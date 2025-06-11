@@ -1,0 +1,28 @@
+{
+  "brand": "PATONG BOXING",
+  "home": "Home",
+  "training": "Muay Thai Training",
+  "contact": "Contact Us",
+    "hero": {
+      "title": "PATONG BOXING STADIUM",
+      "subtitle": "For the best Muay Thai fights in Phuket – next bouts",
+      "dateLabel": "Event",
+      "hour": "Hour",
+      "min": "Min",
+      "sec": "Sec",
+      "dayTitle": "Fight Days",
+      "dayInfo": "Every Monday, Tuesday, Thursday & Saturday",
+      "time": "9 PM - 11 PM · 6–8 fights",
+      "price": "Ticket Price / Free T-Shirt",
+      "ringside": "Ringside: 1,500 baht (Going Fast!)",
+      "stadium": "Stadium: 1,500 baht",
+      "door": "Door opens approx. 1 hour before the fight"
+    },
+    "fightDate": "Fight date",
+    "fightDetail": "Every Mon, Tue, Thu & Sat.\n9 pm - 11 pm | 6-8 fights",
+    "ticketPrice": "Tickets Price / Free T-Shirt",
+    "ringside": "Ringside: 1,500 baht (Going Fast)",
+    "stadium": "Stadium: 1,500 baht",
+    "doorOpen": "Door open",
+    "doorDetail": "Approx. 1 hour before the fight start."
+  }

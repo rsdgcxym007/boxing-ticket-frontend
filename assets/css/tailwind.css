@@ -1,0 +1,22 @@
+@import "./fonts.css"; /* ✅ ต้อง import font ก่อน */
+@tailwind utilities;
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Anuphan", sans-serif;
+    background-color: #fff;
+    color: #111;
+  }
+}
