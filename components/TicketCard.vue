@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-[#0f172a] min-h-screen py-10 px-4">
+  <div class="bg-[#0f172a] py-10 px-4">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-bold text-white">Ticket Zones</h2>
     </div>

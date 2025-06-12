@@ -9,6 +9,8 @@
     <AnimatedSection>
       <TicketCard />
     </AnimatedSection>
+
+    <StadiumZoneSelector />
   </div>
 </template>
 
