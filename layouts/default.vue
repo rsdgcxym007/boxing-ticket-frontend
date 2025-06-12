@@ -4,7 +4,9 @@
     <main class="flex-grow pb-25">
       <slot />
     </main>
-    <Footer />
+    <slot name="footer">
+      <Footer />
+    </slot>
   </div>
 </template>
 

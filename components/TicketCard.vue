@@ -109,7 +109,12 @@
                   <p class="text-xl font-bold">฿{{ ticket.newPrice }}</p>
                 </div>
                 <button
-                  @click="goToSeatPage"
+                  @click="
+                    router.push({
+                      path: '/select-seats',
+                      query: { zone: ticket.zone },
+                    })
+                  "
                   class="px-4 py-2 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-md shadow"
                 >
                   {{ t("select") }}
@@ -131,6 +136,7 @@ const { locale, t } = useI18n();
 const router = useRouter();
 const tickets = reactive([
   {
+    zone: "back-left",
     label: {
       th: "RINGSIDE โซนด้านหลังซ้าย",
       en: "RINGSIDE Zone Back Left",
@@ -161,6 +167,7 @@ const tickets = reactive([
     showMore: false,
   },
   {
+    zone: "back-right",
     label: {
       th: "RINGSIDE โซนด้านหลังขวา",
       en: "RINGSIDE Zone Back Right",
@@ -191,6 +198,7 @@ const tickets = reactive([
     showMore: false,
   },
   {
+    zone: "left",
     label: {
       th: "RINGSIDE โซนซ้าย",
       en: "RINGSIDE Zone Left",
@@ -221,6 +229,7 @@ const tickets = reactive([
     showMore: false,
   },
   {
+    zone: "right",
     label: {
       th: "RINGSIDE โซนขวา",
       en: "RINGSIDE Zone Right",
@@ -251,6 +260,7 @@ const tickets = reactive([
     showMore: false,
   },
   {
+    zone: "front-ringside",
     label: {
       th: "RINGSIDE โซนด้านหน้า",
       en: "RINGSIDE Zone Front Center",

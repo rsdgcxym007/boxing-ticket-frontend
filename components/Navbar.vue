@@ -22,14 +22,16 @@
           <li>
             <a href="/" class="hover:text-red-400">{{ t("home") }}</a>
           </li>
-          <li>
+          <!-- <li>
             <a href="#" class="hover:text-red-400">{{ t("stadium") }}</a>
           </li>
           <li>
             <a href="#" class="hover:text-red-400">{{ t("training") }}</a>
-          </li>
+          </li> -->
           <li>
-            <a href="#" class="hover:text-red-400">{{ t("contact") }}</a>
+            <a href="/contacts" class="hover:text-red-400">{{
+              t("contact")
+            }}</a>
           </li>
         </ul>
         <button
@@ -83,14 +85,16 @@
           <li>
             <a href="/" class="hover:text-red-400">{{ t("home") }}</a>
           </li>
-          <li>
+          <!-- <li>
             <a href="#" class="hover:text-red-400">{{ t("stadium") }}</a>
           </li>
           <li>
             <a href="#" class="hover:text-red-400">{{ t("training") }}</a>
-          </li>
+          </li> -->
           <li>
-            <a href="#" class="hover:text-red-400">{{ t("contact") }}</a>
+            <a href="/contacts" class="hover:text-red-400">{{
+              t("contact")
+            }}</a>
           </li>
         </ul>
         <button

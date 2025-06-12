@@ -30,14 +30,23 @@
 <script setup>
 const props = defineProps({
   seat: String,
-  selectedSeats: Array,
-  bookedSeats: Array,
+  selectedSeats: {
+    type: Array,
+    default: () => [],
+  },
+  bookedSeats: {
+    type: Array,
+    default: () => [],
+  },
 });
-const isBooked = props.bookedSeats.includes(props.seat);
-const isSelected = computed(() => props.selectedSeats.includes(props.seat));
 
-function getSeatImage(seat) {
-  if (isBooked) return "/images/seat-booked.png";
+const { seat, selectedSeats, bookedSeats } = toRefs(props); // ให้ reactive
+
+const isBooked = computed(() => bookedSeats.value.includes(seat.value));
+const isSelected = computed(() => selectedSeats.value.includes(seat.value));
+
+function getSeatImage() {
+  if (isBooked.value) return "/images/seat-booked.png";
   if (isSelected.value) return "/images/seat-selected.png";
   return "/images/armchair.png";
 }
