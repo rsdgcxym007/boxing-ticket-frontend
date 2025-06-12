@@ -33,7 +33,7 @@ const props = defineProps({
   selectedSeats: Array,
 });
 
-const bookedSeats = ["101", "202"]; // Mock data
+const bookedSeats = ["101", "202", "401", "402", "403"];
 
 const isBooked = bookedSeats.includes(props.seat);
 const isSelected = computed(() => props.selectedSeats.includes(props.seat));
