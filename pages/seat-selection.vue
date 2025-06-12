@@ -7,11 +7,12 @@
       @update:selectedSeats="updateSeats"
     />
 
-    <!-- <SeatSummary
+    <SeatSummary
+      v-if="selectedSeats.length > 0"
       class="mt-25 mb-5"
       :selectedSeats="selectedSeats"
       :totalPrice="selectedSeats.length * 1500"
-    /> -->
+    />
   </div>
 </template>
 

@@ -4,7 +4,9 @@
   >
     <div class="min-w-[768px] mx-auto flex flex-col items-center gap-8">
       <!-- BACK SECTION -->
-      <div class="grid grid-cols-2 gap-8 sm:gap-16 justify-center w-full">
+      <div
+        class="grid grid-cols-2 gap-8 sm:gap-16 justify-center w-full relative z-0"
+      >
         <!-- BACK LEFT -->
         <div class="flex flex-col items-end gap-2">
           <span class="text-xs font-bold text-blue-600 mb-1">BACK LEFT</span>
@@ -56,10 +58,10 @@
 
       <!-- LEFT - STAGE - RIGHT -->
       <div
-        class="grid grid-cols-3 gap-6 items-start w-full relative -mt-50 sm:-mt-50 md:-mt-50 lg:-mt-60"
+        class="grid grid-cols-3 gap-6 items-start w-full relative -mt-40 z-0 pointer-events-none"
       >
         <!-- LEFT -->
-        <div class="flex flex-col gap-2 items-end">
+        <div class="flex flex-col gap-2 items-end pointer-events-auto">
           <span class="text-xs font-bold text-green-600 mb-1 mr-20">LEFT</span>
           <div
             v-for="(row, i) in zones.left"
@@ -72,6 +74,7 @@
             <template v-for="(seat, j) in row" :key="j">
               <SeatIcon
                 v-if="seat"
+                class="pointer-events-auto"
                 :seat="seat.toString()"
                 :bookedSeats="props.bookedSeats"
                 :selectedSeats="selectedSeats"
@@ -83,19 +86,21 @@
         </div>
 
         <!-- STAGE -->
-        <div class="flex flex-col items-center justify-center mt-80">
-          <div class="w-full h-full">
+        <div
+          class="flex flex-col items-center justify-center mt-80 relative z-10 pointer-events-none"
+        >
+          <div class="">
             <img
               src="/images/stadium.png"
               alt="Stage"
-              class="w-full h-full object-contain"
+              class="w-full h-full object-contain pointer-events-none"
             />
           </div>
-          <SeatLegend class="mt-5" />
+          <SeatLegend class="mt-5 pointer-events-none" />
         </div>
 
         <!-- RIGHT -->
-        <div class="flex flex-col gap-2 items-start">
+        <div class="flex flex-col gap-2 items-start pointer-events-auto">
           <span class="text-xs font-bold text-green-600 mb-1 ml-20">RIGHT</span>
           <div
             v-for="(row, i) in zones.right"
@@ -107,6 +112,7 @@
           >
             <template v-for="(seat, j) in row" :key="j">
               <SeatIcon
+                class="pointer-events-auto"
                 v-if="seat"
                 :seat="seat.toString()"
                 :bookedSeats="props.bookedSeats"
@@ -119,28 +125,34 @@
         </div>
       </div>
 
-      <!-- FRONT -->
-      <div class="w-full -mt-52 sm:-mt-80 relative z-10">
-        <span class="block text-center text-xs font-bold text-red-600 mb-2">
+      <!-- FRONT RINGSIDE -->
+      <div
+        class="md:w-[30%] sm:w-[100%] relative -mt-60 z-30 pointer-events-none"
+      >
+        <span
+          class="block text-center text-xs font-bold text-red-600 mb-2 pointer-events-auto"
+        >
           FRONT RINGSIDE
         </span>
-        <div class="flex flex-col gap-2 items-center">
+        <div class="flex flex-col gap-2 items-center pointer-events-auto">
           <div
             v-for="(row, i) in zones.frontRingside"
             :key="'frontRingside' + i"
-            class="grid gap-1 justify-center"
+            class="grid gap-1 justify-center pointer-events-auto"
             :style="{
               gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.6fr))`,
             }"
           >
             <template v-for="(seat, j) in row" :key="j">
               <SeatIcon
+                class="pointer-events-auto relative z-50"
                 v-if="seat"
                 :seat="seat.toString()"
                 :bookedSeats="props.bookedSeats"
                 :selectedSeats="selectedSeats"
                 @toggle="toggleSeat"
               />
+
               <div v-else class="w-4 h-4" />
             </template>
           </div>
@@ -184,3 +196,13 @@ function toggleSeat(seat) {
   emits("update:selectedSeats", newSelection);
 }
 </script>
+
+<style scoped>
+/* ไม่จำเป็นต้องเพิ่ม z-index ที่นี่ ถ้าใช้ Tailwind แล้ว */
+.pointer-events-none {
+  pointer-events: none;
+}
+.pointer-events-auto {
+  pointer-events: auto;
+}
+</style>

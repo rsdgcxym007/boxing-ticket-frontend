@@ -6,7 +6,7 @@
       <!-- Logo -->
       <div class="flex items-center gap-3">
         <img
-          src="public/images/logo/logo.png"
+          src="/images/logo/LOGOFC.svg"
           alt="Patong Boxing Logo"
           class="w-8 h-8 md:w-10 md:h-10"
         />

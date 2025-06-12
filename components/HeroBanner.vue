@@ -1,51 +1,39 @@
 <template>
-  <section
-    class="relative w-full bg-gradient-to-b from-black via-zinc-900 to-black overflow-hidden"
-  >
-    <!-- Background -->
-    <div class="absolute inset-0 z-0">
-      <img
-        src="/images/stadium.png"
-        alt="Boxing Ring"
-        class="w-full h-full object-cover opacity-20 blur-sm scale-105"
-      />
-    </div>
-
-    <!-- Content Wrapper -->
+  <section class="w-full bg-[#0f172a] py-4">
     <div
-      class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 grid grid-cols-1 md:grid-cols-2 gap-10 items-center"
+      class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center"
     >
-      <!-- Info Left -->
+      <!-- Hero Left: Responsive heading + countdown + info -->
       <div
-        class="bg-gradient-to-br from-orange-500 via-red-500 to-yellow-400 text-white shadow-2xl rounded-3xl p-8 sm:p-10 space-y-6 border border-white/10 animate-fade-in-down"
+        class="bg-[#0b1b3f] rounded-3xl shadow-2xl px-10 py-12 text-left text-white"
       >
         <h1
-          class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-wider leading-snug uppercase flex flex-wrap gap-x-2"
+          class="text-3xl sm:text-4xl md:text-5xl font-bold uppercase leading-snug tracking-wide flex flex-wrap gap-x-2 gap-y-1"
         >
-          <span class="text-white drop-shadow-md">PATONG</span>
-          <span class="text-pink-100">BOXING</span>
-          <span class="text-yellow-200 drop-shadow-md">STADIUM</span>
+          <span class="text-yellow-400">PATONG</span>
+          <span class="text-yellow-300">BOXING</span>
+          <span class="text-yellow-100">STADIUM</span>
         </h1>
 
-        <p class="text-sm sm:text-base font-medium text-white/90">
+        <p class="mt-4 text-sm sm:text-base text-white/90 font-medium">
           {{ $t("hero.subtitle") }}
         </p>
-        <p class="text-xs sm:text-sm font-semibold text-white">
+
+        <p class="text-xs sm:text-sm font-semibold mt-2">
           {{ $t("hero.dateLabel") }}:
           <span class="underline decoration-dotted decoration-white"
             >5th January 2024</span
           >
         </p>
 
-        <div class="flex flex-wrap gap-3 pt-4">
+        <!-- Countdown Timer -->
+        <div class="flex gap-3 pt-4">
           <div
             v-for="(value, label) in countdown"
             :key="label"
-            class="bg-white/90 text-black px-4 py-2 sm:px-5 sm:py-3 rounded-xl shadow text-center w-20"
+            class="bg-white text-black px-4 py-2 sm:px-5 sm:py-3 rounded-xl text-center w-20 shadow"
           >
-            <div class="text-xl sm:text-2xl font-bold leading-none">
-              {{ value }}
-            </div>
+            <div class="text-xl sm:text-2xl font-bold">{{ value }}</div>
             <div
               class="text-[10px] sm:text-xs mt-1 font-semibold uppercase tracking-wide text-gray-600"
             >
@@ -53,31 +41,30 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Info Right -->
-      <div
-        class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 sm:p-10 animate-fade-in-up border border-black/10"
-      >
+        <!-- Info Block -->
         <h2
-          class="text-lg sm:text-xl font-bold border-b pb-3 border-gray-300 text-gray-900"
+          class="text-lg sm:text-xl font-bold border-b pb-3 border-gray-300 text-white mt-8"
         >
           {{ $t("hero.dayTitle") }}
         </h2>
-        <p class="text-sm sm:text-base mt-4 text-gray-800 leading-relaxed">
+
+        <p class="text-sm sm:text-base mt-4 text-white/90 leading-relaxed">
           {{ $t("hero.dayInfo") }}
         </p>
-        <p class="text-xs sm:text-sm mt-2 text-gray-600">
+        <p class="text-xs sm:text-sm mt-2 text-slate-300">
           {{ $t("hero.time") }}
         </p>
 
-        <p class="mt-5 text-xs sm:text-sm font-semibold text-gray-800">
+        <p class="mt-5 text-xs sm:text-sm font-semibold text-white">
           {{ $t("hero.price") }}:
-          <span class="text-red-600 font-bold">{{ $t("hero.ringside") }}</span>
+          <span class="text-red-400 font-bold">{{ $t("hero.ringside") }}</span>
         </p>
-        <p class="text-xs sm:text-sm text-gray-700">{{ $t("hero.stadium") }}</p>
+        <p class="text-xs sm:text-sm text-slate-300">
+          {{ $t("hero.stadium") }}
+        </p>
 
-        <p class="mt-4 text-xs sm:text-sm text-gray-600">
+        <p class="mt-4 text-xs sm:text-sm text-slate-300">
           {{ $t("hero.door") }}
         </p>
       </div>
