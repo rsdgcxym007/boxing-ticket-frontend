@@ -31,11 +31,9 @@
 const props = defineProps({
   seat: String,
   selectedSeats: Array,
+  bookedSeats: Array,
 });
-
-const bookedSeats = ["101", "202", "401", "402", "403"];
-
-const isBooked = bookedSeats.includes(props.seat);
+const isBooked = props.bookedSeats.includes(props.seat);
 const isSelected = computed(() => props.selectedSeats.includes(props.seat));
 
 function getSeatImage(seat) {

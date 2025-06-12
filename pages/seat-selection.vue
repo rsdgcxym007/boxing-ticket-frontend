@@ -3,15 +3,15 @@
     <StadiumLayout
       :zones="seatZones"
       :selectedSeats="selectedSeats"
-      :bookedSeats="['204', '314', '471']"
+      :bookedSeats="['204', '314', '471', '101', '202', '401', '402', '403']"
       @update:selectedSeats="updateSeats"
     />
 
-    <SeatSummary
+    <!-- <SeatSummary
       class="mt-25 mb-5"
       :selectedSeats="selectedSeats"
       :totalPrice="selectedSeats.length * 1500"
-    />
+    /> -->
   </div>
 </template>
 
@@ -44,55 +44,55 @@ const seatZones = {
   ],
 
   left: [
-    ["386", null, null, null, null, null],
-    ["385", "363", "343", null, null, null],
-    ["384", "362", "342", "324", null, null],
-    ["383", "361", "341", "323", null, null],
-    ["382", "360", "340", "322", null, null],
-    ["381", "359", "339", "321", null, null],
-    ["380", "358", "338", "320", "309", null],
-    ["379", "357", "337", "319", "308", null],
-    ["378", "356", "336", "318", "307", null],
-    ["377", "355", "335", "317", "306", null],
-    ["376", "354", "334", "316", "305", null],
-    ["375", null, null, null, null, null],
-    ["374", "353", "333", "315", "304", null],
-    ["373", "352", "332", "314", "303", null],
-    ["372", "351", "331", "313", "302", null],
-    ["371", "350", "330", "312", "301", null],
-    ["370", "349", "329", "311", null, null],
-    ["369", "348", "328", "310", null, null],
-    ["368", "347", "327", null, null, null],
-    ["367", "346", "326", null, null, null],
-    ["366", "345", "325", null, null, null],
-    ["365", "344", null, null, null, null],
-    ["364", null, null, null, null, null],
+    ["386", null, null, null, null, null, null, null],
+    ["385", "363", "343", null, null, null, null, null],
+    ["384", "362", "342", "324", null, null, null, null],
+    ["383", "361", "341", "323", null, null, null, null],
+    ["382", "360", "340", "322", null, null, null, null],
+    ["381", "359", "339", "321", null, null, null, null],
+    ["380", "358", "338", "320", "309", null, null, null],
+    ["379", "357", "337", "319", "308", null, null, null],
+    ["378", "356", "336", "318", "307", null, null, null],
+    ["377", "355", "335", "317", "306", null, null, null],
+    ["376", "354", "334", "316", "305", null, null, null],
+    ["375", null, null, null, null, null, null, null],
+    ["374", "353", "333", "315", "304", null, null, null],
+    ["373", "352", "332", "314", "303", null, null, null],
+    ["372", "351", "331", "313", "302", null, null, null],
+    ["371", "350", "330", "312", "301", null, null, null],
+    ["370", "349", "329", "311", null, null, null, null],
+    ["369", "348", "328", "310", null, null, null, null],
+    ["368", "347", "327", null, null, null, null, null],
+    ["367", "346", "326", null, null, null, null, null],
+    ["366", "345", "325", null, null, null, null, null],
+    ["365", "344", null, null, null, null, null, null],
+    ["364", null, null, null, null, null, null, null],
   ],
 
   right: [
-    [null, null, null, "124", "143", "163"],
-    [null, null, null, "125", "144", "164"],
-    [null, null, null, "126", "145", "165"],
-    [null, null, null, "127", "146", "166"],
-    [null, null, "110", "128", "147", "167"],
-    [null, null, "111", "129", "148", "168"],
-    [null, "101", "112", "130", "149", "169"],
-    [null, "102", "113", "131", "150", "170"],
-    [null, "103", "114", "132", "151", "171"],
-    [null, "104", "115", "133", "152", "172"],
-    [null, null, null, null, null, "173"],
-    [null, "105", "116", "134", "153", "174"],
-    [null, "106", "117", "135", "154", "175"],
-    [null, "107", "118", "136", "155", "176"],
-    [null, "108", "119", "137", "156", "177"],
-    [null, "109", "120", "138", "157", "178"],
-    [null, null, "121", "139", "158", "179"],
-    [null, null, "122", "140", "159", "180"],
-    [null, null, "123", "141", "160", "181"],
-    [null, null, null, "142", "161", "182"],
-    [null, null, null, null, "162", "183"],
-    [null, null, null, null, null, "184"],
-    [null, null, null, null, null, "185"],
+    [null, null, null, null, null, "124", "143", "163"],
+    [null, null, null, null, null, "125", "144", "164"],
+    [null, null, null, null, null, "126", "145", "165"],
+    [null, null, null, null, null, "127", "146", "166"],
+    [null, null, null, null, "110", "128", "147", "167"],
+    [null, null, null, null, "111", "129", "148", "168"],
+    [null, null, null, "101", "112", "130", "149", "169"],
+    [null, null, null, "102", "113", "131", "150", "170"],
+    [null, null, null, "103", "114", "132", "151", "171"],
+    [null, null, null, "104", "115", "133", "152", "172"],
+    [null, null, null, null, null, null, null, "173"],
+    [null, null, null, "105", "116", "134", "153", "174"],
+    [null, null, null, "106", "117", "135", "154", "175"],
+    [null, null, null, "107", "118", "136", "155", "176"],
+    [null, null, null, "108", "119", "137", "156", "177"],
+    [null, null, null, "109", "120", "138", "157", "178"],
+    [null, null, null, null, "121", "139", "158", "179"],
+    [null, null, null, null, "122", "140", "159", "180"],
+    [null, null, null, null, "123", "141", "160", "181"],
+    [null, null, null, null, null, "142", "161", "182"],
+    [null, null, null, null, null, null, "162", "183"],
+    [null, null, null, null, null, null, null, "184"],
+    [null, null, null, null, null, null, null, "185"],
   ],
   frontRingside: [
     [null, null, "204", null, "203", "202", "201", null],

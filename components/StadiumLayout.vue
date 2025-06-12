@@ -13,13 +13,14 @@
             :key="'backLeft' + i"
             class="grid gap-1"
             :style="{
-              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.8fr))`,
+              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.6fr))`,
             }"
           >
             <template v-for="(seat, j) in row" :key="j">
               <SeatIcon
                 v-if="seat"
                 :seat="seat.toString()"
+                :bookedSeats="props.bookedSeats"
                 :selectedSeats="selectedSeats"
                 @toggle="toggleSeat"
               />
@@ -36,13 +37,14 @@
             :key="'backRight' + i"
             class="grid gap-1"
             :style="{
-              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.8fr))`,
+              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.6fr))`,
             }"
           >
             <template v-for="(seat, j) in row" :key="j">
               <SeatIcon
                 v-if="seat"
                 :seat="seat.toString()"
+                :bookedSeats="props.bookedSeats"
                 :selectedSeats="selectedSeats"
                 @toggle="toggleSeat"
               />
@@ -53,22 +55,25 @@
       </div>
 
       <!-- LEFT - STAGE - RIGHT -->
-      <div class="grid grid-cols-3 gap-6 items-center w-full">
+      <div
+        class="grid grid-cols-3 gap-6 items-start w-full relative -mt-50 sm:-mt-50 md:-mt-50 lg:-mt-60"
+      >
         <!-- LEFT -->
         <div class="flex flex-col gap-2 items-end">
-          <span class="text-xs font-bold text-green-600 mb-1">LEFT</span>
+          <span class="text-xs font-bold text-green-600 mb-1 mr-20">LEFT</span>
           <div
             v-for="(row, i) in zones.left"
             :key="'left' + i"
             class="grid gap-1"
             :style="{
-              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.8fr))`,
+              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.6fr))`,
             }"
           >
             <template v-for="(seat, j) in row" :key="j">
               <SeatIcon
                 v-if="seat"
                 :seat="seat.toString()"
+                :bookedSeats="props.bookedSeats"
                 :selectedSeats="selectedSeats"
                 @toggle="toggleSeat"
               />
@@ -78,8 +83,8 @@
         </div>
 
         <!-- STAGE -->
-        <div class="flex flex-col items-center justify-center">
-          <div class="rounded-xl shadow-lg">
+        <div class="flex flex-col items-center justify-center mt-80">
+          <div class="w-full h-full">
             <img
               src="/images/stadium.png"
               alt="Stage"
@@ -91,19 +96,20 @@
 
         <!-- RIGHT -->
         <div class="flex flex-col gap-2 items-start">
-          <span class="text-xs font-bold text-green-600 mb-1">RIGHT</span>
+          <span class="text-xs font-bold text-green-600 mb-1 ml-20">RIGHT</span>
           <div
             v-for="(row, i) in zones.right"
             :key="'right' + i"
             class="grid gap-1"
             :style="{
-              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.8fr))`,
+              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.6fr))`,
             }"
           >
             <template v-for="(seat, j) in row" :key="j">
               <SeatIcon
                 v-if="seat"
                 :seat="seat.toString()"
+                :bookedSeats="props.bookedSeats"
                 :selectedSeats="selectedSeats"
                 @toggle="toggleSeat"
               />
@@ -114,23 +120,24 @@
       </div>
 
       <!-- FRONT -->
-      <div class="w-full">
-        <span class="block text-center text-xs font-bold text-red-600 mb-2"
-          >FRONT RINGSIDE</span
-        >
+      <div class="w-full -mt-52 sm:-mt-80 relative z-10">
+        <span class="block text-center text-xs font-bold text-red-600 mb-2">
+          FRONT RINGSIDE
+        </span>
         <div class="flex flex-col gap-2 items-center">
           <div
             v-for="(row, i) in zones.frontRingside"
             :key="'frontRingside' + i"
             class="grid gap-1 justify-center"
             :style="{
-              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.8fr))`,
+              gridTemplateColumns: `repeat(${row.length}, minmax(16px, 0.6fr))`,
             }"
           >
             <template v-for="(seat, j) in row" :key="j">
               <SeatIcon
                 v-if="seat"
                 :seat="seat.toString()"
+                :bookedSeats="props.bookedSeats"
                 :selectedSeats="selectedSeats"
                 @toggle="toggleSeat"
               />
@@ -145,7 +152,7 @@
 
 <script setup>
 import SeatIcon from "./SeatIcon.vue";
-import StadiumLayout from "./StadiumLayout.vue";
+import SeatLegend from "./SeatLegend.vue";
 
 const props = defineProps({
   zones: Object,
