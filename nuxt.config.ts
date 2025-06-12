@@ -2,6 +2,7 @@ import { defineNuxtConfig } from "nuxt/config";
 
 export default defineNuxtConfig({
   css: [
+    "@/assets/css/fonts.css",
     "@/assets/css/tailwind.css",
     "@fortawesome/fontawesome-free/css/all.min.css",
   ],
