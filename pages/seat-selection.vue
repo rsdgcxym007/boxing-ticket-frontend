@@ -1,15 +1,17 @@
 <template>
-  <div class="min-h-screen bg-gray-100 p-6 space-y-4">
-    <SeatLegend class="p-6" />
-
+  <div class="min-h-screen bg-gray-900 px-4 relative">
     <StadiumLayout
       :zones="seatZones"
       :selectedSeats="selectedSeats"
+      :bookedSeats="['204', '314', '471']"
       @update:selectedSeats="updateSeats"
     />
 
-    <!-- ✅ เพิ่ม Section สรุปที่นั่งและราคาตรงนี้ -->
-    <SeatSummary :selectedSeats="selectedSeats" :totalPrice="totalPrice" />
+    <SeatSummary
+      class="mt-25 mb-5"
+      :selectedSeats="selectedSeats"
+      :totalPrice="selectedSeats.length * 1500"
+    />
   </div>
 </template>
 
@@ -60,8 +62,8 @@ const seatZones = {
     ["371", "350", "330", "312", "301", null],
     ["370", "349", "329", "311", null, null],
     ["369", "348", "328", "310", null, null],
-    ["368", "348", "328", null, null, null],
-    ["367", "346", "327", null, null, null],
+    ["368", "347", "327", null, null, null],
+    ["367", "346", "326", null, null, null],
     ["366", "345", "325", null, null, null],
     ["365", "344", null, null, null, null],
     ["364", null, null, null, null, null],

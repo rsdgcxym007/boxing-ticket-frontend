@@ -20,7 +20,7 @@
       <div v-if="isDesktop" class="flex items-center gap-8">
         <ul class="flex gap-6 text-sm font-medium">
           <li>
-            <a href="#" class="hover:text-red-400">{{ t("home") }}</a>
+            <a href="/" class="hover:text-red-400">{{ t("home") }}</a>
           </li>
           <li>
             <a href="#" class="hover:text-red-400">{{ t("stadium") }}</a>
@@ -81,7 +81,7 @@
       >
         <ul class="flex flex-col gap-4 text-sm font-medium">
           <li>
-            <a href="#" class="hover:text-red-400">{{ t("home") }}</a>
+            <a href="/" class="hover:text-red-400">{{ t("home") }}</a>
           </li>
           <li>
             <a href="#" class="hover:text-red-400">{{ t("stadium") }}</a>

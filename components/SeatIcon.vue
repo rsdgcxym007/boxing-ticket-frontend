@@ -1,16 +1,29 @@
 <template>
-  <div class="flex items-center justify-center">
+  <div class="flex flex-col items-center w-12">
+    <!-- Seat Icon Button -->
     <button
-      class="w-8 h-8"
+      class="transition-transform duration-200 hover:scale-120 focus:outline-none"
       @click="$emit('toggle', seat)"
-      :disabled="bookedSeats.includes(seat)"
+      :disabled="isBooked"
     >
       <img
         :src="getSeatImage(seat)"
-        alt="seat"
-        class="w-full h-full object-contain"
+        alt="seat icon"
+        class="w-full h-full object-contain drop-shadow-md"
       />
     </button>
+
+    <!-- Seat Number -->
+    <span
+      class="mt-1 text-xs font-medium tracking-tight"
+      :class="{
+        'text-gray-400 line-through': isBooked,
+        'text-blue-600 font-semibold': isSelected && !isBooked,
+        'text-gray-800': !isSelected && !isBooked,
+      }"
+    >
+      {{ seat }}
+    </span>
   </div>
 </template>
 
@@ -20,14 +33,21 @@ const props = defineProps({
   selectedSeats: Array,
 });
 
-const bookedSeats = ["101", "202"]; // Mock
+const bookedSeats = ["101", "202"]; // Mock data
+
+const isBooked = bookedSeats.includes(props.seat);
+const isSelected = computed(() => props.selectedSeats.includes(props.seat));
 
 function getSeatImage(seat) {
-  console.log("seatseatseatseat");
-  console.log("seat", seat);
-
-  if (bookedSeats.includes(seat)) return "/images/seat-booked.png";
-  if (props.selectedSeats.includes(seat)) return "/images/seat-selected.png";
+  if (isBooked) return "/images/seat-booked.png";
+  if (isSelected.value) return "/images/seat-selected.png";
   return "/images/armchair.png";
 }
 </script>
+
+<style scoped>
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+</style>

@@ -49,6 +49,7 @@
             <p class="text-xl font-bold text-black">฿{{ ticket.newPrice }}</p>
           </div>
           <button
+            @click="goToSeatPage"
             class="px-5 py-2 text-white text-sm font-medium bg-orange-500 hover:bg-orange-600 rounded-lg shadow hover:shadow-md transition"
           >
             {{ t("select") }}
@@ -64,6 +65,7 @@ import { reactive } from "vue";
 import { useI18n } from "vue-i18n";
 
 const { locale, t } = useI18n();
+const router = useRouter();
 const tickets = reactive([
   {
     label: { th: "ที่นั่ง Stadium", en: "Stadium Seat" },
@@ -129,4 +131,8 @@ const tickets = reactive([
     showMore: false,
   },
 ]);
+
+const goToSeatPage = () => {
+  router.push("/seat-selection");
+};
 </script>

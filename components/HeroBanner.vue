@@ -5,7 +5,7 @@
     <!-- Background -->
     <div class="absolute inset-0 z-0">
       <img
-        src="/images/stadium.jpg"
+        src="/images/stadium.png"
         alt="Boxing Ring"
         class="w-full h-full object-cover opacity-20 blur-sm scale-105"
       />
