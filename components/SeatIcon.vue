@@ -10,6 +10,10 @@
         :src="getSeatImage(seat)"
         alt="seat icon"
         class="w-full h-full object-contain drop-shadow-md pointer-events-none"
+        :class="{
+          'rotate-[-90deg]': zoneKey === 'left',
+          '-rotate-[-90deg]': zoneKey === 'right',
+        }"
       />
     </button>
 
@@ -38,9 +42,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  zoneKey: { type: String, default: "" },
 });
 
-const { seat, selectedSeats, bookedSeats } = toRefs(props); // ให้ reactive
+const { seat, selectedSeats, bookedSeats } = toRefs(props);
 
 const isBooked = computed(() => bookedSeats.value.includes(seat.value));
 const isSelected = computed(() => selectedSeats.value.includes(seat.value));

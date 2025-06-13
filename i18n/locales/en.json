@@ -24,5 +24,29 @@
     "ringside": "Ringside: 1,500 baht (Going Fast)",
     "stadium": "Stadium: 1,500 baht",
     "doorOpen": "Door open",
-    "doorDetail": "Approx. 1 hour before the fight start."
+    "doorDetail": "Approx. 1 hour before the fight start.",
+      "selectSeats": "Select Seats",
+      "zone": "Zone",
+      "available": "Available",
+      "selected": "Selected",
+      "booked": "Booked",
+      "selectedSeats": "Selected Seats",
+      "totalPrice": "Total Price",
+      "baht": "Baht",
+      "back": "Back",
+      "checkout": "Checkout",
+      "ticketZones": "Ticket Zones",
+      "select": "Select",
+      "cancel": "Cancel",
+      "more": "More info",
+      "less": "Less",
+      "payment": {
+        "title": "Confirm Payment",
+        "zone": "Zone",
+        "seats": "Seats",
+        "total": "Total",
+        "confirm": "Pay Now"
+      }
+    
+    
   }
