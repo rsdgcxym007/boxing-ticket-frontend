@@ -210,7 +210,7 @@ const onCancel = async () => {
 async function submitOrders() {
   try {
     await submitOrder({
-      orderId: dataZoneSelected.orderId,
+      orderId: props.dataZoneSelected.orderId,
       zone: pageData.zoneKey,
       selectedSeats: pageData.selectedSeats,
       total: props.total,
@@ -233,7 +233,7 @@ const mockPaymentSuccess = async () => {
   }
   try {
     const res = await submitOrder({
-      orderId: dataZoneSelected.orderId,
+      orderId: props.dataZoneSelected.orderId,
       zone: pageData.zoneKey,
       selectedSeats: pageData.selectedSeats,
       total: props.total,
