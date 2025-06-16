@@ -1,7 +1,10 @@
-// composables/useSocketEmitter.ts
+import { useRuntimeConfig } from "nuxt/app";
+
+const config = useRuntimeConfig();
+const base = config.public.apiBase;
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:4000"); // หรือจาก plugin
+const socket = io(`${base}`);
 
 export const useSocketEmitter = () => {
   const emitOrderCancelled = (orderId: string) => {

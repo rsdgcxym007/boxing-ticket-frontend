@@ -3,12 +3,14 @@ import { io, Socket } from "socket.io-client";
 import { onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "./useToast";
+import { useRuntimeConfig } from "nuxt/app";
 
 let socket: Socket | null = null;
 let isConnected = false;
 
 const handledOrderIds = new Set<string>(); // ✅ กันยิงซ้ำ
-
+const config = useRuntimeConfig();
+const base = config.public.apiBase;
 export const useWebSocket = (
   orderId: string | "*",
   onOrderCancelled?: (orderId: string) => void
@@ -19,7 +21,7 @@ export const useWebSocket = (
   const connectSocket = () => {
     if (socket && isConnected) return;
 
-    socket = io("http://localhost:4000");
+    socket = io(`${base}`);
     isConnected = true;
 
     socket.on("connect", () => {
