@@ -1,4 +1,5 @@
-// composables/useSeatApi.ts
+import { useApi } from "../composables/useApi";
+const { get } = useApi();
 export function useSeatApi() {
   const getSeatsByZone = async (zone: string) => {
     const seats = {
@@ -149,8 +150,14 @@ export function useSeatApi() {
     return Promise.resolve(seats[zone] || []);
   };
 
-  const getBookedSeats = async () => {
-    return Promise.resolve(["471", "403"]);
+  const getBookedSeats = async (): Promise<string[]> => {
+    try {
+      const data = await get("/api/orders/seats/booked");
+      return data;
+    } catch (err) {
+      console.error("❌ getBookedSeats error:", err);
+      return [];
+    }
   };
 
   return {

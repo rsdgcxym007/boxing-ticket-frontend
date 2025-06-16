@@ -13,6 +13,7 @@
         :class="{
           'rotate-[-90deg]': zoneKey === 'left',
           '-rotate-[-90deg]': zoneKey === 'right',
+          '-rotate-[180deg]': zoneKey === 'front-ringside',
         }"
       />
     </button>
