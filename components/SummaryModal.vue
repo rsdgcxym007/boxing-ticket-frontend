@@ -125,8 +125,10 @@ import { useScb } from "@/composables/useScb";
 import { useToast } from "@/composables/useToast";
 import QRCode from "qrcode";
 import { useSocketEmitter } from "@/composables/useSocketEmitter"; // เราจะสร้างไฟล์นี้
+import { useRuntimeConfig } from "nuxt/app";
 const { emitOrderCancelled } = useSocketEmitter();
-
+const config = useRuntimeConfig();
+const base = config.public.apiBase;
 const { showToast } = useToast();
 const { requestQR } = useScb();
 const { submitOrder, cancelOrder } = useOrder();
@@ -238,7 +240,7 @@ const mockPaymentSuccess = async () => {
       method: pageData.method,
     });
 
-    await $fetch("http://localhost:4000/api/scb/payment-webhook", {
+    await $fetch(`${base}/api/scb/payment-webhook`, {
       method: "POST",
       body: {
         ref1: res.orderId,
