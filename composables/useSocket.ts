@@ -17,6 +17,7 @@ export const useWebSocket = (
 ) => {
   const router = useRouter();
   const { showToast } = useToast();
+  console.log("orderId", orderId);
 
   const connectSocket = () => {
     if (socket && isConnected) return;
@@ -24,28 +25,21 @@ export const useWebSocket = (
     socket = io(`${base}`);
     isConnected = true;
 
-    socket.on("connect", () => {
-      console.log("✅ WebSocket connected");
-    });
-
+    socket.on("connect", () => {});
     socket.off("order-cancelled");
-
     socket.on("order-cancelled", (data) => {
-      const isMatch = orderId === "*" || data.orderId === orderId;
-
-      // ✅ ถ้าเคยทำไปแล้ว ไม่ต้องทำซ้ำ
-      if (!isMatch || handledOrderIds.has(data.orderId)) return;
-
-      handledOrderIds.add(data.orderId); // ✅ จดไว้ว่าเคยทำแล้ว
-
-      console.log("📨 รับ order-cancelled:", data.orderId);
-
+      handledOrderIds.add(data.orderId);
       if (orderId !== "*") {
         showToast("⏰ คำสั่งซื้อนี้หมดเวลาและถูกยกเลิก", "error");
         router.push("/");
       }
-
       onOrderCancelled?.(data.orderId);
+    });
+
+    socket.on("order-created", (data) => {
+      console.log("🔥 [order-created] received:", data); // ✅ log นี้ควรขึ้น
+      showToast(`🎟️ Order ใหม่ถูกสร้าง: #${data.orderId}`, "success");
+      onOrderCancelled?.(data.orderId); // ใช้โหลดข้อมูลใหม่
     });
 
     socket.on("disconnect", () => {

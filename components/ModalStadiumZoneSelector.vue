@@ -201,17 +201,16 @@ watch(
   }
 );
 
-const onOrderCancelled = async () => {
-  pageData.bookedSeats = await getBookedSeats();
+const refreshBookedSeats = async () => {
+  console.log("🔁 reload booked seats from websocket");
+  nextTick(async () => {
+    pageData.bookedSeats = await getBookedSeats();
+  });
 };
 
 const { connectSocket, disconnectSocket } = useWebSocket(
   "*",
-  async (orderId) => {
-    console.log("123213123");
-
-    pageData.bookedSeats = await getBookedSeats();
-  }
+  refreshBookedSeats
 );
 
 onMounted(() => {

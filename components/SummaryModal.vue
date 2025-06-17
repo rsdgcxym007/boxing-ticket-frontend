@@ -196,7 +196,7 @@ const isValid = computed(() => {
 const onCancel = async () => {
   try {
     await cancelOrder(props.dataZoneSelected.orderId);
-    emitOrderCancelled(props.dataZoneSelected.orderId);
+    // emitOrderCancelled(props.dataZoneSelected.orderId);
     showToast("❌ ยกเลิกออเดอร์เรียบร้อยแล้ว", "warning");
   } catch (err) {
     console.error("Cancel Error", err);
