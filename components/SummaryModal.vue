@@ -124,9 +124,8 @@ import { useOrder } from "@/composables/useOrder";
 import { useScb } from "@/composables/useScb";
 import { useToast } from "@/composables/useToast";
 import QRCode from "qrcode";
-import { useSocketEmitter } from "@/composables/useSocketEmitter"; // เราจะสร้างไฟล์นี้
+import { useWebSocket } from "@/composables/useSocket";
 import { useRuntimeConfig } from "nuxt/app";
-const { emitOrderCancelled } = useSocketEmitter();
 const config = useRuntimeConfig();
 const base = config.public.apiBase;
 const { showToast } = useToast();
@@ -155,7 +154,9 @@ const qrCode = ref("");
 const countdown = ref(300);
 let countdownTimer;
 
+const { connectSocket, disconnectSocket } = useWebSocket("*");
 onMounted(async () => {
+  connectSocket();
   pageData.method = "qr";
   pageData.zoneKey = props.zone;
   pageData.selectedSeats = props.selectedSeats;
@@ -177,7 +178,14 @@ onMounted(async () => {
   }
 });
 
-onBeforeUnmount(() => clearInterval(countdownTimer));
+onMounted(() => {
+  connectSocket();
+});
+
+onBeforeUnmount(() => {
+  clearInterval(countdownTimer);
+  disconnectSocket();
+});
 
 // File Upload
 function onFileChange(e) {
@@ -196,7 +204,6 @@ const isValid = computed(() => {
 const onCancel = async () => {
   try {
     await cancelOrder(props.dataZoneSelected.orderId);
-    // emitOrderCancelled(props.dataZoneSelected.orderId);
     showToast("❌ ยกเลิกออเดอร์เรียบร้อยแล้ว", "warning");
   } catch (err) {
     console.error("Cancel Error", err);
