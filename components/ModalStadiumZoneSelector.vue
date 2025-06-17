@@ -197,6 +197,7 @@ watch(
       body.style.overflow = "";
       pageData.zoneKey = "";
       pageData.selectedSeats = [];
+      console.log("test");
     }
   }
 );
@@ -210,6 +211,7 @@ const refreshBookedSeats = async () => {
 
 const { connectSocket, disconnectSocket } = useWebSocket(
   "*",
+
   refreshBookedSeats
 );
 
