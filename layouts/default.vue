@@ -1,12 +1,9 @@
 <template>
   <div class="flex flex-col min-h-screen bg-gray-900">
     <Navbar />
-    <main class="flex-grow pb-25">
+    <main class="flex-grow">
       <slot />
     </main>
-    <slot name="footer">
-      <Footer />
-    </slot>
   </div>
 </template>
 

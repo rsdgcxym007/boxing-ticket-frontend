@@ -2,44 +2,57 @@
 import { io, Socket } from "socket.io-client";
 import { onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
-import { useToast } from "./useToast";
+import { useToast } from "vue-toastification";
 import { useRuntimeConfig } from "nuxt/app";
 
 let socket: Socket | null = null;
 let isConnected = false;
+const handledOrderIds = new Set<string>();
 
-const handledOrderIds = new Set<string>(); // ✅ กันยิงซ้ำ
-const config = useRuntimeConfig();
-const base = config.public.apiBase;
+type dataDto = {
+  event: string;
+  orderId: string;
+  zone: string;
+  seats: string;
+  total: number;
+  method: string;
+  createdAt: string;
+  status: string;
+  expiresAt: string;
+  slipPath: null;
+  transactionId: string;
+  paidAt: string;
+  id: number;
+  updatedAt: string;
+};
 export const useWebSocket = (
-  orderId: string | "*",
+  listenOrderId: string | "*",
   onOrderCancelled?: (orderId: string) => void
 ) => {
-  const router = useRouter();
-  const { showToast } = useToast();
-  console.log("orderId", orderId);
+  const toast = useToast();
+  const config = useRuntimeConfig();
+  const baseURL = config.public.apiBase;
 
   const connectSocket = () => {
     if (socket && isConnected) return;
 
-    socket = io(`${base}`);
+    socket = io(`${baseURL}`);
     isConnected = true;
 
-    socket.on("connect", () => {});
-    socket.off("order-cancelled");
-    socket.on("order-cancelled", (data) => {
-      handledOrderIds.add(data.orderId);
-      if (orderId !== "*") {
-        showToast("⏰ คำสั่งซื้อนี้หมดเวลาและถูกยกเลิก", "error");
-        router.push("/");
-      }
+    socket.on("connect", () => {
+      console.log("✅ WebSocket connected");
+    });
+
+    socket.on("order-cancelled", (data: dataDto) => {
+      toast.warning(
+        `⏰ คำสั่งซื้อ ${data.orderId} Zone ${data.zone}  ที่นั่ง ${data.seats} นี้หมดเวลาและถูกยกเลิก`
+      );
       onOrderCancelled?.(data.orderId);
     });
 
-    socket.on("order-created", (data) => {
-      console.log("🔥 [order-created] received:", data); // ✅ log นี้ควรขึ้น
-      showToast(`🎟️ Order ใหม่ถูกสร้าง: #${data.orderId}`, "success");
-      onOrderCancelled?.(data.orderId); // ใช้โหลดข้อมูลใหม่
+    socket.on("order-created", (data: dataDto) => {
+      toast.warning(`⏰ Zone ${data.zone}  ที่นั่ง ${data.seats} ถูกจองแล้ว`);
+      onOrderCancelled?.(data.orderId);
     });
 
     socket.on("disconnect", () => {
@@ -47,7 +60,7 @@ export const useWebSocket = (
     });
 
     socket.on("connect_error", (err) => {
-      console.error("❌ WebSocket connection error:", err.message);
+      console.error("❌ WebSocket error:", err.message);
     });
   };
 
@@ -56,8 +69,8 @@ export const useWebSocket = (
       socket.disconnect();
       socket = null;
       isConnected = false;
-      handledOrderIds.clear(); // ✅ เคลียร์เมื่อออกจาก component
-      console.log("🧹 Socket disconnected manually");
+      handledOrderIds.clear();
+      console.log("🧹 Socket disconnected");
     }
   };
 

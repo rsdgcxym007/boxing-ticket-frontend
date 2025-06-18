@@ -1,82 +1,133 @@
 <template>
   <div
-    v-if="visible"
-    class="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center px-4 overflow-auto"
+    class="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-4 py-10"
     @click.self="$emit('close')"
   >
     <div
-      class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-lg space-y-6 relative text-gray-800"
+      class="bg-white rounded-[28px] w-full max-w-lg px-8 py-10 shadow-2xl relative border border-gray-100"
     >
-      <!-- Close -->
+      <!-- Close Button -->
       <button
-        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+        class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition"
         @click="$emit('close')"
       >
-        ✕
+        <X class="w-5 h-5" />
       </button>
 
       <!-- Title -->
-      <h2 class="text-2xl font-bold text-center text-gray-800">
-        สรุปรายการสั่งซื้อ
+      <h2
+        class="text-[26px] font-semibold text-center text-gray-900 mb-6 flex items-center justify-center gap-2 tracking-tight"
+      >
+        <FileText class="w-6 h-6 text-gray-800" />
+        {{ t("summary.title") }}
       </h2>
 
       <!-- Order Info -->
-      <div class="text-sm space-y-1">
-        <p>
-          <span class="font-semibold">โซน:</span>
+      <div
+        class="rounded-2xl bg-gray-50/70 border border-gray-200 p-5 shadow-sm mb-8 space-y-2"
+      >
+        <p class="text-sm text-gray-600">
+          <span class="font-medium text-gray-700"
+            >{{ t("summary.zone") }}:</span
+          >
           {{ pageData.zoneKey.toUpperCase() }}
         </p>
-        <p>
-          <span class="font-semibold">ที่นั่ง:</span>
+        <p class="text-sm text-gray-600">
+          <span class="font-medium text-gray-700"
+            >{{ t("summary.seats") }}:</span
+          >
           {{ pageData.selectedSeats.join(", ") }}
         </p>
-        <p>
-          <span class="font-semibold">ราคารวม:</span>
-          <span class="text-blue-600 font-semibold"
-            >{{ total.toLocaleString() }} บาท</span
+        <p class="text-sm">
+          <span class="text-gray-700 font-medium"
+            >{{ t("summary.total") }}:</span
           >
+          <span class="text-blue-600 font-bold text-[16px]">
+            {{ total.toLocaleString() }} {{ t("summary.baht") }}
+          </span>
         </p>
-        <p v-if="countdown > 0" class="text-red-600 font-semibold">
-          เวลาที่เหลือ: {{ Math.floor(countdown / 60) }}:{{
-            (countdown % 60).toString().padStart(2, "0")
-          }}
-        </p>
+        <div v-if="countdown > 0">
+          <span
+            class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 shadow-sm"
+          >
+            <AlarmClock class="w-4 h-4" /> {{ t("summary.timeLeft") }}:
+            {{ Math.floor(countdown / 60) }}:{{
+              (countdown % 60).toString().padStart(2, "0")
+            }}
+          </span>
+        </div>
       </div>
 
       <!-- Payment Method -->
-      <div class="space-y-3 pt-4">
-        <p class="text-sm font-semibold">เลือกวิธีชำระเงิน:</p>
-        <div class="space-y-2">
-          <label class="flex items-center gap-3">
-            <input type="radio" v-model="pageData.method" value="qr" />
-            QR Code (แนะนำ)
+      <div class="mb-8">
+        <p class="text-[15px] font-semibold text-gray-800 mb-3">
+          {{ t("summary.selectMethod") }}
+        </p>
+        <div class="space-y-4">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input
+              type="radio"
+              v-model="pageData.method"
+              value="qr"
+              class="accent-blue-600 w-4 h-4"
+            />
+            <span class="flex items-center gap-2 text-gray-800">
+              <QrCode class="w-5 h-5" />
+              {{ t("summary.qr") }}
+              <span class="text-xs text-blue-500 font-medium">(แนะนำ)</span>
+            </span>
           </label>
-          <label class="flex items-center gap-3">
-            <input type="radio" v-model="pageData.method" value="bank" />
-            โอนเงิน (แนบสลิป)
+
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input
+              type="radio"
+              v-model="pageData.method"
+              value="bank"
+              class="accent-blue-600 w-4 h-4"
+            />
+            <span class="flex items-center gap-2 text-gray-800">
+              <Banknote class="w-5 h-5" />
+              {{ t("summary.bank") }}
+            </span>
+          </label>
+
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input
+              type="radio"
+              v-model="pageData.method"
+              value="cash"
+              class="accent-blue-600 w-4 h-4"
+            />
+            <span class="flex items-center gap-2 text-gray-800">
+              <Wallet class="w-5 h-5" />
+              {{ t("summary.cash") }}
+            </span>
           </label>
         </div>
       </div>
 
-      <!-- QR Section -->
-      <div v-if="pageData.method === 'qr'" class="text-center">
-        <img
-          v-if="qrCode"
-          :src="qrCode"
-          alt="QR Code"
-          class="w-40 h-40 mx-auto border rounded"
+      <!-- Conditional Section -->
+      <div v-if="pageData.method === 'cash'" class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          {{ t("summary.cashAmount") }}
+        </label>
+        <input
+          type="number"
+          v-model="pageData.total"
+          class="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-inner"
+          min="0"
         />
-        <p class="text-sm text-gray-500 mt-2">โปรดแสกนเพื่อชำระเงิน</p>
       </div>
 
-      <!-- Slip Upload -->
-      <div v-if="pageData.method === 'bank'" class="space-y-2">
-        <label class="block text-sm font-medium">แนบสลิป:</label>
+      <div v-if="pageData.method === 'bank'" class="mb-6">
+        <label class="text-sm font-medium text-gray-700">{{
+          t("summary.uploadSlip")
+        }}</label>
         <input
           type="file"
           accept="image/*,application/pdf"
           @change="onFileChange"
-          class="w-full border rounded px-3 py-2 text-sm"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 shadow-sm"
         />
         <div v-if="slipPreview" class="mt-2 text-center">
           <img
@@ -86,30 +137,31 @@
         </div>
       </div>
 
-      <!-- Success -->
-      <div v-if="submitted" class="text-center py-8">
-        <p class="text-lg font-semibold text-green-600">
-          ระบบได้รับคำสั่งซื้อแล้ว
-        </p>
-        <p class="text-sm text-gray-500">
-          กรุณารอเจ้าหน้าที่ตรวจสอบการชำระเงิน
+      <div v-if="pageData.method === 'qr'" class="text-center mb-6 space-y-2">
+        <img
+          v-if="qrCode"
+          :src="qrCode"
+          class="w-44 h-44 mx-auto border rounded-xl shadow"
+        />
+        <p class="text-sm text-gray-500 italic">
+          📷 {{ t("summary.scanPrompt") }}
         </p>
       </div>
-      <button @click="mockPaymentSuccess">จำลองการชำระเงิน</button>
+
       <!-- Buttons -->
-      <div v-if="!submitted" class="flex justify-center gap-4 pt-4">
+      <div class="flex justify-between pt-4">
         <button
-          class="px-5 py-2 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-50 text-sm font-medium"
           @click="onCancel"
+          class="px-5 py-2 text-sm text-gray-600 border border-gray-300 rounded-full hover:bg-gray-100 transition"
         >
           ยกเลิก
         </button>
         <button
-          class="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-sm font-semibold"
-          @click="submitOrders"
+          @click="mockPaymentSuccess"
           :disabled="!isValid"
+          class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-sm font-semibold shadow-md hover:brightness-110 transition"
         >
-          ยืนยันการชำระเงิน
+          ✅ ยืนยันการชำระเงิน
         </button>
       </div>
     </div>
@@ -117,20 +169,35 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import {
+  QrCode,
+  Banknote,
+  Wallet,
+  AlarmClock,
+  FileText,
+  X,
+} from "lucide-vue-next";
+
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import { useRuntimeConfig } from "nuxt/app";
+import QRCode from "qrcode";
+
 import { usePageData } from "@/composables/usePageData";
 import { useOrder } from "@/composables/useOrder";
 import { useScb } from "@/composables/useScb";
-import { useToast } from "@/composables/useToast";
-import QRCode from "qrcode";
 import { useWebSocket } from "@/composables/useSocket";
-import { useRuntimeConfig } from "nuxt/app";
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
+const { t } = useI18n();
+const router = useRouter();
 const config = useRuntimeConfig();
 const base = config.public.apiBase;
-const { showToast } = useToast();
+
 const { requestQR } = useScb();
-const { submitOrder, cancelOrder } = useOrder();
+const { submitOrder, cancelOrder, markAsPaid } = useOrder();
+const { connectSocket, disconnectSocket } = useWebSocket("*");
 
 const props = defineProps({
   zone: String,
@@ -142,10 +209,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["close", "confirmed"]);
-const router = useRouter();
 const pageData = usePageData();
+
 const orderId = `ORDER${Date.now()}`.slice(0, 17);
 const ref2 = "STADIUM";
+
 const slipFile = ref(null);
 const slipPreview = ref(null);
 const submitted = ref(false);
@@ -154,32 +222,34 @@ const qrCode = ref("");
 const countdown = ref(300);
 let countdownTimer;
 
-const { connectSocket, disconnectSocket } = useWebSocket("*");
+const setupCountdown = () => {
+  countdownTimer = setInterval(() => {
+    countdown.value--;
+    if (countdown.value <= 0) {
+      clearInterval(countdownTimer);
+      emit("close");
+      toast.warning(t("summary.timeout"));
+    }
+  }, 1000);
+};
+
 onMounted(async () => {
   connectSocket();
   pageData.method = "qr";
   pageData.zoneKey = props.zone;
   pageData.selectedSeats = props.selectedSeats;
+  pageData.total = props.total;
 
   if (pageData.method === "qr") {
-    const result = await requestQR(props.total, orderId, ref2);
-    QRCode.toDataURL(result.qrRawData).then((url) => {
-      qrCode.value = url;
-    });
-
-    countdownTimer = setInterval(() => {
-      countdown.value--;
-      if (countdown.value <= 0) {
-        clearInterval(countdownTimer);
-        emit("close");
-        showToast("หมดเวลาชำระเงิน กรุณาเลือกใหม่อีกครั้ง", "warning");
-      }
-    }, 1000);
+    try {
+      // const result = await requestQR(pageData.total, orderId, ref2);
+      // qrCode.value = await QRCode.toDataURL(result.qrRawData);
+      setupCountdown();
+    } catch (err) {
+      toast.error("QR Code creation failed");
+      console.error(err);
+    }
   }
-});
-
-onMounted(() => {
-  connectSocket();
 });
 
 onBeforeUnmount(() => {
@@ -187,90 +257,95 @@ onBeforeUnmount(() => {
   disconnectSocket();
 });
 
-// File Upload
-function onFileChange(e) {
+const onFileChange = (e) => {
   const file = e.target.files[0];
   if (!file) return;
   slipFile.value = file;
   const reader = new FileReader();
   reader.onload = () => (slipPreview.value = reader.result);
   reader.readAsDataURL(file);
-}
+};
 
-const isValid = computed(() => {
-  return pageData.method === "bank" ? !!slipFile.value : true;
-});
+const isValid = computed(() =>
+  pageData.method === "bank" ? !!slipFile.value : true
+);
 
 const onCancel = async () => {
   try {
     await cancelOrder(props.dataZoneSelected.orderId);
-    showToast("❌ ยกเลิกออเดอร์เรียบร้อยแล้ว", "warning");
+    toast.warning(t("summary.cancelled"));
   } catch (err) {
     console.error("Cancel Error", err);
-    showToast("ไม่สามารถยกเลิกออเดอร์ได้", "error");
+    toast.error(t("summary.cancelError"));
   } finally {
     emit("close");
   }
 };
 
-// Submit Order
-async function submitOrders() {
+const submitOrders = async () => {
   try {
     await submitOrder({
       orderId: props.dataZoneSelected.orderId,
       zone: pageData.zoneKey,
       selectedSeats: pageData.selectedSeats,
-      total: props.total,
+      total: pageData.total,
       method: pageData.method,
     });
     submitted.value = true;
     emit("confirmed");
     router.push("/confirmation");
   } catch (e) {
-    showToast("เกิดข้อผิดพลาดในการสั่งซื้อ", "error");
-    console.error("❌ submit error:", e);
+    toast.error(t("summary.submitError"));
+    console.error("Submit Error:", e);
   }
-}
+};
 
-// MOCK Webhook Flow
 const mockPaymentSuccess = async () => {
-  if (!pageData.selectedSeats.length || !pageData.zoneKey || !props.total) {
-    showToast("ข้อมูลไม่ครบ ไม่สามารถ mock ได้");
+  if (!pageData.selectedSeats.length || !pageData.zoneKey || !pageData.total) {
+    toast.error(t("summary.mockError"));
     return;
   }
+
   try {
-    const res = await submitOrder({
-      orderId: props.dataZoneSelected.orderId,
-      zone: pageData.zoneKey,
-      selectedSeats: pageData.selectedSeats,
-      total: props.total,
-      method: pageData.method,
-    });
+    if (pageData.method === "qr") {
+      const res = await submitOrder({
+        orderId: props.dataZoneSelected.orderId,
+        zone: pageData.zoneKey,
+        selectedSeats: pageData.selectedSeats,
+        total: pageData.total,
+        method: pageData.method,
+      });
 
-    await $fetch(`${base}/api/scb/payment-webhook`, {
-      method: "POST",
-      body: {
-        ref1: res.orderId,
-        ref2,
-        amount: props.total.toString(),
-        status: "SUCCESS",
-        transactionId: `MOCKTXN${Math.floor(Math.random() * 1000000)}`,
-        signature:
-          "1f0ebe8a333f07a6277ab7c743dc085cbf5c0dc4a6b6c54dce2baa6d28eb765d",
-      },
-    });
+      await $fetch(`${base}/api/scb/payment-webhook`, {
+        method: "POST",
+        body: {
+          ref1: res.orderId,
+          ref2,
+          amount: pageData.total.toString(),
+          status: "SUCCESS",
+          transactionId: `MOCKTXN${Math.floor(Math.random() * 1000000)}`,
+          signature:
+            "1f0ebe8a333f07a6277ab7c743dc085cbf5c0dc4a6b6c54dce2baa6d28eb765d",
+        },
+      });
 
-    showToast("🎉 Mock Payment สำเร็จ!");
-    router.push("/confirmation");
+      toast.success(t("summary.mockSuccess"));
+      router.push("/confirmation");
+    } else {
+      await markAsPaid(props.dataZoneSelected.orderId);
+      toast.success(t("summary.mockSuccess"));
+      router.push({
+        path: "/confirmation",
+        query: {
+          zone: pageData.zoneKey,
+          seats: pageData.selectedSeats.join(","),
+          total: pageData.total,
+        },
+      });
+    }
   } catch (err) {
-    showToast("❌ Mock payment ล้มเหลว");
-    console.error("mockPayment error:", err);
+    toast.error(t("summary.mockFailed"));
+    console.error("Mock Payment Error:", err);
   }
 };
 </script>
-
-<style scoped>
-input[type="radio"]:disabled {
-  cursor: not-allowed;
-}
-</style>

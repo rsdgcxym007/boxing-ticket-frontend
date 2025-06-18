@@ -17,6 +17,10 @@
     <AnimatedSection>
       <Contact />
     </AnimatedSection>
+
+    <AnimatedSection>
+      <Footer />
+    </AnimatedSection>
   </div>
 </template>
 

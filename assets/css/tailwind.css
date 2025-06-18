@@ -1,6 +1,5 @@
 @import "./fonts.css"; /* ✅ ต้อง import font ก่อน */
 @tailwind utilities;
-
 @layer base {
   *,
   ::before,

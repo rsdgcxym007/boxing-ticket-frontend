@@ -30,8 +30,8 @@ export function useTicketData() {
         th: "เหมาะสำหรับผู้ที่ต้องการความใกล้ชิดแต่ยังมองเห็นเวทีได้มุมกว้าง",
         en: "Ideal for fans who want close seats with a wider view of the ring.",
       },
-      oldPrice: 1800,
-      newPrice: 1650,
+      oldPrice: 2000,
+      newPrice: 1800,
       showMore: false,
     },
     {
@@ -61,8 +61,8 @@ export function useTicketData() {
         th: "มุมมองดี เห็นนักชกชัดตลอดการแข่งขัน",
         en: "Great angle to watch fighters in action throughout the match.",
       },
-      oldPrice: 1800,
-      newPrice: 1650,
+      oldPrice: 2000,
+      newPrice: 1800,
       showMore: false,
     },
     {
@@ -93,7 +93,7 @@ export function useTicketData() {
         en: "Perfect for fans who want to feel the intensity up close.",
       },
       oldPrice: 2000,
-      newPrice: 1790,
+      newPrice: 1800,
       showMore: false,
     },
     {
@@ -124,7 +124,7 @@ export function useTicketData() {
         en: "Great for photographers – clear, close viewing spot.",
       },
       oldPrice: 2000,
-      newPrice: 1790,
+      newPrice: 1800,
       showMore: false,
     },
     {
@@ -154,8 +154,8 @@ export function useTicketData() {
         th: "พิเศษสุดสำหรับผู้ที่ต้องการประสบการณ์แบบ VVIP",
         en: "Exclusive VVIP experience for Muay Thai lovers.",
       },
-      oldPrice: 2800,
-      newPrice: 2490,
+      oldPrice: 2000,
+      newPrice: 1800,
       showMore: false,
     },
   ]);

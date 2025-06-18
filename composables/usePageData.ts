@@ -15,6 +15,7 @@ export const usePageData = () => {
     bookedSeats: [],
     method: "", // ✅ เพิ่มบรรทัดนี้
     userRole: "GUEST",
+    total: 0,
   });
 
   return pageData;

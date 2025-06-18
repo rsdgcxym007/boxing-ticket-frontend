@@ -111,7 +111,7 @@
                 >
                   {{ t("totalPrice") }}:
                   <span class="text-cyan-500 font-bold">
-                    {{ pageData.selectedSeats.length * 1 }}
+                    {{ pageData.selectedSeats.length * 1800 }}
                   </span>
                   <span class="ml-1 text-sm text-gray-500">{{
                     t("baht")
@@ -143,7 +143,7 @@
         :visible="pageData.showSummaryModal"
         :selectedSeats="pageData.selectedSeats"
         :zone="pageData.zoneKey"
-        :total="pageData.selectedSeats.length * 1"
+        :total="pageData.selectedSeats.length * 1800"
         :userRole="pageData.userRole"
         :dataZoneSelected="pageData"
         @close="pageData.showSummaryModal = false"
@@ -155,28 +155,30 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { watch, nextTick, onBeforeUnmount } from "vue";
+import { watch, nextTick, onMounted, onBeforeUnmount } from "vue";
 import { usePageData } from "@/composables/usePageData";
 import { useSeatApi } from "@/composables/useSeatApi";
-import { useOrder } from "@/composables/useOrder"; // เพิ่ม
+import { useOrder } from "@/composables/useOrder";
 import { useWebSocket } from "@/composables/useSocket";
-const { submitOrder } = useOrder();
-const { showToast } = useToast();
+import { useToast } from "vue-toastification";
+
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const pageData = usePageData();
 const { getSeatsByZone, getBookedSeats } = useSeatApi();
+const { submitOrder } = useOrder();
+const toast = useToast();
 
 const props = defineProps({
   zoneKey: String,
 });
 
+// 🔄 Update modal & seat data on zone change
 watch(
   () => props.zoneKey,
   async (newZone) => {
     if (!newZone) return;
-
     pageData.zoneKey = "";
     await nextTick();
     pageData.zoneKey = newZone;
@@ -185,11 +187,11 @@ watch(
   { immediate: true }
 );
 
+// 👁️ Watch seat modal visibility
 watch(
   () => pageData.showSeatModal,
   async (show) => {
     const body = document.body;
-
     if (show && pageData.zoneKey) {
       pageData.currentZoneSeats = await getSeatsByZone(pageData.zoneKey);
       pageData.bookedSeats = await getBookedSeats();
@@ -197,41 +199,39 @@ watch(
       body.style.overflow = "";
       pageData.zoneKey = "";
       pageData.selectedSeats = [];
-      console.log("test");
     }
   }
 );
 
+// 🔁 Refresh seats via websocket
 const refreshBookedSeats = async () => {
-  console.log("🔁 reload booked seats from websocket");
-  nextTick(async () => {
-    pageData.bookedSeats = await getBookedSeats();
-  });
+  console.log("🔁 Reload booked seats from websocket");
+  await nextTick((pageData.bookedSeats = await getBookedSeats()));
 };
 
+// 🧩 Connect socket on mount
 const { connectSocket, disconnectSocket } = useWebSocket(
   "*",
-
   refreshBookedSeats
 );
 
 onMounted(() => {
   connectSocket();
 });
-
 onBeforeUnmount(() => {
   document.body.style.overflow = "";
   disconnectSocket();
 });
+
+// ❌ Close modal
 const onClose = () => {
   pageData.showSeatModal = false;
 };
-function handleConfirmed() {
-  pageData.showSummaryModal = false;
-}
+
+// ✅ Buy ticket and open summary
 const handleBuyTicket = async () => {
   if (!pageData.selectedSeats.length) {
-    showToast("กรุณาเลือกที่นั่งก่อน", "warning");
+    toast.warning("กรุณาเลือกที่นั่งก่อน");
     return;
   }
 
@@ -246,24 +246,18 @@ const handleBuyTicket = async () => {
 
     pageData.orderId = order.orderId;
     pageData.totalAmount = order.total;
-
-    // ปิด modal ที่เลือก
     pageData.showSummaryModal = true;
   } catch (err) {
-    console.log("err", err);
-
-    // ✅ แสดงข้อความ error จริงจาก backend
     const message =
       err?.message ||
       err?.response?.data?.message ||
       "เกิดข้อผิดพลาดในการสั่งซื้อ";
-
-    showToast(message, "error");
+    toast.error(message);
   }
 };
 
-// ✅ เลือกที่นั่ง
-function toggleSeat(seat) {
+// 🎯 Toggle seat selection
+const toggleSeat = (seat) => {
   if (pageData.bookedSeats.includes(seat)) return;
   const index = pageData.selectedSeats.indexOf(seat);
   if (index === -1) {
@@ -272,13 +266,13 @@ function toggleSeat(seat) {
   } else {
     pageData.selectedSeats.splice(index, 1);
   }
-}
+};
 
-// ✅ สถานะที่นั่ง
-function getSeatStatus(seat) {
+// 🎨 Get seat visual status
+const getSeatStatus = (seat) => {
   if (!seat) return "unavailable";
   if (pageData.bookedSeats.includes(seat)) return "booked";
   if (pageData.selectedSeats.includes(seat)) return "selected";
   return "available";
-}
+};
 </script>

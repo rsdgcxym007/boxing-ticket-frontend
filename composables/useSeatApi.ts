@@ -1,5 +1,7 @@
 import { useApi } from "../composables/useApi";
+import { useToast } from "vue-toastification";
 const { get } = useApi();
+const toast = useToast();
 export function useSeatApi() {
   const getSeatsByZone = async (zone: string) => {
     const seats = {
@@ -152,9 +154,12 @@ export function useSeatApi() {
 
   const getBookedSeats = async (): Promise<string[]> => {
     try {
-      const data = await get("/api/orders/seats/booked");
-      return data;
-    } catch (err) {
+      const { data } = await get("/api/orders/seats/booked");
+      return data || [];
+    } catch (err: any) {
+      toast.error(
+        `❌ โหลดที่นั่งที่ถูกจองล้มเหลว: ${err.message || "Unknown error"}`
+      );
       console.error("❌ getBookedSeats error:", err);
       return [];
     }

@@ -46,7 +46,26 @@
         "seats": "Seats",
         "total": "Total",
         "confirm": "Pay Now"
-      }
+      },
+      "summary": {
+    "title": "Order Summary",
+    "zone": "Zone",
+    "seats": "Seats",
+    "total": "Total",
+    "baht": "Baht",
+    "timeLeft": "Time Left",
+    "selectMethod": "Select Payment Method",
+    "qr": "QR Code (Recommended)",
+    "bank": "Bank Transfer (Upload Slip)",
+    "cash": "Cash",
+    "scanPrompt": "Please scan to pay",
+    "uploadSlip": "Upload Payment Slip",
+    "cashAmount": "Cash Amount (Baht)",
+    "received": "Order received",
+    "awaitingReview": "Please wait for payment verification",
+    "cancel": "Cancel",
+    "confirmPayment": "Confirm Payment"
+  }
     
     
   }
