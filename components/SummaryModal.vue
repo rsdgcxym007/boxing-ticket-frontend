@@ -235,7 +235,7 @@ const setupCountdown = () => {
 
 onMounted(async () => {
   connectSocket();
-  pageData.method = "qr";
+  pageData.method = "cash";
   pageData.zoneKey = props.zone;
   pageData.selectedSeats = props.selectedSeats;
   pageData.total = props.total;

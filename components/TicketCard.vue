@@ -65,7 +65,9 @@
               </div>
             </div>
 
-            <div class="p-5 space-y-3">
+            <div
+              class="p-5 space-y-3 flex flex-col justify-between min-h-[320px]"
+            >
               <h3 class="text-lg font-bold">{{ ticket.title[locale] }}</h3>
               <ul class="space-y-1 text-sm">
                 <li
