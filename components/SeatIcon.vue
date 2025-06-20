@@ -3,7 +3,7 @@
     <!-- Seat Icon Button -->
     <button
       class="transition-transform duration-200 hover:scale-120 focus:outline-none pointer-events-auto"
-      @click="$emit('toggle', seat)"
+      @click="$emit('toggle', seat, isBooked)"
       :disabled="isBooked"
     >
       <img
@@ -20,11 +20,12 @@
 
     <!-- Seat Number -->
     <span
-      class="text-xs font-medium tracking-tight pointer-events-none"
+      class="text-xs font-medium tracking-tight"
       :class="{
         'text-gray-400 line-through': ['BOOKED', 'PAID'].includes(seat?.status),
         'text-blue-600 font-semibold': isSelected && !isBooked,
         'text-gray-800': !isSelected && !isBooked,
+        'pointer-events-auto opacity-50': isBooked,
       }"
     >
       {{ seat?.seatNumber || "" }}
@@ -47,17 +48,12 @@ const props = defineProps({
 });
 
 const { seat, selectedSeats, bookedSeats } = toRefs(props);
-console.log("seat", seat.value);
-console.log(" bookedSeats.value", bookedSeats.value);
 
 const isBooked = computed(() =>
-  ["Booked", "PAID"].includes(seat.value?.status)
+  ["BOOKED", "PAID"].includes(seat.value?.bookingStatus)
 );
-// console.log("isBooked", isBooked.value);
 
 const isSelected = computed(() => selectedSeats.value.includes(seat.value));
-
-// console.log("isSelected", isSelected.value);
 
 function getSeatImage() {
   if (isBooked.value) return "/images/seat-booked.png";

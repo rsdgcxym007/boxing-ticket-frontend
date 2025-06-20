@@ -36,12 +36,12 @@
           <span class="font-medium text-gray-700"
             >{{ t("summary.seats") }}:</span
           >
-          {{ pageData.selectedSeats.join(", ") }}
+          {{ pageData.selectedSeats.map((s) => s.seatNumber).join(", ") }}
         </p>
         <p class="text-sm">
           <span class="text-gray-700 font-medium"
-            >{{ t("summary.total") }}:</span
-          >
+            >{{ t("summary.total") }}:
+          </span>
           <span class="text-blue-600 font-bold text-[16px]">
             {{ total.toLocaleString() }} {{ t("summary.baht") }}
           </span>
@@ -64,7 +64,7 @@
           {{ t("summary.selectMethod") }}
         </p>
         <div class="space-y-4">
-          <label class="flex items-center gap-3 cursor-pointer">
+          <!-- <label class="flex items-center gap-3 cursor-pointer">
             <input
               type="radio"
               v-model="pageData.method"
@@ -89,7 +89,7 @@
               <Banknote class="w-5 h-5" />
               {{ t("summary.bank") }}
             </span>
-          </label>
+          </label> -->
 
           <label class="flex items-center gap-3 cursor-pointer">
             <input
@@ -118,7 +118,19 @@
           min="0"
         />
       </div>
-
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          {{ "“Referrer Code (ถ้ามี)” หรือ “รหัสผู้แนะนำ (ถ้ามี)”" }}
+        </label>
+        <input
+          type="text"
+          v-model="pageData.referrerCode"
+          class="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-inner"
+          min="0"
+          placeholder="Referrer Code ถ้ามี"
+        />
+      </div>
+      <!-- 
       <div v-if="pageData.method === 'bank'" class="mb-6">
         <label class="text-sm font-medium text-gray-700">{{
           t("summary.uploadSlip")
@@ -146,7 +158,7 @@
         <p class="text-sm text-gray-500 italic">
           📷 {{ t("summary.scanPrompt") }}
         </p>
-      </div>
+      </div> -->
 
       <!-- Buttons -->
       <div class="flex justify-between pt-4">
@@ -157,7 +169,7 @@
           ยกเลิก
         </button>
         <button
-          @click="mockPaymentSuccess"
+          @click="submitOrders"
           :disabled="!isValid"
           class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-sm font-semibold shadow-md hover:brightness-110 transition"
         >
@@ -181,9 +193,7 @@ import {
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useRuntimeConfig } from "nuxt/app";
-import QRCode from "qrcode";
-
-import { usePageData } from "@/composables/usePageData";
+import { usePageData } from "@/stores/pageData";
 import { useOrder } from "@/composables/useOrder";
 import { useScb } from "@/composables/useScb";
 import { useWebSocket } from "@/composables/useSocket";
@@ -196,7 +206,7 @@ const config = useRuntimeConfig();
 const base = config.public.apiBase;
 
 const { requestQR } = useScb();
-const { submitOrder, cancelOrder, markAsPaid } = useOrder();
+const { submitOrder, cancelOrder, markAsPaidWithRef } = useOrder();
 const { connectSocket, disconnectSocket } = useWebSocket("*");
 
 const props = defineProps({
@@ -234,22 +244,12 @@ const setupCountdown = () => {
 };
 
 onMounted(async () => {
+  setupCountdown();
   connectSocket();
   pageData.method = "cash";
   pageData.zoneKey = props.zone;
   pageData.selectedSeats = props.selectedSeats;
   pageData.total = props.total;
-
-  if (pageData.method === "qr") {
-    try {
-      // const result = await requestQR(pageData.total, orderId, ref2);
-      // qrCode.value = await QRCode.toDataURL(result.qrRawData);
-      setupCountdown();
-    } catch (err) {
-      toast.error("QR Code creation failed");
-      console.error(err);
-    }
-  }
 });
 
 onBeforeUnmount(() => {
@@ -284,68 +284,23 @@ const onCancel = async () => {
 
 const submitOrders = async () => {
   try {
-    await submitOrder({
-      orderId: props.dataZoneSelected.orderId,
-      zone: pageData.zoneKey,
-      selectedSeats: pageData.selectedSeats,
-      total: pageData.total,
-      method: pageData.method,
-    });
+    await markAsPaidWithRef(
+      props.dataZoneSelected.orderId,
+      pageData.referrerCode
+    );
     submitted.value = true;
-    emit("confirmed");
-    router.push("/confirmation");
+    pageData.resetPageData();
+    router.push({
+      path: "/confirmation",
+      query: {
+        zone: pageData.zoneKey,
+        seats: pageData.selectedSeats.join(","),
+        total: pageData.total,
+      },
+    });
   } catch (e) {
     toast.error(t("summary.submitError"));
     console.error("Submit Error:", e);
-  }
-};
-
-const mockPaymentSuccess = async () => {
-  if (!pageData.selectedSeats.length || !pageData.zoneKey || !pageData.total) {
-    toast.error(t("summary.mockError"));
-    return;
-  }
-
-  try {
-    if (pageData.method === "qr") {
-      const res = await submitOrder({
-        orderId: props.dataZoneSelected.orderId,
-        zone: pageData.zoneKey,
-        selectedSeats: pageData.selectedSeats,
-        total: pageData.total,
-        method: pageData.method,
-      });
-
-      await $fetch(`${base}/api/scb/payment-webhook`, {
-        method: "POST",
-        body: {
-          ref1: res.orderId,
-          ref2,
-          amount: pageData.total.toString(),
-          status: "SUCCESS",
-          transactionId: `MOCKTXN${Math.floor(Math.random() * 1000000)}`,
-          signature:
-            "1f0ebe8a333f07a6277ab7c743dc085cbf5c0dc4a6b6c54dce2baa6d28eb765d",
-        },
-      });
-
-      toast.success(t("summary.mockSuccess"));
-      router.push("/confirmation");
-    } else {
-      await markAsPaid(props.dataZoneSelected.orderId);
-      toast.success(t("summary.mockSuccess"));
-      router.push({
-        path: "/confirmation",
-        query: {
-          zone: pageData.zoneKey,
-          seats: pageData.selectedSeats.join(","),
-          total: pageData.total,
-        },
-      });
-    }
-  } catch (err) {
-    toast.error(t("summary.mockFailed"));
-    console.error("Mock Payment Error:", err);
   }
 };
 </script>

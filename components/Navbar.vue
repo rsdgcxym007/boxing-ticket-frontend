@@ -38,6 +38,12 @@
           </li>
         </ul>
         <button
+          @click="logout"
+          class="px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
+        >
+          ออกจากระบบ
+        </button>
+        <button
           @click="toggleLang"
           class="px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
         >
@@ -104,6 +110,12 @@
           </li>
         </ul>
         <button
+          @click="logout"
+          class="mt-4 px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
+        >
+          ออกจากระบบ
+        </button>
+        <button
           @click="toggleLang"
           class="mt-4 px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
         >
@@ -129,6 +141,11 @@ const toggleLang = () => {
 
 const updateScreen = () => {
   isDesktop.value = window.innerWidth >= 768;
+};
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = "/login";
 };
 onMounted(() => {
   updateScreen();

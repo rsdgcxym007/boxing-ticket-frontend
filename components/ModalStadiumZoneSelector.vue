@@ -1,25 +1,21 @@
 <template>
   <Teleport to="body">
     <div>
-      <!-- Backdrop -->
       <div
         v-if="pageData.showSeatModal"
         class="fixed inset-0 bg-black/50 z-50 overflow-auto"
         @click.self="onClose"
       >
-        <!-- Center Wrapper -->
         <div
           class="flex justify-center items-start min-h-screen p-4 sm:p-6 md:p-10"
         >
-          <!-- Modal Container -->
           <div
             class="w-full max-w-[90%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-10 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
           >
-            <!-- Sticky Header -->
             <div class="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 border-b">
               <button
                 class="absolute top-6 right-6 text-gray-400 hover:text-gray-700 text-xl"
-                @click="pageData.showSeatModal = false"
+                @click="onClose"
               >
                 ✕
               </button>
@@ -34,9 +30,16 @@
               </p>
             </div>
 
-            <!-- Scrollable Seat Area -->
+            <div class="flex justify-center px-6 pt-4">
+              <div class="w-full max-w-xs sm:max-w-sm md:max-w-md p-4">
+                <DatePicker
+                  v-model="pageData.showDate"
+                  placeholder="เลือกวันที่"
+                />
+              </div>
+            </div>
+
             <div class="flex-1 overflow-auto p-6 space-y-6">
-              <!-- Seat Layout (❌ no border/bg wrapper) -->
               <div class="w-full">
                 <div class="flex flex-col items-center gap-4 min-w-[400px]">
                   <div
@@ -48,18 +51,15 @@
                       gap: '0.5rem',
                     }"
                   >
-                    <div
-                      v-for="seat in row"
-                      :key="seat"
-                      @click="toggleSeat(seat)"
-                    >
+                    <div v-for="seat in row" :key="seat?.id">
                       <SeatIcon
-                        v-if="seat"
+                        v-if="seat && seat.seatNumber"
                         :seat="seat"
                         :status="getSeatStatus(seat)"
                         :selectedSeats="pageData.selectedSeats"
                         :bookedSeats="pageData.bookedSeats"
                         :zoneKey="pageData.zoneKey"
+                        @toggle="toggleSeat"
                         class="w-8 sm:w-10 md:w-11 transition-transform hover:scale-105 cursor-pointer"
                       />
                     </div>
@@ -67,13 +67,11 @@
                 </div>
               </div>
 
-              <!-- Legend -->
               <div
                 class="flex justify-center flex-wrap gap-6 text-sm text-gray-600 font-medium"
               >
                 <div class="flex items-center gap-2">
-                  <img src="/images/armchair.png" class="w-4 h-4" />
-                  ว่าง
+                  <img src="/images/armchair.png" class="w-4 h-4" /> ว่าง
                 </div>
                 <div
                   class="flex items-center gap-2 text-green-600 font-semibold"
@@ -90,47 +88,55 @@
                 </div>
               </div>
 
-              <!-- Summary (No box, clean layout) -->
               <div
                 v-if="pageData.selectedSeats.length"
                 class="text-center space-y-4"
               >
-                <!-- ที่นั่งที่เลือก -->
                 <div class="text-sm text-gray-500 font-medium">
                   {{ t("selectedSeats") }}
                 </div>
                 <div
                   class="text-base sm:text-lg font-semibold text-blue-600 tracking-wide"
                 >
-                  {{ pageData.selectedSeats.join(", ") }}
+                  {{
+                    pageData.selectedSeats
+                      .map((s) => s?.seatNumber || "—")
+                      .join(", ")
+                  }}
                 </div>
 
-                <!-- ราคารวม (ไม่มีกรอบ) -->
                 <div
                   class="text-lg sm:text-xl font-bold text-blue-700 tracking-wide"
                 >
                   {{ t("totalPrice") }}:
                   <span class="text-cyan-500 font-bold">
-                    {{ pageData.selectedSeats.length * 1800 }}
+                    {{
+                      props.mode === "change"
+                        ? pageData.totalAmount
+                        : pageData.selectedSeats.length * 1800
+                    }}
                   </span>
                   <span class="ml-1 text-sm text-gray-500">{{
                     t("baht")
                   }}</span>
                 </div>
 
-                <!-- ปุ่ม -->
                 <div class="flex justify-center gap-3 flex-wrap pt-3">
                   <button
-                    @click="pageData.showSeatModal = false"
+                    @click="onClose"
                     class="px-5 py-2 text-blue-500 font-medium text-sm border border-blue-500 rounded-full hover:bg-blue-50 transition"
                   >
                     {{ t("back") }}
                   </button>
                   <button
-                    @click="handleBuyTicket"
+                    @click="handleConfirm"
                     class="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-medium text-sm rounded-full hover:opacity-90 shadow-md transition"
                   >
-                    {{ t("checkout") }}
+                    {{
+                      props.mode === "change"
+                        ? "ยืนยันเปลี่ยนที่นั่ง"
+                        : t("checkout")
+                    }}
                   </button>
                 </div>
               </div>
@@ -138,44 +144,37 @@
           </div>
         </div>
       </div>
-      <SummaryModal
-        v-if="pageData.showSummaryModal"
-        :visible="pageData.showSummaryModal"
-        :selectedSeats="pageData.selectedSeats"
-        :zone="pageData.zoneKey"
-        :total="pageData.selectedSeats.length * 1800"
-        :userRole="pageData.userRole"
-        :dataZoneSelected="pageData"
-        @close="pageData.showSummaryModal = false"
-        @confirmed="handleConfirmed"
-      /></div
-  ></Teleport>
+    </div>
+    <SummaryModal
+      v-if="pageData.showSummaryModal"
+      :visible="pageData.showSummaryModal"
+      :selectedSeats="pageData.selectedSeats"
+      :zone="pageData.zoneKey"
+      :total="pageData.selectedSeats.length * 1800"
+      :userRole="pageData.userRole"
+      :dataZoneSelected="pageData"
+      @close="pageData.showSummaryModal = false"
+      @confirmed="handleConfirmed"
+    />
+  </Teleport>
 </template>
 
 <script setup>
-import { useRoute, useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
-import { watch, nextTick, onMounted, onBeforeUnmount } from "vue";
-import { usePageData } from "@/composables/usePageData";
-import { useSeatApi } from "@/composables/useSeatApi";
-import { useOrder } from "@/composables/useOrder";
-import { useWebSocket } from "@/composables/useSocket";
-import { useToast } from "vue-toastification";
-import { buildSeatLayoutFromCoordinates } from "@/utils/buildSeatLayout";
-
 const { t } = useI18n();
 const router = useRouter();
-const route = useRoute();
 const pageData = usePageData();
-const { getSeatsByZone, getSeatsByZoneId } = useSeatApi();
+const { getSeatsByZoneId } = useSeatApi();
 const { submitOrder } = useOrder();
 const toast = useToast();
+const auth = useAuthStore();
+if (!auth.user) auth.loadUser();
 
 const props = defineProps({
   zoneKey: String,
+  mode: { type: String, default: "booking" },
+  orderData: Object,
 });
 
-// 🔄 Update modal & seat data on zone change
 watch(
   () => props.zoneKey,
   async (newZone) => {
@@ -188,96 +187,106 @@ watch(
   { immediate: true }
 );
 
-// 👁️ Watch seat modal visibility
 watch(
   () => pageData.showSeatModal,
   async (show) => {
-    const body = document.body;
+    pageData.loading = true;
     if (show && pageData.zoneKey) {
-      //ยิงapiจริง
-      let allSeatsZoneId = await getSeatsByZoneId(pageData.zoneKey);
-
-      //ยิงmockที่ front
-      const allSezatsMock = await getSeatsByZone(pageData.zoneKey);
-
-      pageData.currentZoneSeats =
-        buildSeatLayoutFromCoordinates(allSeatsZoneId);
+      const allSeats = await getSeatsByZoneId(
+        pageData.zoneKey,
+        pageData.showDate
+      );
+      pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
     } else {
-      body.style.overflow = "";
+      document.body.style.overflow = "";
       pageData.zoneKey = "";
       pageData.selectedSeats = [];
     }
+    pageData.loading = false;
   }
 );
 
-// 🔁 Refresh seats via websocket
-const refreshBookedSeats = async () => {
-  console.log("🔁 Reload booked seats from websocket");
-  await nextTick((pageData.bookedSeats = await getBookedSeats()));
-};
-
-// 🧩 Connect socket on mount
-const { connectSocket, disconnectSocket } = useWebSocket(
-  "*",
-  refreshBookedSeats
+watch(
+  () => pageData.showDate,
+  async (showDate) => {
+    pageData.loading = true;
+    const allSeats = await getSeatsByZoneId(
+      pageData.zoneKey,
+      new Date(showDate)
+    );
+    pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
+    pageData.loading = false;
+  }
 );
 
 onMounted(() => {
-  connectSocket();
-});
-onBeforeUnmount(() => {
-  document.body.style.overflow = "";
-  disconnectSocket();
+  pageData.loading = true;
+  pageData.selectedSeats = [];
+  if (props.mode === "change" && props.orderData) {
+    pageData.selectedSeats = props.orderData.seats;
+    pageData.showDate = props.orderData.showDate;
+    pageData.totalAmount = props.orderData.total;
+  }
+  pageData.loading = false;
 });
 
-// ❌ Close modal
+onBeforeUnmount(() => {
+  document.body.style.overflow = "";
+});
+
 const onClose = () => {
   pageData.showSeatModal = false;
 };
 
-// ✅ Buy ticket and open summary
-const handleBuyTicket = async () => {
-  if (!pageData.selectedSeats.length) {
-    toast.warning("กรุณาเลือกที่นั่งก่อน");
-    return;
-  }
-
-  try {
-    const order = await submitOrder({
-      orderId: `ORDER${Date.now()}`.slice(0, 17),
-      zone: props.zoneKey,
-      selectedSeats: pageData.selectedSeats,
-      total: pageData.selectedSeats.length,
-      method: "qr",
-    });
-
-    pageData.orderId = order.orderId;
-    pageData.totalAmount = order.total;
-    pageData.showSummaryModal = true;
-  } catch (err) {
-    const message =
-      err?.message ||
-      err?.response?.data?.message ||
-      "เกิดข้อผิดพลาดในการสั่งซื้อ";
-    toast.error(message);
+const handleConfirm = async () => {
+  if (!pageData.selectedSeats.length)
+    return toast.warning("กรุณาเลือกที่นั่งก่อน");
+  if (props.mode === "booking") {
+    try {
+      const order = await submitOrder({
+        userId: auth.user.providerId,
+        seatIds: pageData.selectedSeats.map((s) => s.id),
+        total: pageData.selectedSeats.length,
+        showDate: pageData.showDate,
+        method: "CASH",
+      });
+      pageData.orderId = order.id;
+      pageData.totalAmount = order.total;
+      pageData.showSummaryModal = true;
+      console.log("pageData", pageData.showSummaryModal);
+    } catch (err) {
+      toast.error(err?.message || "เกิดข้อผิดพลาดในการสั่งซื้อ");
+    }
+  } else if (props.mode === "change") {
+    try {
+      await $fetch("/api/orders/change-seats", {
+        method: "PATCH",
+        body: {
+          orderId: props.orderData.id,
+          newSeatIds: pageData.selectedSeats.map((s) => s.id),
+          showDate: pageData.showDate,
+        },
+      });
+      toast.success("เปลี่ยนที่นั่งเรียบร้อยแล้ว");
+      pageData.showSeatModal = false;
+    } catch (err) {
+      toast.error("ไม่สามารถเปลี่ยนที่นั่งได้");
+    }
   }
 };
 
-// 🎯 Toggle seat selection
 const toggleSeat = (seat) => {
-  console.log("seat", seat);
-
   if (pageData.bookedSeats.includes(seat)) return;
   const index = pageData.selectedSeats.indexOf(seat);
   if (index === -1) {
-    if (pageData.selectedSeats.length >= 10) return;
+    if (pageData.selectedSeats.length >= 10)
+      return toast.warning("กรุณาเลือกไม่เกิน 10 ที่นั่ง");
     pageData.selectedSeats.push(seat);
   } else {
     pageData.selectedSeats.splice(index, 1);
   }
 };
 
-// 🎨 Get seat visual status
 const getSeatStatus = (seat) => {
   if (!seat) return "unavailable";
   if (pageData.bookedSeats.includes(seat)) return "booked";

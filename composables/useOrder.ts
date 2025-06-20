@@ -6,30 +6,30 @@ export const useOrder = () => {
   const toast = useToast();
 
   const submitOrder = async ({
-    zone,
-    selectedSeats,
+    userId,
+    seatIds,
     total,
+    showDate,
     method,
-    orderId,
   }: {
-    zone: string;
-    selectedSeats: string[];
+    userId: string;
+    seatIds: string[];
     total: number;
+    showDate: string;
     method: string;
-    orderId: string;
   }) => {
-    try {
-      const payload = {
-        orderId,
-        zone,
-        seats: selectedSeats,
-        total,
-        method,
-      };
+    const payload = {
+      userId,
+      seatIds,
+      showDate,
+      total,
+      method,
+    };
 
-      const { data } = await post("/api/orders", payload);
+    try {
+      const res = await post("/orders", payload);
       toast.success("✅ สร้างออเดอร์สำเร็จ");
-      return data;
+      return res;
     } catch (err: any) {
       toast.error(`❌ สร้างออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
       throw err;
@@ -38,27 +38,30 @@ export const useOrder = () => {
 
   const cancelOrder = async (orderId: string) => {
     try {
-      await patch(`/api/orders/cancel/${orderId}`, {
+      await patch(`/orders/cancel/${orderId}`, {
         status: "CANCELLED",
       });
       toast.info(`🛑 ยกเลิกออเดอร์ ${orderId} สำเร็จ`);
     } catch (err: any) {
-      toast.error(`❌ ยกเลิกออเดอร์ล้มเหลว: ${err.message}`);
+      toast.error(`❌ ยกเลิกออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
       throw err;
     }
   };
 
-  const markAsPaid = async (orderId: string) => {
+  const markAsPaidWithRef = async (orderId: string, refCode?: string) => {
     try {
-      await patch(`/api/orders/${orderId}/status`, {
+      await patch(`/orders/${orderId}`, {
         status: "PAID",
+        ...(refCode && { referrerCode: refCode }),
       });
       toast.success(`💰 ชำระเงินออเดอร์ ${orderId} สำเร็จ`);
     } catch (err: any) {
-      toast.error(`❌ ชำระเงินล้มเหลว: ${err.message}`);
+      toast.error(
+        `❌ ชำระเงินล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
+      );
       throw err;
     }
   };
 
-  return { submitOrder, cancelOrder, markAsPaid };
+  return { submitOrder, cancelOrder, markAsPaidWithRef };
 };

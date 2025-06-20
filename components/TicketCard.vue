@@ -111,6 +111,7 @@
                   <p class="text-xl font-bold">฿{{ ticket.newPrice }}</p>
                 </div>
                 <button
+                  v-if="!['user'].includes(auth.user.role)"
                   @click="openZoneModal(ticket.zone)"
                   class="px-4 py-2 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-md shadow"
                 >
@@ -138,7 +139,13 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useTicketData } from "@/composables/useTicketData";
 import ModalStadiumZoneSelector from "@/components/ModalStadiumZoneSelector.vue";
+import { useAuthStore } from "../stores/auth";
 
+const auth = useAuthStore();
+
+if (!auth.user) {
+  auth.loadUser();
+}
 const { locale, t } = useI18n();
 const router = useRouter();
 const scrollContainer = ref(null);

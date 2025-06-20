@@ -6,7 +6,7 @@
       class="relative w-full max-w-4xl aspect-square shadow-2xl rounded-xl overflow-hidden"
     >
       <img
-        src="/images/stage_steage.png"
+        src="/images/stadiumlast.png"
         alt="stadium background"
         class="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
       />
@@ -30,13 +30,13 @@
         <g v-for="zone in pageData.zones" :key="zone.id">
           <polygon
             :points="zone.points"
-            :fill="isSelected(zone) ? darken(zone.fill) : zone.fill"
-            :stroke="isSelected(zone) ? '#fff' : 'white'"
-            stroke-width="2"
+            fill="transparent"
+            stroke="transparent"
+            stroke-width="0"
             class="cursor-pointer transition duration-300"
-            :style="isSelected(zone) ? 'filter: url(#glow)' : ''"
             @click="selectZone(zone)"
           />
+
           <text
             :x="zone.labelX"
             :y="zone.labelY"
@@ -69,7 +69,7 @@ const pageData = reactive({
   zones: [
     {
       id: "back-left",
-      name: "BACK LEFT",
+      // name: "BACK LEFT",
       fill: "#ca8a04",
       labelX: 340,
       labelY: 130,
@@ -77,7 +77,7 @@ const pageData = reactive({
     },
     {
       id: "back-right",
-      name: "BACK RIGHT",
+      // name: "BACK RIGHT",
       fill: "#ea580c",
       labelX: 650,
       labelY: 130,
@@ -85,7 +85,7 @@ const pageData = reactive({
     },
     {
       id: "left",
-      name: "LEFT",
+      // name: "LEFT",
       fill: "#c2410c",
       labelX: 250,
       labelY: 400,
@@ -93,7 +93,7 @@ const pageData = reactive({
     },
     {
       id: "right",
-      name: "RIGHT",
+      // name: "RIGHT",
       fill: "#dc2626",
       labelX: 740,
       labelY: 400,
@@ -101,7 +101,7 @@ const pageData = reactive({
     },
     {
       id: "front-ringside",
-      name: "FRONT RINGSIDE",
+      // name: "FRONT RINGSIDE",
       fill: "#2563eb",
       labelX: 500,
       labelY: 750,
@@ -117,6 +117,13 @@ function darken(color) {
   const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - 40);
   const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - 40);
   return `rgb(${r},${g},${b})`;
+}
+function showFill(zone) {
+  // ถ้ายังไม่ได้เลือกอะไรเลย → ซ่อนไป
+  if (!pageData.selectedZone) return "transparent";
+
+  // ถ้าเลือกแล้ว → ให้ใช้สีเดิม
+  return zone;
 }
 
 function isSelected(zone) {
