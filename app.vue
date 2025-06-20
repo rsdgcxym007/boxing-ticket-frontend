@@ -1,16 +1,9 @@
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <NuxtUIProvider>
+    <NuxtLayout>
+      <UApp>
+        <NuxtPage />
+      </UApp>
+    </NuxtLayout>
+  </NuxtUIProvider>
 </template>
-
-<script setup>
-useHead({
-  meta: [
-    {
-      name: "viewport",
-      content: "width=device-width, initial-scale=1",
-    },
-  ],
-});
-</script>

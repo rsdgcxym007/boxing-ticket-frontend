@@ -7,9 +7,11 @@ export default defineNuxtConfig({
     "@/assets/css/main.css",
     "@fortawesome/fontawesome-free/css/all.min.css",
   ],
-  modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss"],
+  modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@nuxt/ui"],
+
   devtools: { enabled: false },
   ssr: false,
+
   i18n: {
     defaultLocale: "th",
     detectBrowserLanguage: false,

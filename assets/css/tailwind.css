@@ -1,5 +1,7 @@
 @import "./fonts.css"; /* ✅ ต้อง import font ก่อน */
 @tailwind utilities;
+@import "@nuxt/ui";
+
 @layer base {
   *,
   ::before,

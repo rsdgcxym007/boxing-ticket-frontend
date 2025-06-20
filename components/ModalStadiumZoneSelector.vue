@@ -161,12 +161,13 @@ import { useSeatApi } from "@/composables/useSeatApi";
 import { useOrder } from "@/composables/useOrder";
 import { useWebSocket } from "@/composables/useSocket";
 import { useToast } from "vue-toastification";
+import { buildSeatLayoutFromCoordinates } from "@/utils/buildSeatLayout";
 
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const pageData = usePageData();
-const { getSeatsByZone, getBookedSeats } = useSeatApi();
+const { getSeatsByZone, getSeatsByZoneId } = useSeatApi();
 const { submitOrder } = useOrder();
 const toast = useToast();
 
@@ -193,8 +194,14 @@ watch(
   async (show) => {
     const body = document.body;
     if (show && pageData.zoneKey) {
-      pageData.currentZoneSeats = await getSeatsByZone(pageData.zoneKey);
-      pageData.bookedSeats = await getBookedSeats();
+      //ยิงapiจริง
+      let allSeatsZoneId = await getSeatsByZoneId(pageData.zoneKey);
+
+      //ยิงmockที่ front
+      const allSezatsMock = await getSeatsByZone(pageData.zoneKey);
+
+      pageData.currentZoneSeats =
+        buildSeatLayoutFromCoordinates(allSeatsZoneId);
     } else {
       body.style.overflow = "";
       pageData.zoneKey = "";
@@ -258,6 +265,8 @@ const handleBuyTicket = async () => {
 
 // 🎯 Toggle seat selection
 const toggleSeat = (seat) => {
+  console.log("seat", seat);
+
   if (pageData.bookedSeats.includes(seat)) return;
   const index = pageData.selectedSeats.indexOf(seat);
   if (index === -1) {

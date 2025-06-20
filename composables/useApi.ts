@@ -4,78 +4,129 @@ export const useApi = () => {
   const config = useRuntimeConfig();
   const base = config.public.apiBase;
 
-  // Generic methods
-  const get = async (url: string) => {
-    const res = await fetch(`${base}${url}`);
-
-    const contentType = res.headers.get("content-type");
-    const isJson = contentType && contentType.includes("application/json");
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText);
+  // ดึง token จาก localStorage
+  const getToken = () => {
+    if (process.client) {
+      return localStorage.getItem("token") || "";
     }
-
-    if (isJson) {
-      return res.json();
-    } else {
-      const raw = await res.text();
-      console.warn("⚠️ Response is not JSON:", raw);
-      throw new Error("Invalid JSON format");
-    }
+    return "";
   };
 
+  // ตรวจสอบและจัดการ Response ทุกรูปแบบ
+  const handleResponse = async (res: Response) => {
+    const result = await res.json();
+
+    if (!res.ok || result.statusCode >= 400) {
+      throw new Error(result.message || "❌ Unknown error");
+    }
+
+    return result.data?.data ?? result.data;
+  };
+
+  // GET
+  const get = async (url: string) => {
+    const res = await fetch(`${base}${url}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return handleResponse(res);
+  };
+
+  // POST (JSON)
   const post = async (url: string, payload: any) => {
     const res = await fetch(`${base}${url}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
       body: JSON.stringify(payload),
     });
-
-    const result = await res.json();
-
-    if (!res.ok) {
-      throw new Error(result.message || "Unknown error");
-    }
-
-    return result;
+    return handleResponse(res);
   };
-  const patch = async (url: string, data: any) => {
+
+  // PATCH (JSON)
+  const patch = async (url: string, payload: any) => {
     const res = await fetch(`${base}${url}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    return handleResponse(res);
   };
 
+  // UPLOAD (FormData)
   const upload = async (url: string, formData: FormData) => {
     const res = await fetch(`${base}${url}`, {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
       body: formData,
     });
-    return res.json();
+    return handleResponse(res);
   };
 
-  // ✅ Custom methods
-  const createOrder = (formData: FormData) => upload("/orders", formData);
+  // DELETE (กรณีต้องใช้)
+  const remove = async (url: string) => {
+    const res = await fetch(`${base}${url}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return handleResponse(res);
+  };
 
-  const updateOrderStatus = (id: number, status: string) =>
-    patch(`/orders/${id}/status`, { status });
+  const createOrder = (payload: any) => post("/orders", payload);
+  const cancelOrder = (orderId: string) =>
+    patch(`/orders/cancel/${orderId}`, {});
+  const getOrderById = (orderId: string) => get(`/orders/${orderId}`);
+  const getAllOrders = () => get("/orders/list"); // optional
 
-  const getAllOrders = () => get("/orders/list");
+  // PAYMENT
+  const payWithCash = (payload: { orderId: string; amount: number }) =>
+    post("/payments/cash", payload);
 
-  const getQRCode = () => get("/orders/qrcode");
+  const generateQRCode = (payload: { orderId: string; amount: number }) =>
+    post("/payments/qr", payload);
+
+  const checkPaymentStatus = (paymentId: string) =>
+    get(`/payments/status/${paymentId}`);
+
+  // SEAT
+  const getSeatsByZone = (zoneId: string) => get(`/seats/by-zone/${zoneId}`);
+  const updateSeatStatus = (seatId: string, status: string) =>
+    patch(`/seats/${seatId}`, { status });
+
+  // REFERRER
+  const getAllReferrers = () => get("/referrers");
+  const getReferrerById = (id: string) => get(`/referrers/${id}`);
 
   return {
+    // generic
     get,
     post,
     patch,
     upload,
+    remove,
+
+    // custom
     createOrder,
-    updateOrderStatus,
+    cancelOrder,
+    getOrderById,
     getAllOrders,
-    getQRCode,
+    payWithCash,
+    generateQRCode,
+    checkPaymentStatus,
+    getSeatsByZone,
+    updateSeatStatus,
+    getAllReferrers,
+    getReferrerById,
   };
 };

@@ -33,6 +33,9 @@
               t("contact")
             }}</a>
           </li>
+          <li>
+            <a href="/login" class="hover:text-red-400">{{ "เข้าสู่ระบบ" }}</a>
+          </li>
         </ul>
         <button
           @click="toggleLang"
@@ -96,6 +99,9 @@
               t("contact")
             }}</a>
           </li>
+          <li>
+            <a href="/login" class="hover:text-red-400">{{ "เข้าสู่ระบบ" }}</a>
+          </li>
         </ul>
         <button
           @click="toggleLang"
@@ -111,9 +117,10 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
+
+const showLogin = ref(false);
 const { locale, t, setLocale } = useI18n();
 
-const isOpen = ref(false);
 const isDesktop = ref(false);
 
 const toggleLang = () => {

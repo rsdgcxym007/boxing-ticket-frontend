@@ -1,8 +1,16 @@
 import { useApi } from "../composables/useApi";
 import { useToast } from "vue-toastification";
+import { ZONE_IDS_BY_NAME } from "../utils/zoneEnums";
 const { get } = useApi();
 const toast = useToast();
 export function useSeatApi() {
+  const getSeatsByZoneId = async (zoneId: string) => {
+    const zoneIds = ZONE_IDS_BY_NAME[`${zoneId}`];
+    const allSeats = await get(`/seats/by-zone/${zoneIds}`);
+
+    return allSeats;
+  };
+
   const getSeatsByZone = async (zone: string) => {
     const seats = {
       "back-left": [
@@ -168,5 +176,6 @@ export function useSeatApi() {
   return {
     getSeatsByZone,
     getBookedSeats,
+    getSeatsByZoneId,
   };
 }
