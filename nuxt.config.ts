@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     "@/assets/css/main.css",
     "@fortawesome/fontawesome-free/css/all.min.css",
   ],
-  modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@pinia/nuxt"],
+  modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@pinia/nuxt", "@nuxt/ui"],
 
   devtools: { enabled: false },
   ssr: false,
