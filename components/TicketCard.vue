@@ -111,7 +111,7 @@
                   <p class="text-xl font-bold">฿{{ ticket.newPrice }}</p>
                 </div>
                 <button
-                  v-if="!['user'].includes(auth.user.role)"
+                  v-if="!['user'].includes(auth?.user?.role)"
                   @click="openZoneModal(ticket.zone)"
                   class="px-4 py-2 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-md shadow"
                 >
@@ -143,7 +143,7 @@ import { useAuthStore } from "../stores/auth";
 
 const auth = useAuthStore();
 
-if (!auth.user) {
+if (!auth?.user) {
   auth.loadUser();
 }
 const { locale, t } = useI18n();
