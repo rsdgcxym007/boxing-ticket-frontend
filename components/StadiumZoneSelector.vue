@@ -1,18 +1,21 @@
 <template>
   <div
-    class="relative w-full bg-gradient-to-b from-black via-zinc-900 to-black flex justify-center items-center overflow-hidden"
+    class="w-full bg-gradient-to-b from-black via-zinc-900 to-black flex flex-col items-center justify-center overflow-hidden px-4 py-6"
   >
+    <!-- ✅ หัวข้อคำอธิบาย -->
+    <div class="mb-4 text-center">
+      <h2 class="text-lg sm:text-xl font-semibold text-white">
+        เลือกโซนเพื่อจองที่นั่งสำหรับชมมวย
+      </h2>
+      <p class="text-sm text-gray-300 mt-1">
+        คลิกที่โซนใดก็ได้ในแผนผังด้านล่างเพื่อเริ่มต้นซื้อตั๋ว
+      </p>
+    </div>
+
+    <!-- ✅ ผังสนาม -->
     <div
       class="relative w-full max-w-4xl aspect-square shadow-2xl rounded-xl overflow-hidden"
     >
-      <div
-        class="absolute top-4 left-1/2 -translate-x-1/2 z-20 text-center bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-gray-200"
-      >
-        <p class="text-sm sm:text-base text-gray-800 font-semibold">
-          คลิกที่โซนที่ต้องการเพื่อเลือกที่นั่งและซื้อตั๋ว
-        </p>
-      </div>
-
       <img
         src="/images/stadiumlast.png"
         alt="stadium background"
@@ -44,7 +47,6 @@
             class="cursor-pointer transition duration-300"
             @click="selectZone(zone)"
           />
-
           <text
             :x="zone.labelX"
             :y="zone.labelY"
@@ -59,12 +61,14 @@
         </g>
       </svg>
     </div>
+
+    <!-- ✅ Modal Zone Selector -->
+    <ModalStadiumZoneSelector
+      :zoneKey="pageData.selectedZone"
+      :show="pageData.showZoneModal"
+      @close="pageData.showZoneModal = false"
+    />
   </div>
-  <ModalStadiumZoneSelector
-    :zoneKey="pageData.selectedZone"
-    :show="pageData.showZoneModal"
-    @close="pageData.showZoneModal = false"
-  />
 </template>
 
 <script setup>
