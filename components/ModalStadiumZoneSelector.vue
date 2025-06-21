@@ -88,59 +88,73 @@
                   ไม่ว่าง
                 </div>
               </div>
-
-              <div
-                v-if="pageData.selectedSeats.length"
-                class="text-center space-y-4"
-              >
-                <div class="text-sm text-gray-500 font-medium">
-                  {{ t("selectedSeats") }}
-                </div>
+              <Teleport to="body">
                 <div
-                  class="text-base sm:text-lg font-semibold text-blue-600 tracking-wide"
+                  v-if="pageData.selectedSeats.length"
+                  class="fixed bottom-4 w-full px-4 sm:px-6 z-50"
                 >
-                  {{
-                    pageData.selectedSeats
-                      .map((s) => s?.seatNumber || "—")
-                      .join(", ")
-                  }}
-                </div>
-
-                <div
-                  class="text-lg sm:text-xl font-bold text-blue-700 tracking-wide"
-                >
-                  {{ t("totalPrice") }}:
-                  <span class="text-cyan-500 font-bold">
-                    {{
-                      props.mode === "change"
-                        ? pageData.totalAmount
-                        : pageData.selectedSeats.length * 1800
-                    }}
-                  </span>
-                  <span class="ml-1 text-sm text-gray-500">{{
-                    t("baht")
-                  }}</span>
-                </div>
-
-                <div class="flex justify-center gap-3 flex-wrap pt-3">
-                  <button
-                    @click="onClose"
-                    class="px-5 py-2 text-blue-500 font-medium text-sm border border-blue-500 rounded-full hover:bg-blue-50 transition"
+                  <div
+                    class="w-full max-w-[90%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto bg-white border border-gray-300 rounded-2xl shadow-2xl px-6 py-5"
                   >
-                    {{ t("back") }}
-                  </button>
-                  <button
-                    @click="handleConfirm"
-                    class="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-medium text-sm rounded-full hover:opacity-90 shadow-md transition"
-                  >
-                    {{
-                      props.mode === "change"
-                        ? "ยืนยันเปลี่ยนที่นั่ง"
-                        : t("checkout")
-                    }}
-                  </button>
+                    <div class="text-center space-y-3">
+                      <p
+                        class="text-sm text-gray-600 tracking-wide font-medium"
+                      >
+                        ที่นั่งที่เลือก
+                      </p>
+
+                      <p
+                        class="text-xl font-semibold text-blue-600 tracking-wider"
+                      >
+                        {{
+                          pageData.selectedSeats
+                            .map((s) => s?.seatNumber || "—")
+                            .join(", ")
+                        }}
+                      </p>
+
+                      <p class="text-lg sm:text-xl font-semibold tracking-wide">
+                        <span class="text-blue-600">ราคารวม:</span>
+                        <span class="text-cyan-500">
+                          {{
+                            props.mode === "change"
+                              ? pageData.totalAmount
+                              : pageData.selectedSeats.length * 1800
+                          }}
+                        </span>
+                        <span class="ml-1 text-sm text-gray-500">บาท</span>
+                      </p>
+
+                      <div class="flex justify-center gap-3 flex-wrap pt-2">
+                        <button
+                          @click="onClose"
+                          class="min-w-[90px] px-4 py-2 border border-blue-500 text-blue-600 text-sm font-semibold rounded-full shadow-sm hover:bg-blue-50 transition-all"
+                        >
+                          ย้อนกลับ
+                        </button>
+
+                        <button
+                          @click="pageData.selectedSeats = []"
+                          class="min-w-[90px] px-4 py-2 border border-red-400 text-red-500 text-sm font-semibold rounded-full shadow-sm hover:bg-red-50 transition-all"
+                        >
+                          ยกเลิกทั้งหมด
+                        </button>
+
+                        <button
+                          @click="handleConfirm"
+                          class="min-w-[90px] px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition-all"
+                        >
+                          {{
+                            props.mode === "change"
+                              ? "ยืนยันเปลี่ยนที่นั่ง"
+                              : "ซื้อตั๋ว"
+                          }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </Teleport>
             </div>
           </div>
         </div>
