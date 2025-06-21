@@ -5,6 +5,14 @@
     <div
       class="relative w-full max-w-4xl aspect-square shadow-2xl rounded-xl overflow-hidden"
     >
+      <div
+        class="absolute top-4 left-1/2 -translate-x-1/2 z-20 text-center bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-gray-200"
+      >
+        <p class="text-sm sm:text-base text-gray-800 font-semibold">
+          คลิกที่โซนที่ต้องการเพื่อเลือกที่นั่งและซื้อตั๋ว
+        </p>
+      </div>
+
       <img
         src="/images/stadiumlast.png"
         alt="stadium background"
