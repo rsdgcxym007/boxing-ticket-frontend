@@ -44,21 +44,26 @@ const displayFormat = (date) => {
   ).padStart(2, "0")}-${d.getFullYear()}`;
 };
 
-// ✅ sync parent → display
+// sync parent → display (มีเช็คกันซ้ำ)
 watch(
   () => model.value,
   (val) => {
-    displayDate.value = val ? new Date(val) : null;
+    const newDate = val ? new Date(val) : null;
+    if (
+      !displayDate.value ||
+      newDate.getTime() !== new Date(displayDate.value).getTime()
+    ) {
+      displayDate.value = newDate;
+    }
   },
   { immediate: true }
 );
 
-// ✅ sync display → parent
+// sync display → parent (มีเช็คกันซ้ำ)
 watch(displayDate, (val) => {
-  if (val) {
-    model.value = new Date(val).toISOString().split("T")[0];
-  } else {
-    model.value = null;
+  const newVal = val ? new Date(val).toISOString().split("T")[0] : null;
+  if (newVal !== model.value) {
+    model.value = newVal;
   }
 });
 

@@ -28,10 +28,10 @@ export const useOrder = () => {
 
     try {
       const res = await post("/orders", payload);
-      toast.success("✅ สร้างออเดอร์สำเร็จ");
+      toast.success("สร้างออเดอร์สำเร็จ");
       return res;
     } catch (err: any) {
-      toast.error(`❌ สร้างออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
+      toast.error(`สร้างออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
       throw err;
     }
   };
@@ -41,9 +41,9 @@ export const useOrder = () => {
       await patch(`/orders/cancel/${orderId}`, {
         status: "CANCELLED",
       });
-      toast.info(`🛑 ยกเลิกออเดอร์ ${orderId} สำเร็จ`);
+      toast.info(`ยกเลิกออเดอร์ สำเร็จ`);
     } catch (err: any) {
-      toast.error(`❌ ยกเลิกออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
+      toast.error(`ยกเลิกออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
       throw err;
     }
   };
@@ -54,10 +54,10 @@ export const useOrder = () => {
         status: "PAID",
         ...(refCode && { referrerCode: refCode }),
       });
-      toast.success(`💰 ชำระเงินออเดอร์ ${orderId} สำเร็จ`);
+      toast.success(`ชำระเงินออเดอร์ ${orderId} สำเร็จ`);
     } catch (err: any) {
       toast.error(
-        `❌ ชำระเงินล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
+        `ชำระเงินล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
       );
       throw err;
     }

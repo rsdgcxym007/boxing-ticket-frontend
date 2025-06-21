@@ -17,7 +17,7 @@ export const useApi = () => {
     const result = await res.json();
 
     if (!res.ok || result.statusCode >= 400) {
-      throw new Error(result.message || "❌ Unknown error");
+      throw new Error(result.message || "Unknown error");
     }
 
     return result.data?.data ?? result.data;

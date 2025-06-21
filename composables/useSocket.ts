@@ -44,14 +44,14 @@ export const useWebSocket = (
     });
 
     socket.on("order-cancelled", (data: dataDto) => {
-      toast.warning(
-        `⏰ คำสั่งซื้อ ${data.orderId} Zone ${data.zone}  ที่นั่ง ${data.seats} นี้หมดเวลาและถูกยกเลิก`
-      );
+      // toast.warning(
+      //   `⏰ คำสั่งซื้อ ${data.orderId} Zone ${data.zone}  ที่นั่ง ${data.seats} นี้หมดเวลาและถูกยกเลิก`
+      // );
       onOrderCancelled?.(data.orderId);
     });
 
     socket.on("order-created", (data: dataDto) => {
-      toast.warning(`⏰ Zone ${data.zone}  ที่นั่ง ${data.seats} ถูกจองแล้ว`);
+      // toast.warning(`⏰ Zone ${data.zone}  ที่นั่ง ${data.seats} ถูกจองแล้ว`);
       onOrderCancelled?.(data.orderId);
     });
 
@@ -60,7 +60,7 @@ export const useWebSocket = (
     });
 
     socket.on("connect_error", (err) => {
-      console.error("❌ WebSocket error:", err.message);
+      console.error("WebSocket error:", err.message);
     });
   };
 

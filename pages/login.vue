@@ -100,10 +100,10 @@ const login = async () => {
     localStorage.setItem("token", data.access_token);
     localStorage.setItem("user", JSON.stringify(data.user));
 
-    toast.success("✅ เข้าสู่ระบบสำเร็จ");
+    toast.success("เข้าสู่ระบบสำเร็จ");
     router.push("/");
   } catch (err: any) {
-    toast.error(`❌ ${err.message || "เข้าสู่ระบบล้มเหลว"}`);
+    toast.error(`${err.message || "เข้าสู่ระบบล้มเหลว"}`);
   } finally {
     pageData.loading = false;
   }

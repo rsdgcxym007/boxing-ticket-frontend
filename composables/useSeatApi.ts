@@ -5,17 +5,23 @@ const { get } = useApi();
 const toast = useToast();
 export function useSeatApi() {
   const getSeatsByZoneId = async (zoneId: string, showDate: string | Date) => {
-    const zoneIds = ZONE_IDS_BY_NAME[`${zoneId}`];
-    const localDate = new Date(showDate);
-    const yyyy = localDate.getFullYear();
-    const mm = String(localDate.getMonth() + 1).padStart(2, "0");
-    const dd = String(localDate.getDate()).padStart(2, "0");
-    const formattedDate = `${yyyy}-${mm}-${dd}`;
+    try {
+      const zoneIds = ZONE_IDS_BY_NAME[`${zoneId}`];
+      const localDate = new Date(showDate);
+      const yyyy = localDate.getFullYear();
+      const mm = String(localDate.getMonth() + 1).padStart(2, "0");
+      const dd = String(localDate.getDate()).padStart(2, "0");
+      const formattedDate = `${yyyy}-${mm}-${dd}`;
 
-    const allSeats = await get(
-      `/seats/by-zone/${zoneIds}?showDate=${formattedDate}`
-    );
-    return allSeats;
+      const allSeats = await get(
+        `/seats/by-zone/${zoneIds}?showDate=${formattedDate}`
+      );
+
+      return allSeats;
+    } catch (error: any) {
+      toast.error(`โหลดที่นั่งล้มเหลว: ${error?.message || "Unknown error"}`);
+      return [];
+    }
   };
 
   const getSeatsByZone = async (zone: string) => {
@@ -173,9 +179,9 @@ export function useSeatApi() {
       return data || [];
     } catch (err: any) {
       toast.error(
-        `❌ โหลดที่นั่งที่ถูกจองล้มเหลว: ${err.message || "Unknown error"}`
+        `โหลดที่นั่งที่ถูกจองล้มเหลว: ${err.message || "Unknown error"}`
       );
-      console.error("❌ getBookedSeats error:", err);
+      console.error("getBookedSeats error:", err);
       return [];
     }
   };

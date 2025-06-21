@@ -109,12 +109,15 @@
             <a href="/login" class="hover:text-red-400">{{ "เข้าสู่ระบบ" }}</a>
           </li>
         </ul>
-        <button
-          @click="logout"
-          class="mt-4 px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
-        >
-          ออกจากระบบ
-        </button>
+        <div>
+          <button
+            @click="logout"
+            class="mt-4 px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
+          >
+            ออกจากระบบ
+          </button>
+        </div>
+
         <button
           @click="toggleLang"
           class="mt-4 px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
@@ -132,7 +135,7 @@ import { useI18n } from "vue-i18n";
 
 const showLogin = ref(false);
 const { locale, t, setLocale } = useI18n();
-
+const isOpen = ref(false);
 const isDesktop = ref(false);
 
 const toggleLang = () => {
@@ -141,6 +144,7 @@ const toggleLang = () => {
 
 const updateScreen = () => {
   isDesktop.value = window.innerWidth >= 768;
+  console.log("isDesktop.value", isDesktop.value);
 };
 const logout = () => {
   localStorage.removeItem("token");

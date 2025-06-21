@@ -7,10 +7,10 @@
         @click.self="onClose"
       >
         <div
-          class="flex justify-center items-start min-h-screen p-4 sm:p-6 md:p-10"
+          class="flex justify-center items-start p-4 sm:p-6 md:p-10 h-[1000px]"
         >
           <div
-            class="w-full max-w-[90%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-10 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+            class="w-full h-[80%] max-w-[90%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-10 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
           >
             <div class="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 border-b">
               <button
@@ -35,6 +35,7 @@
                 <DatePicker
                   v-model="pageData.showDate"
                   placeholder="เลือกวันที่"
+                  @update:modelValue="handleDateChange"
                 />
               </div>
             </div>
@@ -187,47 +188,66 @@ watch(
   { immediate: true }
 );
 
-watch(
-  () => pageData.showSeatModal,
-  async (show) => {
-    pageData.loading = true;
-    if (show && pageData.zoneKey) {
-      const allSeats = await getSeatsByZoneId(
-        pageData.zoneKey,
-        pageData.showDate
-      );
-      pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
-    } else {
-      document.body.style.overflow = "";
-      pageData.zoneKey = "";
-      pageData.selectedSeats = [];
-    }
-    pageData.loading = false;
-  }
-);
+let modalHasLoaded = false;
 
-watch(
-  () => pageData.showDate,
-  async (showDate) => {
-    pageData.loading = true;
-    const allSeats = await getSeatsByZoneId(
-      pageData.zoneKey,
-      new Date(showDate)
-    );
+watchEffect(async () => {
+  const show = pageData.showSeatModal;
+  const zone = pageData.zoneKey;
+  const date = pageData.showDate;
+
+  if (!show || !zone || !date) {
+    modalHasLoaded = false;
+    return;
+  }
+
+  if (modalHasLoaded) return;
+  modalHasLoaded = true;
+
+  pageData.loading = true;
+  try {
+    const allSeats = await getSeatsByZoneId(zone, date);
     pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
+  } catch (err) {
+    console.error("โหลดที่นั่งล้มเหลว:", err);
+  } finally {
     pageData.loading = false;
   }
-);
+});
+
+let prevDateTime = null;
+
+const handleDateChange = async (newDate) => {
+  const newTime = new Date(newDate).getTime();
+  if (newTime === prevDateTime) return;
+  prevDateTime = newTime;
+
+  if (!pageData.zoneKey) return;
+
+  pageData.loading = true;
+  try {
+    const allSeats = await getSeatsByZoneId(pageData.zoneKey, newDate);
+    pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
+  } catch (error) {
+    console.error("❌ โหลดที่นั่งล้มเหลว:", error);
+  } finally {
+    pageData.loading = false;
+  }
+};
 
 onMounted(() => {
   pageData.loading = true;
   pageData.selectedSeats = [];
-  if (props.mode === "change" && props.orderData) {
-    pageData.selectedSeats = props.orderData.seats;
-    pageData.showDate = props.orderData.showDate;
-    pageData.totalAmount = props.orderData.total;
+  try {
+    if (props.mode === "change" && props.orderData) {
+      pageData.selectedSeats = props.orderData.seats;
+      pageData.showDate = props.orderData.showDate;
+      pageData.totalAmount = props.orderData.total;
+    }
+  } catch (error) {
+    console.log("error", error);
+  } finally {
+    pageData.loading = false;
   }
-  pageData.loading = false;
 });
 
 onBeforeUnmount(() => {
@@ -235,6 +255,7 @@ onBeforeUnmount(() => {
 });
 
 const onClose = () => {
+  pageData.resetPageData();
   pageData.showSeatModal = false;
 };
 
@@ -253,7 +274,6 @@ const handleConfirm = async () => {
       pageData.orderId = order.id;
       pageData.totalAmount = order.total;
       pageData.showSummaryModal = true;
-      console.log("pageData", pageData.showSummaryModal);
     } catch (err) {
       toast.error(err?.message || "เกิดข้อผิดพลาดในการสั่งซื้อ");
     }

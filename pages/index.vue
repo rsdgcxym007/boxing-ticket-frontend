@@ -6,9 +6,9 @@
       <HeroBanner />
     </AnimatedSection>
 
-    <AnimatedSection>
+    <!-- <AnimatedSection>
       <TicketCard />
-    </AnimatedSection>
+    </AnimatedSection> -->
 
     <AnimatedSection>
       <StadiumZoneSelector />

@@ -273,7 +273,6 @@ const isValid = computed(() =>
 const onCancel = async () => {
   try {
     await cancelOrder(props.dataZoneSelected.orderId);
-    toast.warning(t("summary.cancelled"));
   } catch (err) {
     console.error("Cancel Error", err);
     toast.error(t("summary.cancelError"));
@@ -289,15 +288,15 @@ const submitOrders = async () => {
       pageData.referrerCode
     );
     submitted.value = true;
-    pageData.resetPageData();
     router.push({
       path: "/confirmation",
       query: {
         zone: pageData.zoneKey,
-        seats: pageData.selectedSeats.join(","),
+        seats: pageData.selectedSeats.map((s) => s.seatNumber).join(","),
         total: pageData.total,
       },
     });
+    pageData.resetPageData();
   } catch (e) {
     toast.error(t("summary.submitError"));
     console.error("Submit Error:", e);
