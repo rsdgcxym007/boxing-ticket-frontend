@@ -50,7 +50,7 @@
 
             <div class="flex-1 overflow-auto p-6 space-y-6">
               <div class="w-full">
-                <div class="flex flex-col items-center gap-4 min-w-[400px]">
+                <div class="flex flex-col items-center gap-4 min-w-[500px]">
                   <div
                     v-for="(row, i) in pageData.currentZoneSeats"
                     :key="i"
