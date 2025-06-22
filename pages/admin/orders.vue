@@ -181,13 +181,25 @@
           :total="pageData.totalCount"
           :perPage="pageData.limit"
           @update:page="onPageChange"
+          @change-seats="onChangeSeats"
+          @update-status="onUpdateStatus"
+          @cancel-order="onCancelOrder"
         />
       </div>
     </div>
   </div>
+  <ModalStadiumZoneSelector
+    v-if="pageData.showZoneModal"
+    :zoneKey="pageData.selectedZone"
+    :show="pageData.showZoneModal"
+    @close="pageData.showZoneModal = false"
+    :orderData="orderData"
+    mode="change"
+  />
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { reactive, onMounted } from "vue";
 import { useDebounceFn } from "@vueuse/core";
@@ -203,7 +215,8 @@ import { ZONE_IDS_BY_NAME } from "~~/utils/zoneEnums";
 const menuItems = useAdminMenu();
 const pageData = usePageData();
 const route = useRoute();
-
+const orderData = reactive({});
+const { cancelOrder } = useOrder();
 const collapsed = ref(false);
 
 const getZoneLabel = (value) => {
@@ -238,6 +251,22 @@ const fetchData = async () => {
     pageData.loading = false;
   }
 };
+const onChangeSeats = (order) => {
+  Object.assign(orderData, order);
+  pageData.selectedZone = order.zoneName;
+  pageData.showZoneModal = true;
+};
+
+const onUpdateStatus = (order) => {
+  Object.assign(orderData, order);
+  pageData.selectedZone = order.zoneName;
+  pageData.showZoneModal = true;
+};
+
+const onCancelOrder = async (order) => {
+  await cancelOrder(order.id);
+  fetchData();
+};
 
 const onOrderIdChange = useDebounceFn(() => {
   pageData.page = 1;
@@ -260,7 +289,7 @@ const onPageChange = (p) => {
 };
 
 const handleResize = () => {
-  collapsed.value = window.innerWidth < 768; // auto collapse on small screens
+  collapsed.value = window.innerWidth < 768;
 };
 onMounted(() => {
   handleResize();

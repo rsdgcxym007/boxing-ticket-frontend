@@ -35,6 +35,7 @@ export const usePageData = defineStore("pageData", {
       { name: "ทั้งหมด", value: "" },
       { name: "ชำระแล้ว", value: "PAID" },
       { name: "จองแล้ว", value: "BOOKED" },
+      { name: "รอดำเนินการ", value: "PENDING" },
       { name: "ยกเลิก", value: "CANCELLED" },
     ],
     zoneOptions: [
@@ -60,6 +61,7 @@ export const usePageData = defineStore("pageData", {
     topCustomers: [],
     topReferrers: [],
     orderStatusCounts: {},
+    CheckLimitChatSeat: 0,
   }),
 
   actions: {
@@ -72,6 +74,7 @@ export const usePageData = defineStore("pageData", {
       this.loading = false;
       this.showSummaryModal = false;
       this.zoneKey = "";
+      this.selectedZone = "";
       this.showDate = `${yyyy}-${mm}-${dd}`;
       this.showSeatModal = false;
       this.showPaymentModal = false;
@@ -84,6 +87,7 @@ export const usePageData = defineStore("pageData", {
       this.method = "";
       this.referrerCode = "";
       this.total = 0;
+      this.CheckLimitChatSeat = 0;
     },
   },
 });

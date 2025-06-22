@@ -41,12 +41,14 @@ export const useOrder = () => {
     total,
     showDate,
     method,
+    status,
   }: {
     userId: string;
     seatIds: string[];
     total: number;
     showDate: string;
     method: string;
+    status: string;
   }) => {
     const payload = {
       userId,
@@ -54,6 +56,7 @@ export const useOrder = () => {
       showDate,
       total,
       method,
+      status,
     };
 
     try {
@@ -93,5 +96,58 @@ export const useOrder = () => {
     }
   };
 
-  return { submitOrder, cancelOrder, markAsPaidWithRef, getOrders };
+  const changeSeats = async (
+    orderId: string,
+    newSeatIds: string[],
+    showDate: string
+  ) => {
+    console.log(orderId, newSeatIds, showDate);
+
+    try {
+      await patch(`/orders/change-seats/${orderId}`, {
+        seatIds: newSeatIds,
+        showDate,
+      });
+
+      toast.success(`เปลี่ยนที่นั่งออเดอร์ ${orderId} สำเร็จ`);
+    } catch (err: any) {
+      toast.error(
+        `เปลี่ยนที่นั่งล้มเหลว: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  const updateOrderBooked = async (
+    orderId: string,
+    newSeatIds: string[],
+    showDate: string
+  ) => {
+    console.log(orderId, newSeatIds, showDate);
+
+    try {
+      const data = await patch(`/orders/update-booked/${orderId}`, {
+        seatIds: newSeatIds,
+        showDate,
+      });
+      toast.success(`อัพเดท ${orderId} สำเร็จ`);
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `อัพเดทล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
+      );
+      throw err;
+    }
+  };
+
+  return {
+    submitOrder,
+    cancelOrder,
+    markAsPaidWithRef,
+    getOrders,
+    changeSeats,
+    updateOrderBooked,
+  };
 };

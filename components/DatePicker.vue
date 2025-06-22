@@ -10,6 +10,7 @@
       :format="displayFormat"
       :auto-apply="true"
       :enable-time-picker="false"
+      :clearable="false"
       :id="id"
       input-class-name="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
       placeholder="เลือกวันที่"

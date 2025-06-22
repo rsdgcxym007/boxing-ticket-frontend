@@ -60,7 +60,6 @@
       </svg>
     </div>
 
-    <!-- ✅ Modal Zone Selector -->
     <ModalStadiumZoneSelector
       :zoneKey="pageData.selectedZone"
       :show="pageData.showZoneModal"

@@ -32,11 +32,19 @@
 
             <div class="flex justify-center px-6 pt-4">
               <div class="w-full max-w-xs sm:max-w-sm md:max-w-md p-4">
-                <DatePicker
-                  v-model="pageData.showDate"
-                  placeholder="เลือกวันที่"
-                  @update:modelValue="handleDateChange"
+                <ZoneSelect
+                  v-model="pageData.zoneKey"
+                  :options="pageData.zoneOptions"
+                  label="ค้นหาโซน"
+                  @update:modelValue="onZoneChange"
                 />
+                <div class="mt-4">
+                  <DatePicker
+                    v-model="pageData.showDate"
+                    placeholder="เลือกวันที่"
+                    @update:modelValue="handleDateChange"
+                  />
+                </div>
               </div>
             </div>
 
@@ -180,7 +188,7 @@ const { t } = useI18n();
 const router = useRouter();
 const pageData = usePageData();
 const { getSeatsByZoneId } = useSeatApi();
-const { submitOrder } = useOrder();
+const { submitOrder, changeSeats, updateOrderBooked } = useOrder();
 const toast = useToast();
 const auth = useAuthStore();
 if (!auth.user) auth.loadUser();
@@ -229,17 +237,12 @@ watchEffect(async () => {
   }
 });
 
-let prevDateTime = null;
-
 const handleDateChange = async (newDate) => {
-  const newTime = new Date(newDate).getTime();
-  if (newTime === prevDateTime) return;
-  prevDateTime = newTime;
-
   if (!pageData.zoneKey) return;
 
   pageData.loading = true;
   try {
+    pageData.selectedSeats = [];
     const allSeats = await getSeatsByZoneId(pageData.zoneKey, newDate);
     pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
   } catch (error) {
@@ -254,9 +257,11 @@ onMounted(() => {
   pageData.selectedSeats = [];
   try {
     if (props.mode === "change" && props.orderData) {
-      pageData.selectedSeats = props.orderData.seats;
+      // pageData.selectedSeats = props.orderData.seats;
       pageData.showDate = props.orderData.showDate;
       pageData.totalAmount = props.orderData.total;
+      pageData.showDate = props.orderData.showDate;
+      console.log("props.orderData", props.orderData);
     }
   } catch (error) {
     console.log("error", error);
@@ -264,6 +269,11 @@ onMounted(() => {
     pageData.loading = false;
   }
 });
+
+const onZoneChange = async () => {
+  const allSeats = await getSeatsByZoneId(pageData.zoneKey, pageData.showDate);
+  pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
+};
 
 onBeforeUnmount(() => {
   document.body.style.overflow = "";
@@ -275,37 +285,78 @@ const onClose = () => {
 };
 
 const handleConfirm = async () => {
-  if (!pageData.selectedSeats.length)
+  if (
+    pageData.selectedSeats.length > props.orderData?.seatBookings?.length &&
+    props.mode === "change" &&
+    props.orderData.status === "PAID"
+  ) {
+    return toast.warning("ไม่สามารถเลือกเกินกว่าที่เคยซื้อได้");
+  }
+  if (!pageData.selectedSeats.length && props.mode === "booking") {
     return toast.warning("กรุณาเลือกที่นั่งก่อน");
+  }
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  const showDateStr = new Date(pageData.showDate).toISOString().split("T")[0];
+
+  const orderPayload = {
+    userId: auth.user.providerId,
+    seatIds: pageData.selectedSeats.map((s) => s.id),
+    total: pageData.selectedSeats.length,
+    showDate: pageData.showDate,
+    method: "CASH",
+    status: showDateStr === todayStr ? "PENDING" : "BOOKED",
+  };
+
   if (props.mode === "booking") {
     try {
-      const order = await submitOrder({
-        userId: auth.user.providerId,
-        seatIds: pageData.selectedSeats.map((s) => s.id),
-        total: pageData.selectedSeats.length,
-        showDate: pageData.showDate,
-        method: "CASH",
-      });
-      pageData.orderId = order.id;
-      pageData.totalAmount = order.total;
-      pageData.showSummaryModal = true;
+      pageData.loading = true;
+      const order = await submitOrder(orderPayload);
+
+      if (orderPayload.status === "PENDING") {
+        // วันนี้
+        pageData.orderId = order.id;
+        pageData.totalAmount = order.total;
+        pageData.showSummaryModal = true;
+      } else {
+        // ล่วงหน้า
+        pageData.resetPageData();
+        toast.success("จองล่วงหน้าเรียบร้อยแล้ว");
+      }
     } catch (err) {
       toast.error(err?.message || "เกิดข้อผิดพลาดในการสั่งซื้อ");
+    } finally {
+      pageData.loading = false;
     }
   } else if (props.mode === "change") {
-    try {
-      await $fetch("/api/orders/change-seats", {
-        method: "PATCH",
-        body: {
-          orderId: props.orderData.id,
-          newSeatIds: pageData.selectedSeats.map((s) => s.id),
-          showDate: pageData.showDate,
-        },
-      });
-      toast.success("เปลี่ยนที่นั่งเรียบร้อยแล้ว");
-      pageData.showSeatModal = false;
-    } catch (err) {
-      toast.error("ไม่สามารถเปลี่ยนที่นั่งได้");
+    if (props.orderData.status === "PAID") {
+      try {
+        await changeSeats(
+          props.orderData.id,
+          pageData.selectedSeats.map((s) => s.id),
+          pageData.showDate
+        );
+        pageData.resetPageData();
+        pageData.showSeatModal = false;
+      } catch (err) {
+        toast.error("ไม่สามารถเปลี่ยนที่นั่งได้");
+      }
+    } else {
+      try {
+        const order = await updateOrderBooked(
+          props.orderData.id,
+          pageData.selectedSeats.map((s) => s.id),
+          pageData.showDate
+        );
+        console.log("order", order);
+
+        pageData.showSeatModal = false;
+        pageData.orderId = order.id;
+        pageData.totalAmount = order.total;
+        pageData.selectedSeats = order.seats;
+
+        pageData.showSummaryModal = true;
+      } catch (err) {}
     }
   }
 };
@@ -313,6 +364,14 @@ const handleConfirm = async () => {
 const toggleSeat = (seat) => {
   if (pageData.bookedSeats.includes(seat)) return;
   const index = pageData.selectedSeats.indexOf(seat);
+  if (
+    pageData.selectedSeats.length >= props.orderData?.seatBookings?.length &&
+    props.mode === "change" &&
+    props.orderData.status === "PAID"
+  ) {
+    return toast.warning("ไม่สามารถเลือกเกินกว่าที่เคยซื้อได้");
+  }
+
   if (index === -1) {
     if (pageData.selectedSeats.length >= 10)
       return toast.warning("กรุณาเลือกไม่เกิน 10 ที่นั่ง");

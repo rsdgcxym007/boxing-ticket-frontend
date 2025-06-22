@@ -18,7 +18,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   ssr: false,
   imports: {
-    dirs: ["composables", "stores", "components", "utils"],
+    dirs: ["composables", "stores", "components", "utils", "vue-i18n"],
   },
 
   i18n: {

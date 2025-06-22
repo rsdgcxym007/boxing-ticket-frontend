@@ -1,5 +1,6 @@
 <template>
   <div class="space-y-4">
+    <!-- No orders -->
     <div
       v-if="orders.length === 0"
       class="text-center py-12 text-gray-400 text-dynamic"
@@ -7,6 +8,7 @@
       ไม่พบออเดอร์ตามที่ค้นหา
     </div>
 
+    <!-- Order list -->
     <div
       v-for="order in orders"
       :key="order.id"
@@ -51,8 +53,43 @@
           {{ order.total?.toLocaleString() }} บาท
         </p>
       </div>
+
+      <!-- Action Buttons -->
+      <div
+        :class="[
+          'mt-4 gap-2 w-full',
+          isMobile ? 'flex flex-col' : 'flex justify-end items-center flex-row',
+        ]"
+      >
+        <!-- ปุ่มเปลี่ยนที่นั่ง -->
+        <button
+          v-if="order.status === 'PAID'"
+          class="px-4 py-2 border border-blue-500 text-blue-600 rounded-lg flex items-center gap-2 justify-center w-full md:w-auto hover:bg-blue-100 hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out"
+          @click="$emit('change-seats', order)"
+        >
+          เปลี่ยนที่นั่ง
+        </button>
+
+        <!-- ปุ่มอัปเดตสถานะ -->
+        <button
+          v-if="order.status === 'BOOKED'"
+          class="px-4 py-2 border border-purple-500 text-purple-600 rounded-lg flex items-center gap-2 justify-center w-full md:w-auto hover:bg-purple-100 hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out"
+          @click="$emit('update-status', order)"
+        >
+          อัปเดตสถานะ
+        </button>
+
+        <button
+          v-if="order.status === 'PENDING'"
+          class="px-4 py-2 border border-purple-500 text-purple-600 rounded-lg flex items-center gap-2 justify-center w-full md:w-auto hover:bg-purple-100 hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out"
+          @click="$emit('cancel-order', order)"
+        >
+          ยกเลิก
+        </button>
+      </div>
     </div>
 
+    <!-- Pagination -->
     <div
       v-if="orders.length > 0"
       class="flex flex-col items-center justify-center gap-3 pt-6"
@@ -107,7 +144,11 @@ const props = defineProps({
   total: Number,
   perPage: Number,
 });
+const isMobile = ref(false);
 
+const handleResize = () => {
+  isMobile.value = window.innerWidth < 768;
+};
 const totalPages = computed(() =>
   props.total && props.perPage ? Math.ceil(props.total / props.perPage) : 1
 );
@@ -148,13 +189,13 @@ const statusClass = (status) => {
 const statusText = (status) => {
   switch (status) {
     case "PAID":
-      return "✅ ชำระแล้ว";
+      return "PAID";
     case "BOOKED":
-      return "📝 จองแล้ว";
+      return "BOOKED";
     case "CANCELLED":
-      return "❌ ยกเลิก";
+      return "CANCELLED";
     default:
-      return status;
+      return status || "-";
   }
 };
 
@@ -163,4 +204,13 @@ const formatDate = (dateStr) => {
   const date = new Date(dateStr);
   return date.toISOString().split("T")[0];
 };
+
+onMounted(() => {
+  handleResize();
+  window.addEventListener("resize", handleResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleResize);
+});
 </script>
