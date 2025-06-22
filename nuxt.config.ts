@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     "@/assets/css/tailwind.css",
     "@/assets/css/main.css",
     "@fortawesome/fontawesome-free/css/all.min.css",
+    "@mdi/font/css/materialdesignicons.min.css",
   ],
   modules: [
     "@nuxtjs/i18n",
