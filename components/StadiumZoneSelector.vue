@@ -36,7 +36,7 @@
           </filter>
         </defs>
 
-        <g v-for="zone in pageData.zones" :key="zone.id">
+        <g v-for="zone in pageData.zones" :key="zone.id" class="cursor-pointer">
           <polygon
             :points="zone.points"
             fill="transparent"
