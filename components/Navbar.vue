@@ -89,37 +89,59 @@
     <transition name="slide-fade">
       <div
         v-if="isOpen"
-        class="md:hidden px-6 py-6 bg-black/90 backdrop-blur border-t border-white/10 shadow-lg"
+        class="md:hidden px-6 py-6 bg-[#0a172e]/95 backdrop-blur-md shadow-2xl rounded-b-xl border-t border-white/10"
       >
-        <ul class="flex flex-col gap-4 text-sm font-medium">
+        <!-- เมนูหลัก -->
+        <ul class="flex flex-col gap-4 text-base font-medium text-white">
           <li>
-            <a href="/" class="hover:text-red-400">{{ t("home") }}</a>
+            <a
+              href="/"
+              class="flex items-center gap-3 hover:text-blue-400 transition"
+            >
+              <i class="mdi mdi-home-outline text-lg"></i> หน้าหลัก
+            </a>
           </li>
           <li>
-            <a href="/contacts" class="hover:text-red-400">{{
-              t("contact")
-            }}</a>
-          </li>
-          <li v-if="!auth?.user">
-            <a href="/login" class="hover:text-red-400">เข้าสู่ระบบ</a>
+            <a
+              href="/contacts"
+              class="flex items-center gap-3 hover:text-blue-400 transition"
+            >
+              <i class="mdi mdi-email-outline text-lg"></i> ติดต่อเรา
+            </a>
           </li>
           <li v-if="auth?.user?.role === 'admin'">
-            <a href="/admin/dashboard" class="hover:text-red-400">หน้าแอดมิน</a>
+            <a
+              href="/admin/dashboard"
+              class="flex items-center gap-3 hover:text-blue-400 transition"
+            >
+              <i class="mdi mdi-shield-account-outline text-lg"></i> หน้าแอดมิน
+            </a>
+          </li>
+          <li v-if="!auth?.user">
+            <a
+              href="/login"
+              class="flex items-center gap-3 hover:text-blue-400 transition"
+            >
+              <i class="mdi mdi-login-variant text-lg"></i> เข้าสู่ระบบ
+            </a>
           </li>
         </ul>
 
-        <div class="mt-4 flex flex-col gap-2">
+        <!-- ปุ่มล่าง -->
+        <div class="mt-6 flex flex-col gap-3">
           <button
             v-if="auth?.user"
             @click="logout"
-            class="px-3 py-1 text-sm border rounded hover:bg-white hover:text-black transition"
+            class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-md border border-white/20 text-white hover:bg-white hover:text-black transition"
           >
-            ออกจากระบบ
+            <i class="mdi mdi-logout-variant text-base"></i> ออกจากระบบ
           </button>
+
           <button
             @click="toggleLang"
-            class="px-3 py-1 text-sm border rounded hover:bg-white hover:text-black transition"
+            class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-md border border-white/20 text-white hover:bg-white hover:text-black transition"
           >
+            <i class="mdi mdi-translate text-base"></i>
             {{ locale === "th" ? "EN" : "TH" }}
           </button>
         </div>
