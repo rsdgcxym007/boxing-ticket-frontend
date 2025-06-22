@@ -67,8 +67,8 @@ import { useRuntimeConfig } from "nuxt/app";
 const config = useRuntimeConfig();
 const base = config.public.apiBase;
 const pageData = reactive({
-  email: "newuser@gmail.com",
-  password: "secure123",
+  email: "admin@example.com",
+  password: "admin1234",
   loading: false,
 });
 

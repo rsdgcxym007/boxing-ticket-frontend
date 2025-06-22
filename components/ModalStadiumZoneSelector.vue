@@ -231,6 +231,11 @@ watchEffect(async () => {
     const allSeats = await getSeatsByZoneId(zone, date);
     pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
   } catch (err) {
+    if (!auth.user) {
+      pageData.showZoneModal = false;
+      router.push("/login");
+    }
+
     console.error("โหลดที่นั่งล้มเหลว:", err);
   } finally {
     pageData.loading = false;
@@ -261,7 +266,6 @@ onMounted(() => {
       pageData.showDate = props.orderData.showDate;
       pageData.totalAmount = props.orderData.total;
       pageData.showDate = props.orderData.showDate;
-      console.log("props.orderData", props.orderData);
     }
   } catch (error) {
     console.log("error", error);

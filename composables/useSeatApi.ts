@@ -3,6 +3,7 @@ import { useToast } from "vue-toastification";
 import { ZONE_IDS_BY_NAME } from "../utils/zoneEnums";
 const { get } = useApi();
 const toast = useToast();
+
 export function useSeatApi() {
   const getSeatsByZoneId = async (zoneId: string, showDate: string | Date) => {
     try {
@@ -21,6 +22,7 @@ export function useSeatApi() {
     } catch (error: any) {
       if (error?.message === "Unauthorized") {
         toast.warning(`กรุณาเข้าสู่ระบบเพื่อดําเนินการต่อ`);
+
         return;
       }
       console.log("error?.message", error?.message);
