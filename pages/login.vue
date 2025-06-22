@@ -44,8 +44,7 @@
         <span v-if="!pageData.loading">เข้าสู่ระบบ</span>
         <span v-else>กำลังโหลด...</span>
       </button>
-
-      <div class="text-center text-sm text-gray-500">
+      <!-- <div class="text-center text-sm text-gray-500">
         ยังไม่มีบัญชี?
         <NuxtLink
           to="/register"
@@ -53,7 +52,7 @@
         >
           สมัครสมาชิก
         </NuxtLink>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

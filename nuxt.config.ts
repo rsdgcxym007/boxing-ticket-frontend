@@ -34,6 +34,8 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      charset: "utf-8",
+      title: "PATONG BOXING",
       link: [
         {
           rel: "stylesheet",
