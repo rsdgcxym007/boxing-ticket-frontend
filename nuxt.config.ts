@@ -18,7 +18,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   ssr: false,
   imports: {
-    dirs: ["composables", "stores", "components"],
+    dirs: ["composables", "stores", "components", "utils"],
   },
 
   i18n: {

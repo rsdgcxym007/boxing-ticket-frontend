@@ -155,6 +155,7 @@ const updateScreen = () => {
 };
 
 onMounted(() => {
+  auth.loadUser();
   updateScreen();
   window.addEventListener("resize", updateScreen);
 });

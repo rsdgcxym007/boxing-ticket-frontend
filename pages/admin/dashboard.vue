@@ -37,16 +37,17 @@
         <SummaryCard
           icon="Ticket"
           label="ยอดขายรวม"
-          :value="pageData.totalSales"
+          :value="formatCurrency(pageData.totalSales)"
           sub="เดือนนี้: "
-          :subValue="pageData.monthSales"
+          :subValue="formatCurrency(pageData.monthSales)"
         />
+
         <SummaryCard
           icon="ShoppingCart"
           label="ออเดอร์"
-          :value="pageData.totalOrders"
+          :value="formatCurrency(pageData.totalOrders)"
           sub="ลูกค้า: "
-          :subValue="pageData.totalCustomers"
+          :subValue="formatCurrency(pageData.totalCustomers)"
         />
         <SummaryCard
           icon="Armchair"
@@ -79,7 +80,7 @@
             >
               <span>{{ sale.date }}</span>
               <span class="font-semibold"
-                >฿{{ sale.amount.toLocaleString() }}</span
+                >{{ formatCurrency(sale.amount) }} THB</span
               >
             </li>
           </ul>
@@ -95,7 +96,7 @@
             >
               <span>{{ method.method }}</span>
               <span class="font-semibold"
-                >฿{{ method.total.toLocaleString() }}</span
+                >{{ formatCurrency(method.total) }} THB</span
               >
             </li>
           </ul>
@@ -107,7 +108,7 @@
         <ChartCard title="Top Customers">
           <ul class="space-y-2 text-sm">
             <li v-for="c in pageData.topCustomers" :key="c.customer">
-              {{ c.customer }} - ฿{{ c.spent }}
+              {{ c.customer }} - {{ formatCurrency(c.spent) }} THB
             </li>
           </ul>
         </ChartCard>
@@ -115,8 +116,8 @@
         <ChartCard title="Top Referrers">
           <ul class="space-y-2 text-sm">
             <li v-for="r in pageData.topReferrers" :key="r.referrer">
-              {{ r.name }} ({{ r.referrer }}) - คอมมิชชัน ฿{{ r.commission }} /
-              {{ r.orders }} orders
+              {{ r.name }} ({{ r.referrer }}) - คอมมิชชัน
+              {{ formatCurrency(r.commission) }} / {{ r.orders }} orders
             </li>
           </ul>
         </ChartCard>
@@ -134,7 +135,7 @@
               class="flex justify-between"
             >
               <span>{{ status }}</span>
-              <span class="font-semibold">{{ count }}</span>
+              <span class="font-semibold">{{ formatCurrency(count) }}</span>
             </li>
           </ul>
         </ChartCard>
@@ -152,7 +153,7 @@
                   :style="{ width: (z.total / maxZoneTotal) * 100 + '%' }"
                 ></div>
               </div>
-              <span class="text-sm">฿{{ z.total }}</span>
+              <span class="text-sm">{{ formatCurrency(z.total) }} THB</span>
             </div>
           </div>
         </ChartCard>
@@ -179,30 +180,30 @@ import ChartCard from "@/components/dashboard/ChartCard.vue";
 import BarChart from "@/components/charts/BarChart.vue";
 import PieChart from "@/components/charts/PieChart.vue";
 import SidebarItem from "@/components/SidebarItem.vue";
-
+import { formatCurrency } from "@/utils/formatCurrency";
 const { t } = useI18n();
 const route = useRoute();
 const collapsed = ref(false);
 const menuItems = useAdminMenu();
 const { getDashbord } = useDashbord();
-
-const pageData = reactive({
-  totalSales: "฿0",
-  monthSales: "0 บาท",
-  totalOrders: 0,
-  totalCustomers: 0,
-  availableSeats: 0,
-  dailySales: [],
-  alerts: [],
-  nextShowDate: "",
-  nextShowAvailable: 0,
-  nextShowBooked: 0,
-  salesByZone: [],
-  salesByMethod: [],
-  topCustomers: [],
-  topReferrers: [],
-  orderStatusCounts: {},
-});
+const pageData = usePageData();
+// const pageData = reactive({
+//   totalSales: "0",
+//   monthSales: "0 บาท",
+//   totalOrders: 0,
+//   totalCustomers: 0,
+//   availableSeats: 0,
+//   dailySales: [],
+//   alerts: [],
+//   nextShowDate: "",
+//   nextShowAvailable: 0,
+//   nextShowBooked: 0,
+//   salesByZone: [],
+//   salesByMethod: [],
+//   topCustomers: [],
+//   topReferrers: [],
+//   orderStatusCounts: {},
+// });
 
 const maxAmount = computed(() =>
   Math.max(...pageData.dailySales.map((bar) => bar.amount || 0))
@@ -217,6 +218,7 @@ const handleResize = () => {
 };
 
 onMounted(async () => {
+  pageData.loading = true;
   handleResize();
   window.addEventListener("resize", handleResize);
   try {
@@ -224,6 +226,8 @@ onMounted(async () => {
     Object.assign(pageData, data);
   } catch (error) {
     console.error("❌ Dashboard fetch error:", error);
+  } finally {
+    pageData.loading = false;
   }
 });
 

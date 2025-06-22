@@ -12,5 +12,8 @@
 import { usePageData } from "@/stores/pageData";
 import Navbar from "@/components/Navbar.vue";
 import BaseLoading from "@/components/BaseLoading.vue";
+import { useAuthStore } from "@/stores/auth";
 const pageData = usePageData();
+const auth = useAuthStore();
+auth.loadUser();
 </script>

@@ -141,7 +141,6 @@ function isSelected(zone) {
 }
 
 const selectZone = async (zone) => {
-  console.log("zone", zone);
   pageData.selectedZone = "";
   await nextTick();
   pageData.selectedZone = zone.id;

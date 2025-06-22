@@ -39,9 +39,7 @@ export const useWebSocket = (
     socket = io(`${baseURL}`);
     isConnected = true;
 
-    socket.on("connect", () => {
-      console.log("✅ WebSocket connected");
-    });
+    socket.on("connect", () => {});
 
     socket.on("order-cancelled", (data: dataDto) => {
       // toast.warning(
@@ -70,7 +68,6 @@ export const useWebSocket = (
       socket = null;
       isConnected = false;
       handledOrderIds.clear();
-      console.log("🧹 Socket disconnected");
     }
   };
 

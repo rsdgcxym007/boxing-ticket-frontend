@@ -19,6 +19,12 @@ export function useSeatApi() {
 
       return allSeats;
     } catch (error: any) {
+      if (error?.message === "Unauthorized") {
+        toast.warning(`กรุณาเข้าสู่ระบบเพื่อดําเนินการต่อ`);
+        return;
+      }
+      console.log("error?.message", error?.message);
+
       toast.error(`โหลดที่นั่งล้มเหลว: ${error?.message || "Unknown error"}`);
       return [];
     }

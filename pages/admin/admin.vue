@@ -68,8 +68,6 @@ const { get, patch } = useApi();
 
 const loadOrders = async () => {
   const res = await get("/orders/list");
-
-  console.log(res);
   orders.value = res;
 };
 

@@ -21,9 +21,7 @@ const videoEl = ref(null);
 
 onMounted(() => {
   if (videoEl.value) {
-    videoEl.value.play().catch(() => {
-      console.warn("Autoplay prevented by browser");
-    });
+    videoEl.value.play().catch(() => {});
   }
 });
 </script>
