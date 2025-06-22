@@ -2,7 +2,6 @@
   <div
     class="w-full bg-gradient-to-b from-black via-zinc-900 to-black flex flex-col items-center justify-center overflow-hidden px-4 py-6"
   >
-    <!-- ✅ หัวข้อคำอธิบาย -->
     <div class="mb-4 text-center">
       <h2 class="text-lg sm:text-xl font-semibold text-white">
         เลือกโซนเพื่อจองที่นั่งสำหรับชมมวย
@@ -12,7 +11,6 @@
       </p>
     </div>
 
-    <!-- ✅ ผังสนาม -->
     <div
       class="relative w-full max-w-4xl aspect-square shadow-2xl rounded-xl overflow-hidden"
     >

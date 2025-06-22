@@ -65,7 +65,22 @@
     "awaitingReview": "Please wait for payment verification",
     "cancel": "Cancel",
     "confirmPayment": "Confirm Payment"
-  }
-    
-    
+  },
+    "dashboard": {
+      "title": "Dashboard",
+      "totalSales": "Total Sales",
+      "month": "This month",
+      "orders": "Orders",
+      "customers": "Customers",
+      "availableSeats": "Available Seats Today",
+      "today": "Today's Info",
+      "dailySales": "Daily Sales",
+      "alerts": "Alerts",
+      "nextShow": "Next Show",
+      "createNewShow": "Create New Show",
+      "manageShow": "Manage Show",
+      "nextShowAvailable": "Available Seats",
+      "nextShowBooked": "Booked Seats",
+      "paidOrder": "Order Paid Successfully"
+    }
   }

@@ -108,6 +108,20 @@
 
       <!-- Conditional Section -->
       <div v-if="pageData.method === 'cash'" class="mb-6">
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            ชื่อลูกค้า
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            v-model="pageData.customerName"
+            class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 shadow-inner"
+            placeholder="กรอกชื่อลูกค้า"
+            required
+          />
+        </div>
+
         <label class="block text-sm font-medium text-gray-700 mb-1">
           {{ t("summary.cashAmount") }}
         </label>
@@ -206,7 +220,8 @@ const config = useRuntimeConfig();
 const base = config.public.apiBase;
 
 const { requestQR } = useScb();
-const { submitOrder, cancelOrder, markAsPaidWithRef } = useOrder();
+const { cancelOrder, markAsPaidWithRef } = useOrder();
+const { createPayment } = usePayments();
 const { connectSocket, disconnectSocket } = useWebSocket("*");
 
 const props = defineProps({
@@ -282,11 +297,19 @@ const onCancel = async () => {
 };
 
 const submitOrders = async () => {
+  if (pageData.customerName.length === 0) {
+    toast.warning(t("Please enter the customer name before proceeding."));
+    return;
+  }
   try {
-    await markAsPaidWithRef(
-      props.dataZoneSelected.orderId,
-      pageData.referrerCode
-    );
+    await createPayment({
+      orderId: props.dataZoneSelected.orderId,
+      amount: pageData.total,
+      method: pageData.method.toUpperCase(),
+      customerName: pageData.customerName,
+      referrerCode: pageData.referrerCode || undefined,
+    });
+
     submitted.value = true;
     router.push({
       path: "/confirmation",

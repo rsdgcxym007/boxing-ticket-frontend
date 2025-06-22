@@ -64,6 +64,24 @@
           "awaitingReview": "กรุณารอเจ้าหน้าที่ตรวจสอบการชำระเงิน",
           "cancel": "ยกเลิก",
           "confirmPayment": "ยืนยันการชำระเงิน"
-        }
+        },
+          "dashboard": {
+            "title": "แดชบอร์ด",
+            "totalSales": "ยอดขายรวม",
+            "month": "เดือนนี้",
+            "orders": "ออเดอร์",
+            "customers": "ลูกค้า",
+            "availableSeats": "ที่นั่งว่างวันนี้",
+            "today": "ข้อมูลวันนี้",
+            "dailySales": "ยอดขายรายวัน",
+            "alerts": "การแจ้งเตือน",
+            "nextShow": "รอบถัดไป",
+            "createNewShow": "สร้างรอบใหม่",
+            "manageShow": "จัดการรอบแสดง",
+            "nextShowAvailable": "จำนวนที่นั่งว่าง",
+            "nextShowBooked": "จำนวนที่นั่งจองแล้ว",
+            "paidOrder": "ออเดอร์ ชำระเงินเรียบร้อย"
+          }
+        
       
 }

@@ -10,48 +10,49 @@
           alt="Patong Boxing Logo"
           class="w-8 h-8 md:w-10 md:h-10"
         />
-        <span class="text-lg md:text-xl font-bold tracking-wide">
-          <span class="text-white">PATONG</span
-          ><span class="text-green-400">BOXING</span>
+        <span class="text-base md:text-xl font-bold tracking-wide">
+          <span class="text-white">PATONG</span>
+          <span class="text-green-400">BOXING</span>
         </span>
       </div>
 
       <!-- Desktop Menu -->
-      <div v-if="isDesktop" class="flex items-center gap-8">
-        <ul class="flex gap-6 text-sm font-medium">
+      <div v-if="isDesktop" class="flex items-center gap-6">
+        <ul class="flex gap-6 text-sm md:text-base font-medium">
           <li>
             <a href="/" class="hover:text-red-400">{{ t("home") }}</a>
           </li>
-          <!-- <li>
-            <a href="#" class="hover:text-red-400">{{ t("stadium") }}</a>
-          </li>
-          <li>
-            <a href="#" class="hover:text-red-400">{{ t("training") }}</a>
-          </li> -->
           <li>
             <a href="/contacts" class="hover:text-red-400">{{
               t("contact")
             }}</a>
           </li>
-          <li>
-            <a href="/login" class="hover:text-red-400">{{ "เข้าสู่ระบบ" }}</a>
+          <li v-if="!auth?.user">
+            <a href="/login" class="hover:text-red-400">เข้าสู่ระบบ</a>
+          </li>
+          <li v-if="auth?.user?.role === 'admin'">
+            <a href="/admin/dashboard" class="hover:text-red-400">หน้าแอดมิน</a>
           </li>
         </ul>
-        <button
-          @click="logout"
-          class="px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
-        >
-          ออกจากระบบ
-        </button>
-        <button
-          @click="toggleLang"
-          class="px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
-        >
-          {{ locale === "th" ? "EN" : "TH" }}
-        </button>
+
+        <div class="flex gap-3">
+          <button
+            v-if="auth?.user"
+            @click="logout"
+            class="px-3 py-1 text-xs md:text-sm border rounded hover:bg-white hover:text-black transition"
+          >
+            ออกจากระบบ
+          </button>
+          <button
+            @click="toggleLang"
+            class="px-3 py-1 text-xs md:text-sm border rounded hover:bg-white hover:text-black transition"
+          >
+            {{ locale === "th" ? "EN" : "TH" }}
+          </button>
+        </div>
       </div>
 
-      <!-- Mobile Button -->
+      <!-- Mobile Menu Toggle -->
       <button class="md:hidden" @click="isOpen = !isOpen">
         <svg
           v-if="!isOpen"
@@ -94,36 +95,34 @@
           <li>
             <a href="/" class="hover:text-red-400">{{ t("home") }}</a>
           </li>
-          <!-- <li>
-            <a href="#" class="hover:text-red-400">{{ t("stadium") }}</a>
-          </li>
-          <li>
-            <a href="#" class="hover:text-red-400">{{ t("training") }}</a>
-          </li> -->
           <li>
             <a href="/contacts" class="hover:text-red-400">{{
               t("contact")
             }}</a>
           </li>
-          <li>
-            <a href="/login" class="hover:text-red-400">{{ "เข้าสู่ระบบ" }}</a>
+          <li v-if="!auth?.user">
+            <a href="/login" class="hover:text-red-400">เข้าสู่ระบบ</a>
+          </li>
+          <li v-if="auth?.user?.role === 'admin'">
+            <a href="/admin/dashboard" class="hover:text-red-400">หน้าแอดมิน</a>
           </li>
         </ul>
-        <div>
+
+        <div class="mt-4 flex flex-col gap-2">
           <button
+            v-if="auth?.user"
             @click="logout"
-            class="mt-4 px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
+            class="px-3 py-1 text-sm border rounded hover:bg-white hover:text-black transition"
           >
             ออกจากระบบ
           </button>
+          <button
+            @click="toggleLang"
+            class="px-3 py-1 text-sm border rounded hover:bg-white hover:text-black transition"
+          >
+            {{ locale === "th" ? "EN" : "TH" }}
+          </button>
         </div>
-
-        <button
-          @click="toggleLang"
-          class="mt-4 px-3 py-1 border rounded text-xs hover:bg-white hover:text-black transition"
-        >
-          {{ locale === "th" ? "EN" : "TH" }}
-        </button>
       </div>
     </transition>
   </nav>
@@ -132,9 +131,11 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
+import { useAuthStore } from "@/stores/auth";
 
-const showLogin = ref(false);
 const { locale, t, setLocale } = useI18n();
+const auth = useAuthStore();
+
 const isOpen = ref(false);
 const isDesktop = ref(false);
 
@@ -142,19 +143,22 @@ const toggleLang = () => {
   setLocale(locale.value === "th" ? "en" : "th");
 };
 
-const updateScreen = () => {
-  isDesktop.value = window.innerWidth >= 768;
-  console.log("isDesktop.value", isDesktop.value);
-};
 const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
+  auth.logout(); // สมมุติคุณมีฟังก์ชันนี้ใน store
   window.location.href = "/login";
 };
+
+const updateScreen = () => {
+  isDesktop.value = window.innerWidth >= 768;
+};
+
 onMounted(() => {
   updateScreen();
   window.addEventListener("resize", updateScreen);
 });
+
 onBeforeUnmount(() => {
   window.removeEventListener("resize", updateScreen);
 });

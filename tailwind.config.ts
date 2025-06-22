@@ -12,6 +12,9 @@ const config: Config = {
       fontFamily: {
         sans: ["Anuphan", "sans-serif"],
       },
+      fontSize: {
+        dynamic: "clamp(0.875rem, 1vw, 1.125rem)",
+      },
     },
   },
   plugins: [],

@@ -22,7 +22,29 @@ export const usePageData = defineStore("pageData", {
     userRole: "",
     method: "",
     referrerCode: "",
+    customerName: "",
     total: 0,
+    page: 1,
+    limit: 5,
+    filters: { status: "", zone: "", search: "" },
+    orders: [],
+    hasNext: false,
+    totalPage: 0,
+    totalCount: 0,
+    statusOptions: [
+      { name: "ทั้งหมด", value: "" },
+      { name: "ชำระแล้ว", value: "PAID" },
+      { name: "จองแล้ว", value: "BOOKED" },
+      { name: "ยกเลิก", value: "CANCELLED" },
+    ],
+    zoneOptions: [
+      { label: "ทั้งหมด", value: "" },
+      { label: "Back Left", value: "back-left" },
+      { label: "Back Right", value: "back-right" },
+      { label: "Left", value: "left" },
+      { label: "Right", value: "right" },
+      { label: "Front Ringside", value: "front-ringside" },
+    ],
   }),
 
   actions: {
@@ -31,7 +53,7 @@ export const usePageData = defineStore("pageData", {
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, "0");
       const dd = String(today.getDate()).padStart(2, "0");
-
+      this.customerName = "";
       this.loading = false;
       this.showSummaryModal = false;
       this.zoneKey = "";

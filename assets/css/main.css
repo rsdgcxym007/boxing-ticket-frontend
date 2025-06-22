@@ -23,3 +23,6 @@
     padding: 10px 12px !important;
   }
 }
+html {
+  font-size: clamp(0.875rem, 1vw, 1.125rem);
+}

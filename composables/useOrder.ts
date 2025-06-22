@@ -2,9 +2,39 @@ import { useApi } from "../composables/useApi";
 import { useToast } from "vue-toastification";
 
 export const useOrder = () => {
-  const { post, patch } = useApi();
+  const { get, post, patch } = useApi();
   const toast = useToast();
 
+  const getOrders = async ({
+    page = 1,
+    limit = 10,
+    status,
+    zone,
+    search,
+  }: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    zone?: string;
+    search?: string;
+  }) => {
+    try {
+      const query: Record<string, any> = { page, limit };
+      if (status) query.status = status;
+      if (zone) query.zone = zone;
+      if (search) query.search = search;
+
+      const data = await get("/orders", { query });
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `ไม่สามารถโหลดออเดอร์ได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
   const submitOrder = async ({
     userId,
     seatIds,
@@ -63,5 +93,5 @@ export const useOrder = () => {
     }
   };
 
-  return { submitOrder, cancelOrder, markAsPaidWithRef };
+  return { submitOrder, cancelOrder, markAsPaidWithRef, getOrders };
 };

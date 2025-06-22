@@ -24,13 +24,21 @@ export const useApi = () => {
   };
 
   // GET
-  const get = async (url: string) => {
-    const res = await fetch(`${base}${url}`, {
+  const get = async (
+    url: string,
+    options?: { query?: Record<string, any> }
+  ) => {
+    const queryString = options?.query
+      ? "?" + new URLSearchParams(options.query).toString()
+      : "";
+
+    const res = await fetch(`${base}${url}${queryString}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },
     });
+
     return handleResponse(res);
   };
 

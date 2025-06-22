@@ -175,6 +175,7 @@
 </template>
 
 <script setup>
+import { useToast } from "vue-toastification";
 const { t } = useI18n();
 const router = useRouter();
 const pageData = usePageData();
