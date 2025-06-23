@@ -13,7 +13,7 @@ export const useAdminMenu = () => {
     {
       icon: "mdi:account-cog-outline",
       label: "จัดการผู้แนะนำ",
-      to: "/admin/referrer",
+      to: "/admin/referrer/",
     },
   ];
 };

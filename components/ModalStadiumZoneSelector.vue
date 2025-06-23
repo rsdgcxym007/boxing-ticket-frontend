@@ -29,7 +29,7 @@
                 </span>
               </p>
             </div>
-
+            {{ props.mode }}
             <div class="flex justify-center px-6 pt-4">
               <div class="w-full max-w-xs sm:max-w-sm md:max-w-md p-4">
                 <ZoneSelect
@@ -41,7 +41,7 @@
                 <div class="mt-4">
                   <DatePicker
                     v-model="pageData.showDate"
-                    placeholder="เลือกวันที่"
+                    :placeholder="'เลือกวันที่'"
                     @update:modelValue="handleDateChange"
                   />
                 </div>
@@ -183,6 +183,7 @@
 </template>
 
 <script setup>
+import dayjs from "dayjs";
 import { useToast } from "vue-toastification";
 const { t } = useI18n();
 const router = useRouter();
@@ -300,8 +301,9 @@ const handleConfirm = async () => {
     return toast.warning("กรุณาเลือกที่นั่งก่อน");
   }
 
-  const todayStr = new Date().toISOString().split("T")[0];
-  const showDateStr = new Date(pageData.showDate).toISOString().split("T")[0];
+  const todayStr = dayjs().format("YYYY-MM-DD");
+
+  const showDateStr = dayjs(pageData.showDate).format("YYYY-MM-DD");
 
   const orderPayload = {
     userId: auth.user.providerId,
@@ -352,8 +354,6 @@ const handleConfirm = async () => {
           pageData.selectedSeats.map((s) => s.id),
           pageData.showDate
         );
-        console.log("order", order);
-
         pageData.showSeatModal = false;
         pageData.orderId = order.id;
         pageData.totalAmount = order.total;

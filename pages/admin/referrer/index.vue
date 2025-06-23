@@ -105,6 +105,12 @@
               >
                 <i class="mdi mdi-repeat text-sm"></i> เปลี่ยนสถานะ
               </button>
+              <button
+                @click="viewReferrer(ref.id)"
+                class="flex items-center gap-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs px-3 py-1 rounded-md"
+              >
+                <i class="mdi mdi-repeat text-sm"></i> ดูเพิ่มเติม
+              </button>
             </div>
           </div>
         </div>
@@ -207,11 +213,12 @@ import { reactive, ref, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import debounce from "lodash/debounce";
 import SidebarItem from "../../components/SidebarItem.vue";
-
+import dayjs from "dayjs";
 const menuItems = useAdminMenu();
 const { getReferrers, createReferrer, updateReferrer, deleteReferrer } =
   useReferrer();
 const route = useRoute();
+const router = useRouter();
 const collapsed = ref(false);
 const data = usePageData();
 const pageData = reactive({
@@ -243,6 +250,9 @@ const fetchReferrers = async () => {
 };
 
 watch(() => pageData.filters.keyword, debounce(fetchReferrers, 400));
+const viewReferrer = (id) => {
+  router.push(`/admin/referrer/${id}`);
+};
 
 const handleSaveReferrer = async () => {
   data.loading = true;

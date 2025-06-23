@@ -6,14 +6,14 @@
 
     <Datepicker
       v-model="displayDate"
-      :min-date="today"
+      :min-date="minDate"
       :format="displayFormat"
       :auto-apply="true"
       :enable-time-picker="false"
       :clearable="false"
       :id="id"
       input-class-name="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      placeholder="เลือกวันที่"
+      :placeholder="placeholder"
     />
   </div>
 </template>
@@ -22,7 +22,7 @@
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { computed, ref, watch } from "vue";
-
+import dayjs from "dayjs";
 // ✅ รับค่าจาก parent (v-model)
 const model = defineModel(); // format: YYYY-MM-DD
 const displayDate = ref(null);
@@ -30,7 +30,15 @@ const displayDate = ref(null);
 defineProps({
   label: {
     type: String,
+    default: "",
+  },
+  placeholder: {
+    type: String,
     default: "เลือกวันที่",
+  },
+  minDate: {
+    type: Date,
+    default: new Date(),
   },
 });
 
@@ -62,7 +70,7 @@ watch(
 
 // sync display → parent (มีเช็คกันซ้ำ)
 watch(displayDate, (val) => {
-  const newVal = val ? new Date(val).toISOString().split("T")[0] : null;
+  const newVal = val ? dayjs(val).format("YYYY-MM-DD") : null;
   if (newVal !== model.value) {
     model.value = newVal;
   }

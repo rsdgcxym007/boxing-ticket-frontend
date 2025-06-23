@@ -136,7 +136,7 @@
 
 <script setup>
 import { computed } from "vue";
-
+import dayjs from "dayjs";
 const props = defineProps({
   orders: Array,
   page: Number,
@@ -201,8 +201,7 @@ const statusText = (status) => {
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "-";
-  const date = new Date(dateStr);
-  return date.toISOString().split("T")[0];
+  return dayjs(dateStr).format("YYYY-MM-DD");
 };
 
 onMounted(() => {

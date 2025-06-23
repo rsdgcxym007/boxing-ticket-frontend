@@ -33,7 +33,42 @@ export const useReferrer = () => {
     }
   };
 
-  // ✅ สร้าง Referrer ใหม่
+  const getReferrerById = async (id: string) => {
+    try {
+      const data = await get(`/referrers/${id}/orders`);
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `ไม่สามารถโหลดข้อมูลภายในได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  const getReferrerOrders = async (
+    id: string,
+    filters?: { startDate?: string; endDate?: string }
+  ) => {
+    try {
+      const query: Record<string, string> = {};
+
+      if (filters?.startDate) query.startDate = filters.startDate;
+      if (filters?.endDate) query.endDate = filters.endDate;
+
+      const data = await get(`/referrers/${id}/orders`, { query });
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `ไม่สามารถโหลดข้อมูลภายในได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
   const createReferrer = async ({
     name,
     code,
@@ -82,5 +117,7 @@ export const useReferrer = () => {
     getReferrers,
     createReferrer,
     updateReferrer,
+    getReferrerById,
+    getReferrerOrders,
   };
 };
