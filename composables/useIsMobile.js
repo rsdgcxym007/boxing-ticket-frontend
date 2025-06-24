@@ -1,4 +1,3 @@
-// composables/useIsMobile.js
 import { ref, onMounted, onUnmounted } from "vue";
 
 export function useIsMobile() {

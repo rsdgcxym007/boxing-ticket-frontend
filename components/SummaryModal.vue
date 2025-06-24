@@ -144,35 +144,6 @@
           placeholder="Referrer Code ถ้ามี"
         />
       </div>
-      <!-- 
-      <div v-if="pageData.method === 'bank'" class="mb-6">
-        <label class="text-sm font-medium text-gray-700">{{
-          t("summary.uploadSlip")
-        }}</label>
-        <input
-          type="file"
-          accept="image/*,application/pdf"
-          @change="onFileChange"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 shadow-sm"
-        />
-        <div v-if="slipPreview" class="mt-2 text-center">
-          <img
-            :src="slipPreview"
-            class="max-w-full max-h-48 mx-auto border rounded shadow"
-          />
-        </div>
-      </div>
-
-      <div v-if="pageData.method === 'qr'" class="text-center mb-6 space-y-2">
-        <img
-          v-if="qrCode"
-          :src="qrCode"
-          class="w-44 h-44 mx-auto border rounded-xl shadow"
-        />
-        <p class="text-sm text-gray-500 italic">
-          📷 {{ t("summary.scanPrompt") }}
-        </p>
-      </div> -->
 
       <!-- Buttons -->
       <div class="flex justify-between pt-4">
@@ -195,32 +166,20 @@
 </template>
 
 <script setup>
-import {
-  QrCode,
-  Banknote,
-  Wallet,
-  AlarmClock,
-  FileText,
-  X,
-} from "lucide-vue-next";
-
+import { Wallet, AlarmClock, FileText, X } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
-import { useRuntimeConfig } from "nuxt/app";
 import { usePageData } from "@/stores/pageData";
 import { useOrder } from "@/composables/useOrder";
-import { useScb } from "@/composables/useScb";
 import { useWebSocket } from "@/composables/useSocket";
 import { useToast } from "vue-toastification";
 
 const toast = useToast();
 const { t } = useI18n();
 const router = useRouter();
-const config = useRuntimeConfig();
-const base = config.public.apiBase;
 
-const { requestQR } = useScb();
-const { cancelOrder, markAsPaidWithRef } = useOrder();
+const { cancelOrder } = useOrder();
 const { createPayment } = usePayments();
 const { connectSocket, disconnectSocket } = useWebSocket("*");
 
@@ -229,21 +188,16 @@ const props = defineProps({
   selectedSeats: Array,
   visible: Boolean,
   total: Number,
+  mode: { type: String, default: "booking" },
   userRole: { type: String, default: "GUEST" },
   dataZoneSelected: Object,
 });
 
 const emit = defineEmits(["close", "confirmed"]);
 const pageData = usePageData();
-
-const orderId = `ORDER${Date.now()}`.slice(0, 17);
-const ref2 = "STADIUM";
-
 const slipFile = ref(null);
 const slipPreview = ref(null);
 const submitted = ref(false);
-const qrCode = ref("");
-
 const countdown = ref(300);
 let countdownTimer;
 
@@ -271,15 +225,6 @@ onBeforeUnmount(() => {
   clearInterval(countdownTimer);
   disconnectSocket();
 });
-
-const onFileChange = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  slipFile.value = file;
-  const reader = new FileReader();
-  reader.onload = () => (slipPreview.value = reader.result);
-  reader.readAsDataURL(file);
-};
 
 const isValid = computed(() =>
   pageData.method === "bank" ? !!slipFile.value : true
@@ -311,15 +256,25 @@ const submitOrders = async () => {
     });
 
     submitted.value = true;
-    router.push({
-      path: "/confirmation",
-      query: {
-        zone: pageData.zoneKey,
-        seats: pageData.selectedSeats.map((s) => s.seatNumber).join(","),
-        total: pageData.total,
-      },
-    });
-    pageData.resetPageData();
+    if (props.mode === "booking") {
+      pageData.resetPageData();
+
+      router.push({
+        path: "/confirmation",
+        query: {
+          zone: pageData.zoneKey,
+          seats: pageData.selectedSeats.map((s) => s.seatNumber).join(","),
+          total: pageData.total,
+        },
+      });
+      emit("close");
+    } else {
+      pageData.resetPageData();
+      router.push({
+        path: "/admin/orders",
+      });
+      emit("close");
+    }
   } catch (e) {
     toast.error(t("summary.submitError"));
     console.error("Submit Error:", e);

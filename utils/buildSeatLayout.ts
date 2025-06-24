@@ -12,15 +12,36 @@ type Seat = {
 type SeatLayout = (Seat | null)[][];
 
 export function buildSeatLayoutFromCoordinates(seats: Seat[]): SeatLayout {
-  const maxRow = Math.max(...seats.map((s) => s.rowIndex));
-  const maxCol = Math.max(...seats.map((s) => s.columnIndex));
-
-  const layout: SeatLayout = Array.from({ length: maxRow + 1 }, () =>
-    Array.from({ length: maxCol + 1 }, () => null)
-  );
+  const groupedByRow: Record<number, Seat[]> = {};
 
   for (const seat of seats) {
-    layout[seat.rowIndex][seat.columnIndex] = seat;
+    if (!groupedByRow[seat.rowIndex]) {
+      groupedByRow[seat.rowIndex] = [];
+    }
+    groupedByRow[seat.rowIndex].push(seat);
+  }
+
+  const layout: SeatLayout = [];
+
+  const allRows = Object.keys(groupedByRow)
+    .map((k) => parseInt(k))
+    .sort((a, b) => a - b);
+
+  for (const rowIndex of allRows) {
+    const rowSeats = groupedByRow[rowIndex];
+
+    const maxCol = Math.max(...rowSeats.map((s) => s.columnIndex));
+
+    const rowArray: (Seat | null)[] = Array.from(
+      { length: maxCol + 1 },
+      () => null
+    );
+
+    for (const seat of rowSeats) {
+      rowArray[seat.columnIndex] = seat;
+    }
+
+    layout.push(rowArray);
   }
 
   return layout;

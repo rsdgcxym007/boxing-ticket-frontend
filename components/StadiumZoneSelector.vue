@@ -63,6 +63,7 @@
     <ModalStadiumZoneSelector
       :zoneKey="pageData.selectedZone"
       :show="pageData.showZoneModal"
+      mode="booking"
       @close="pageData.showZoneModal = false"
     />
   </div>
@@ -71,7 +72,7 @@
 <script setup>
 import { onMounted, onUnmounted, reactive } from "vue";
 import { useRouter } from "vue-router";
-
+import { useI18n } from "vue-i18n";
 const router = useRouter();
 const pageData = reactive({
   selectedZone: "",

@@ -1,31 +1,31 @@
 <template>
-  <div class="flex flex-col items-center w-12 pointer-events-auto">
-    <!-- Seat Icon Button -->
+  <div
+    class="flex flex-col items-center justify-center"
+    :style="{ width: size, height: size }"
+  >
     <button
-      class="transition-transform duration-200 hover:scale-120 focus:outline-none pointer-events-auto"
+      class="w-full h-full relative transition-transform duration-200 hover:scale-110 focus:outline-none"
       @click="$emit('toggle', seat, isBooked)"
       :disabled="isBooked"
     >
       <img
-        :src="getSeatImage(seat)"
+        :src="getSeatImage()"
         alt="seat icon"
         class="w-full h-full object-contain drop-shadow-md pointer-events-none"
         :class="{
-          'rotate-[-90deg]': zoneKey === 'left',
-          '-rotate-[-90deg]': zoneKey === 'right',
-          '-rotate-[180deg]': zoneKey === 'front-ringside',
+          '-rotate-90': zoneKey === 'left',
+          'rotate-90': zoneKey === 'right',
+          'rotate-180': zoneKey === 'front-ringside',
         }"
       />
     </button>
-
-    <!-- Seat Number -->
     <span
-      class="text-xs font-medium tracking-tight"
+      class="block mt-[-0.25rem] text-[0.55em] leading-tight font-semibold text-center"
       :class="{
-        'text-gray-400 line-through': ['BOOKED', 'PAID'].includes(seat?.status),
-        'text-blue-600 font-semibold': isSelected && !isBooked,
+        'text-gray-400 line-through': isBooked,
+        'text-blue-600': isSelected && !isBooked,
         'text-gray-800': !isSelected && !isBooked,
-        'pointer-events-auto opacity-50': isBooked,
+        'opacity-50': isBooked,
       }"
     >
       {{ seat?.seatNumber || "" }}
@@ -35,25 +35,30 @@
 
 <script setup>
 const props = defineProps({
-  seat: String,
-  selectedSeats: {
-    type: Array,
-    default: () => [],
-  },
-  bookedSeats: {
-    type: Array,
-    default: () => [],
-  },
+  seat: Object,
+  selectedSeats: Array,
+  bookedSeats: Array,
   zoneKey: { type: String, default: "" },
+  size: { type: String, default: "2rem" },
+  ownSeatIds: {
+    type: Array,
+    default: () => [],
+  },
 });
 
-const { seat, selectedSeats, bookedSeats } = toRefs(props);
+const { seat, selectedSeats } = toRefs(props);
 
-const isBooked = computed(() =>
-  ["BOOKED", "PAID"].includes(seat.value?.bookingStatus)
+const isBooked = computed(() => {
+  const isOwnSeat = props.ownSeatIds.includes(seat.value?.id);
+  const isStatusBlocked = ["BOOKED", "PAID"].includes(
+    seat.value?.bookingStatus
+  );
+  return isStatusBlocked && !isOwnSeat;
+});
+
+const isSelected = computed(() =>
+  selectedSeats.value.some((s) => s.id === seat.value?.id)
 );
-
-const isSelected = computed(() => selectedSeats.value.includes(seat.value));
 
 function getSeatImage() {
   if (isBooked.value) return "/images/seat-booked.png";
@@ -66,11 +71,5 @@ function getSeatImage() {
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-.pointer-events-none {
-  pointer-events: none;
-}
-.pointer-events-auto {
-  pointer-events: auto;
 }
 </style>

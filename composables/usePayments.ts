@@ -23,5 +23,23 @@ export const usePayments = () => {
     }
   };
 
-  return { createPayment };
+  const createPayStanding = async (payload: {
+    orderId: string;
+    amount: number;
+    method: string;
+    customerName: string;
+    referrerCode?: string;
+  }) => {
+    try {
+      await post("/payments/pay-standing", payload);
+      toast.success("ชำระเงินสำเร็จ");
+    } catch (err: any) {
+      toast.error(
+        `ชำระเงินล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
+      );
+      throw err;
+    }
+  };
+
+  return { createPayment, createPayStanding };
 };

@@ -68,6 +68,45 @@ export const useOrder = () => {
       throw err;
     }
   };
+  const createStanding = async ({
+    userId,
+    standingAdultQty,
+    standingChildQty,
+    showDate,
+    method,
+    status,
+    referrerCode,
+    customerName,
+  }: {
+    userId: string;
+    standingAdultQty: number;
+    standingChildQty: number;
+    showDate: string;
+    method: string;
+    status: string;
+    referrerCode?: string;
+    customerName?: string;
+  }) => {
+    const payload = {
+      userId,
+      standingAdultQty,
+      standingChildQty,
+      showDate,
+      method,
+      status,
+      referrerCode,
+      customerName,
+    };
+
+    try {
+      const res = await post("/orders/create-standing", payload);
+      toast.success("สร้างออเดอร์สำเร็จ");
+      return res;
+    } catch (err: any) {
+      toast.error(`สร้างออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
+      throw err;
+    }
+  };
 
   const cancelOrder = async (orderId: string) => {
     try {
@@ -149,5 +188,6 @@ export const useOrder = () => {
     getOrders,
     changeSeats,
     updateOrderBooked,
+    createStanding,
   };
 };

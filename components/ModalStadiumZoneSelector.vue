@@ -2,15 +2,13 @@
   <Teleport to="body">
     <div>
       <div
-        v-if="pageData.showSeatModal"
+        v-if="show"
         class="fixed inset-0 bg-black/50 z-50 overflow-auto"
         @click.self="onClose"
       >
-        <div
-          class="flex justify-center items-start p-4 sm:p-6 md:p-10 h-[1000px]"
-        >
+        <div class="flex justify-center items-start p-4 sm:p-6 md:p-10">
           <div
-            class="w-full h-[80%] max-w-[90%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-10 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+            class="w-full max-w-[95%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-10 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] overflow-hidden"
           >
             <div class="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 border-b">
               <button
@@ -29,53 +27,70 @@
                 </span>
               </p>
             </div>
-            {{ props.mode }}
-            <div class="flex justify-center px-6 pt-4">
-              <div class="w-full max-w-xs sm:max-w-sm md:max-w-md p-4">
-                <ZoneSelect
-                  v-model="pageData.zoneKey"
-                  :options="pageData.zoneOptions"
-                  label="ค้นหาโซน"
-                  @update:modelValue="onZoneChange"
-                />
-                <div class="mt-4">
-                  <DatePicker
-                    v-model="pageData.showDate"
-                    :placeholder="'เลือกวันที่'"
-                    @update:modelValue="handleDateChange"
+
+            <!-- ✅ Content Scrollable -->
+            <div class="flex-1 overflow-auto p-6 space-y-6">
+              <!-- Selectors -->
+              <div class="flex justify-center px-6 pt-4">
+                <div class="w-full max-w-xs sm:max-w-sm md:max-w-md p-4">
+                  <ZoneSelect
+                    v-model="pageData.zoneKey"
+                    :options="pageData.zoneOptions"
+                    label="ค้นหาโซน"
+                    @update:modelValue="onZoneChange"
                   />
+                  <div class="mt-4">
+                    <DatePicker
+                      v-model="pageData.showDate"
+                      :placeholder="'เลือกวันที่'"
+                      @update:modelValue="handleDateChange"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div class="flex-1 overflow-auto p-6 space-y-6">
+              <!-- 💡 Container ของที่นั่ง -->
               <div class="w-full">
-                <div class="flex flex-col items-center gap-4 min-w-[500px]">
-                  <div
-                    v-for="(row, i) in pageData.currentZoneSeats"
-                    :key="i"
-                    class="grid justify-center"
-                    :style="{
-                      gridTemplateColumns: `repeat(${row.length}, minmax(1.75rem, auto))`,
-                      gap: '0.5rem',
-                    }"
-                  >
-                    <div v-for="seat in row" :key="seat?.id">
-                      <SeatIcon
-                        v-if="seat && seat.seatNumber"
-                        :seat="seat"
-                        :status="getSeatStatus(seat)"
-                        :selectedSeats="pageData.selectedSeats"
-                        :bookedSeats="pageData.bookedSeats"
-                        :zoneKey="pageData.zoneKey"
-                        @toggle="toggleSeat"
-                        class="w-8 sm:w-10 md:w-11 transition-transform hover:scale-105 cursor-pointer"
-                      />
+                <div
+                  class="max-h-[70vh] overflow-auto bg-white"
+                  style="margin: 0 auto"
+                >
+                  <div class="flex flex-col gap-2 items-center w-full">
+                    <div
+                      v-for="(row, i) in pageData.currentZoneSeats"
+                      :key="i"
+                      class="w-full grid place-items-center"
+                    >
+                      <div
+                        class="grid"
+                        :style="{
+                          gridTemplateColumns: `repeat(${row.length}, minmax(2.10rem, auto))`,
+                        }"
+                      >
+                        <div v-for="seat in row" :key="seat?.id">
+                          <SeatIcon
+                            v-if="seat && seat.seatNumber"
+                            :seat="seat"
+                            :status="getSeatStatus(seat)"
+                            :selectedSeats="pageData.selectedSeats"
+                            :bookedSeats="pageData.bookedSeats"
+                            :zoneKey="pageData.zoneKey"
+                            @toggle="toggleSeat"
+                            :ownSeatIds="
+                              props.orderData?.seatBookings.map(
+                                (b) => b.seat.id
+                              ) || []
+                            "
+                            class="w-8 sm:w-10 md:w-11 transition-transform hover:scale-105 cursor-pointer"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
+              <!-- Legend -->
               <div
                 class="flex justify-center flex-wrap gap-6 text-sm text-gray-600 font-medium"
               >
@@ -96,78 +111,73 @@
                   ไม่ว่าง
                 </div>
               </div>
-              <Teleport to="body">
+              <div
+                v-if="pageData.selectedSeats.length"
+                class="mt-4 border-t pt-6"
+              >
                 <div
-                  v-if="pageData.selectedSeats.length"
-                  class="fixed bottom-4 w-full px-4 sm:px-6 z-50"
+                  class="w-full max-w-[100%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto bg-white border border-gray-300 rounded-2xl shadow-2xl px-6 py-5"
                 >
-                  <div
-                    class="w-full max-w-[90%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto bg-white border border-gray-300 rounded-2xl shadow-2xl px-6 py-5"
-                  >
-                    <div class="text-center space-y-3">
-                      <p
-                        class="text-sm text-gray-600 tracking-wide font-medium"
-                      >
-                        ที่นั่งที่เลือก
-                      </p>
+                  <div class="text-center space-y-3">
+                    <p class="text-sm text-gray-600 tracking-wide font-medium">
+                      ที่นั่งที่เลือก
+                    </p>
+                    <p
+                      class="text-xl font-semibold text-blue-600 tracking-wider"
+                    >
+                      {{
+                        pageData.selectedSeats
+                          .map((s) => s?.seatNumber || "—")
+                          .join(", ")
+                      }}
+                    </p>
+                    <p class="text-lg sm:text-xl font-semibold tracking-wide">
+                      <span class="text-blue-600">ราคารวม:</span>
+                      <span class="text-cyan-500">
+                        {{
+                          props.mode === "change"
+                            ? pageData.totalAmount
+                            : pageData.selectedSeats.length * 1800
+                        }}
+                      </span>
+                      <span class="ml-1 text-sm text-gray-500">บาท</span>
+                    </p>
 
-                      <p
-                        class="text-xl font-semibold text-blue-600 tracking-wider"
+                    <div class="flex justify-center gap-3 flex-wrap pt-2">
+                      <button
+                        @click="onClose"
+                        class="min-w-[90px] px-4 py-2 border border-blue-500 text-blue-600 text-sm font-semibold rounded-full shadow-sm hover:bg-blue-50 transition-all"
+                      >
+                        ย้อนกลับ
+                      </button>
+                      <button
+                        @click="pageData.selectedSeats = []"
+                        class="min-w-[90px] px-4 py-2 border border-red-400 text-red-500 text-sm font-semibold rounded-full shadow-sm hover:bg-red-50 transition-all"
+                      >
+                        ยกเลิกทั้งหมด
+                      </button>
+                      <button
+                        @click="handleConfirm"
+                        class="min-w-[90px] px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition-all"
                       >
                         {{
-                          pageData.selectedSeats
-                            .map((s) => s?.seatNumber || "—")
-                            .join(", ")
+                          props.mode === "change" &&
+                          props?.orderData?.status === "PAID"
+                            ? "ยืนยันเปลี่ยนที่นั่ง"
+                            : "ซื้อตั๋ว"
                         }}
-                      </p>
-
-                      <p class="text-lg sm:text-xl font-semibold tracking-wide">
-                        <span class="text-blue-600">ราคารวม:</span>
-                        <span class="text-cyan-500">
-                          {{
-                            props.mode === "change"
-                              ? pageData.totalAmount
-                              : pageData.selectedSeats.length * 1800
-                          }}
-                        </span>
-                        <span class="ml-1 text-sm text-gray-500">บาท</span>
-                      </p>
-
-                      <div class="flex justify-center gap-3 flex-wrap pt-2">
-                        <button
-                          @click="onClose"
-                          class="min-w-[90px] px-4 py-2 border border-blue-500 text-blue-600 text-sm font-semibold rounded-full shadow-sm hover:bg-blue-50 transition-all"
-                        >
-                          ย้อนกลับ
-                        </button>
-
-                        <button
-                          @click="pageData.selectedSeats = []"
-                          class="min-w-[90px] px-4 py-2 border border-red-400 text-red-500 text-sm font-semibold rounded-full shadow-sm hover:bg-red-50 transition-all"
-                        >
-                          ยกเลิกทั้งหมด
-                        </button>
-
-                        <button
-                          @click="handleConfirm"
-                          class="min-w-[90px] px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition-all"
-                        >
-                          {{
-                            props.mode === "change"
-                              ? "ยืนยันเปลี่ยนที่นั่ง"
-                              : "ซื้อตั๋ว"
-                          }}
-                        </button>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>
-              </Teleport>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- ✅ Modal แสดงสรุป -->
     <SummaryModal
       v-if="pageData.showSummaryModal"
       :visible="pageData.showSummaryModal"
@@ -176,7 +186,8 @@
       :total="pageData.selectedSeats.length * 1800"
       :userRole="pageData.userRole"
       :dataZoneSelected="pageData"
-      @close="pageData.showSummaryModal = false"
+      :mode="props.mode"
+      @close="onCloseSummaryModal"
       @confirmed="handleConfirmed"
     />
   </Teleport>
@@ -185,6 +196,8 @@
 <script setup>
 import dayjs from "dayjs";
 import { useToast } from "vue-toastification";
+import { useI18n } from "vue-i18n";
+
 const { t } = useI18n();
 const router = useRouter();
 const pageData = usePageData();
@@ -192,203 +205,250 @@ const { getSeatsByZoneId } = useSeatApi();
 const { submitOrder, changeSeats, updateOrderBooked } = useOrder();
 const toast = useToast();
 const auth = useAuthStore();
+const getDateKey = (date) => dayjs(date).format("YYYY-MM-DD");
+
 if (!auth.user) auth.loadUser();
 
 const props = defineProps({
   zoneKey: String,
+  show: Boolean,
   mode: { type: String, default: "booking" },
   orderData: Object,
 });
+const emit = defineEmits(["close"]);
 
-watch(
-  () => props.zoneKey,
-  async (newZone) => {
-    if (!newZone) return;
-    pageData.zoneKey = "";
-    await nextTick();
-    pageData.zoneKey = newZone;
-    pageData.showSeatModal = true;
-  },
-  { immediate: true }
-);
+const isFirstOpen = ref(true);
+const originalSeatCount = ref(0);
 
-let modalHasLoaded = false;
-
-watchEffect(async () => {
-  const show = pageData.showSeatModal;
-  const zone = pageData.zoneKey;
-  const date = pageData.showDate;
-
-  if (!show || !zone || !date) {
-    modalHasLoaded = false;
-    return;
-  }
-
-  if (modalHasLoaded) return;
-  modalHasLoaded = true;
-
-  pageData.loading = true;
+const fetchSeats = async () => {
   try {
-    const allSeats = await getSeatsByZoneId(zone, date);
-    pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
-  } catch (err) {
-    if (!auth.user) {
-      pageData.showZoneModal = false;
-      router.push("/login");
-    }
+    pageData.loading = true;
 
-    console.error("โหลดที่นั่งล้มเหลว:", err);
+    const allSeats = await getSeatsByZoneId(
+      pageData.zoneKey,
+      pageData.showDate
+    );
+
+    pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
+    const allSeatIds = allSeats.map((s) => s.id);
+    const dateKey = getDateKey(pageData.showDate);
+
+    const orderSeatIds =
+      props.orderData?.seatBookings.map((b) => b.seat.id) || [];
+
+    pageData.bookedSeats = allSeats.filter((s) =>
+      s.seatBookings?.some((b) => {
+        const isSameDay = getDateKey(b.showDate) === dateKey;
+        const isBooked = ["BOOKED", "PAID"].includes(b.status);
+        const isDifferentFromOrder = !orderSeatIds.includes(s.id);
+        return (
+          isSameDay &&
+          isBooked &&
+          (props.mode !== "change" || isDifferentFromOrder)
+        );
+      })
+    );
+
+    const savedSeats = pageData.selectedSeatsMap[dateKey] || [];
+    pageData.selectedSeats = savedSeats.filter((s) =>
+      allSeatIds.includes(s.id)
+    );
+  } catch (err) {
+    console.error("โหลดที่นั่งล้มเหลว", err);
   } finally {
     pageData.loading = false;
   }
-});
+};
+
+const onZoneChange = async (newZone) => {
+  if (!newZone) return;
+  pageData.zoneKey = newZone;
+  pageData.selectedSeats = [];
+  await fetchSeats();
+};
 
 const handleDateChange = async (newDate) => {
-  if (!pageData.zoneKey) return;
+  const dateKey = getDateKey(newDate);
+  const orderDateKey = getDateKey(props.orderData?.showDate);
+  pageData.showDate = newDate;
 
-  pageData.loading = true;
+  for (const key in pageData.selectedSeatsMap) {
+    if (key !== orderDateKey) {
+      delete pageData.selectedSeatsMap[key];
+    }
+  }
+
+  pageData.selectedSeats = pageData.selectedSeatsMap[dateKey] || [];
+
+  pageData.totalAmount = 0;
+  await fetchSeats();
+};
+
+function toggleSeat(seat) {
+  const seatId = seat.id;
+  const isAlreadySelected = pageData.selectedSeats.some((s) => s.id === seatId);
+
+  if (isAlreadySelected) {
+    pageData.selectedSeats = pageData.selectedSeats.filter(
+      (s) => s.id !== seatId
+    );
+  } else {
+    const maxSelectable =
+      props.mode === "change" && props.orderData.status === "PAID"
+        ? originalSeatCount.value
+        : 10;
+
+    if (pageData.selectedSeats.length >= maxSelectable) {
+      toast.warning(
+        `คุณสามารถเลือกได้สูงสุด ${maxSelectable} ที่นั่งตามจำนวนที่ซื้อไว้`,
+        { id: "max-seat-warning" }
+      );
+      return;
+    }
+
+    pageData.selectedSeats.push(seat);
+  }
+
+  const dateKey = getDateKey(pageData.showDate);
+  pageData.selectedSeatsMap[dateKey] = [...pageData.selectedSeats];
+}
+
+const getSeatStatus = (seat) => {
+  if (!seat) return "unavailable";
+  const isSelected = pageData.selectedSeats.some((s) => s.id === seat.id);
+  const isBooked = pageData.bookedSeats.some((b) => b.id === seat.id);
+  if (isSelected) return "selected";
+  if (isBooked) return "booked";
+  return "available";
+};
+
+const handleConfirm = async () => {
+  if (!pageData.selectedSeats.length) {
+    toast.warning("กรุณาเลือกที่นั่งก่อน");
+    return;
+  }
+  if (props.mode === "change" && props.orderData?.status === "PAID") {
+    const selectedCount = pageData.selectedSeats.length;
+    const originalCount = originalSeatCount.value;
+
+    if (selectedCount !== originalCount) {
+      toast.warning(
+        `คุณต้องเลือกที่นั่งให้ครบ ${originalCount} ที่นั่งตามที่เคยชำระเงินแล้ว`
+      );
+      return;
+    }
+  }
+
+  const showDateStr = dayjs(pageData.showDate).format("YYYY-MM-DD");
+  const todayStr = dayjs().format("YYYY-MM-DD");
+
+  const orderPayload = {
+    seatIds: pageData.selectedSeats.map((s) => s.id),
+    showDate: pageData.showDate,
+    method: "CASH",
+    status: showDateStr === todayStr ? "PENDING" : "BOOKED",
+  };
+
   try {
-    pageData.selectedSeats = [];
-    const allSeats = await getSeatsByZoneId(pageData.zoneKey, newDate);
-    pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
-  } catch (error) {
-    console.error("❌ โหลดที่นั่งล้มเหลว:", error);
+    pageData.loading = true;
+
+    if (props.mode === "booking") {
+      const order = await submitOrder(orderPayload);
+      if (order.status === "PENDING") {
+        pageData.orderId = order.id;
+        pageData.totalAmount = order.total;
+        const dateKey = getDateKey(pageData.showDate);
+        pageData.selectedSeatsMap[dateKey] = [...pageData.selectedSeats];
+        pageData.showSummaryModal = true;
+      } else {
+        pageData.showSeatModal = false;
+        // toast.success("จองล่วงหน้าเรียบร้อย");
+        emit("close");
+      }
+    } else if (props.mode === "change") {
+      if (props.orderData.status === "PAID") {
+        await changeSeats(
+          props.orderData.id,
+          orderPayload.seatIds,
+          orderPayload.showDate
+        );
+        toast.success("เปลี่ยนที่นั่งเรียบร้อย");
+        pageData.showSeatModal = false;
+        pageData.selectedSeatsMap = {};
+        emit("close");
+      } else {
+        const updated = await updateOrderBooked(
+          props.orderData.id,
+          orderPayload.seatIds,
+          orderPayload.showDate
+        );
+        pageData.orderId = updated.id;
+        pageData.totalAmount = updated.total;
+        pageData.selectedSeats = updated.seats;
+        const dateKey = getDateKey(pageData.showDate);
+        pageData.selectedSeatsMap[dateKey] = [...updated.seats];
+        pageData.showSummaryModal = true;
+      }
+    }
+  } catch (err) {
+    toast.error(err.message || "เกิดข้อผิดพลาด");
   } finally {
     pageData.loading = false;
   }
 };
 
 onMounted(() => {
-  pageData.loading = true;
-  pageData.selectedSeats = [];
-  try {
-    if (props.mode === "change" && props.orderData) {
-      // pageData.selectedSeats = props.orderData.seats;
-      pageData.showDate = props.orderData.showDate;
-      pageData.totalAmount = props.orderData.total;
-      pageData.showDate = props.orderData.showDate;
-    }
-  } catch (error) {
-    console.log("error", error);
-  } finally {
-    pageData.loading = false;
-  }
+  pageData.showDate = props.orderData?.showDate || new Date();
+  pageData.zoneKey = props.zoneKey;
 });
 
-const onZoneChange = async () => {
-  const allSeats = await getSeatsByZoneId(pageData.zoneKey, pageData.showDate);
-  pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
+watch(
+  () => props.show,
+  async (isOpen) => {
+    if (isOpen) {
+      isFirstOpen.value = true;
+      pageData.showSeatModal = true;
+      pageData.showDate = props.orderData?.showDate || new Date();
+      await onZoneChange(props.zoneKey);
+      if (props.mode === "change" && props.orderData) {
+        const fallbackSeats = props.orderData.seatBookings.map((b) => b.seat);
+        const dateKey = getDateKey(pageData.showDate);
+        pageData.selectedSeats = [];
+
+        pageData.selectedSeats = [...fallbackSeats];
+        pageData.selectedSeatsMap[dateKey] = [...fallbackSeats];
+        pageData.totalAmount = props.orderData.total;
+        originalSeatCount.value = fallbackSeats.length;
+        isFirstOpen.value = false;
+      }
+    }
+  }
+);
+
+watch(
+  () => pageData.showSeatModal,
+  async (isOpen) => {
+    if (isOpen && !props.show) {
+      await fetchSeats();
+    }
+  }
+);
+
+const onClose = () => {
+  pageData.resetPageData();
+  pageData.showSeatModal = false;
+  pageData.selectedSeatsMap = {};
+  emit("close");
+};
+const onCloseSummaryModal = () => {
+  pageData.resetPageData();
+  pageData.showSummaryModal = false;
+  pageData.showSeatModal = false;
+  pageData.selectedSeatsMap = {};
+  emit("close");
 };
 
 onBeforeUnmount(() => {
   document.body.style.overflow = "";
 });
-
-const onClose = () => {
-  pageData.resetPageData();
-  pageData.showSeatModal = false;
-};
-
-const handleConfirm = async () => {
-  if (
-    pageData.selectedSeats.length > props.orderData?.seatBookings?.length &&
-    props.mode === "change" &&
-    props.orderData.status === "PAID"
-  ) {
-    return toast.warning("ไม่สามารถเลือกเกินกว่าที่เคยซื้อได้");
-  }
-  if (!pageData.selectedSeats.length && props.mode === "booking") {
-    return toast.warning("กรุณาเลือกที่นั่งก่อน");
-  }
-
-  const todayStr = dayjs().format("YYYY-MM-DD");
-
-  const showDateStr = dayjs(pageData.showDate).format("YYYY-MM-DD");
-
-  const orderPayload = {
-    userId: auth.user.providerId,
-    seatIds: pageData.selectedSeats.map((s) => s.id),
-    total: pageData.selectedSeats.length,
-    showDate: pageData.showDate,
-    method: "CASH",
-    status: showDateStr === todayStr ? "PENDING" : "BOOKED",
-  };
-
-  if (props.mode === "booking") {
-    try {
-      pageData.loading = true;
-      const order = await submitOrder(orderPayload);
-
-      if (orderPayload.status === "PENDING") {
-        // วันนี้
-        pageData.orderId = order.id;
-        pageData.totalAmount = order.total;
-        pageData.showSummaryModal = true;
-      } else {
-        // ล่วงหน้า
-        pageData.resetPageData();
-        toast.success("จองล่วงหน้าเรียบร้อยแล้ว");
-      }
-    } catch (err) {
-      toast.error(err?.message || "เกิดข้อผิดพลาดในการสั่งซื้อ");
-    } finally {
-      pageData.loading = false;
-    }
-  } else if (props.mode === "change") {
-    if (props.orderData.status === "PAID") {
-      try {
-        await changeSeats(
-          props.orderData.id,
-          pageData.selectedSeats.map((s) => s.id),
-          pageData.showDate
-        );
-        pageData.resetPageData();
-        pageData.showSeatModal = false;
-      } catch (err) {
-        toast.error("ไม่สามารถเปลี่ยนที่นั่งได้");
-      }
-    } else {
-      try {
-        const order = await updateOrderBooked(
-          props.orderData.id,
-          pageData.selectedSeats.map((s) => s.id),
-          pageData.showDate
-        );
-        pageData.showSeatModal = false;
-        pageData.orderId = order.id;
-        pageData.totalAmount = order.total;
-        pageData.selectedSeats = order.seats;
-
-        pageData.showSummaryModal = true;
-      } catch (err) {}
-    }
-  }
-};
-
-const toggleSeat = (seat) => {
-  if (pageData.bookedSeats.includes(seat)) return;
-  const index = pageData.selectedSeats.indexOf(seat);
-  if (
-    pageData.selectedSeats.length >= props.orderData?.seatBookings?.length &&
-    props.mode === "change" &&
-    props.orderData.status === "PAID"
-  ) {
-    return toast.warning("ไม่สามารถเลือกเกินกว่าที่เคยซื้อได้");
-  }
-
-  if (index === -1) {
-    if (pageData.selectedSeats.length >= 10)
-      return toast.warning("กรุณาเลือกไม่เกิน 10 ที่นั่ง");
-    pageData.selectedSeats.push(seat);
-  } else {
-    pageData.selectedSeats.splice(index, 1);
-  }
-};
-
-const getSeatStatus = (seat) => {
-  if (!seat) return "unavailable";
-  if (pageData.bookedSeats.includes(seat)) return "booked";
-  if (pageData.selectedSeats.includes(seat)) return "selected";
-  return "available";
-};
 </script>

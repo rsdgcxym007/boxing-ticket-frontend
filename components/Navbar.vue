@@ -17,132 +17,210 @@
       </div>
 
       <!-- Desktop Menu -->
-      <div v-if="isDesktop" class="flex items-center gap-6">
-        <ul class="flex gap-6 text-sm md:text-base font-medium">
+      <div v-if="isDesktop" class="flex items-center gap-8">
+        <ul class="flex gap-8 text-sm md:text-base font-semibold tracking-wide">
+          <li><a href="/" class="hover:text-green-400">หน้าหลัก</a></li>
           <li>
-            <a href="/" class="hover:text-red-400">{{ t("home") }}</a>
+            <a href="/StandingTicketForm" class="hover:text-green-400"
+              >ซื้อตั๋วยืน</a
+            >
           </li>
           <li>
-            <a href="/contacts" class="hover:text-red-400">{{
-              t("contact")
-            }}</a>
+            <a href="/ringside" class="hover:text-green-400">ซื้อตั๋วริงไซด์</a>
+          </li>
+          <li>
+            <a href="/contacts" class="hover:text-green-400">ติดต่อเรา</a>
           </li>
           <li v-if="!auth?.user">
-            <a href="/login" class="hover:text-red-400">เข้าสู่ระบบ</a>
+            <a href="/login" class="hover:text-green-400">เข้าสู่ระบบ</a>
           </li>
-          <li v-if="auth?.user?.role === 'admin'">
-            <a href="/admin/dashboard" class="hover:text-red-400">หน้าแอดมิน</a>
+
+          <!-- Admin Dropdown -->
+          <li v-if="auth?.user?.role === 'admin'" class="relative group">
+            <button
+              @click="toggleAdminMenu"
+              @mouseenter="adminMenuHover = true"
+              @mouseleave="adminMenuHover = false"
+              class="hover:text-green-400 flex items-center gap-1"
+            >
+              <i class="mdi mdi-shield-account-outline text-lg"></i>
+              หน้าแอดมิน
+              <svg
+                class="w-4 h-4 mt-0.5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.587l3.71-4.356a.75.75 0 111.14.976l-4.25 5a.75.75 0 01-1.14 0l-4.25-5a.75.75 0 01.02-1.06z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+
+            <!-- Admin Dropdown Menu -->
+            <div
+              v-if="adminMenuHover || adminMenuOpen"
+              @mouseenter="adminMenuHover = true"
+              @mouseleave="adminMenuHover = false"
+              class="absolute top-full left-0 mt-2 w-56 bg-[#0f1f3c] text-white shadow-xl rounded-xl z-50 py-2 border border-white/10"
+            >
+              <a
+                v-for="item in adminMenu"
+                :key="item.to"
+                :href="item.to"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+              >
+                <Icon :name="item.icon" class="text-lg text-white/80" />
+                <span>{{ item.label }}</span>
+              </a>
+            </div>
           </li>
         </ul>
 
-        <div class="flex gap-3">
+        <!-- Logout & Lang -->
+        <div class="flex items-center gap-3">
           <button
             v-if="auth?.user"
             @click="logout"
-            class="px-3 py-1 text-xs md:text-sm border rounded hover:bg-white hover:text-black transition"
+            class="px-4 py-1.5 text-sm border border-white/30 rounded-md hover:bg-white hover:text-black transition"
           >
             ออกจากระบบ
           </button>
           <button
             @click="toggleLang"
-            class="px-3 py-1 text-xs md:text-sm border rounded hover:bg-white hover:text-black transition"
+            class="px-4 py-1.5 text-sm border border-white/30 rounded-md hover:bg-white hover:text-black transition"
           >
             {{ locale === "th" ? "EN" : "TH" }}
           </button>
         </div>
       </div>
 
-      <!-- Mobile Menu Toggle -->
-      <button class="md:hidden" @click="isOpen = !isOpen">
-        <svg
-          v-if="!isOpen"
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+      <!-- Mobile: Buttons + Hamburger -->
+      <div v-if="!isDesktop" class="flex items-center gap-2 md:hidden">
+        <!-- Stadium & Ringside Buttons -->
+        <a
+          href="/StandingTicketForm"
+          class="text-xs px-3 py-1 rounded-full border border-white/20 hover:bg-white hover:text-black transition"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-        </svg>
-        <svg
-          v-else
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+          ยืน
+        </a>
+        <a
+          href="/ringside"
+          class="text-xs px-3 py-1 rounded-full border border-white/20 hover:bg-white hover:text-black transition"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
+          ริง
+        </a>
+
+        <!-- Hamburger Icon -->
+        <button @click="isOpen = !isOpen">
+          <svg
+            v-if="!isOpen"
+            class="w-6 h-6 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+          <svg
+            v-else
+            class="w-6 h-6 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <!-- Mobile Menu -->
+    <!-- Mobile Menu Dropdown -->
     <transition name="slide-fade">
       <div
         v-if="isOpen"
         class="md:hidden px-6 py-6 bg-[#0a172e]/95 backdrop-blur-md shadow-2xl rounded-b-xl border-t border-white/10"
       >
-        <!-- เมนูหลัก -->
-        <ul class="flex flex-col gap-4 text-base font-medium text-white">
+        <ul class="flex flex-col gap-3 text-base font-medium text-white">
           <li>
-            <a
-              href="/"
-              class="flex items-center gap-3 hover:text-blue-400 transition"
+            <a href="/" class="flex items-center gap-3 hover:text-blue-400"
+              ><i class="mdi mdi-home-outline text-xl"></i>หน้าหลัก</a
             >
-              <i class="mdi mdi-home-outline text-lg"></i> หน้าหลัก
-            </a>
           </li>
           <li>
             <a
               href="/contacts"
-              class="flex items-center gap-3 hover:text-blue-400 transition"
+              class="flex items-center gap-3 hover:text-blue-400"
+              ><i class="mdi mdi-email-outline text-xl"></i>ติดต่อเรา</a
             >
-              <i class="mdi mdi-email-outline text-lg"></i> ติดต่อเรา
-            </a>
-          </li>
-          <li v-if="auth?.user?.role === 'admin'">
-            <a
-              href="/admin/dashboard"
-              class="flex items-center gap-3 hover:text-blue-400 transition"
-            >
-              <i class="mdi mdi-shield-account-outline text-lg"></i> หน้าแอดมิน
-            </a>
           </li>
           <li v-if="!auth?.user">
-            <a
-              href="/login"
-              class="flex items-center gap-3 hover:text-blue-400 transition"
+            <a href="/login" class="flex items-center gap-3 hover:text-blue-400"
+              ><i class="mdi mdi-login-variant text-xl"></i>เข้าสู่ระบบ</a
             >
-              <i class="mdi mdi-login-variant text-lg"></i> เข้าสู่ระบบ
-            </a>
+          </li>
+
+          <!-- Admin Dropdown (Mobile) -->
+          <li v-if="auth?.user?.role === 'admin'" class="flex flex-col">
+            <button
+              @click="adminSubOpen = !adminSubOpen"
+              class="flex items-center gap-3 w-full text-left hover:text-blue-400"
+            >
+              <i class="mdi mdi-shield-account-outline text-xl"></i>
+              หน้าแอดมิน
+              <i
+                class="mdi"
+                :class="adminSubOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+              ></i>
+            </button>
+            <transition name="slide-fade">
+              <ul
+                v-if="adminSubOpen"
+                class="mt-2 ml-6 flex flex-col gap-2 text-sm text-white/80"
+              >
+                <li v-for="item in adminMenu" :key="item.to">
+                  <a
+                    :href="item.to"
+                    class="flex items-center gap-2 hover:text-white"
+                  >
+                    <Icon :name="item.icon" />
+                    {{ item.label }}
+                  </a>
+                </li>
+              </ul>
+            </transition>
           </li>
         </ul>
 
-        <!-- ปุ่มล่าง -->
-        <div class="mt-6 flex flex-col gap-3">
+        <!-- Divider -->
+        <div class="border-t border-white/10 my-5"></div>
+
+        <!-- Logout & Language -->
+        <div class="flex flex-col gap-3">
           <button
             v-if="auth?.user"
             @click="logout"
-            class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-md border border-white/20 text-white hover:bg-white hover:text-black transition"
+            class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
           >
-            <i class="mdi mdi-logout-variant text-base"></i> ออกจากระบบ
+            <i class="mdi mdi-logout-variant text-xl"></i> ออกจากระบบ
           </button>
-
           <button
             @click="toggleLang"
-            class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-md border border-white/20 text-white hover:bg-white hover:text-black transition"
+            class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
           >
-            <i class="mdi mdi-translate text-base"></i>
-            {{ locale === "th" ? "EN" : "TH" }}
+            <i class="mdi mdi-translate text-xl"></i>
+            {{ locale === "th" ? "English" : "ไทย" }}
           </button>
         </div>
       </div>
@@ -154,12 +232,20 @@
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth";
-
+import { useAdminMenu } from "@/composables/useAdminMenu";
 const { locale, t, setLocale } = useI18n();
 const auth = useAuthStore();
 
 const isOpen = ref(false);
 const isDesktop = ref(false);
+const adminMenu = useAdminMenu();
+const adminMenuOpen = ref(false);
+const adminMenuHover = ref(false);
+const adminSubOpen = ref(false);
+
+const toggleAdminMenu = () => {
+  adminMenuOpen.value = !adminMenuOpen.value;
+};
 
 const toggleLang = () => {
   setLocale(locale.value === "th" ? "en" : "th");
@@ -196,5 +282,9 @@ onBeforeUnmount(() => {
 .slide-fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+button:hover svg {
+  transform: rotate(180deg);
+  transition: transform 0.2s;
 }
 </style>

@@ -80,7 +80,7 @@
         </button>
 
         <button
-          v-if="order.status === 'PENDING'"
+          v-if="order.status === 'PENDING' || order.status === 'BOOKED'"
           class="px-4 py-2 border border-purple-500 text-purple-600 rounded-lg flex items-center gap-2 justify-center w-full md:w-auto hover:bg-purple-100 hover:shadow-md hover:scale-[1.02] transition-all duration-300 ease-in-out"
           @click="$emit('cancel-order', order)"
         >

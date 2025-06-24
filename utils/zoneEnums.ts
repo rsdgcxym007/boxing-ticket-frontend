@@ -15,9 +15,9 @@ export const ZONE_LABELS = {
 } as const;
 
 export const ZONE_IDS_BY_NAME = {
-  "back-left": "57495b71-04fc-4a5a-bcc2-9c8eb63a42ba",
-  "back-right": "f1a77a2c-f117-45e3-b21e-6dac1489d93a",
-  left: "d2e183a4-9310-4a16-9fb3-3ca19c60d336",
-  right: "eda3f7e3-92ad-415a-81e2-a59871be0710",
-  "front-ringside": "641cabe9-6da1-4a74-8d33-35a12e81b28d",
+  "back-left": "945b915e-89f1-40bc-b162-033a959b8e6d",
+  "back-right": "21015e2c-9140-479a-8a62-1338ef529cd2",
+  left: "0ec7de07-b545-476c-a662-8269095d906d",
+  right: "169d4228-5ab4-4150-b159-3147e5a51cae",
+  "front-ringside": "4208f8f5-7fc8-45c7-be4f-7b3fb5b5d1aa",
 } as const;

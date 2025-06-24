@@ -1,10 +1,17 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useAuthStore = defineStore("auth", () => {
-  const user = ref(null);
+export interface User {
+  id: string;
+  name: string;
+  role: string;
+  // เพิ่ม field อื่น ๆ ตามต้องการ เช่น email, token ฯลฯ
+}
 
-  const setUser = (newUser) => {
+export const useAuthStore = defineStore("auth", () => {
+  const user = ref<User | null>(null); // ✅ แก้ตรงนี้
+
+  const setUser = (newUser: User) => {
     user.value = newUser;
     if (import.meta.client) {
       localStorage.setItem("user", JSON.stringify(newUser));
