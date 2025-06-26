@@ -129,7 +129,7 @@
             </div>
             <div class="flex items-center gap-2 text-sm text-white-400">
               <i class="mdi mdi-account-outline"></i>
-              โดย: {{ order.user.name }}
+              โดย: {{ order?.user?.name }}
             </div>
           </div>
 
