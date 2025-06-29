@@ -14,6 +14,12 @@
         รายละเอียดผู้แนะนำ:
         <span class="text-blue-400">{{ referrerName }}</span>
       </h4>
+      <NuxtLink
+        :to="`/admin/referrer/referrer-preview/${route.params.id}`"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+      >
+        ดูตัวอย่าง PDF
+      </NuxtLink>
     </div>
 
     <!-- Header -->
@@ -260,7 +266,7 @@ import { usePageData } from "../../../stores/pageData";
 const loading = usePageData();
 const orders = ref<Order[]>([]);
 
-const { getReferrerOrders } = useReferrer();
+const { getReferrerOrders, exportReferrerPdf } = useReferrer();
 const route = useRoute();
 const referrerName = ref("");
 
@@ -298,6 +304,27 @@ const fetchOrders = async () => {
   } finally {
     loading.loading = false;
   }
+};
+
+const handleExport = () => {
+  const referrerId = Array.isArray(route.params.id)
+    ? route.params.id[0]
+    : route.params.id;
+
+  const query: Record<string, string> = {};
+
+  if (filters.value.start) {
+    query.startDate = dayjs(filters.value.start).format("YYYY-MM-DD");
+  }
+
+  if (filters.value.end) {
+    query.endDate = dayjs(filters.value.end).format("YYYY-MM-DD");
+  }
+
+  exportReferrerPdf(referrerId, {
+    startDate: query.startDate,
+    endDate: query.endDate,
+  });
 };
 
 onMounted(fetchOrders);

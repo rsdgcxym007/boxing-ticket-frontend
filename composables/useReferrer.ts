@@ -1,7 +1,10 @@
 import { useApi } from "../composables/useApi";
 import { useToast } from "vue-toastification";
+import { useRuntimeConfig } from "nuxt/app";
 
 export const useReferrer = () => {
+  const config = useRuntimeConfig();
+  const base = config.public.apiBase;
   const { get, post, patch, remove } = useApi();
   const toast = useToast();
 
@@ -124,6 +127,32 @@ export const useReferrer = () => {
     }
   };
 
+  const exportReferrerPdf = async (
+    id: string,
+    filters?: { startDate?: string; endDate?: string }
+  ) => {
+    const query: Record<string, string> = {};
+    if (filters?.startDate) query.startDate = filters.startDate;
+    if (filters?.endDate) query.endDate = filters.endDate;
+
+    const queryString = new URLSearchParams(query).toString();
+    const url = `${base}/api/referrers/${id}/export-pdf?${queryString}`;
+
+    window.open(url, "_blank");
+  };
+  const previewReferrerPdf = async (
+    id: string,
+    filters?: { startDate?: string; endDate?: string }
+  ) => {
+    const query: Record<string, string> = {};
+    if (filters?.startDate) query.startDate = filters.startDate;
+    if (filters?.endDate) query.endDate = filters.endDate;
+
+    const queryString = new URLSearchParams(query).toString();
+    const url = `${base}/referrers/${id}/preview-pdf?${queryString}`;
+    return url;
+  };
+
   return {
     getReferrers,
     createReferrer,
@@ -131,5 +160,7 @@ export const useReferrer = () => {
     getReferrerById,
     getReferrerOrders,
     deleteReferrer,
+    exportReferrerPdf,
+    previewReferrerPdf,
   };
 };
