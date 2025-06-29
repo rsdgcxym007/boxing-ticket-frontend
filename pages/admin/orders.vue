@@ -172,7 +172,7 @@
   <StandingTicketModal
     v-model:showModal="showModal"
     :order="orderData"
-    @success="refetchData()"
+    @success="fetchData"
   />
 </template>
 
@@ -226,6 +226,7 @@ const fetchData = async () => {
     pageData.orders = res.items;
     pageData.totalCount = res.total;
     pageData.totalPage = res.totalPages;
+    showModal.value = false;
   } catch (error) {
     console.log("fetchData", error);
   } finally {

@@ -63,6 +63,18 @@ export const useApi = () => {
     return handleResponse(res);
   };
 
+  const put = async (url: string, payload: any) => {
+    const res = await fetch(`${base}${url}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  };
+
   const upload = async (url: string, formData: FormData) => {
     const res = await fetch(`${base}${url}`, {
       method: "POST",
@@ -88,6 +100,7 @@ export const useApi = () => {
     // generic
     get,
     post,
+    put,
     patch,
     upload,
     remove,

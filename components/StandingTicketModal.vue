@@ -99,7 +99,7 @@
               class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium shadow-lg transition"
             >
               <i class="mdi mdi-plus-circle-outline text-xl" />
-              สร้างออเดอร์
+              อัพเดท ออเดอร์
             </button>
             <button
               @click="handlePayNow"
@@ -159,12 +159,10 @@ const emit = defineEmits(["update:showModal", "update:modelValue", "success"]);
 const toast = useToast();
 const auth = useAuthStore();
 const isLoading = usePageData();
-const { createStanding } = useOrder();
+const { createStanding, updateStanding } = useOrder();
 const { createPayStanding } = usePayments();
 
 const orderId = ref<string | null>(props.order?.id ?? null);
-
-console.log("orderData", props.order);
 
 const pageData = ref({
   customerName: props.order?.customerName ?? "",
@@ -183,7 +181,8 @@ const handleCreateOrder = async () => {
   }
 
   try {
-    const res = await createStanding({
+    const res = await updateStanding({
+      id: props.order?.id ?? "",
       userId: auth.user?.id ?? "",
       standingAdultQty,
       standingChildQty,
@@ -191,9 +190,10 @@ const handleCreateOrder = async () => {
       method: "CASH",
       status: "BOOKED",
       referrerCode: pageData.value.referrerCode ?? "",
+      customerName: pageData.value.customerName,
     });
     orderId.value = res.id;
-    toast.success("สร้างออเดอร์สำเร็จ");
+    toast.success("อัพเดท ออเดอร์สำเร็จ");
   } catch (err: any) {
     toast.error(err.message || "เกิดข้อผิดพลาด");
   } finally {
@@ -212,6 +212,7 @@ const handlePayNow = async () => {
 
   try {
     await createPayStanding({
+      userId: auth.user?.id ?? "",
       orderId: orderId.value,
       amount: total,
       method: "CASH",
@@ -219,7 +220,6 @@ const handlePayNow = async () => {
       referrerCode: referrerCode || undefined,
     });
 
-    toast.success("ชำระเงินสำเร็จ");
     emit("update:modelValue", false);
     emit("success");
   } catch (err: any) {

@@ -6,6 +6,7 @@ export const usePayments = () => {
   const toast = useToast();
 
   const createPayment = async (payload: {
+    userId: string;
     orderId: string;
     amount: number;
     method: string;
@@ -24,6 +25,7 @@ export const usePayments = () => {
   };
 
   const createPayStanding = async (payload: {
+    userId: string;
     orderId: string;
     amount: number;
     method: string;

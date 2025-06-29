@@ -2,7 +2,7 @@ import { useApi } from "../composables/useApi";
 import { useToast } from "vue-toastification";
 
 export const useOrder = () => {
-  const { get, post, patch } = useApi();
+  const { get, post, patch, put } = useApi();
   const toast = useToast();
 
   const getOrders = async ({
@@ -107,6 +107,47 @@ export const useOrder = () => {
       throw err;
     }
   };
+  const updateStanding = async ({
+    id,
+    userId,
+    standingAdultQty,
+    standingChildQty,
+    showDate,
+    method,
+    status,
+    referrerCode,
+    customerName,
+  }: {
+    id: string;
+    userId: string;
+    standingAdultQty?: number;
+    standingChildQty?: number;
+    showDate?: string;
+    method?: string;
+    status?: string;
+    referrerCode?: string;
+    customerName?: string;
+  }) => {
+    const payload = {
+      userId,
+      standingAdultQty,
+      standingChildQty,
+      showDate,
+      method,
+      status,
+      referrerCode,
+      customerName,
+    };
+
+    try {
+      const res = await put(`/orders/${id}/update-standing`, payload);
+      toast.success("อัปเดตออเดอร์สำเร็จ");
+      return res;
+    } catch (err: any) {
+      toast.error(`อัปเดตออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
+      throw err;
+    }
+  };
 
   const cancelOrder = async (orderId: string) => {
     try {
@@ -189,5 +230,6 @@ export const useOrder = () => {
     changeSeats,
     updateOrderBooked,
     createStanding,
+    updateStanding,
   };
 };

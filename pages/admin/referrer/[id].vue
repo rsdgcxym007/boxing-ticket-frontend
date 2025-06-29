@@ -84,7 +84,7 @@
           <!-- Total Amount -->
           <div>
             <div class="text-sm text-gray-400">
-              รวมยอดขาย (หักลบกับค่าคอมแล้ว) :
+              รวมยอดขาย (เฉพาะที่จ่ายแล้ว):
             </div>
             <div
               class="text-2xl font-bold text-green-400 flex items-center gap-2 mt-1"
@@ -102,6 +102,11 @@
             >
               <i class="mdi mdi-currency-usd text-yellow-400"></i>
               {{ formatPrice(totalCommission) }} บาท
+            </div>
+            <div class="text-xs mt-1 text-gray-400 leading-tight">
+              - ค่าคอมที่นั่ง:
+              {{ formatPrice(totalReferrerCommission) }} บาท<br />
+              - ค่าคอมยืน: {{ formatPrice(totalStandingCommission) }} บาท
             </div>
           </div>
         </div>
@@ -123,13 +128,18 @@
               <i class="mdi mdi-calendar-clock text-blue-400 text-xl"></i>
               {{ formatDate(order.createdAt) }}
             </div>
-            <div class="flex items-center gap-2 text-sm text-gray-400">
+            <div class="flex items-center gap-2 text-sm text-gray-400 mt-2">
               <i class="mdi mdi-calendar-range-outline"></i>
               รอบแสดง: {{ formatDate(order.showDate) }}
             </div>
-            <div class="flex items-center gap-2 text-sm text-white-400">
+            <div class="flex items-center gap-2 text-sm text-white-400 mt-3">
               <i class="mdi mdi-account-outline"></i>
-              โดย: {{ order?.user?.name }}
+              สร้างออเดอร์โดย: {{ order?.user?.name }}
+            </div>
+
+            <div class="flex items-center gap-2 text-sm text-white-400 mt-3">
+              <i class="mdi mdi-account-cash-outline"></i>
+              รับชำระเงินโดย: {{ order?.payment?.user?.name }}
             </div>
           </div>
 
@@ -167,20 +177,48 @@
           </div>
           <div class="flex items-center gap-2">
             <i class="mdi mdi-seat-outline text-lg text-white"></i>
-            <span><strong>ที่นั่ง:</strong> {{ order.seats.length }}</span>
+            <span
+              ><strong>ที่นั่ง Ringside:</strong> {{ order.seats.length }}</span
+            >
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="mdi mdi-seat-outline text-lg text-white"></i>
+            <span
+              ><strong>ที่นั่ง Stadium (ผู้ใหญ่) :</strong>
+              {{ order.standingAdultQty }}</span
+            >
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="mdi mdi-seat-outline text-lg text-white"></i>
+            <span
+              ><strong>ที่นั่ง Stadium (เด็ก) :</strong>
+              {{ order.standingChildQty }}</span
+            >
           </div>
           <div class="flex items-center gap-2">
             <i class="mdi mdi-cash text-lg text-green-400"></i>
-            <span
-              ><strong>ยอดรวม (หักลบกับค่าคอมแล้ว) :</strong>
-              {{ formatPrice(order.total) }} บาท</span
-            >
+            <span>
+              <strong>ยอดรวม (หักลบค่าคอมมิชชันแล้ว):</strong>
+              {{
+                formatPrice(
+                  order.total -
+                    ((order.referrerCommission || 0) +
+                      (order.standingCommission || 0))
+                )
+              }}
+              บาท
+            </span>
           </div>
           <div class="flex items-center gap-2">
             <i class="mdi mdi-currency-usd text-lg text-yellow-400"></i>
             <span
               ><strong>ค่าคอม:</strong>
-              {{ formatPrice(order.referrerCommission) }} บาท</span
+              {{
+                order.referrerCommission !== 0
+                  ? formatPrice(order.referrerCommission)
+                  : formatPrice(order.standingCommission)
+              }}
+              บาท</span
             >
           </div>
         </div>
@@ -217,56 +255,48 @@ import { ref, onMounted, computed } from "vue";
 import { useReferrer } from "../../../composables/useReferrer";
 import { useRoute } from "vue-router";
 import dayjs from "dayjs";
-
-interface Order {
-  id: string;
-  createdAt: string;
-  showDate: string;
-  user: {
-    name: string;
-  };
-  customerName: string;
-  method: string;
-  status: string;
-  total: number;
-  referrerCommission: number;
-  seats: {
-    id: string;
-    seatNumber: string;
-  }[];
-}
-
+import type { Order } from "../../../types/Order";
+import { usePageData } from "../../../stores/pageData";
+const loading = usePageData();
 const orders = ref<Order[]>([]);
+
 const { getReferrerOrders } = useReferrer();
 const route = useRoute();
 const referrerName = ref("");
 
 const filters = ref({
-  start: "",
-  end: "",
+  start: dayjs(new Date()).format("YYYY-MM-DD"),
+  end: dayjs(new Date()).format("YYYY-MM-DD"),
 });
 
 const fetchOrders = async () => {
-  const query: Record<string, string> = {};
+  loading.loading = true;
+  try {
+    const query: Record<string, string> = {};
 
-  if (filters.value.start) {
-    query.startDate = dayjs(filters.value.start).format("YYYY-MM-DD");
-  }
+    if (filters.value.start) {
+      query.startDate = dayjs(filters.value.start).format("YYYY-MM-DD");
+    }
 
-  if (filters.value.end) {
-    query.endDate = dayjs(filters.value.end).format("YYYY-MM-DD");
-  }
+    if (filters.value.end) {
+      query.endDate = dayjs(filters.value.end).format("YYYY-MM-DD");
+    }
 
-  const referrerId = Array.isArray(route.params.id)
-    ? route.params.id[0]
-    : route.params.id;
+    const referrerId = Array.isArray(route.params.id)
+      ? route.params.id[0]
+      : route.params.id;
 
-  const data = await getReferrerOrders(referrerId, query);
-  console.log("data", data);
+    const data = await getReferrerOrders(referrerId, query);
 
-  orders.value = data;
-  if (data.length > 0) {
-    referrerName.value = data[0].referrer.name;
+    orders.value = data;
+    const paid = data.find((o: Order) => o.status === "PAID");
+    if (paid) {
+      referrerName.value = paid.referrer?.name || "";
+    }
+  } catch (error) {
+    loading.loading = false;
+  } finally {
+    loading.loading = false;
   }
 };
 
@@ -276,19 +306,36 @@ const formatDate = (d: string) => dayjs(d).format("D MMM YYYY เวลา HH:mm
 const formatPrice = (val: number | string) =>
   Number(val).toLocaleString("th-TH");
 
-const totalAmount = computed(() => {
-  const rawTotal = orders.value.reduce(
-    (sum, o) => sum + Number(o.total || 0),
-    0
-  );
-  const totalSeats = orders.value.reduce(
-    (sum, o) => sum + (o.seats?.length || 0),
-    0
-  );
-  return rawTotal - totalSeats * 400;
-});
+const paidOrdersOnly = computed(() =>
+  orders.value.filter((o) => o.status === "PAID")
+);
 
-const totalCommission = computed(() =>
-  orders.value.reduce((sum, o) => sum + Number(o.referrerCommission), 0)
+const totalAmount = computed(() =>
+  paidOrdersOnly.value.reduce(
+    (sum, o) =>
+      sum +
+      Number(o.total || 0) -
+      Number(o.referrerCommission || 0) -
+      Number(o.standingCommission || 0),
+    0
+  )
+);
+
+const totalReferrerCommission = computed(() =>
+  paidOrdersOnly.value.reduce(
+    (sum, o) => sum + Number(o.referrerCommission || 0),
+    0
+  )
+);
+
+const totalStandingCommission = computed(() =>
+  paidOrdersOnly.value.reduce(
+    (sum, o) => sum + Number(o.standingCommission || 0),
+    0
+  )
+);
+
+const totalCommission = computed(
+  () => totalReferrerCommission.value + totalStandingCommission.value
 );
 </script>

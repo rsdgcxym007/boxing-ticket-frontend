@@ -174,7 +174,8 @@ import { usePageData } from "@/stores/pageData";
 import { useOrder } from "@/composables/useOrder";
 import { useWebSocket } from "@/composables/useSocket";
 import { useToast } from "vue-toastification";
-
+import { useAuthStore } from "../stores/auth";
+const auth = useAuthStore();
 const toast = useToast();
 const { t } = useI18n();
 const router = useRouter();
@@ -246,8 +247,10 @@ const submitOrders = async () => {
     toast.warning(t("Please enter the customer name before proceeding."));
     return;
   }
+
   try {
     await createPayment({
+      userId: auth.user?.id ?? "",
       orderId: props.dataZoneSelected.orderId,
       amount: pageData.total,
       method: pageData.method.toUpperCase(),

@@ -112,7 +112,6 @@ import { useOrder } from "../composables/useOrder";
 import { useAuthStore } from "../stores/auth";
 import { usePageData } from "../stores/pageData";
 const auth = useAuthStore();
-console.log("auth.user?.id", auth.user?.id);
 const isLoading = usePageData();
 const { createStanding } = useOrder();
 const { createPayStanding } = usePayments();
@@ -131,12 +130,12 @@ const pageData = ref({
 const orderId = ref<string | null>(null);
 
 const handleCreateOrder = async () => {
-  isLoading.loading = true;
   const { standingAdultQty, standingChildQty, showDate } = pageData.value;
   if (!showDate || standingAdultQty + standingChildQty === 0) {
     toast.error("กรุณากรอกข้อมูลให้ครบ");
     return;
   }
+  isLoading.loading = true;
 
   try {
     const res = await createStanding({
@@ -149,7 +148,6 @@ const handleCreateOrder = async () => {
       referrerCode: pageData.value.referrerCode ?? "",
       customerName: pageData.value.customerName,
     });
-    console.log(res);
 
     orderId.value = res.id;
     isLoading.loading = false;
@@ -170,6 +168,7 @@ const handlePayNow = async () => {
 
   try {
     await createPayStanding({
+      userId: auth.user?.id ?? "",
       orderId: orderId.value,
       amount: total,
       method: "CASH",

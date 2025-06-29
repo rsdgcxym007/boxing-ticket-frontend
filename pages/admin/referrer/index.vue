@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-1 px-4 py-8 min-h-screen bg-[#0f1f3c] text-white">
     <!-- Header + Search -->
-    <div class="mb-6">
+    <div class="mb-4">
       <h1 class="text-2xl font-bold mb-4">จัดการ Referrer</h1>
       <div class="flex flex-row gap-2 items-center">
         <!-- ช่องค้นหา -->
@@ -19,6 +19,94 @@
           + สร้าง Referrer
         </button>
       </div>
+      <div class="overflow-auto rounded-md mt-5">
+        <!-- Referrer Card List -->
+        <div class="grid md:grid-cols-3 xl:grid-cols-3 gap-4">
+          <div
+            v-for="ref in pageData.referrers"
+            :key="ref.id"
+            class="bg-[#1a2a47] rounded-lg p-4 shadow hover:shadow-lg transition"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <h2 class="text-lg font-semibold truncate">{{ ref.name }}</h2>
+              <span
+                :class="[
+                  'text-xs font-semibold px-3 py-1 rounded-full',
+                  ref.status === true
+                    ? 'bg-green-600 text-white'
+                    : 'bg-red-500 text-white',
+                ]"
+              >
+                {{ ref.status ? "ใช้งาน" : "ไม่ใช้งาน" }}
+              </span>
+            </div>
+
+            <div class="text-sm text-gray-200 space-y-1 mb-3">
+              <div>
+                <span class="font-semibold text-white">โค้ด:</span>
+                {{ ref.code }}
+              </div>
+              <div>
+                <span class="font-semibold text-white">ค่าคอมมิชชัน:</span>
+                {{ ref.totalCommission.toLocaleString() }} บาท
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <!-- แก้ไข -->
+              <button
+                @click="editReferrer(ref)"
+                class="flex items-center gap-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 text-xs px-3 py-1 rounded-md"
+              >
+                <i class="mdi mdi-pencil-outline text-sm"></i> แก้ไข
+              </button>
+
+              <!-- ลบ -->
+              <button
+                @click="deleteReferrers(ref)"
+                class="flex items-center gap-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-1 rounded-md"
+              >
+                <i class="mdi mdi-trash-can-outline text-sm"></i> ลบ
+              </button>
+
+              <!-- เปลี่ยนสถานะ -->
+              <button
+                @click="toggleStatus(ref)"
+                class="flex items-center gap-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs px-3 py-1 rounded-md"
+              >
+                <i class="mdi mdi-repeat text-sm"></i> เปลี่ยนสถานะ
+              </button>
+              <button
+                @click="viewReferrer(ref.id)"
+                class="flex items-center gap-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs px-3 py-1 rounded-md"
+              >
+                <i class="mdi mdi-repeat text-sm"></i> ดูเพิ่มเติม
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-end space-x-2">
+          <button
+            @click="changePage(pageData.page - 1)"
+            :disabled="pageData.page === 1"
+            class="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
+          >
+            ก่อนหน้า
+          </button>
+          <span class="px-3 py-1"
+            >หน้า {{ pageData.page }} / {{ pageData.totalPages }}</span
+          >
+          <button
+            @click="changePage(pageData.page + 1)"
+            :disabled="pageData.page === pageData.totalPages"
+            class="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
+          >
+            ถัดไป
+          </button>
+        </div>
+      </div>
     </div>
     <!-- Empty State -->
     <div
@@ -31,94 +119,6 @@
     </div>
 
     <!-- Referrer Table -->
-    <div class="overflow-auto rounded-md">
-      <!-- Referrer Card List -->
-      <div class="grid md:grid-cols-3 xl:grid-cols-3 gap-4">
-        <div
-          v-for="ref in pageData.referrers"
-          :key="ref.id"
-          class="bg-[#1a2a47] rounded-lg p-4 shadow hover:shadow-lg transition"
-        >
-          <div class="flex justify-between items-center mb-2">
-            <h2 class="text-lg font-semibold truncate">{{ ref.name }}</h2>
-            <span
-              :class="[
-                'text-xs font-semibold px-3 py-1 rounded-full',
-                ref.status === true
-                  ? 'bg-green-600 text-white'
-                  : 'bg-red-500 text-white',
-              ]"
-            >
-              {{ ref.status ? "ใช้งาน" : "ไม่ใช้งาน" }}
-            </span>
-          </div>
-
-          <div class="text-sm text-gray-200 space-y-1 mb-3">
-            <div>
-              <span class="font-semibold text-white">โค้ด:</span>
-              {{ ref.code }}
-            </div>
-            <div>
-              <span class="font-semibold text-white">ค่าคอมมิชชัน:</span>
-              {{ ref.totalCommission.toLocaleString() }} บาท
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-2">
-            <!-- แก้ไข -->
-            <button
-              @click="editReferrer(ref)"
-              class="flex items-center gap-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 text-xs px-3 py-1 rounded-md"
-            >
-              <i class="mdi mdi-pencil-outline text-sm"></i> แก้ไข
-            </button>
-
-            <!-- ลบ -->
-            <button
-              @click="deleteReferrers(ref)"
-              class="flex items-center gap-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs px-3 py-1 rounded-md"
-            >
-              <i class="mdi mdi-trash-can-outline text-sm"></i> ลบ
-            </button>
-
-            <!-- เปลี่ยนสถานะ -->
-            <button
-              @click="toggleStatus(ref)"
-              class="flex items-center gap-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs px-3 py-1 rounded-md"
-            >
-              <i class="mdi mdi-repeat text-sm"></i> เปลี่ยนสถานะ
-            </button>
-            <button
-              @click="viewReferrer(ref.id)"
-              class="flex items-center gap-1 bg-green-100 hover:bg-green-200 text-green-700 text-xs px-3 py-1 rounded-md"
-            >
-              <i class="mdi mdi-repeat text-sm"></i> ดูเพิ่มเติม
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pagination -->
-      <div class="mt-4 flex justify-end space-x-2">
-        <button
-          @click="changePage(pageData.page - 1)"
-          :disabled="pageData.page === 1"
-          class="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-        >
-          ก่อนหน้า
-        </button>
-        <span class="px-3 py-1"
-          >หน้า {{ pageData.page }} / {{ pageData.totalPages }}</span
-        >
-        <button
-          @click="changePage(pageData.page + 1)"
-          :disabled="pageData.page === pageData.totalPages"
-          class="px-3 py-1 bg-gray-700 rounded disabled:opacity-50"
-        >
-          ถัดไป
-        </button>
-      </div>
-    </div>
 
     <!-- Create/Edit Modal -->
     <div

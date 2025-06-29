@@ -2,7 +2,7 @@ import { useApi } from "../composables/useApi";
 import { useToast } from "vue-toastification";
 
 export const useReferrer = () => {
-  const { get, post, patch } = useApi();
+  const { get, post, patch, remove } = useApi();
   const toast = useToast();
 
   const getReferrers = async ({
@@ -113,11 +113,23 @@ export const useReferrer = () => {
     }
   };
 
+  const deleteReferrer = async (id: string) => {
+    try {
+      const res = await remove(`/referrers/${id}`);
+      toast.success("ลบผู้แนะนำเรียบร้อย");
+      return res;
+    } catch (err: any) {
+      toast.error(`ลบผู้แนะนำล้มเหลว: ${err.message || "Unknown error"}`);
+      throw err;
+    }
+  };
+
   return {
     getReferrers,
     createReferrer,
     updateReferrer,
     getReferrerById,
     getReferrerOrders,
+    deleteReferrer,
   };
 };
