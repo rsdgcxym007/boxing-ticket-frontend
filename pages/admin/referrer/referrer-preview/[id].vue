@@ -1,4 +1,11 @@
 <template>
+  <button
+    @click="$router.back()"
+    class="inline-flex items-center ml-5 gap-2 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white px-6 py-2 rounded-xl font-semibold shadow-lg transition-all duration-300 mt-6 sm:mt-0"
+  >
+    <i class="mdi mdi-arrow-left text-lg"></i>
+    ย้อนกลับ
+  </button>
   <div
     class="min-h-screen bg-[#0a1323] text-white flex flex-col items-center justify-start px-4 py-10"
   >
