@@ -29,14 +29,18 @@
         </p>
       </div>
 
-      <div class="grid gap-3 mt-4">
+      <div class="space-y-4 mt-6">
+        <!-- Generate Tickets Button -->
         <button
-          v-for="seat in seats"
-          :key="seat"
-          @click="generatePDF(seat)"
-          class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full px-5 py-2 font-medium shadow-md hover:shadow-lg hover:scale-105 transition"
+          @click="onGenerateTickets"
+          :disabled="isGeneratingTickets"
+          class="w-full bg-gradient-to-r from-green-500 to-green-700 text-white rounded-full px-6 py-3 font-semibold shadow-md hover:shadow-lg hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          🎫 ดาวน์โหลดตั๋ว: ที่นั่ง {{ seat }}
+          <i class="mdi mdi-ticket" v-if="!isGeneratingTickets"></i>
+          <i class="mdi mdi-loading mdi-spin" v-else></i>
+          {{
+            isGeneratingTickets ? "กำลังสร้างตั๋ว..." : "🎫 สร้างตั๋วทั้งหมด"
+          }}
         </button>
       </div>
 
@@ -47,107 +51,73 @@
         ⬅️ กลับหน้าแรก
       </router-link>
     </div>
+
+    <!-- Ticket Display Modal -->
+    <TicketDisplay
+      v-if="showTicketModal"
+      :tickets="generatedTickets"
+      @close="showTicketModal = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { useRoute } from "vue-router";
-import jsPDF from "jspdf";
+import TicketDisplay from "~/components/TicketDisplay.vue";
 
+const { cancelOrder, generateTickets } = useOrder();
 const route = useRoute();
 
 // ✅ Fallback mock data
+const orderId = route.query.orderId || "12345";
 const zone = route.query.zone || "BACK-RIGHT";
 const seats = (route.query.seats || "A1,A2,A3").toString().split(",");
 const total = parseInt(route.query.total || "5400");
 
-function generatePDF() {
-  const doc = new jsPDF({
-    orientation: "landscape",
-    unit: "mm",
-    format: "a5", // A5 ขนาด 210 x 148 mm
-  });
+// Reactive data
+const isGeneratingTickets = ref(false);
+const generatedTickets = ref([]);
+const showTicketModal = ref(false);
 
-  // 🟥 Background ซ้าย
-  doc.setFillColor(155, 0, 0);
-  doc.rect(0, 0, 148, 148, "F");
+// Generate tickets from order data using API
+const onGenerateTickets = async () => {
+  isGeneratingTickets.value = true;
 
-  // ⬛️ Background ขวา
-  doc.setFillColor(17, 17, 17);
-  doc.rect(148, 0, 62, 148, "F");
+  try {
+    // Use the real API to generate tickets
+    const tickets = await generateTickets(orderId);
+    console.log("Generated tickets:", tickets);
 
-  // 🖼 โลโก้
-  const logo = new Image();
-  logo.src = "/images/logo/logonew.png"; // ✅ ปรับ path ตามที่อยู่จริง
-  logo.onload = () => {
-    doc.addImage(logo, "PNG", 10, 10, 30, 30);
+    // แสดงตั๋วที่ออกมา
+    generatedTickets.value = tickets;
+    showTicketModal.value = true;
 
-    // 🏷 TITLE
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("SAINAMYEN", 45, 20);
-    doc.text("BOXING STADIUM", 45, 30);
+    // Show success message
+    alert(`สร้างตั๋วเสร็จสิ้น! จำนวน ${tickets.length} ใบ`);
+  } catch (error) {
+    console.error("Failed to generate tickets:", error);
 
-    // 📅 รายละเอียด
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.text("Date:", 10, 60);
-    doc.text("Zone:", 10, 70);
-    doc.text("Seat:", 10, 80);
-    doc.text("Price:", 10, 90);
+    // Fallback to mock data if API fails
+    console.log("API failed, using fallback mock data");
 
-    doc.setFont("helvetica", "bold");
-    doc.text("30 June 2025", 35, 60);
-    doc.text("BACK-RIGHT", 35, 70);
-    doc.text("417", 35, 80);
-    doc.text("1,800 Baht", 35, 90);
+    // Create ticket objects from order data
+    const tickets = seats.map((seat, index) => ({
+      orderId: orderId,
+      seatNumber: seat,
+      customerName: `ผู้ซื้อตั๋ว ${index + 1}`, // You can customize this
+      showDate: "01/07/2025", // You can get this from order data
+      type: zone.includes("STANDING") ? "STANDING" : "SEAT",
+      zone: zone,
+    }));
 
-    // 🟢 ปุ่มแนวนอน
-    drawPill(doc, "ENTRANCE", 10, 110);
-    drawPill(doc, "ZONE", 50, 110);
-    drawPill(doc, "SEAT", 90, 110);
+    generatedTickets.value = tickets;
+    showTicketModal.value = true;
 
-    // 🔴 ปุ่มขวาแนวตั้ง
-    drawRedPill(doc, "ENTRANCE", 155, 20);
-    drawRedPill(doc, "ZONE: BACK-RIGHT", 155, 35);
-    drawRedPill(doc, "SEAT: 417", 155, 50);
-
-    // 🟨 QR CODE
-    const qr = new Image();
-    qr.src =
-      "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=SAINAMYEN-417";
-    qr.onload = () => {
-      doc.addImage(qr, "PNG", 160, 70, 40, 40);
-
-      // Footer
-      doc.setFontSize(8);
-      doc.setTextColor(160);
-      doc.setFont("helvetica", "normal");
-      doc.text("Issued by: www.your-website.com", 155, 120);
-
-      // ✅ Save PDF
-      doc.save("sainamyen-ticket-417.pdf");
-    };
-  };
-}
-function drawPill(doc, text, x, y) {
-  doc.setFillColor(255, 255, 255);
-  doc.roundedRect(x, y, 35, 10, 5, 5, "F");
-  doc.setTextColor(215, 0, 0);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "bold");
-  doc.text(text, x + 17.5, y + 7, { align: "center" });
-}
-
-function drawRedPill(doc, text, x, y) {
-  doc.setFillColor(255, 0, 0);
-  doc.roundedRect(x, y, 50, 12, 6, 6, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "bold");
-  doc.text(text, x + 25, y + 8, { align: "center" });
-}
+    alert(`สร้างตั๋วเสร็จสิ้น! จำนวน ${tickets.length} ใบ (ใช้ข้อมูลตัวอย่าง)`);
+  } finally {
+    isGeneratingTickets.value = false;
+  }
+};
 </script>
 
 <style scoped>

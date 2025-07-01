@@ -232,6 +232,7 @@ const fetchSeats = async () => {
     pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
     const allSeatIds = allSeats.map((s) => s.id);
     const dateKey = getDateKey(pageData.showDate);
+    console.log("dateKey", dateKey);
 
     const orderSeatIds =
       props.orderData?.seatBookings.map((b) => b.seat.id) || [];
@@ -239,6 +240,8 @@ const fetchSeats = async () => {
     pageData.bookedSeats = allSeats.filter((s) =>
       s.seatBookings?.some((b) => {
         const isSameDay = getDateKey(b.showDate) === dateKey;
+        console.log("isSameDay", isSameDay);
+
         const isBooked = ["BOOKED", "PAID"].includes(b.status);
         const isDifferentFromOrder = !orderSeatIds.includes(s.id);
         return (
@@ -339,12 +342,12 @@ const handleConfirm = async () => {
     }
   }
 
-  const showDateStr = dayjs(pageData.showDate).format("YYYY-MM-DD");
-  const todayStr = dayjs().format("YYYY-MM-DD");
+  const showDateStr = dayjs(pageData.showDate).format("DD-MM-YYYY'");
+  const todayStr = dayjs().format("DD-MM-YYYY'");
 
   const orderPayload = {
     seatIds: pageData.selectedSeats.map((s) => s.id),
-    showDate: pageData.showDate,
+    showDate: dayjs(pageData.showDate).format("YYYY-MM-DD"),
     method: "CASH",
     status: showDateStr === todayStr ? "PENDING" : "BOOKED",
   };

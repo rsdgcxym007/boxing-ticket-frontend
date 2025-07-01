@@ -257,19 +257,22 @@ const submitOrders = async () => {
       customerName: pageData.customerName,
       referrerCode: pageData.referrerCode || undefined,
     });
+    console.log("props.dataZoneSelected", props.dataZoneSelected);
+    console.log("pageData", pageData);
 
     submitted.value = true;
-    if (props.mode === "booking") {
-      pageData.resetPageData();
 
+    if (props.mode === "booking") {
       router.push({
         path: "/confirmation",
         query: {
+          orderId: props.dataZoneSelected.orderId,
           zone: pageData.zoneKey,
           seats: pageData.selectedSeats.map((s) => s.seatNumber).join(","),
           total: pageData.total,
         },
       });
+      pageData.resetPageData();
       emit("close");
     } else {
       pageData.resetPageData();

@@ -70,7 +70,7 @@ watch(
 
 // sync display → parent (มีเช็คกันซ้ำ)
 watch(displayDate, (val) => {
-  const newVal = val ? dayjs(val).format("YYYY-MM-DD") : null;
+  const newVal = val ? dayjs(val).format("YYYY-MM-DD HH:mm:ss") : null;
   if (newVal !== model.value) {
     model.value = newVal;
   }

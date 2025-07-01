@@ -123,7 +123,7 @@ import { usePayments } from "../composables/usePayments";
 import { useOrder } from "../composables/useOrder";
 import { useAuthStore } from "../stores/auth";
 import { usePageData } from "../stores/pageData";
-
+import dayjs from 'dayjs'
 interface StandingOrderData {
   id?: string;
   referrerCode?: string;
@@ -169,7 +169,7 @@ const pageData = ref({
   standingAdultQty: props.order?.standingAdultQty ?? 0,
   standingChildQty: props.order?.standingChildQty ?? 0,
   referrerCode: props.order?.referrerCode ?? props.order?.referrer?.code ?? "",
-  showDate: props.order?.showDate ?? new Date().toISOString().slice(0, 10),
+  showDate: props.order?.showDate ?? dayjs().format('YYYY-MM-DD'),
 });
 
 const handleCreateOrder = async () => {

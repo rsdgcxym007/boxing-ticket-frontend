@@ -8,25 +8,32 @@ export function useSeatApi() {
   const getSeatsByZoneId = async (zoneId: string, showDate: string | Date) => {
     try {
       const zoneIds = ZONE_IDS_BY_NAME[`${zoneId}`];
+      console.log("getSeatsByZoneId - zoneId:", zoneId, "zoneIds:", zoneIds);
+
       const localDate = new Date(showDate);
       const yyyy = localDate.getFullYear();
       const mm = String(localDate.getMonth() + 1).padStart(2, "0");
       const dd = String(localDate.getDate()).padStart(2, "0");
       const formattedDate = `${yyyy}-${mm}-${dd}`;
+      const apiUrl = `/seats/by-zone/${zoneIds}?showDate=${formattedDate}`;
+      console.log("getSeatsByZoneId - API URL:", apiUrl);
 
-      const allSeats = await get(
-        `/seats/by-zone/${zoneIds}?showDate=${formattedDate}`
+      const allSeats = await get(apiUrl);
+      console.log(
+        "getSeatsByZoneId - returned seats count:",
+        allSeats?.length || 0
       );
 
-      return allSeats;
+      return allSeats || [];
     } catch (error: any) {
+      console.error("getSeatsByZoneId - error:", error);
+
       if (error?.message === "Unauthorized") {
         toast.warning(`กรุณาเข้าสู่ระบบเพื่อดําเนินการต่อ`);
-
-        return;
+        return [];
       }
-      console.log("error?.message", error?.message);
 
+      console.log("getSeatsByZoneId - error message:", error?.message);
       toast.error(`โหลดที่นั่งล้มเหลว: ${error?.message || "Unknown error"}`);
       return [];
     }
