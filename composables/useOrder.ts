@@ -222,6 +222,19 @@ export const useOrder = () => {
     }
   };
 
+  const generateTickets = async (orderId: string) => {
+    try {
+      const data = await get(`/orders/${orderId}/tickets`);
+      toast.success("ออกตั๋วสำเร็จ");
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `ออกตั๋วล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
+      );
+      throw err;
+    }
+  };
+
   return {
     submitOrder,
     cancelOrder,
@@ -231,5 +244,6 @@ export const useOrder = () => {
     updateOrderBooked,
     createStanding,
     updateStanding,
+    generateTickets,
   };
 };

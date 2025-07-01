@@ -137,6 +137,16 @@
           อัปเดตสถานะ
         </button>
 
+        <!-- ออกตั๋ว -->
+        <button
+          v-if="order.status === 'PAID'"
+          class="px-4 py-2 text-sm font-medium border border-green-500 text-green-400 rounded-lg flex items-center gap-2 justify-center w-full sm:max-w-[220px] hover:bg-green-900/20 hover:shadow-sm transition-all duration-200"
+          @click="$emit('generate-tickets', order)"
+        >
+          <i class="mdi mdi-ticket-confirmation text-base"></i>
+          ออกตั๋ว
+        </button>
+
         <!-- ยกเลิก -->
         <button
           v-if="order.status === 'PENDING' || order.status === 'BOOKED'"

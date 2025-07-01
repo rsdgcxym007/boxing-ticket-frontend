@@ -159,6 +159,7 @@
         @change-seats="onChangeSeats"
         @update-status="onUpdateStatus"
         @cancel-order="onCancelOrder"
+        @generate-tickets="onGenerateTickets"
       />
     </div>
   </div>
@@ -173,6 +174,13 @@
     v-model:showModal="showModal"
     :order="orderData"
     @success="fetchData"
+  />
+  
+  <!-- Ticket Display Modal -->
+  <TicketDisplay
+    v-if="showTicketModal"
+    :tickets="generatedTickets"
+    @close="showTicketModal = false"
   />
 </template>
 
@@ -197,8 +205,12 @@ const selectedOrder = ref(null);
 const pageData = usePageData();
 const route = useRoute();
 const orderData = reactive({});
-const { cancelOrder } = useOrder();
+const { cancelOrder, generateTickets } = useOrder();
 const collapsed = ref(false);
+
+// สำหรับแสดงตั๋ว
+const showTicketModal = ref(false);
+const generatedTickets = ref([]);
 
 const getZoneLabel = (value) => {
   return (
@@ -234,8 +246,6 @@ const fetchData = async () => {
   }
 };
 const onChangeSeats = (order) => {
-  console.log("order", order);
-
   Object.assign(orderData, order);
   pageData.selectedZone = order.zoneName;
   pageData.showZoneModal = true;
@@ -255,6 +265,21 @@ const onUpdateStatus = (order) => {
 const onCancelOrder = async (order) => {
   await cancelOrder(order.id);
   fetchData();
+};
+
+const onGenerateTickets = async (order) => {
+  try {
+    const tickets = await generateTickets(order.id);
+    console.log("Generated tickets:", tickets);
+    
+    // แสดงตั๋วที่ออกมา
+    generatedTickets.value = tickets;
+    showTicketModal.value = true;
+    
+    fetchData();
+  } catch (error) {
+    console.error("Failed to generate tickets:", error);
+  }
 };
 
 const onOrderIdChange = useDebounceFn(() => {
