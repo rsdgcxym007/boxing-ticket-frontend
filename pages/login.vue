@@ -103,8 +103,6 @@ const login = async () => {
 
     for (const endpoint of endpoints) {
       try {
-        console.log(`🔍 ลองเรียก: ${base}${endpoint}`);
-
         const res = await fetch(`${base}/api/v1${endpoint}`, {
           method: "POST",
           headers: {
@@ -114,13 +112,6 @@ const login = async () => {
             email: pageData.email,
             password: pageData.password,
           }),
-        });
-
-        console.log(`📊 Response สำหรับ ${endpoint}:`, {
-          status: res.status,
-          statusText: res.statusText,
-          ok: res.ok,
-          url: res.url,
         });
 
         if (res.ok) {
