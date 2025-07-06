@@ -5,26 +5,33 @@ export const useOrder = () => {
   const { get, post, patch, put } = useApi();
   const toast = useToast();
 
+  // ตรงกับ API: GET /api/v1/orders
   const getOrders = async ({
     page = 1,
     limit = 10,
     status,
     zone,
     search,
+    startDate,
+    endDate,
   }: {
     page?: number;
     limit?: number;
     status?: string;
     zone?: string;
     search?: string;
+    startDate?: string;
+    endDate?: string;
   }) => {
     try {
       const query: Record<string, any> = { page, limit };
       if (status) query.status = status;
       if (zone) query.zone = zone;
       if (search) query.search = search;
+      if (startDate) query.startDate = startDate;
+      if (endDate) query.endDate = endDate;
 
-      const data = await get("/orders", { query });
+      const data = await get("/api/v1/orders", { query });
       return data;
     } catch (err: any) {
       toast.error(
@@ -35,112 +42,147 @@ export const useOrder = () => {
       throw err;
     }
   };
+
+  // ตรงกับ API: GET /api/v1/orders/{id}
+  const getOrderById = async (orderId: string) => {
+    try {
+      const data = await get(`/api/v1/orders/${orderId}`);
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `ไม่สามารถโหลดข้อมูลออเดอร์ได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: POST /api/v1/orders (Updated)
   const submitOrder = async ({
-    userId,
+    customerName,
+    customerPhone,
+    customerEmail,
+    ticketType,
+    quantity,
     seatIds,
-    total,
     showDate,
-    method,
-    status,
-  }: {
-    userId: string;
-    seatIds: string[];
-    total: number;
-    showDate: string;
-    method: string;
-    status: string;
-  }) => {
-    const payload = {
-      userId,
-      seatIds,
-      showDate,
-      total,
-      method,
-      status,
-    };
-
-    try {
-      const res = await post("/orders", payload);
-      toast.success("สร้างออเดอร์สำเร็จ");
-      return res;
-    } catch (err: any) {
-      toast.error(`สร้างออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
-      throw err;
-    }
-  };
-  const createStanding = async ({
-    userId,
+    referrerCode,
+    paymentMethod,
+    note,
+    source,
     standingAdultQty,
     standingChildQty,
-    showDate,
-    method,
-    status,
-    referrerCode,
-    customerName,
   }: {
-    userId: string;
-    standingAdultQty: number;
-    standingChildQty: number;
+    customerName: string;
+    customerPhone: string;
+    customerEmail: string;
+    ticketType: string;
+    quantity?: number;
+    seatIds?: string[];
     showDate: string;
-    method: string;
-    status: string;
     referrerCode?: string;
-    customerName?: string;
-  }) => {
-    const payload = {
-      userId,
-      standingAdultQty,
-      standingChildQty,
-      showDate,
-      method,
-      status,
-      referrerCode,
-      customerName,
-    };
-
-    try {
-      const res = await post("/orders/create-standing", payload);
-      toast.success("สร้างออเดอร์สำเร็จ");
-      return res;
-    } catch (err: any) {
-      toast.error(`สร้างออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
-      throw err;
-    }
-  };
-  const updateStanding = async ({
-    id,
-    userId,
-    standingAdultQty,
-    standingChildQty,
-    showDate,
-    method,
-    status,
-    referrerCode,
-    customerName,
-  }: {
-    id: string;
-    userId: string;
+    paymentMethod?: string;
+    note?: string;
+    source?: string;
     standingAdultQty?: number;
     standingChildQty?: number;
-    showDate?: string;
-    method?: string;
-    status?: string;
-    referrerCode?: string;
-    customerName?: string;
   }) => {
     const payload = {
-      userId,
+      customerName,
+      customerPhone,
+      customerEmail,
+      ticketType,
+      quantity,
+      seatIds,
+      showDate,
+      referrerCode,
+      paymentMethod,
+      note,
+      source,
       standingAdultQty,
       standingChildQty,
-      showDate,
-      method,
-      status,
-      referrerCode,
-      customerName,
     };
 
     try {
-      const res = await put(`/orders/${id}/update-standing`, payload);
+      const res = await post("/api/v1/orders", payload);
+      return res;
+    } catch (err: any) {
+      // toast.error(`สร้างออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: PATCH /api/v1/orders/{id}/cancel
+  const cancelOrder = async (orderId: string) => {
+    try {
+      const res = await patch(`/api/v1/orders/${orderId}/cancel`, {});
+      return res;
+    } catch (err: any) {
+      toast.error(`ยกเลิกออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: PATCH /api/v1/orders/{id}/confirm-payment
+  const confirmPayment = async (orderId: string) => {
+    try {
+      const res = await patch(`/api/v1/orders/${orderId}/confirm-payment`, {});
+      return res;
+    } catch (err: any) {
+      toast.error(
+        `ยืนยันการชำระเงินล้มเหลว: ${err.message || "Unknown error"}`
+      );
+      throw err;
+    }
+  };
+  // ตรงกับ API: PUT /orders/:id/update-standing-order
+  const updateStanding = async ({
+    id,
+    customerName,
+    customerPhone,
+    customerEmail,
+    ticketType,
+    showDate,
+    referrerCode,
+    paymentMethod,
+    note,
+    source,
+    standingAdultQty,
+    standingChildQty,
+  }: {
+    id: string;
+    customerName: string;
+    customerPhone: string;
+    customerEmail: string;
+    ticketType: string;
+    showDate: string;
+    referrerCode?: string;
+    paymentMethod?: string;
+    note?: string;
+    source?: string;
+    standingAdultQty?: number;
+    standingChildQty?: number;
+  }) => {
+    const payload = {
+      customerName,
+      customerPhone,
+      customerEmail,
+      ticketType,
+      showDate,
+      referrerCode,
+      paymentMethod,
+      note,
+      source,
+      standingAdultQty,
+      standingChildQty,
+    };
+
+    try {
+      const res = await patch(
+        `/api/v1/orders/${id}/update-standing-order`,
+        payload
+      );
       toast.success("อัปเดตออเดอร์สำเร็จ");
       return res;
     } catch (err: any) {
@@ -149,22 +191,9 @@ export const useOrder = () => {
     }
   };
 
-  const cancelOrder = async (orderId: string) => {
-    try {
-      await patch(`/orders/cancel/${orderId}`, {
-        status: "CANCELLED",
-      });
-      toast.info(`ยกเลิกออเดอร์ สำเร็จ`);
-    } catch (err: any) {
-      toast.error(`ยกเลิกออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
-      throw err;
-    }
-  };
-
   const markAsPaidWithRef = async (orderId: string, refCode?: string) => {
     try {
-      await patch(`/orders/${orderId}`, {
-        status: "PAID",
+      await patch(`/api/v1/orders/${orderId}/confirm-payment`, {
         ...(refCode && { referrerCode: refCode }),
       });
       toast.success(`ชำระเงินออเดอร์ ${orderId} สำเร็จ`);
@@ -178,16 +207,29 @@ export const useOrder = () => {
 
   const changeSeats = async (
     orderId: string,
-    newSeatIds: string[],
-    showDate: string
+    seatIds: string[],
+    newReferrerCode?: string,
+    newCustomerName?: string,
+    newCustomerPhone?: string,
+    newCustomerEmail?: string,
+    newShowDate?: string
   ) => {
-    console.log(orderId, newSeatIds, showDate);
-
     try {
-      await patch(`/orders/change-seats/${orderId}`, {
-        seatIds: newSeatIds,
-        showDate,
-      });
+      const payload: any = {
+        seatIds,
+      };
+
+      if (newReferrerCode !== undefined)
+        payload.newReferrerCode = newReferrerCode;
+      if (newCustomerName !== undefined)
+        payload.newCustomerName = newCustomerName;
+      if (newCustomerPhone !== undefined)
+        payload.newCustomerPhone = newCustomerPhone;
+      if (newCustomerEmail !== undefined)
+        payload.newCustomerEmail = newCustomerEmail;
+      if (newShowDate !== undefined) payload.newShowDate = newShowDate;
+
+      await patch(`/api/v1/orders/${orderId}/change-seats`, payload);
 
       toast.success(`เปลี่ยนที่นั่งออเดอร์ ${orderId} สำเร็จ`);
     } catch (err: any) {
@@ -236,13 +278,14 @@ export const useOrder = () => {
   };
 
   return {
+    getOrders,
+    getOrderById,
     submitOrder,
     cancelOrder,
+    confirmPayment,
     markAsPaidWithRef,
-    getOrders,
     changeSeats,
     updateOrderBooked,
-    createStanding,
     updateStanding,
     generateTickets,
   };

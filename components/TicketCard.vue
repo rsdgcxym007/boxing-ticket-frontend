@@ -126,7 +126,7 @@
       <!-- Zone Selector Modal -->
       <ModalStadiumZoneSelector
         :zoneKey="pageData.selectedZoneKey"
-        :show="pageData.showZoneModal"
+        :isOpen="pageData.showZoneModal"
         @close="pageData.showZoneModal = false"
       />
     </div>

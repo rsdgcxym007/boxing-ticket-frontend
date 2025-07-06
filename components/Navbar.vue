@@ -71,7 +71,7 @@
                 :href="item.to"
                 class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
               >
-                <Icon :name="item.icon" class="text-lg text-white/80" />
+                <i :class="`mdi ${item.icon} text-lg text-white/80`"></i>
                 <span>{{ item.label }}</span>
               </a>
             </div>
@@ -194,7 +194,7 @@
                     :href="item.to"
                     class="flex items-center gap-2 hover:text-white"
                   >
-                    <Icon :name="item.icon" />
+                    <i :class="`mdi ${item.icon}`"></i>
                     {{ item.label }}
                   </a>
                 </li>

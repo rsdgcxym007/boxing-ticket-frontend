@@ -150,33 +150,59 @@ import BarChart from "@/components/charts/BarChart.vue";
 import PieChart from "@/components/charts/PieChart.vue";
 import SidebarItem from "@/components/SidebarItem.vue";
 import { formatCurrency } from "@/utils/formatCurrency";
+
+// 🎯 การใช้งาน Composables
 const { t } = useI18n();
 const collapsed = ref(false);
-const { getDashbord } = useDashbord();
+
+// 📊 Dashboard API - ใช้ฟังก์ชันใหม่ที่อัปเดตแล้ว
+const {
+  getDashboard, // ข้อมูลแดชบอร์ดหลัก
+  getDashboardStats, // สถิติโดยรวม
+  getRevenueAnalytics, // วิเคราะห์รายได้
+  getSeatOccupancy, // ข้อมูลการใช้งานที่นั่ง
+  getRecentActivities, // กิจกรรมล่าสุด
+  getSystemAlerts, // แจ้งเตือนระบบ
+} = useDashboard();
+
 const pageData = usePageData();
 
+// 💰 คำนวณยอดสูงสุดสำหรับแสดงผลกราฟ
 const maxAmount = computed(() =>
   Math.max(...pageData.dailySales.map((bar) => bar.amount || 0))
 );
 
+// 🏟️ คำนวณยอดขายสูงสุดตามโซน
 const maxZoneTotal = computed(() =>
   Math.max(...pageData.salesByZone.map((z) => z.total || 0))
 );
 
+// 📱 จัดการ Responsive Design
 const handleResize = () => {
   collapsed.value = window.innerWidth < 768;
 };
 
 onMounted(async () => {
+  // 🔄 เริ่มต้นการโหลดข้อมูล
   pageData.loading = true;
   handleResize();
   window.addEventListener("resize", handleResize);
+
   try {
-    const data = await getDashbord();
+    // 📊 ดึงข้อมูลแดชบอร์ดหลักจาก API ใหม่
+    console.log("🚀 กำลังโหลดข้อมูลแดชบอร์ด...");
+    const data = await getDashboard();
+
+    // 📋 อัปเดตข้อมูลทั้งหมด
     Object.assign(pageData, data);
+    console.log("✅ โหลดข้อมูลแดชบอร์ดสำเร็จ");
   } catch (error) {
-    console.error("❌ Dashboard fetch error:", error);
+    console.error("❌ เกิดข้อผิดพลาดในการโหลดข้อมูลแดชบอร์ด:", error);
+
+    // 🚨 แสดงข้อความแจ้งเตือนให้ผู้ใช้ทราบ
+    // toast.error("ไม่สามารถโหลดข้อมูลแดชบอร์ดได้ กรุณาลองใหม่อีกครั้ง");
   } finally {
+    // ⏹️ หยุดการแสดงสถานะโหลด
     pageData.loading = false;
   }
 });

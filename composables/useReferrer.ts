@@ -8,6 +8,7 @@ export const useReferrer = () => {
   const { get, post, patch, remove } = useApi();
   const toast = useToast();
 
+  // ตรงกับ API: GET /api/v1/referrers
   const getReferrers = async ({
     page = 1,
     limit = 10,
@@ -24,7 +25,7 @@ export const useReferrer = () => {
       if (status) query.status = status;
       if (search) query.search = search;
 
-      const data = await get("/referrers", { query });
+      const data = await get("/api/v1/referrers", { query });
       return data;
     } catch (err: any) {
       toast.error(
@@ -36,6 +37,115 @@ export const useReferrer = () => {
     }
   };
 
+  // ตรงกับ API: POST /api/v1/referrers
+  const createReferrer = async (payload: {
+    name: string;
+    code: string;
+    email?: string;
+    phone?: string;
+    commissionRate?: number;
+    description?: string;
+  }) => {
+    try {
+      const data = await post("/api/v1/referrers", payload);
+      toast.success("สร้างผู้แนะนำสำเร็จ");
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `สร้างผู้แนะนำล้มเหลว: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: PUT /api/v1/referrers/{id}
+  const updateReferrer = async (
+    id: string,
+    payload: {
+      name?: string;
+      code?: string;
+      email?: string;
+      phone?: string;
+      commissionRate?: number;
+      description?: string;
+      status?: string;
+    }
+  ) => {
+    try {
+      const data = await patch(`/api/v1/referrers/${id}`, payload);
+      toast.success("อัพเดทผู้แนะนำสำเร็จ");
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `อัพเดทผู้แนะนำล้มเหลว: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: GET /api/v1/referrers/{id}/orders
+  const getReferrerOrders = async (
+    id: string,
+    params?: {
+      page?: number;
+      limit?: number;
+      startDate?: string;
+      endDate?: string;
+      status?: string;
+    }
+  ) => {
+    try {
+      const data = await get(`/api/v1/referrers/${id}/orders`, {
+        query: params,
+      });
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `ไม่สามารถโหลดข้อมูลออเดอร์ได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: GET /api/v1/referrers/{id}/export-pdf
+  const exportReferrerReport = async (
+    id: string,
+    params?: {
+      startDate?: string;
+      endDate?: string;
+      format?: "pdf" | "excel";
+    }
+  ) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.startDate) queryParams.append("startDate", params.startDate);
+      if (params?.endDate) queryParams.append("endDate", params.endDate);
+      if (params?.format) queryParams.append("format", params.format);
+
+      const url = `${base}/api/v1/referrers/${id}/export-pdf?${queryParams.toString()}`;
+
+      // Open PDF in new tab
+      window.open(url, "_blank");
+      toast.success("กำลังเตรียมรายงาน...");
+
+      return { success: true, url };
+    } catch (err: any) {
+      toast.error(
+        `ไม่สามารถส่งออกรายงานได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  // Legacy method - รองรับเดิม
   const getReferrerById = async (id: string) => {
     try {
       const data = await get(`/referrers/${id}/orders`);
@@ -50,117 +160,14 @@ export const useReferrer = () => {
     }
   };
 
-  const getReferrerOrders = async (
-    id: string,
-    filters?: { startDate?: string; endDate?: string }
-  ) => {
-    try {
-      const query: Record<string, string> = {};
-
-      if (filters?.startDate) query.startDate = filters.startDate;
-      if (filters?.endDate) query.endDate = filters.endDate;
-
-      const data = await get(`/referrers/${id}/orders`, { query });
-      return data;
-    } catch (err: any) {
-      toast.error(
-        `ไม่สามารถโหลดข้อมูลภายในได้: ${
-          err.response?.data?.message || "Unknown error"
-        }`
-      );
-      throw err;
-    }
-  };
-
-  const createReferrer = async ({
-    name,
-    code,
-    note,
-  }: {
-    name: string;
-    code: string;
-    note?: string;
-  }) => {
-    const payload = {
-      name,
-      code,
-      note,
-    };
-
-    try {
-      const res = await post("/referrers", payload);
-      toast.success("สร้างผู้แนะนำสำเร็จ");
-      return res;
-    } catch (err: any) {
-      toast.error(`สร้างผู้แนะนำล้มเหลว: ${err.message || "Unknown error"}`);
-      throw err;
-    }
-  };
-
-  const updateReferrer = async (
-    id: string,
-    payload: {
-      name?: string;
-      code?: string;
-      note?: string;
-      active?: boolean;
-    }
-  ) => {
-    try {
-      const res = await patch(`/referrers/${id}`, payload);
-      toast.success("อัปเดตผู้แนะนำเรียบร้อย");
-      return res;
-    } catch (err: any) {
-      toast.error(`อัปเดตล้มเหลว: ${err.message || "Unknown error"}`);
-      throw err;
-    }
-  };
-
-  const deleteReferrer = async (id: string) => {
-    try {
-      const res = await remove(`/referrers/${id}`);
-      toast.success("ลบผู้แนะนำเรียบร้อย");
-      return res;
-    } catch (err: any) {
-      toast.error(`ลบผู้แนะนำล้มเหลว: ${err.message || "Unknown error"}`);
-      throw err;
-    }
-  };
-
-  const exportReferrerPdf = async (
-    id: string,
-    filters?: { startDate?: string; endDate?: string }
-  ) => {
-    const query: Record<string, string> = {};
-    if (filters?.startDate) query.startDate = filters.startDate;
-    if (filters?.endDate) query.endDate = filters.endDate;
-
-    const queryString = new URLSearchParams(query).toString();
-    const url = `${base}/api/referrers/${id}/export-pdf?${queryString}`;
-
-    window.open(url, "_blank");
-  };
-  const previewReferrerPdf = async (
-    id: string,
-    filters?: { startDate?: string; endDate?: string }
-  ) => {
-    const query: Record<string, string> = {};
-    if (filters?.startDate) query.startDate = filters.startDate;
-    if (filters?.endDate) query.endDate = filters.endDate;
-
-    const queryString = new URLSearchParams(query).toString();
-    const url = `${base}/referrers/${id}/preview-pdf?${queryString}`;
-    return url;
-  };
-
   return {
+    // New API methods
     getReferrers,
     createReferrer,
     updateReferrer,
-    getReferrerById,
     getReferrerOrders,
-    deleteReferrer,
-    exportReferrerPdf,
-    previewReferrerPdf,
+    exportReferrerReport,
+    // Legacy methods
+    getReferrerById,
   };
 };

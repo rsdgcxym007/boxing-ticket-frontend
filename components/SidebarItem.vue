@@ -10,7 +10,7 @@
   >
     <!-- ไอคอน -->
     <span class="text-xl w-6 text-center">
-      <Icon :name="icon" />
+      <i :class="`mdi ${icon}`"></i>
     </span>
 
     <!-- ชื่อเมนู -->

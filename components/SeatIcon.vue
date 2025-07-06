@@ -50,7 +50,7 @@ const { seat, selectedSeats } = toRefs(props);
 
 const isBooked = computed(() => {
   const isOwnSeat = props.ownSeatIds.includes(seat.value?.id);
-  const isStatusBlocked = ["BOOKED", "PAID"].includes(
+  const isStatusBlocked = ["BOOKED", "PAID", "PENDING"].includes(
     seat.value?.bookingStatus
   );
   return isStatusBlocked && !isOwnSeat;

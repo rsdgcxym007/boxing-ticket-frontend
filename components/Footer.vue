@@ -48,7 +48,7 @@
           href="tel:+66817377193"
           class="text-sm flex items-center gap-2 text-white hover:text-yellow-300 transition hover:scale-105"
         >
-          <i class="fas fa-phone-alt text-base"></i> +66 81 737 7193
+          <i class="mdi mdi-phone text-base"></i> +66 81 737 7193
         </a>
       </div>
     </div>

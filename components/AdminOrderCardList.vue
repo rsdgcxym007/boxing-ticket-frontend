@@ -117,19 +117,42 @@
           isMobile ? 'flex-col items-stretch' : 'flex-row items-center',
         ]"
       >
-        <!-- เปลี่ยนที่นั่ง -->
+        <!-- แก้ไขที่นั่ง -->
         <button
+          v-if="
+            (order.status === 'PENDING' ||
+              order.status === 'BOOKED' ||
+              order.status === 'PAID') &&
+            order.seats?.length > 0
+          "
+          class="px-4 py-2 text-sm font-medium border border-orange-500 text-orange-400 rounded-lg flex items-center gap-2 justify-center w-full sm:max-w-[220px] hover:bg-orange-900/20 hover:shadow-sm transition-all duration-200"
+          @click="
+            () => {
+              console.log('Edit button clicked for order:', order);
+              $emit('edit-order', order);
+            }
+          "
+        >
+          <i class="mdi mdi-pencil text-base"></i>
+          แก้ไขที่นั่ง
+        </button>
+
+        <!-- เปลี่ยนที่นั่ง -->
+        <!-- <button
           v-if="order.status === 'PAID' && order.seats?.length > 0"
           class="px-4 py-2 text-sm font-medium border border-blue-500 text-blue-400 rounded-lg flex items-center gap-2 justify-center w-full sm:max-w-[220px] hover:bg-blue-900/20 hover:shadow-sm transition-all duration-200"
           @click="$emit('change-seats', order)"
         >
           <i class="mdi mdi-swap-horizontal-bold text-base"></i>
           เปลี่ยนที่นั่ง
-        </button>
+        </button> -->
 
         <!-- อัปเดตสถานะ -->
         <button
-          v-if="order.status === 'BOOKED'"
+          v-if="
+            order.status === 'BOOKED' ||
+            (order.status === 'PENDING' && order.seats?.length == 0)
+          "
           class="px-4 py-2 text-sm font-medium border border-purple-500 text-purple-400 rounded-lg flex items-center gap-2 justify-center w-full sm:max-w-[220px] hover:bg-purple-900/20 hover:shadow-sm transition-all duration-200"
           @click="$emit('update-status', order)"
         >
@@ -205,8 +228,9 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref, onMounted, onUnmounted } from "vue";
 import dayjs from "dayjs";
+
 const props = defineProps({
   orders: Array,
   page: Number,
@@ -214,11 +238,31 @@ const props = defineProps({
   total: Number,
   perPage: Number,
 });
+
+const emit = defineEmits([
+  "update:page",
+  "change-seats",
+  "update-status",
+  "cancel-order",
+  "generate-tickets",
+  "edit-order",
+]);
+
 const isMobile = ref(false);
 
 const handleResize = () => {
   isMobile.value = window.innerWidth < 768;
 };
+
+onMounted(() => {
+  handleResize();
+  window.addEventListener("resize", handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
+});
+
 const totalPages = computed(() =>
   props.total && props.perPage ? Math.ceil(props.total / props.perPage) : 1
 );

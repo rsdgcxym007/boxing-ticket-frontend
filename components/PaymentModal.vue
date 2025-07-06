@@ -10,7 +10,7 @@
         @click="$emit('close')"
         class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
       >
-        <i class="fas fa-times text-xl"></i>
+        <i class="mdi mdi-close text-xl"></i>
       </button>
 
       <h2 class="text-2xl font-bold text-center text-blue-600">
