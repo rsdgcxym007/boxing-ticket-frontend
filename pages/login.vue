@@ -105,7 +105,7 @@ const login = async () => {
       try {
         console.log(`🔍 ลองเรียก: ${base}${endpoint}`);
 
-        const res = await fetch(`${base}${endpoint}`, {
+        const res = await fetch(`${base}/api/v1${endpoint}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
