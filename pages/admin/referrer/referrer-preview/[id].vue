@@ -53,7 +53,7 @@ import dayjs from "dayjs";
 import { useReferrer } from "../../../../composables/useReferrer";
 
 // เรียกใช้งาน composable
-const { previewReferrerPdf } = useReferrer();
+const { exportReferrerReport } = useReferrer();
 
 // ดึง referrer ID จาก route
 const route = useRoute();
@@ -65,15 +65,20 @@ const referrerId = computed(() =>
 const startDate = dayjs().format("YYYY-MM-DD");
 const endDate = dayjs().format("YYYY-MM-DD");
 
-// ✅ เก็บ URL ไว้ใน ref เพื่อใช้ใน template
+// เก็บ URL ไว้ใน ref เพื่อใช้ใน template
 const pdfUrl = ref<string>("");
 
-// ✅ ดึง URL จาก composable แล้วเซ็ตค่าลงใน pdfUrl
+// ดึง URL จาก composable แล้วเซ็ตค่าลงใน pdfUrl
 const fetchPdf = async () => {
-  pdfUrl.value = await previewReferrerPdf(referrerId.value, {
-    startDate,
-    endDate,
-  });
+  try {
+    const result = await exportReferrerReport(referrerId.value, {
+      startDate,
+      endDate,
+    });
+    pdfUrl.value = result.url;
+  } catch (error) {
+    console.error("ไม่สามารถโหลด PDF ได้:", error);
+  }
 };
 
 // โหลดเมื่อหน้าเปิด

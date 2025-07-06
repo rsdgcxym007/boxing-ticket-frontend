@@ -197,8 +197,7 @@ import debounce from "lodash/debounce";
 import SidebarItem from "../../components/SidebarItem.vue";
 import dayjs from "dayjs";
 const menuItems = useAdminMenu();
-const { getReferrers, createReferrer, updateReferrer, deleteReferrer } =
-  useReferrer();
+const { getReferrers, createReferrer, updateReferrer } = useReferrer();
 const route = useRoute();
 const router = useRouter();
 const collapsed = ref(false);
@@ -254,7 +253,6 @@ const handleSaveReferrer = async () => {
     data.loading = false;
     console.error("บันทึก Referrer ไม่สำเร็จ:", err);
   }
-  f;
 };
 
 const editReferrer = (ref) => {
@@ -265,10 +263,11 @@ const editReferrer = (ref) => {
 
 const deleteReferrers = async (ref) => {
   try {
-    await deleteReferrer(ref.id);
+    // ใช้ updateReferrer เพื่อเปลี่ยนสถานะเป็น inactive แทนการลบ
+    await updateReferrer(ref.id, { status: false });
     await fetchReferrers();
   } catch (err) {
-    console.error("ลบ Referrer ไม่สำเร็จ:", err);
+    console.error("ปิดการใช้งาน Referrer ไม่สำเร็จ:", err);
   }
 };
 

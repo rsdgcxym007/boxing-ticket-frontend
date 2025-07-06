@@ -1,173 +1,164 @@
 <template>
   <Teleport to="body">
-    <div>
-      <div
-        v-if="show"
-        class="fixed inset-0 bg-black/50 z-50 overflow-auto"
-        @click.self="onClose"
-      >
-        <div class="flex justify-center items-start p-4 sm:p-6 md:p-10">
-          <div
-            class="w-full max-w-[95%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-10 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] overflow-hidden"
-          >
-            <div class="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 border-b">
-              <button
-                class="absolute top-6 right-6 text-gray-400 hover:text-gray-700 text-xl"
-                @click="onClose"
-              >
-                ✕
-              </button>
-              <h2 class="text-xl font-bold text-center text-gray-800">
-                {{ t("selectSeats") }}
-              </h2>
-              <p class="text-center text-sm text-gray-500 mt-1">
-                {{ t("zone") }}:
-                <span class="font-semibold text-indigo-600">
-                  {{ pageData.zoneKey.replace("-", " ").toUpperCase() }}
-                </span>
-              </p>
-            </div>
+    <div
+      v-if="props.isOpen"
+      class="fixed inset-0 bg-black/50 z-50 overflow-auto"
+      @click.self="onClose"
+    >
+      <div class="flex justify-center items-start p-4 sm:p-6 md:p-10">
+        <div
+          class="w-full max-w-[95%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-10 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] overflow-hidden"
+        >
+          <div class="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 border-b">
+            <button
+              class="absolute top-6 right-6 text-gray-400 hover:text-gray-700 text-xl"
+              @click="onClose"
+            >
+              ✕
+            </button>
+            <h2 class="text-xl font-bold text-center text-gray-800">
+              {{ t("selectSeats") }}
+            </h2>
+            <p class="text-center text-sm text-gray-500 mt-1">
+              {{ t("zone") }}:
+              <span class="font-semibold text-indigo-600">
+                {{ pageData.zoneKey.replace("-", " ").toUpperCase() }}
+              </span>
+            </p>
+          </div>
 
-            <!-- ✅ Content Scrollable -->
-            <div class="flex-1 overflow-auto p-6 space-y-6">
-              <!-- Selectors -->
-              <div class="flex justify-center px-6 pt-4">
-                <div class="w-full max-w-xs sm:max-w-sm md:max-w-md p-4">
-                  <ZoneSelect
-                    v-model="pageData.zoneKey"
-                    :options="pageData.zoneOptions"
-                    label="ค้นหาโซน"
-                    @update:modelValue="onZoneChange"
+          <!-- ✅ Content Scrollable -->
+          <div class="flex-1 overflow-auto p-6 space-y-6">
+            <!-- Selectors -->
+            <div class="flex justify-center px-6 pt-4">
+              <div class="w-full max-w-xs sm:max-w-sm md:max-w-md p-4">
+                <ZoneSelect
+                  v-model="pageData.zoneKey"
+                  :options="pageData.zoneOptions"
+                  label="ค้นหาโซน"
+                  @update:modelValue="onZoneChange"
+                />
+                <div class="mt-4">
+                  <DatePicker
+                    v-model="pageData.showDate"
+                    :placeholder="'เลือกวันที่'"
+                    @update:modelValue="handleDateChange"
                   />
-                  <div class="mt-4">
-                    <DatePicker
-                      v-model="pageData.showDate"
-                      :placeholder="'เลือกวันที่'"
-                      @update:modelValue="handleDateChange"
-                    />
-                  </div>
                 </div>
               </div>
+            </div>
 
-              <!-- 💡 Container ของที่นั่ง -->
-              <div class="w-full">
-                <div
-                  class="max-h-[70vh] overflow-auto bg-white"
-                  style="margin: 0 auto"
-                >
-                  <div class="flex flex-col gap-2 items-center w-full">
+            <!-- 💡 Container ของที่นั่ง -->
+            <div class="w-full">
+              <div
+                class="max-h-[70vh] overflow-auto bg-white"
+                style="margin: 0 auto"
+              >
+                <div class="flex flex-col gap-2 items-center w-full">
+                  <div
+                    v-for="(row, i) in pageData.currentZoneSeats"
+                    :key="i"
+                    class="w-full grid place-items-center"
+                  >
                     <div
-                      v-for="(row, i) in pageData.currentZoneSeats"
-                      :key="i"
-                      class="w-full grid place-items-center"
+                      class="grid"
+                      :style="{
+                        gridTemplateColumns: `repeat(${row.length}, minmax(2.10rem, auto))`,
+                      }"
                     >
-                      <div
-                        class="grid"
-                        :style="{
-                          gridTemplateColumns: `repeat(${row.length}, minmax(2.10rem, auto))`,
-                        }"
-                      >
-                        <div v-for="seat in row" :key="seat?.id">
-                          <SeatIcon
-                            v-if="seat && seat.seatNumber"
-                            :seat="seat"
-                            :status="getSeatStatus(seat)"
-                            :selectedSeats="pageData.selectedSeats"
-                            :bookedSeats="pageData.bookedSeats"
-                            :zoneKey="pageData.zoneKey"
-                            @toggle="toggleSeat"
-                            :ownSeatIds="
-                              props.orderData?.seatBookings.map(
-                                (b) => b.seat.id
-                              ) || []
-                            "
-                            class="w-8 sm:w-10 md:w-11 transition-transform hover:scale-105 cursor-pointer"
-                          />
-                        </div>
+                      <div v-for="seat in row" :key="seat?.id">
+                        <SeatIcon
+                          v-if="seat && seat.seatNumber"
+                          :seat="seat"
+                          :status="getSeatStatus(seat)"
+                          :selectedSeats="pageData.selectedSeats"
+                          :bookedSeats="pageData.bookedSeats"
+                          :zoneKey="pageData.zoneKey"
+                          @toggle="toggleSeat"
+                          :ownSeatIds="
+                            props.orderData?.seatBookings.map(
+                              (b) => b.seat.id
+                            ) || []
+                          "
+                          class="w-8 sm:w-10 md:w-11 transition-transform hover:scale-105 cursor-pointer"
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Legend -->
-              <div
-                class="flex justify-center flex-wrap gap-6 text-sm text-gray-600 font-medium"
-              >
-                <div class="flex items-center gap-2">
-                  <img src="/images/armchair.png" class="w-4 h-4" /> ว่าง
-                </div>
-                <div
-                  class="flex items-center gap-2 text-green-600 font-semibold"
-                >
-                  <img src="/images/seat-selected.png" class="w-4 h-4" />
-                  ที่คุณเลือก
-                </div>
-                <div class="flex items-center gap-2 text-gray-400 line-through">
-                  <img
-                    src="/images/seat-booked.png"
-                    class="w-4 h-4 opacity-50"
-                  />
-                  ไม่ว่าง
-                </div>
+            <!-- Legend -->
+            <div
+              class="flex justify-center flex-wrap gap-6 text-sm text-gray-600 font-medium"
+            >
+              <div class="flex items-center gap-2">
+                <img src="/images/armchair.png" class="w-4 h-4" /> ว่าง
               </div>
+              <div class="flex items-center gap-2 text-green-600 font-semibold">
+                <img src="/images/seat-selected.png" class="w-4 h-4" />
+                ที่คุณเลือก
+              </div>
+              <div class="flex items-center gap-2 text-gray-400 line-through">
+                <img src="/images/seat-booked.png" class="w-4 h-4 opacity-50" />
+                ไม่ว่าง
+              </div>
+            </div>
+            <div
+              v-if="pageData.selectedSeats.length"
+              class="mt-4 border-t pt-6"
+            >
               <div
-                v-if="pageData.selectedSeats.length"
-                class="mt-4 border-t pt-6"
+                class="w-full max-w-[100%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto bg-white border border-gray-300 rounded-2xl shadow-2xl px-6 py-5"
               >
-                <div
-                  class="w-full max-w-[100%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto bg-white border border-gray-300 rounded-2xl shadow-2xl px-6 py-5"
-                >
-                  <div class="text-center space-y-3">
-                    <p class="text-sm text-gray-600 tracking-wide font-medium">
-                      ที่นั่งที่เลือก
-                    </p>
-                    <p
-                      class="text-xl font-semibold text-blue-600 tracking-wider"
+                <div class="text-center space-y-3">
+                  <p class="text-sm text-gray-600 tracking-wide font-medium">
+                    ที่นั่งที่เลือก
+                  </p>
+                  <p class="text-xl font-semibold text-blue-600 tracking-wider">
+                    {{
+                      pageData.selectedSeats
+                        .map((s) => s?.seatNumber || "—")
+                        .join(", ")
+                    }}
+                  </p>
+                  <p class="text-lg sm:text-xl font-semibold tracking-wide">
+                    <span class="text-blue-600">ราคารวม:</span>
+                    <span class="text-cyan-500">
+                      {{
+                        props.mode === "change"
+                          ? pageData.totalAmount
+                          : pageData.selectedSeats.length * 1800
+                      }}
+                    </span>
+                    <span class="ml-1 text-sm text-gray-500">บาท</span>
+                  </p>
+
+                  <div class="flex justify-center gap-3 flex-wrap pt-2">
+                    <button
+                      @click="onClose"
+                      class="min-w-[90px] px-4 py-2 border border-blue-500 text-blue-600 text-sm font-semibold rounded-full shadow-sm hover:bg-blue-50 transition-all"
+                    >
+                      ย้อนกลับ
+                    </button>
+                    <button
+                      @click="pageData.selectedSeats = []"
+                      class="min-w-[90px] px-4 py-2 border border-red-400 text-red-500 text-sm font-semibold rounded-full shadow-sm hover:bg-red-50 transition-all"
+                    >
+                      ยกเลิกทั้งหมด
+                    </button>
+                    <button
+                      @click="handleConfirm"
+                      class="min-w-[90px] px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition-all"
                     >
                       {{
-                        pageData.selectedSeats
-                          .map((s) => s?.seatNumber || "—")
-                          .join(", ")
+                        props.mode === "change" &&
+                        props?.orderData?.status === "PAID"
+                          ? "ยืนยันเปลี่ยนที่นั่ง"
+                          : "ซื้อตั๋ว"
                       }}
-                    </p>
-                    <p class="text-lg sm:text-xl font-semibold tracking-wide">
-                      <span class="text-blue-600">ราคารวม:</span>
-                      <span class="text-cyan-500">
-                        {{
-                          props.mode === "change"
-                            ? pageData.totalAmount
-                            : pageData.selectedSeats.length * 1800
-                        }}
-                      </span>
-                      <span class="ml-1 text-sm text-gray-500">บาท</span>
-                    </p>
-
-                    <div class="flex justify-center gap-3 flex-wrap pt-2">
-                      <button
-                        @click="onClose"
-                        class="min-w-[90px] px-4 py-2 border border-blue-500 text-blue-600 text-sm font-semibold rounded-full shadow-sm hover:bg-blue-50 transition-all"
-                      >
-                        ย้อนกลับ
-                      </button>
-                      <button
-                        @click="pageData.selectedSeats = []"
-                        class="min-w-[90px] px-4 py-2 border border-red-400 text-red-500 text-sm font-semibold rounded-full shadow-sm hover:bg-red-50 transition-all"
-                      >
-                        ยกเลิกทั้งหมด
-                      </button>
-                      <button
-                        @click="handleConfirm"
-                        class="min-w-[90px] px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition-all"
-                      >
-                        {{
-                          props.mode === "change" &&
-                          props?.orderData?.status === "PAID"
-                            ? "ยืนยันเปลี่ยนที่นั่ง"
-                            : "ซื้อตั๋ว"
-                        }}
-                      </button>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -188,7 +179,6 @@
       :dataZoneSelected="pageData"
       :mode="props.mode"
       @close="onCloseSummaryModal"
-      @confirmed="handleConfirmed"
     />
   </Teleport>
 </template>
@@ -197,12 +187,12 @@
 import dayjs from "dayjs";
 import { useToast } from "vue-toastification";
 import { useI18n } from "vue-i18n";
+import { SummaryModal } from "@/components";
 
 const { t } = useI18n();
-const router = useRouter();
 const pageData = usePageData();
 const { getSeatsByZoneId } = useSeatApi();
-const { submitOrder, changeSeats, updateOrderBooked } = useOrder();
+const { submitOrder } = useOrder();
 const toast = useToast();
 const auth = useAuthStore();
 const getDateKey = (date) => dayjs(date).format("YYYY-MM-DD");
@@ -211,7 +201,7 @@ if (!auth.user) auth.loadUser();
 
 const props = defineProps({
   zoneKey: String,
-  show: Boolean,
+  isOpen: Boolean,
   mode: { type: String, default: "booking" },
   orderData: Object,
 });
@@ -232,7 +222,6 @@ const fetchSeats = async () => {
     pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(allSeats);
     const allSeatIds = allSeats.map((s) => s.id);
     const dateKey = getDateKey(pageData.showDate);
-    console.log("dateKey", dateKey);
 
     const orderSeatIds =
       props.orderData?.seatBookings.map((b) => b.seat.id) || [];
@@ -240,7 +229,6 @@ const fetchSeats = async () => {
     pageData.bookedSeats = allSeats.filter((s) =>
       s.seatBookings?.some((b) => {
         const isSameDay = getDateKey(b.showDate) === dateKey;
-        console.log("isSameDay", isSameDay);
 
         const isBooked = ["BOOKED", "PAID"].includes(b.status);
         const isDifferentFromOrder = !orderSeatIds.includes(s.id);
@@ -264,6 +252,8 @@ const fetchSeats = async () => {
 };
 
 const onZoneChange = async (newZone) => {
+  console.log("newZone", newZone);
+
   if (!newZone) return;
   pageData.zoneKey = newZone;
   pageData.selectedSeats = [];
@@ -330,68 +320,37 @@ const handleConfirm = async () => {
     toast.warning("กรุณาเลือกที่นั่งก่อน");
     return;
   }
-  if (props.mode === "change" && props.orderData?.status === "PAID") {
-    const selectedCount = pageData.selectedSeats.length;
-    const originalCount = originalSeatCount.value;
-
-    if (selectedCount !== originalCount) {
-      toast.warning(
-        `คุณต้องเลือกที่นั่งให้ครบ ${originalCount} ที่นั่งตามที่เคยชำระเงินแล้ว`
-      );
-      return;
-    }
-  }
-
-  const showDateStr = dayjs(pageData.showDate).format("DD-MM-YYYY'");
-  const todayStr = dayjs().format("DD-MM-YYYY'");
-
-  const orderPayload = {
-    seatIds: pageData.selectedSeats.map((s) => s.id),
-    showDate: dayjs(pageData.showDate).format("YYYY-MM-DD"),
-    method: "CASH",
-    status: showDateStr === todayStr ? "PENDING" : "BOOKED",
-  };
 
   try {
     pageData.loading = true;
 
-    if (props.mode === "booking") {
-      const order = await submitOrder(orderPayload);
-      if (order.status === "PENDING") {
-        pageData.orderId = order.id;
-        pageData.totalAmount = order.total;
-        const dateKey = getDateKey(pageData.showDate);
-        pageData.selectedSeatsMap[dateKey] = [...pageData.selectedSeats];
-        pageData.showSummaryModal = true;
-      } else {
-        pageData.showSeatModal = false;
-        // toast.success("จองล่วงหน้าเรียบร้อย");
-        emit("close");
-      }
-    } else if (props.mode === "change") {
-      if (props.orderData.status === "PAID") {
-        await changeSeats(
-          props.orderData.id,
-          orderPayload.seatIds,
-          orderPayload.showDate
-        );
-        toast.success("เปลี่ยนที่นั่งเรียบร้อย");
-        pageData.showSeatModal = false;
-        pageData.selectedSeatsMap = {};
-        emit("close");
-      } else {
-        const updated = await updateOrderBooked(
-          props.orderData.id,
-          orderPayload.seatIds,
-          orderPayload.showDate
-        );
-        pageData.orderId = updated.id;
-        pageData.totalAmount = updated.total;
-        pageData.selectedSeats = updated.seats;
-        const dateKey = getDateKey(pageData.showDate);
-        pageData.selectedSeatsMap[dateKey] = [...updated.seats];
-        pageData.showSummaryModal = true;
-      }
+    const order = await submitOrder({
+      seatIds: pageData.selectedSeats.map((s) => s.id),
+      showDate: dayjs(pageData.showDate).format("YYYY-MM-DD"),
+      customerName: "",
+      customerPhone: "",
+      customerEmail: "",
+      ticketType: "RINGSIDE",
+      paymentMethod: "CASH",
+    });
+
+    if (order.status === "PENDING") {
+      pageData.orderId = order.id;
+      pageData.totalAmount = order.total;
+      const dateKey = getDateKey(pageData.showDate);
+      pageData.selectedSeatsMap[dateKey] = [...pageData.selectedSeats];
+
+      // Debug log
+      console.log("กำลังเปิด Summary Modal", {
+        showSummaryModal: pageData.showSummaryModal,
+        orderId: pageData.orderId,
+        totalAmount: pageData.totalAmount,
+      });
+
+      pageData.showSummaryModal = true; // เปิด Summary Modal
+
+      // Debug log หลังจากตั้งค่า
+      console.log("หลังตั้งค่า showSummaryModal:", pageData.showSummaryModal);
     }
   } catch (err) {
     toast.error(err.message || "เกิดข้อผิดพลาด");
@@ -404,10 +363,11 @@ onMounted(() => {
   pageData.showDate = props.orderData?.showDate || new Date();
   pageData.zoneKey = props.zoneKey;
 });
-
 watch(
-  () => props.show,
+  () => props.isOpen,
   async (isOpen) => {
+    console.log("isOpen:", isOpen);
+
     if (isOpen) {
       isFirstOpen.value = true;
       pageData.showSeatModal = true;

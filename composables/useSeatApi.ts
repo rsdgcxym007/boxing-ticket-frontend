@@ -1,28 +1,65 @@
 import { useApi } from "../composables/useApi";
 import { useToast } from "vue-toastification";
 import { ZONE_IDS_BY_NAME } from "../utils/zoneEnums";
-const { get } = useApi();
-const toast = useToast();
 
 export function useSeatApi() {
+  const { get, post, patch } = useApi();
+  const toast = useToast();
+
+  // ตรงกับ API: GET /api/v1/seats/available
+  const getAvailableSeats = async (params?: {
+    showDate?: string;
+    zone?: string;
+    zoneId?: string;
+  }) => {
+    try {
+      const data = await get("/api/v1/seats/available", { query: params });
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `ไม่สามารถโหลดที่นั่งได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: POST /api/v1/seats/reserve
+  const reserveSeats = async (payload: {
+    seatIds: string[];
+    showDate: string;
+    userId?: string;
+    reservationTime?: number; // minutes
+  }) => {
+    try {
+      const data = await post("/api/v1/seats/reserve", payload);
+      toast.success("จองที่นั่งสำเร็จ");
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `จองที่นั่งล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
+      );
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: GET /api/v1/seats/by-zone/{zoneId}
   const getSeatsByZoneId = async (zoneId: string, showDate: string | Date) => {
     try {
-      const zoneIds = ZONE_IDS_BY_NAME[`${zoneId}`];
-      console.log("getSeatsByZoneId - zoneId:", zoneId, "zoneIds:", zoneIds);
+      const zoneIds = ZONE_IDS_BY_NAME[`${zoneId}`] || zoneId;
 
       const localDate = new Date(showDate);
       const yyyy = localDate.getFullYear();
       const mm = String(localDate.getMonth() + 1).padStart(2, "0");
       const dd = String(localDate.getDate()).padStart(2, "0");
       const formattedDate = `${yyyy}-${mm}-${dd}`;
-      const apiUrl = `/seats/by-zone/${zoneIds}?showDate=${formattedDate}`;
-      console.log("getSeatsByZoneId - API URL:", apiUrl);
 
-      const allSeats = await get(apiUrl);
-      console.log(
-        "getSeatsByZoneId - returned seats count:",
-        allSeats?.length || 0
-      );
+      const apiUrl = `/api/v1/seats/by-zone/${zoneIds}`;
+
+      const allSeats = await get(apiUrl, {
+        query: { showDate: formattedDate },
+      });
 
       return allSeats || [];
     } catch (error: any) {
@@ -39,6 +76,28 @@ export function useSeatApi() {
     }
   };
 
+  // ตรงกับ API: PATCH /api/v1/seats/{seatId}/status
+  const updateSeatStatus = async (
+    seatId: string,
+    status: string,
+    reason?: string
+  ) => {
+    try {
+      const payload = { status, ...(reason && { reason }) };
+      const data = await patch(`/api/v1/seats/${seatId}/status`, payload);
+      toast.success("อัพเดทสถานะที่นั่งสำเร็จ");
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `อัพเดทสถานะที่นั่งล้มเหลว: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  // Legacy method - รองรับเดิม
   const getSeatsByZone = async (zone: string) => {
     const seats = {
       "back-left": [

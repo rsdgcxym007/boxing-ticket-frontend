@@ -62,7 +62,7 @@
 
     <ModalStadiumZoneSelector
       :zoneKey="pageData.selectedZone"
-      :show="pageData.showZoneModal"
+      :isOpen="pageData.showZoneModal"
       mode="booking"
       @close="pageData.showZoneModal = false"
     />
@@ -120,25 +120,6 @@ const pageData = reactive({
   ],
   showZoneModal: false,
 });
-
-function darken(color) {
-  const hex = color.replace("#", "");
-  const r = Math.max(0, parseInt(hex.substring(0, 2), 16) - 40);
-  const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - 40);
-  const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - 40);
-  return `rgb(${r},${g},${b})`;
-}
-function showFill(zone) {
-  // ถ้ายังไม่ได้เลือกอะไรเลย → ซ่อนไป
-  if (!pageData.selectedZone) return "transparent";
-
-  // ถ้าเลือกแล้ว → ให้ใช้สีเดิม
-  return zone;
-}
-
-function isSelected(zone) {
-  return pageData.selectedZone?.id === zone.id;
-}
 
 const selectZone = async (zone) => {
   pageData.selectedZone = "";

@@ -23,6 +23,8 @@ export const usePageData = defineStore("pageData", {
     method: "",
     referrerCode: "",
     customerName: "",
+    customerPhone: "",
+    customerEmail: "",
     total: 0,
     page: 1,
     limit: 5,
@@ -72,6 +74,8 @@ export const usePageData = defineStore("pageData", {
       const mm = String(today.getMonth() + 1).padStart(2, "0");
       const dd = String(today.getDate()).padStart(2, "0");
       this.customerName = "";
+      this.customerPhone = "";
+      this.customerEmail = "";
       this.loading = false;
       this.showSummaryModal = false;
       this.zoneKey = "";

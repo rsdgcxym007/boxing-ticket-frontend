@@ -2,57 +2,93 @@
   <div
     class="min-h-screen bg-gradient-to-br from-white to-blue-50 flex items-center justify-center px-4 py-8"
   >
-    <div
+    <BaseCard
       class="max-w-xl w-full bg-white shadow-xl rounded-3xl p-8 text-center space-y-6 border border-gray-100"
     >
+      <!-- ไอคอนการเสร็จสิ้น -->
       <div class="text-green-500 text-6xl animate-bounce">🎉</div>
+
+      <!-- หัวข้อหลัก -->
       <h1 class="text-3xl font-bold text-gray-800">การจองเสร็จสมบูรณ์</h1>
 
-      <div
-        class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-left space-y-2 shadow-sm"
-      >
-        <p class="text-sm text-gray-700">
-          <span class="font-semibold">Zone:</span>
-          <span class="text-blue-700 font-semibold uppercase">{{ zone }}</span>
-        </p>
-        <p class="text-sm text-gray-700">
-          <span class="font-semibold">Seats:</span>
-          <span class="text-blue-800 font-semibold">{{
-            seats.join(", ")
-          }}</span>
-        </p>
-        <p class="text-sm text-gray-700">
-          <span class="font-semibold">Total:</span>
-          <span class="text-green-600 font-bold"
-            >{{ total.toLocaleString() }} บาท</span
-          >
-        </p>
-      </div>
+      <!-- ข้อมูลการจอง -->
+      <BaseCard class="bg-gray-50 border border-gray-200 text-left space-y-2">
+        <template #header>
+          <h2 class="text-lg font-semibold text-gray-800">รายละเอียดการจอง</h2>
+        </template>
 
+        <div class="space-y-3">
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-700 font-medium">รหัสออเดอร์:</span>
+            <span class="text-sm text-blue-700 font-semibold">{{
+              orderId
+            }}</span>
+          </div>
+
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-700 font-medium">โซน:</span>
+            <span class="text-sm text-blue-700 font-semibold uppercase">{{
+              zone
+            }}</span>
+          </div>
+
+          <div class="flex justify-between">
+            <span class="text-sm text-gray-700 font-medium">ที่นั่ง:</span>
+            <span class="text-sm text-blue-800 font-semibold">{{
+              seats.join(", ")
+            }}</span>
+          </div>
+
+          <div class="flex justify-between border-t pt-2">
+            <span class="text-sm text-gray-700 font-medium">ราคารวม:</span>
+            <span class="text-sm text-green-600 font-bold"
+              >{{ total.toLocaleString() }} บาท</span
+            >
+          </div>
+        </div>
+      </BaseCard>
+
+      <!-- ปุ่มสร้างตั๋ว -->
       <div class="space-y-4 mt-6">
-        <!-- Generate Tickets Button -->
-        <button
+        <BaseButton
           @click="onGenerateTickets"
           :disabled="isGeneratingTickets"
-          class="w-full bg-gradient-to-r from-green-500 to-green-700 text-white rounded-full px-6 py-3 font-semibold shadow-md hover:shadow-lg hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          :loading="isGeneratingTickets"
+          variant="success"
+          size="large"
+          class="w-full"
         >
-          <i class="mdi mdi-ticket" v-if="!isGeneratingTickets"></i>
-          <i class="mdi mdi-loading mdi-spin" v-else></i>
+          <template #icon>
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+              />
+            </svg>
+          </template>
           {{
             isGeneratingTickets ? "กำลังสร้างตั๋ว..." : "🎫 สร้างตั๋วทั้งหมด"
           }}
-        </button>
+        </BaseButton>
       </div>
 
+      <!-- ปุ่มกลับหน้าแรก -->
       <router-link
         to="/"
-        class="inline-block mt-8 text-sm text-blue-500 hover:underline"
+        class="inline-block mt-8 text-sm text-blue-500 hover:underline hover:text-blue-700 transition-colors"
       >
         ⬅️ กลับหน้าแรก
       </router-link>
-    </div>
+    </BaseCard>
 
-    <!-- Ticket Display Modal -->
+    <!-- Modal สำหรับแสดงตั๋ว -->
     <TicketDisplay
       v-if="showTicketModal"
       :tickets="generatedTickets"
@@ -62,50 +98,63 @@
 </template>
 
 <script setup>
+// นำเข้า utilities และ composables ที่จำเป็น
 import { useRoute } from "vue-router";
+import { ref } from "vue";
+import { useOrder } from "~/composables/useOrder";
 import TicketDisplay from "~/components/TicketDisplay.vue";
 
+// ตั้งค่า metadata สำหรับหน้า
+definePageMeta({
+  layout: "default",
+  title: "ยืนยันการจอง",
+});
+
+// ใช้ composables
 const { cancelOrder, generateTickets } = useOrder();
 const route = useRoute();
 
-// ✅ Fallback mock data
+// ดึงข้อมูลจาก URL parameters หรือใช้ค่าเริ่มต้น
 const orderId = route.query.orderId || "12345";
 const zone = route.query.zone || "BACK-RIGHT";
 const seats = (route.query.seats || "A1,A2,A3").toString().split(",");
 const total = parseInt(route.query.total || "5400");
 
-// Reactive data
+// ตัวแปร reactive สำหรับจัดการสถานะ
 const isGeneratingTickets = ref(false);
 const generatedTickets = ref([]);
 const showTicketModal = ref(false);
 
-// Generate tickets from order data using API
+/**
+ * ฟังก์ชันสำหรับสร้างตั๋วจาก API
+ * เมื่อไม่สามารถเรียก API ได้จะใช้ข้อมูลตัวอย่าง
+ */
 const onGenerateTickets = async () => {
   isGeneratingTickets.value = true;
 
   try {
-    // Use the real API to generate tickets
+    // เรียก API สำหรับสร้างตั๋วจริง
     const tickets = await generateTickets(orderId);
-    console.log("Generated tickets:", tickets);
+    console.log("สร้างตั๋วสำเร็จ:", tickets);
 
-    // แสดงตั๋วที่ออกมา
+    // แสดงตั๋วที่สร้างขึ้น
     generatedTickets.value = tickets;
     showTicketModal.value = true;
 
-    // Show success message
+    // แสดงข้อความแจ้งเตือน
     alert(`สร้างตั๋วเสร็จสิ้น! จำนวน ${tickets.length} ใบ`);
   } catch (error) {
-    console.error("Failed to generate tickets:", error);
+    console.error("ไม่สามารถสร้างตั๋วได้:", error);
 
-    // Fallback to mock data if API fails
-    console.log("API failed, using fallback mock data");
+    // ใช้ข้อมูลตัวอย่างเมื่อ API ล้มเหลว
+    console.log("API ล้มเหลว ใช้ข้อมูลตัวอย่าง");
 
-    // Create ticket objects from order data
+    // สร้างตั๋วจากข้อมูลการจอง
     const tickets = seats.map((seat, index) => ({
       orderId: orderId,
       seatNumber: seat,
-      customerName: `ผู้ซื้อตั๋ว ${index + 1}`, // You can customize this
-      showDate: "01/07/2025", // You can get this from order data
+      customerName: `ผู้ซื้อตั๋ว ${index + 1}`, // สามารถปรับแต่งได้
+      showDate: "01/07/2025", // สามารถดึงจากข้อมูลการจองได้
       type: zone.includes("STANDING") ? "STANDING" : "SEAT",
       zone: zone,
     }));
@@ -121,7 +170,18 @@ const onGenerateTickets = async () => {
 </script>
 
 <style scoped>
+/* ใช้ฟอนต์ Prompt สำหรับการแสดงผล */
 body {
   font-family: "Prompt", sans-serif;
+}
+
+/* Animation สำหรับเอฟเฟค hover */
+.hover\\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+/* การเปลี่ยนแปลงที่นุ่มนวล */
+.transition-colors {
+  transition: color 0.2s ease;
 }
 </style>

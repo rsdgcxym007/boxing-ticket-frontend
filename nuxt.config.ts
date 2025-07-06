@@ -8,13 +8,7 @@ export default defineNuxtConfig({
     "@fortawesome/fontawesome-free/css/all.min.css",
     "@mdi/font/css/materialdesignicons.min.css",
   ],
-  modules: [
-    "@nuxtjs/i18n",
-    "@nuxtjs/tailwindcss",
-    "@pinia/nuxt",
-    "@nuxt/ui",
-    "@nuxt/icon",
-  ],
+  modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@pinia/nuxt"],
 
   devtools: { enabled: false },
   ssr: false,
@@ -47,7 +41,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.API_BASE || "http://localhost:3000",
+      apiBase: process.env.API_BASE || "http://localhost:4000",
     },
   },
 });

@@ -266,7 +266,7 @@ import { usePageData } from "../../../stores/pageData";
 const loading = usePageData();
 const orders = ref<Order[]>([]);
 
-const { getReferrerOrders, exportReferrerPdf } = useReferrer();
+const { getReferrerOrders, exportReferrerReport } = useReferrer();
 const route = useRoute();
 const referrerName = ref("");
 
@@ -321,7 +321,7 @@ const handleExport = () => {
     query.endDate = dayjs(filters.value.end).format("YYYY-MM-DD");
   }
 
-  exportReferrerPdf(referrerId, {
+  exportReferrerReport(referrerId, {
     startDate: query.startDate,
     endDate: query.endDate,
   });

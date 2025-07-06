@@ -2,107 +2,188 @@
   <div
     class="min-h-screen bg-[#0f172a] flex items-center justify-center px-6 py-12"
   >
-    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 space-y-6">
-      <h1 class="text-3xl font-bold text-center text-gray-900">เข้าสู่ระบบ</h1>
+    <BaseCard class="w-full max-w-md bg-white shadow-xl p-8 space-y-6">
+      <template #header>
+        <h1 class="text-3xl font-bold text-center text-gray-900">
+          เข้าสู่ระบบ
+        </h1>
+      </template>
 
-      <!-- ✅ ช่อง input เรียงแนวตั้ง -->
-      <div class="flex flex-col gap-4">
-        <div class="relative">
-          <span
-            class="absolute inset-y-0 left-3 flex items-center text-gray-400"
-          >
-            <i class="fas fa-envelope"></i>
-          </span>
-          <input
+      <!-- ช่องกรอกข้อมูล -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            อีเมล
+          </label>
+          <BaseInput
             v-model="pageData.email"
             type="email"
-            placeholder="อีเมลของคุณ"
-            class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            placeholder="กรอกอีเมลของคุณ"
+            required
           />
         </div>
 
-        <div class="relative">
-          <span
-            class="absolute inset-y-0 left-3 flex items-center text-gray-400"
-          >
-            <i class="fas fa-lock"></i>
-          </span>
-          <input
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            รหัสผ่าน
+          </label>
+          <BaseInput
             v-model="pageData.password"
             type="password"
-            placeholder="รหัสผ่าน"
-            class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            placeholder="กรอกรหัสผ่าน"
+            required
           />
         </div>
       </div>
 
-      <button
+      <!-- ข้อมูลการเชื่อมต่อ API -->
+      <BaseAlert variant="info" class="text-sm">
+        <p><strong>API URL:</strong> {{ base }}</p>
+        <p><strong>Endpoint:</strong> /api/v1/auth/login</p>
+      </BaseAlert>
+
+      <!-- ปุ่มเข้าสู่ระบบ -->
+      <BaseButton
         @click="login"
-        class="w-full py-2 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition duration-200"
-        :disabled="pageData.loading"
+        :loading="pageData.loading"
+        :disabled="!pageData.email || !pageData.password"
+        variant="primary"
+        size="large"
+        class="w-full"
       >
-        <span v-if="!pageData.loading">เข้าสู่ระบบ</span>
-        <span v-else>กำลังโหลด...</span>
-      </button>
-      <!-- <div class="text-center text-sm text-gray-500">
-        ยังไม่มีบัญชี?
-        <NuxtLink
-          to="/register"
-          class="text-blue-600 hover:underline font-semibold"
-        >
-          สมัครสมาชิก
-        </NuxtLink>
-      </div> -->
-    </div>
+        เข้าสู่ระบบ
+      </BaseButton>
+
+      <!-- ข้อมูลทดสอบ -->
+      <BaseAlert variant="warning" class="text-sm">
+        <p><strong>ข้อมูลทดสอบ:</strong></p>
+        <p>Email: admin@example.com</p>
+        <p>Password: admin1234</p>
+      </BaseAlert>
+    </BaseCard>
   </div>
 </template>
 
 <script setup lang="ts">
+// นำเข้า composables และ utilities ที่จำเป็น
 import { reactive } from "vue";
 import { useToast } from "vue-toastification";
 import { useApi } from "../composables/useApi";
 import { useRouter } from "vue-router";
 import { useRuntimeConfig } from "nuxt/app";
+
+// ตั้งค่าการเชื่อมต่อ API
 const config = useRuntimeConfig();
 const base = config.public.apiBase;
+
+// ข้อมูลฟอร์ม login
 const pageData = reactive({
   email: "admin@example.com",
   password: "admin1234",
   loading: false,
 });
 
+// ใช้ composables
 const toast = useToast();
 const router = useRouter();
 const { post } = useApi();
 
+/**
+ * ฟังก์ชันสำหรับเข้าสู่ระบบ
+ * จะเรียก API เพื่อตรวจสอบข้อมูลและบันทึก token
+ */
 const login = async () => {
   pageData.loading = true;
 
   try {
-    const res = await fetch(`${base}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: pageData.email,
-        password: pageData.password,
-      }),
-    });
+    const endpoints = ["/auth/login"];
 
-    const data = await res.json();
+    let success = false;
+    let data;
 
-    if (!res.ok) {
-      throw new Error(data.message || "เข้าสู่ระบบล้มเหลว");
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`🔍 ลองเรียก: ${base}${endpoint}`);
+
+        const res = await fetch(`${base}${endpoint}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: pageData.email,
+            password: pageData.password,
+          }),
+        });
+
+        console.log(`📊 Response สำหรับ ${endpoint}:`, {
+          status: res.status,
+          statusText: res.statusText,
+          ok: res.ok,
+          url: res.url,
+        });
+
+        if (res.ok) {
+          const responseText = await res.text();
+
+          try {
+            data = JSON.parse(responseText);
+            success = true;
+            break;
+          } catch (jsonError) {
+            console.log("❌ ไม่สามารถแปลง response เป็น JSON:", jsonError);
+            throw new Error("API ส่งกลับข้อมูลที่ไม่ใช่ JSON");
+          }
+        } else {
+          console.log(`❌ ${endpoint} ล้มเหลว:`, res.status, res.statusText);
+        }
+      } catch (fetchError) {
+        console.log(`❌ Error เรียก ${endpoint}:`, fetchError);
+      }
     }
 
-    localStorage.setItem("token", data.access_token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    if (!success) {
+      throw new Error(
+        "ไม่สามารถเชื่อมต่อ API ได้ กรุณาตรวจสอบว่า Backend Server ทำงานอยู่"
+      );
+    }
 
-    toast.success("เข้าสู่ระบบสำเร็จ");
-    router.push("/");
+    // ตรวจสอบว่ามี access_token หรือไม่
+    if (!data.access_token && !data.token) {
+      throw new Error("ไม่พบ access_token ในการตอบกลับ");
+    }
+
+    // บันทึกข้อมูลการเข้าสู่ระบบ
+    const token = data.access_token || data.token;
+    localStorage.setItem("token", token);
+    localStorage.setItem(
+      "user",
+      JSON.stringify(data.user || data.data?.user || {})
+    );
+
+    toast.success("🎉 เข้าสู่ระบบสำเร็จ");
+    console.log("🏠 กำลังเปลี่ยนเส้นทางไปหน้าแรก...");
+
+    // เปลี่ยนเส้นทางไปหน้าแรก
+    await router.push("/");
   } catch (err: any) {
-    toast.error(`${err.message || "เข้าสู่ระบบล้มเหลว"}`);
+    console.error("❌ เกิดข้อผิดพลาดในการเข้าสู่ระบบ:", err);
+
+    // แสดงข้อความแจ้งเตือนที่เหมาะสม
+    let errorMessage = "เข้าสู่ระบบล้มเหลว";
+
+    if (err.message) {
+      errorMessage = err.message;
+    } else if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
+    }
+
+    toast.error(`🚫 ${errorMessage}`);
+
+    // แสดงข้อมูลเพิ่มเติมสำหรับการ debug
+    console.log("🔍 ข้อมูลการ debug:");
+    console.log("- API Base URL:", base);
+    console.log("- Error:", err);
   } finally {
     pageData.loading = false;
   }
