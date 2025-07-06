@@ -39,6 +39,7 @@
           <li v-if="auth?.user?.role === 'admin'" class="relative group">
             <button
               @click="toggleAdminMenu"
+              @touchstart="adminMenuHover = true"
               @mouseenter="adminMenuHover = true"
               @mouseleave="adminMenuHover = false"
               class="hover:text-green-400 flex items-center gap-1"
@@ -61,6 +62,7 @@
             <!-- Admin Dropdown Menu -->
             <div
               v-if="adminMenuHover || adminMenuOpen"
+              @touchstart="adminMenuHover = true"
               @mouseenter="adminMenuHover = true"
               @mouseleave="adminMenuHover = false"
               class="absolute top-full left-0 mt-2 w-56 bg-[#0f1f3c] text-white shadow-xl rounded-xl z-50 py-2 border border-white/10"

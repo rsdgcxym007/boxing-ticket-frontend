@@ -36,29 +36,28 @@
         </div>
       </div>
 
-      <!-- ข้อมูลการเชื่อมต่อ API -->
-      <BaseAlert variant="info" class="text-sm">
-        <p><strong>API URL:</strong> {{ base }}</p>
-        <p><strong>Endpoint:</strong> /api/v1/auth/login</p>
-      </BaseAlert>
-
       <!-- ปุ่มเข้าสู่ระบบ -->
       <BaseButton
         @click="login"
         :loading="pageData.loading"
         :disabled="!pageData.email || !pageData.password"
         variant="primary"
-        size="large"
-        class="w-full"
+        size="md"
+        class="w-full h-full"
       >
         เข้าสู่ระบบ
       </BaseButton>
 
       <!-- ข้อมูลทดสอบ -->
-      <BaseAlert variant="warning" class="text-sm">
-        <p><strong>ข้อมูลทดสอบ:</strong></p>
+      <BaseAlert type="warning" class="text-sm mt-5 mb-3">
+        <p><strong>ข้อมูลทดสอบ: role Admin</strong></p>
         <p>Email: admin@example.com</p>
         <p>Password: admin1234</p>
+      </BaseAlert>
+      <BaseAlert type="warning" class="text-sm">
+        <p><strong>ข้อมูลทดสอบ: role Staff</strong></p>
+        <p>Email: staff01@example.com</p>
+        <p>Password: password123</p>
       </BaseAlert>
     </BaseCard>
   </div>
