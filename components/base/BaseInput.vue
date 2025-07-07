@@ -77,7 +77,6 @@ const inputId = computed(
 const inputClasses = computed(() => {
   const baseClasses =
     "block w-full border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2";
-
   const sizes = {
     sm: "px-3 py-1.5 text-sm",
     md: "px-3 py-2 text-base",
@@ -94,7 +93,7 @@ const inputClasses = computed(() => {
 
   return `${baseClasses} ${
     sizes[props.size]
-  } ${stateClasses} ${disabledClasses}`;
+  } ${stateClasses} ${disabledClasses} `;
 });
 
 const handleInput = (event: Event) => {

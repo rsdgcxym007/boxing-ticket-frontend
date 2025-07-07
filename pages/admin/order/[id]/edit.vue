@@ -74,7 +74,7 @@
             class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8"
           >
             <!-- Status and Basic Info -->
-            <div class="space-y-4 lg:space-y-6">
+            <div class="grid sm:grid-cols-2 md:grid-cols-2 gap-4">
               <div class="bg-[#0f1f3c] p-4 rounded-lg border border-blue-700">
                 <label
                   class="block text-sm md:text-base lg:text-lg font-medium text-blue-300 mb-3"
@@ -155,16 +155,24 @@
                 >
                   <i class="mdi mdi-account"></i>ข้อมูลลูกค้า
                 </h3>
-                <div class="space-y-3">
+                <div class="grid sm:grid-cols-2 md:grid-cols-2 gap-4">
                   <div>
                     <label
                       class="block text-sm md:text-base font-medium text-gray-300 mb-1"
                     >
                       ชื่อ
                     </label>
-                    <p class="text-white text-base md:text-lg font-semibold">
+                    <p
+                      v-if="orderData.status === 'PAID'"
+                      class="text-white text-base md:text-lg font-semibold"
+                    >
                       {{ orderData.customerName }}
                     </p>
+                    <BaseInput
+                      v-else
+                      v-model="formData.newCustomerName"
+                      class="bg-white text-black"
+                    />
                   </div>
                   <div>
                     <label
@@ -172,9 +180,17 @@
                     >
                       เบอร์โทร
                     </label>
-                    <p class="text-white text-base md:text-lg font-mono">
+                    <p
+                      v-if="orderData.status === 'PAID'"
+                      class="text-white text-base md:text-lg font-mono"
+                    >
                       {{ orderData.customerPhone }}
                     </p>
+                    <BaseInput
+                      v-else
+                      v-model="formData.newCustomerPhone"
+                      class="bg-white text-black"
+                    />
                   </div>
                   <div>
                     <label
@@ -183,10 +199,16 @@
                       อีเมล
                     </label>
                     <p
+                      v-if="orderData.status === 'PAID'"
                       class="text-white text-base md:text-lg font-mono break-all"
                     >
                       {{ orderData.email }}
                     </p>
+                    <BaseInput
+                      v-else
+                      v-model="formData.newCustomerEmail"
+                      class="bg-white text-black"
+                    />
                   </div>
                 </div>
               </div>
@@ -197,16 +219,24 @@
                 >
                   <i class="mdi mdi-handshake"></i>ข้อมูลการแนะนำ
                 </h3>
-                <div class="space-y-3">
+                <div class="grid sm:grid-cols-2 md:grid-cols-2 gap-4">
                   <div>
                     <label
                       class="block text-sm md:text-base font-medium text-gray-300 mb-1"
                     >
                       รหัสผู้แนะนำ
                     </label>
-                    <p class="text-white text-base md:text-lg font-semibold">
+                    <p
+                      v-if="orderData.status === 'PAID'"
+                      class="text-white text-base md:text-lg font-semibold"
+                    >
                       {{ orderData.referrerCode || "ไม่มีข้อมูล" }}
                     </p>
+                    <BaseInput
+                      v-else
+                      v-model="formData.newReferrerCode"
+                      class="bg-white text-black"
+                    />
                   </div>
                   <div>
                     <label
@@ -214,9 +244,17 @@
                     >
                       แหล่งที่มา
                     </label>
-                    <p class="text-white text-base md:text-lg font-semibold">
+                    <p
+                      v-if="orderData.status === 'PAID'"
+                      class="text-white text-base md:text-lg font-semibold"
+                    >
                       {{ orderData.source }}
                     </p>
+                    <BaseInput
+                      v-else
+                      v-model="formData.source"
+                      class="bg-white text-black"
+                    />
                   </div>
                 </div>
               </div>
@@ -227,7 +265,7 @@
                 >
                   <i class="mdi mdi-credit-card"></i>การชำระเงิน
                 </h3>
-                <div class="space-y-3">
+                <div class="grid sm:grid-cols-2 md:grid-cols-2 gap-4">
                   <div>
                     <label
                       class="block text-sm md:text-base font-medium text-gray-300 mb-1"
@@ -253,14 +291,14 @@
             </div>
 
             <!-- Timestamps and Additional Info -->
-            <div class="space-y-4 lg:space-y-6">
+            <div class="grid sm:grid-cols-1 md:grid-cols-1 gap-4">
               <div class="bg-[#0f1f3c] p-4 rounded-lg border border-blue-700">
                 <h3
                   class="text-lg md:text-xl font-semibold text-blue-300 mb-4 flex items-center gap-2"
                 >
                   <i class="mdi mdi-clock-outline"></i>เวลาและวันที่
                 </h3>
-                <div class="space-y-3">
+                <div class="grid sm:grid-cols-4 md:grid-cols-4 gap-4">
                   <div>
                     <label
                       class="block text-sm md:text-base font-medium text-gray-300 mb-1"
@@ -377,7 +415,7 @@
           </template>
 
           <div
-            class="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+            class="grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
           >
             <div
               v-for="seat in orderData.seats"
@@ -557,6 +595,7 @@ const route = useRoute();
 const router = useRouter();
 const { getOrderById, changeSeats } = useOrder();
 const toast = useToast();
+const { createSeatedPayment } = usePayments();
 
 // Reactive data
 const orderId = route.params.id;
@@ -573,6 +612,10 @@ const formData = ref({
   newCustomerPhone: "",
   newCustomerEmail: "",
   newShowDate: "",
+  newSource: "",
+  status: "",
+  paymentStatus: "",
+  totalAmount: 0,
 });
 
 // Computed for seat IDs text area
@@ -691,8 +734,12 @@ const loadOrder = async () => {
       newCustomerPhone: data.customerPhone || "",
       newCustomerEmail: data.email || "",
       newShowDate: data.showDate
-        ? dayjs(data.showDate).format("YYYY-MM-DDTHH:mm")
+        ? dayjs(data.showDate).format("YYYY-MM-DD")
         : "",
+      totalAmount: data.totalAmount || 0,
+      newSource: data.source || "",
+      status: data.status,
+      paymentStatus: data.paymentStatus,
     };
 
     seatIdsText.value = data.seats.map((seat) => seat.seatNumber).join(", ");
@@ -712,18 +759,41 @@ const saveChanges = async () => {
   try {
     saving.value = true;
 
-    await changeSeats(
-      orderId,
-      formData.value.seatIds,
-      formData.value.newReferrerCode,
-      formData.value.newCustomerName,
-      formData.value.newCustomerPhone,
-      formData.value.newCustomerEmail,
-      formData.value.newShowDate
-    );
-
+    if (formData.value.status === "PAID") {
+      await changeSeats(
+        orderId,
+        formData.value.seatIds,
+        formData.value.newReferrerCode,
+        formData.value.newCustomerName,
+        formData.value.newCustomerPhone,
+        formData.value.newCustomerEmail,
+        formData.value.newShowDate,
+        formData.value.newSource
+      );
+      router.push("/admin/orders");
+    } else {
+      await changeSeats(
+        orderId,
+        formData.value.seatIds,
+        formData.value.newReferrerCode,
+        formData.value.newCustomerName,
+        formData.value.newCustomerPhone,
+        formData.value.newCustomerEmail,
+        formData.value.newShowDate,
+        formData.value.newSource
+      );
+      await createSeatedPayment({
+        orderId,
+        amount: formData.value.totalAmount,
+        method: "CASH",
+        customerName: formData.value.newCustomerName,
+        customerEmail: formData.value.newCustomerEmail,
+        customerPhone: formData.value.newCustomerPhone,
+        referrerCode: formData.value.newReferrerCode || undefined,
+      });
+      router.push("/admin/orders");
+    }
     toast.success("บันทึกการเปลี่ยนแปลงเรียบร้อย");
-    router.push("/admin/orders");
   } catch (err) {
     console.error("Error saving changes:", err);
     toast.error("เกิดข้อผิดพลาดในการบันทึกการเปลี่ยนแปลง");
@@ -769,19 +839,19 @@ const validationErrors = computed(() => {
       errors.push("กรุณากรอกชื่อลูกค้า");
     }
 
-    if (!formData.value.newCustomerPhone.trim()) {
-      errors.push("กรุณากรอกเบอร์โทร");
-    } else if (!/^\d{10}$/.test(formData.value.newCustomerPhone)) {
-      errors.push("เบอร์โทรต้องเป็นตัวเลข 10 หลัก");
-    }
+    // if (!formData.value.newCustomerPhone.trim()) {
+    //   errors.push("กรุณากรอกเบอร์โทร");
+    // } else if (!/^\d{10}$/.test(formData.value.newCustomerPhone)) {
+    //   errors.push("เบอร์โทรต้องเป็นตัวเลข 10 หลัก");
+    // }
 
-    if (!formData.value.newCustomerEmail.trim()) {
-      errors.push("กรุณากรอกอีเมล");
-    } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.newCustomerEmail)
-    ) {
-      errors.push("กรุณากรอกอีเมลที่ถูกต้อง");
-    }
+    // if (!formData.value.newCustomerEmail.trim()) {
+    //   errors.push("กรุณากรอกอีเมล");
+    // } else if (
+    //   !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.newCustomerEmail)
+    // ) {
+    //   errors.push("กรุณากรอกอีเมลที่ถูกต้อง");
+    // }
   }
 
   if (!formData.value.newShowDate) {

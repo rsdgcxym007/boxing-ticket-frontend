@@ -206,7 +206,12 @@ const pageData = reactive({
   referrers: [],
   showCreateModal: false,
   editing: false,
-  newRef: { name: "", code: "", status: "active" },
+  newRef: {
+    name: "",
+    code: "",
+    phone: "",
+    status: "active",
+  },
   filters: { keyword: "" },
   page: 1,
   limit: 10,
@@ -240,12 +245,19 @@ const handleSaveReferrer = async () => {
   try {
     if (pageData.editing) {
       const { id, ...payload } = pageData.newRef;
+      console.log("payload", payload);
+
       await updateReferrer(id, payload);
     } else {
       await createReferrer(pageData.newRef);
     }
     pageData.showCreateModal = false;
-    pageData.newRef = { name: "", code: "", status: "active" };
+    pageData.newRef = {
+      name: "",
+      code: "",
+      phone: "",
+      status: "active",
+    };
     pageData.editing = false;
     await fetchReferrers();
     data.loading = false;

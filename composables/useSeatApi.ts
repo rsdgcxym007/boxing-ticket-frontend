@@ -1,11 +1,12 @@
 import { useApi } from "../composables/useApi";
 import { useToast } from "vue-toastification";
 import { ZONE_IDS_BY_NAME } from "../utils/zoneEnums";
+import { useRouter } from "vue-router";
 
 export function useSeatApi() {
   const { get, post, patch } = useApi();
   const toast = useToast();
-
+  const rounter = useRouter();
   // ตรงกับ API: GET /api/v1/seats/available
   const getAvailableSeats = async (params?: {
     showDate?: string;
@@ -65,7 +66,10 @@ export function useSeatApi() {
     } catch (error: any) {
       console.error("getSeatsByZoneId - error:", error);
 
+      console.log("error?.message", error?.message);
+
       if (error?.message === "Unauthorized") {
+        rounter.push("/login");
         toast.warning(`กรุณาเข้าสู่ระบบเพื่อดําเนินการต่อ`);
         return [];
       }

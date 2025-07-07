@@ -10,14 +10,15 @@
       </div>
 
       <!-- ส่วนกรองข้อมูล -->
-      <BaseCard class="bg-[#1a2b4d] border-blue-600">
+      <BaseCard class="bg-[#1a2b4d] border-blue-60 overflow-visible">
         <template #header>
           <h2 class="text-lg font-semibold text-white">กรองข้อมูล</h2>
         </template>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- สถานะออเดอร์ -->
-          <div class="space-y-2">
+        <div
+          class="grid sm:grid-cols-2 md:grid-cols-2 gap-4 relative z-10 overflow-visible"
+        >
+          <div>
             <label class="block text-sm font-medium text-white"
               >สถานะออเดอร์</label
             >
@@ -25,7 +26,7 @@
               v-model="pageData.filters.status"
               @update:modelValue="onStatusChange"
             >
-              <div class="relative">
+              <div class="relative z-40">
                 <ListboxButton
                   class="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-10 text-left text-black border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
@@ -52,7 +53,7 @@
                 </ListboxButton>
                 <Transition name="fade">
                   <ListboxOptions
-                    class="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-gray-900 py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5"
+                    class="absolute z-40 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-gray-900 py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5"
                   >
                     <ListboxOption
                       v-for="option in pageData.statusOptions"
@@ -70,24 +71,21 @@
                       <span
                         v-if="selected"
                         class="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600"
+                        >✓</span
                       >
-                        ✓
-                      </span>
                     </ListboxOption>
                   </ListboxOptions>
                 </Transition>
               </div>
             </Listbox>
           </div>
-
-          <!-- ค้นหาโซน -->
-          <div class="space-y-2">
+          <div>
             <label class="block text-sm font-medium text-white">โซน</label>
             <Listbox
               v-model="pageData.filters.zone"
               @update:modelValue="onZoneChange"
             >
-              <div class="relative">
+              <div class="relative z-30">
                 <ListboxButton
                   class="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-10 text-left text-black border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
@@ -114,7 +112,7 @@
                 </ListboxButton>
                 <Transition name="fade">
                   <ListboxOptions
-                    class="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-gray-900 py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5"
+                    class="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-gray-900 py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5"
                   >
                     <ListboxOption
                       v-for="zone in pageData.zoneOptions"
@@ -132,18 +130,15 @@
                       <span
                         v-if="selected"
                         class="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600"
+                        >✓</span
                       >
-                        ✓
-                      </span>
                     </ListboxOption>
                   </ListboxOptions>
                 </Transition>
               </div>
             </Listbox>
           </div>
-
-          <!-- ค้นหา Order ID -->
-          <div class="space-y-2">
+          <div>
             <label class="block text-sm font-medium text-white"
               >ค้นหา Order ID</label
             >
@@ -154,14 +149,12 @@
               class="bg-white text-black"
             />
           </div>
-
-          <!-- จำนวนรายการต่อหน้า -->
-          <div class="space-y-2">
+          <div>
             <label class="block text-sm font-medium text-white"
               >รายการต่อหน้า</label
             >
             <Listbox v-model="pageData.limit" @update:modelValue="fetchData">
-              <div class="relative">
+              <div class="relative z-20">
                 <ListboxButton
                   class="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-10 text-left text-black border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
@@ -188,10 +181,10 @@
                 </ListboxButton>
                 <Transition name="fade">
                   <ListboxOptions
-                    class="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-gray-900 py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5"
+                    class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-gray-900 py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5"
                   >
                     <ListboxOption
-                      v-for="n in [5, 10, 20]"
+                      v-for="n in [10, 20, 40]"
                       :key="n"
                       :value="n"
                       v-slot="{ selected }"
@@ -206,9 +199,8 @@
                       <span
                         v-if="selected"
                         class="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600"
+                        >✓</span
                       >
-                        ✓
-                      </span>
                     </ListboxOption>
                   </ListboxOptions>
                 </Transition>
@@ -245,15 +237,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Modal สำหรับการเลือกโซน -->
-  <ModalStadiumZoneSelector
-    :zoneKey="pageData.selectedZone"
-    :isOpen="pageData.showZoneModal"
-    @close="onClose"
-    :orderData="orderData"
-    mode="change"
-  />
 
   <!-- Modal สำหรับแสดงตั๋วที่ออกมา -->
   <TicketDisplay
@@ -365,21 +348,15 @@ const onChangeSeats = (order) => {
 
 const onUpdateStatus = (order) => {
   if (order.seats.length === 0) {
-    // สำหรับออเดอร์ที่ยืน
     Object.assign(orderData, order);
     showModal.value = true;
-  } else {
-    // สำหรับออเดอร์ที่นั่ง
-    Object.assign(orderData, order);
-    pageData.selectedZone = order.zoneName;
-    pageData.showZoneModal = true;
   }
 };
 
 const onCancelOrder = async (order) => {
   try {
     await cancelOrder(order.id);
-    fetchData(); // รีเฟรชข้อมูล
+    fetchData();
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการยกเลิกออเดอร์:", error);
   }

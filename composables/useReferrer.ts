@@ -43,7 +43,6 @@ export const useReferrer = () => {
     code: string;
     email?: string;
     phone?: string;
-    commissionRate?: number;
     description?: string;
   }) => {
     try {

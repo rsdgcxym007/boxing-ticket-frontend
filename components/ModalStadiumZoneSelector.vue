@@ -149,6 +149,14 @@
                       ยกเลิกทั้งหมด
                     </button>
                     <button
+                      @click="handleMarkOrder"
+                      class="min-w-[90px] px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition-all"
+                    >
+                      {{
+                        props.mode === "change" ? "จองที่นั่ง" : "ยืนยันการจอง"
+                      }}
+                    </button>
+                    <button
                       @click="handleConfirm"
                       class="min-w-[90px] px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition-all"
                     >
@@ -252,8 +260,6 @@ const fetchSeats = async () => {
 };
 
 const onZoneChange = async (newZone) => {
-  console.log("newZone", newZone);
-
   if (!newZone) return;
   pageData.zoneKey = newZone;
   pageData.selectedSeats = [];
@@ -359,6 +365,35 @@ const handleConfirm = async () => {
   }
 };
 
+const handleMarkOrder = async () => {
+  if (!pageData.selectedSeats.length) {
+    toast.warning("กรุณาเลือกที่นั่งก่อน");
+    return;
+  }
+
+  try {
+    pageData.loading = true;
+
+    const order = await submitOrder({
+      seatIds: pageData.selectedSeats.map((s) => s.id),
+      showDate: dayjs(pageData.showDate).format("YYYY-MM-DD"),
+      customerName: "",
+      customerPhone: "",
+      customerEmail: "",
+      ticketType: "RINGSIDE",
+      paymentMethod: "CASH",
+      status: "BOOKED",
+    });
+    toast.success("จองที่นั่งเรียบร้อยแล้ว");
+    pageData.resetPageData();
+    onClose();
+  } catch (err) {
+    toast.error(err.message || "เกิดข้อผิดพลาด");
+  } finally {
+    pageData.loading = false;
+  }
+};
+
 onMounted(() => {
   pageData.showDate = props.orderData?.showDate || new Date();
   pageData.zoneKey = props.zoneKey;
@@ -366,8 +401,6 @@ onMounted(() => {
 watch(
   () => props.isOpen,
   async (isOpen) => {
-    console.log("isOpen:", isOpen);
-
     if (isOpen) {
       isFirstOpen.value = true;
       pageData.showSeatModal = true;
