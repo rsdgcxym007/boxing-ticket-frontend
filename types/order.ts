@@ -41,4 +41,5 @@ export interface Order {
   referrer: Referrer;
   seats: Seat[];
   payment: Payment | null;
+  seatBookings: Seat[];
 }

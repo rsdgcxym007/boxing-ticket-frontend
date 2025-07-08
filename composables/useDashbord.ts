@@ -20,14 +20,14 @@ export const useDashboard = () => {
     }
   };
 
-  // ตรงกับ API: GET /api/v1/dashboard/stats
-  const getDashboardStats = async () => {
+  // ตรงกับ API: GET /api/v1/dashboard/referrer-performance
+  const getTodayReferrerPerformance = async () => {
     try {
-      const data = await get("/api/v1/dashboard/stats");
+      const data = await get("/api/v1/dashboard/referrer-performance");
       return data;
     } catch (err: any) {
       toast.error(
-        `ไม่สามารถเรียกสถิติได้: ${
+        `ไม่สามารถเรียกข้อมูล Referrer วันนี้ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
       );
@@ -35,14 +35,40 @@ export const useDashboard = () => {
     }
   };
 
-  // ตรงกับ API: GET /api/v1/dashboard/revenue
-  const getRevenueAnalytics = async (params?: {
-    period?: "daily" | "weekly" | "monthly";
-    startDate?: string;
-    endDate?: string;
-  }) => {
+  // ตรงกับ API: GET /api/v1/dashboard/all-referrers
+  const getAllReferrerPerformance = async () => {
     try {
-      const data = await get("/api/v1/dashboard/revenue", { query: params });
+      const data = await get("/api/v1/dashboard/all-referrers");
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `ไม่สามารถเรียกข้อมูล Referrer ทั้งหมดได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: GET /api/v1/dashboard/ticket-sales
+  const getTicketSalesSummary = async () => {
+    try {
+      const data = await get("/api/v1/dashboard/ticket-sales");
+      return data;
+    } catch (err: any) {
+      toast.error(
+        `ไม่สามารถเรียกข้อมูลยอดขายตั๋วได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
+  // ตรงกับ API: GET /api/v1/dashboard/revenue-summary
+  const getRevenueSummary = async () => {
+    try {
+      const data = await get("/api/v1/dashboard/revenue-summary");
       return data;
     } catch (err: any) {
       toast.error(
@@ -54,17 +80,16 @@ export const useDashboard = () => {
     }
   };
 
-  // ตรงกับ API: GET /api/v1/dashboard/occupancy
-  const getSeatOccupancy = async (params?: {
-    showDate?: string;
-    zone?: string;
-  }) => {
+  // ตรงกับ API: GET /api/v1/dashboard/seat-availability
+  const getSeatAvailability = async (showDate?: string) => {
     try {
-      const data = await get("/api/v1/dashboard/occupancy", { query: params });
+      const data = await get("/api/v1/dashboard/seat-availability", {
+        query: { showDate },
+      });
       return data;
     } catch (err: any) {
       toast.error(
-        `ไม่สามารถเรียกข้อมูลที่นั่งได้: ${
+        `ไม่สามารถเรียกข้อมูลที่นั่งว่างได้: ${
           err.response?.data?.message || "Unknown error"
         }`
       );
@@ -72,14 +97,14 @@ export const useDashboard = () => {
     }
   };
 
-  // ตรงกับ API: GET /api/v1/dashboard/performance
-  const getPerformanceMetrics = async () => {
+  // ตรงกับ API: GET /api/v1/dashboard/customer-analytics
+  const getCustomerAnalytics = async () => {
     try {
-      const data = await get("/api/v1/dashboard/performance");
+      const data = await get("/api/v1/dashboard/customer-analytics");
       return data;
     } catch (err: any) {
       toast.error(
-        `ไม่สามารถเรียกข้อมูลประสิทธิภาพได้: ${
+        `ไม่สามารถเรียกข้อมูลลูกค้าได้: ${
           err.response?.data?.message || "Unknown error"
         }`
       );
@@ -87,17 +112,14 @@ export const useDashboard = () => {
     }
   };
 
-  // ตรงกับ API: GET /api/v1/dashboard/referrers
-  const getReferrerAnalytics = async (params?: {
-    period?: "weekly" | "monthly";
-    limit?: number;
-  }) => {
+  // ตรงกับ API: GET /api/v1/dashboard/system-health
+  const getSystemHealth = async () => {
     try {
-      const data = await get("/api/v1/dashboard/referrers", { query: params });
+      const data = await get("/api/v1/dashboard/system-health");
       return data;
     } catch (err: any) {
       toast.error(
-        `ไม่สามารถเรียกข้อมูลผู้แนะนำได้: ${
+        `ไม่สามารถเรียกข้อมูลสถานะระบบได้: ${
           err.response?.data?.message || "Unknown error"
         }`
       );
@@ -105,32 +127,14 @@ export const useDashboard = () => {
     }
   };
 
-  // ตรงกับ API: GET /api/v1/dashboard/activities
-  const getRecentActivities = async (params?: {
-    limit?: number;
-    type?: string;
-  }) => {
+  // ตรงกับ API: GET /api/v1/dashboard/quick-stats
+  const getQuickStats = async () => {
     try {
-      const data = await get("/api/v1/dashboard/activities", { query: params });
+      const data = await get("/api/v1/dashboard/quick-stats");
       return data;
     } catch (err: any) {
       toast.error(
-        `ไม่สามารถเรียกข้อมูลกิจกรรมได้: ${
-          err.response?.data?.message || "Unknown error"
-        }`
-      );
-      throw err;
-    }
-  };
-
-  // ตรงกับ API: GET /api/v1/dashboard/alerts
-  const getSystemAlerts = async () => {
-    try {
-      const data = await get("/api/v1/dashboard/alerts");
-      return data;
-    } catch (err: any) {
-      toast.error(
-        `ไม่สามารถเรียกข้อมูลแจ้งเตือนได้: ${
+        `ไม่สามารถเรียกข้อมูลสถิติด่วนได้: ${
           err.response?.data?.message || "Unknown error"
         }`
       );
@@ -139,18 +143,14 @@ export const useDashboard = () => {
   };
 
   return {
-    // Main dashboard
     getDashboard,
-    getDashboardStats,
-
-    // Analytics
-    getRevenueAnalytics,
-    getSeatOccupancy,
-    getPerformanceMetrics,
-    getReferrerAnalytics,
-
-    // Activities & Alerts
-    getRecentActivities,
-    getSystemAlerts,
+    getTodayReferrerPerformance,
+    getAllReferrerPerformance,
+    getTicketSalesSummary,
+    getRevenueSummary,
+    getSeatAvailability,
+    getCustomerAnalytics,
+    getSystemHealth,
+    getQuickStats,
   };
 };

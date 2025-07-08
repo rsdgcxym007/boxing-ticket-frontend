@@ -17,9 +17,9 @@ export const usePayments = () => {
       const res = await post("/api/v1/payments/standing", payload);
       return res;
     } catch (err: any) {
-      toast.error(
-        `สร้างการจองล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
-      );
+      // toast.error(
+      //   `สร้างการจองล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
+      // );
       throw err;
     }
   };

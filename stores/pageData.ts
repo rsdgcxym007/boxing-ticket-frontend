@@ -27,7 +27,7 @@ export const usePageData = defineStore("pageData", {
     customerEmail: "",
     total: 0,
     page: 1,
-    limit: 5,
+    limit: 10,
     selectedSeatsMap: {},
     filters: { status: "", zone: "", search: "" },
     orders: [],

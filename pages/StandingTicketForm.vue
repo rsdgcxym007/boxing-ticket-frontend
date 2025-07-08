@@ -265,13 +265,9 @@ const bookStandingTicketNew = async () => {
   if (
     !showDate ||
     standingAdultQty + standingChildQty === 0 ||
-    !customerName.trim() ||
-    !customerPhone.trim() ||
-    !customerEmail.trim()
+    !customerName.trim()
   ) {
-    toast.error(
-      "❌ กรุณากรอกข้อมูลให้ครบถ้วน (ชื่อลูกค้า, เบอร์โทร, อีเมล, จำนวนตั๋ว, วันที่)"
-    );
+    toast.error("❌ กรุณากรอกข้อมูลให้ครบถ้วน (ชื่อลูกค้า,จำนวนตั๋ว, วันที่)");
     return;
   }
 
@@ -314,21 +310,6 @@ const confirmPaymentForOrder = async () => {
     toast.error("❌ ไม่พบข้อมูลออเดอร์ กรุณาจองตั๋วก่อน");
     return;
   }
-
-  // ✅ ตรวจสอบเบอร์โทรและอีเมล
-  const phoneRegex = /^\d{10}$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (!phoneRegex.test(pageData.value.customerPhone.trim())) {
-    toast.error("❌ เบอร์โทรต้องมี 10 ตัวเลข");
-    return;
-  }
-
-  if (!emailRegex.test(pageData.value.customerEmail.trim())) {
-    toast.error("❌ กรุณากรอกอีเมลให้ถูกต้อง");
-    return;
-  }
-
   isLoading.loading = true;
 
   try {
@@ -357,8 +338,8 @@ const confirmPaymentForOrder = async () => {
     };
     orderId.value = null;
   } catch (error) {
-    console.error("❌ เกิดข้อผิดพลาดในการยืนยันการชำระเงิน:", error);
-    toast.error("❌ ไม่สามารถยืนยันการชำระเงินได้ กรุณาลองใหม่อีกครั้ง");
+    // console.error("❌ เกิดข้อผิดพลาดในการยืนยันการชำระเงิน:", error);
+    toast.error(`❌ ${error}`);
   } finally {
     isLoading.loading = false;
   }

@@ -1,184 +1,246 @@
 <template>
   <div class="space-y-6">
     <!-- No Orders -->
-    <div v-if="orders.length === 0" class="text-center py-12 text-gray-500">
-      ไม่พบออเดอร์ตามที่ค้นหา
+    <div v-if="orders.length === 0" class="text-center py-12">
+      <i class="mdi mdi-package-variant text-6xl text-gray-500 mb-4"></i>
+      <h3 class="text-xl font-semibold text-gray-300 mb-2">
+        ไม่มีข้อมูลออเดอร์
+      </h3>
+      <p class="text-gray-500">ไม่พบออเดอร์ที่ตรงกับเงื่อนไขการค้นหา</p>
     </div>
 
-    <!-- Order Cards -->
-    <div
-      v-for="order in orders"
-      :key="order.id"
-      class="bg-[#0a1323] rounded-2xl border border-gray-700 shadow hover:shadow-lg transition-all duration-300 p-6 relative text-gray-200"
-    >
-      <!-- Status Badge -->
-      <span
-        class="absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold"
-        :class="{
-          'bg-green-500/10 text-green-400': order.status === 'PAID',
-          'bg-yellow-500/10 text-yellow-400': order.status === 'BOOKED',
-          'bg-red-500/10 text-red-400': order.status === 'CANCELLED',
-          'bg-gray-600 text-white': !['PAID', 'BOOKED', 'CANCELLED'].includes(
-            order.status
-          ),
-        }"
-      >
-        {{ order.status || "-" }}
-      </span>
-
-      <!-- ORDER ID -->
-      <div class="mb-4">
-        <p class="text-[11px] text-gray-400 font-medium uppercase">ORDER ID</p>
-        <p
-          class="font-mono text-white font-semibold text-sm md:text-base break-all"
-        >
-          {{ order.id }}
-        </p>
-      </div>
-
-      <!-- Order Info -->
-      <div class="space-y-2 text-sm">
-        <p class="flex items-center gap-2">
-          <i class="mdi mdi-calendar-range text-blue-400 text-lg"></i>
-          <span
-            ><span class="font-medium">วันที่แสดง:</span>
-            {{ formatDate(order.showDate) }}</span
-          >
-        </p>
-        <p class="flex items-center gap-2">
-          <i class="mdi mdi-map-marker text-blue-400 text-lg"></i>
-          <span
-            ><span class="font-medium">โซน:</span>
-            {{ order.zoneName || "-" }}</span
-          >
-        </p>
-        <p class="flex items-center gap-2">
-          <i class="mdi mdi-chair-rolling text-blue-400 text-lg"></i>
-          <span
-            ><span class="font-medium">จำนวนที่นั่ง:</span>
-            {{ order.seats?.length || 0 }} ที่นั่ง</span
-          >
-        </p>
-        <p v-if="order.standingTotal > 0" class="flex items-center gap-2">
-          <i class="mdi mdi-account-group text-blue-400 text-lg"></i>
-          <span
-            ><span class="font-medium">ตั๋วยืน:</span>
-            {{ order.standingAdultQty }} ผู้ใหญ่ /
-            {{ order.standingChildQty }} เด็ก</span
-          >
-        </p>
-        <p class="flex items-center gap-2">
-          <i class="mdi mdi-currency-thb text-blue-400 text-lg"></i>
-          <span
-            ><span class="font-medium">รวมเงิน:</span>
-            {{ order.total?.toLocaleString() }} บาท</span
-          >
-        </p>
-        <p v-if="order.customerName" class="flex items-center gap-2">
-          <i class="mdi mdi-account text-blue-400 text-lg"></i>
-          <span
-            ><span class="font-medium">ชื่อผู้สั่งซื้อ:</span>
-            {{ order.customerName }}</span
-          >
-        </p>
-        <p v-if="order.payment" class="flex items-center gap-2">
-          <i class="mdi mdi-credit-card-outline text-blue-400 text-lg"></i>
-          <span
-            ><span class="font-medium">ช่องทางชำระเงิน:</span>
-            {{ order.payment.method }}</span
-          >
-        </p>
-        <p v-if="order.referrer" class="flex items-center gap-2">
-          <i class="mdi mdi-account-tie text-blue-400 text-lg"></i>
-          <span
-            ><span class="font-medium">ผู้แนะนำ:</span>
-            {{ order.referrer.name }} ({{ order.referrer.code }})</span
-          >
-        </p>
-        <p
-          v-if="order.referrerCommission > 0 || order.standingCommission > 0"
-          class="flex items-center gap-2"
-        >
-          <i class="mdi mdi-cash-multiple text-blue-400 text-lg"></i>
-          <span>
-            <span class="font-medium">ค่าคอมมิชชั่น:</span>
-            {{
-              (order.referrerCommission || 0) + (order.standingCommission || 0)
-            }}
-            บาท
-          </span>
-        </p>
-      </div>
-
-      <!-- Action Buttons -->
+    <!-- Orders List -->
+    <div class="grid md:grid-cols-1 gap-4">
       <div
-        :class="[
-          'mt-6 w-full flex flex-wrap justify-end gap-x-3 gap-y-2',
-          isMobile ? 'flex-col items-stretch' : 'flex-row items-center',
-        ]"
+        v-for="order in orders"
+        :key="order.id"
+        class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-600 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
       >
-        <!-- แก้ไขที่นั่ง -->
-        <button
-          v-if="
-            (order.status === 'PENDING' ||
-              order.status === 'BOOKED' ||
-              order.status === 'PAID') &&
-            order.seats?.length > 0
-          "
-          class="px-4 py-2 text-sm font-medium border border-orange-500 text-orange-400 rounded-lg flex items-center gap-2 justify-center w-full sm:max-w-[220px] hover:bg-orange-900/20 hover:shadow-sm transition-all duration-200"
-          @click="
-            () => {
-              console.log('Edit button clicked for order:', order);
-              $emit('edit-order', order);
-            }
-          "
-        >
-          <i class="mdi mdi-pencil text-base"></i>
-          แก้ไขที่นั่ง
-        </button>
+        <!-- Order Header -->
+        <div class="bg-gradient-to-r from-slate-700 to-slate-800 p-4">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-4">
+              <div>
+                <h3 class="text-base font-bold text-white">
+                  {{ order.orderNumber }}
+                </h3>
+                <div class="flex items-center gap-2 mt-1">
+                  <span
+                    class="px-3 py-1 rounded-full text-xs font-semibold border"
+                    :class="getStatusClass(order.status)"
+                  >
+                    {{ getStatusLabel(order.status) }}
+                  </span>
+                  <span
+                    class="px-3 py-1 rounded-full text-xs font-semibold border"
+                    :class="getPaymentStatusClass(order.paymentStatus)"
+                  >
+                    {{ getPaymentStatusLabel(order.paymentStatus) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xl font-bold text-white">
+                ฿{{ formatCurrency(order.totalAmount) }}
+              </div>
+              <div class="text-sm text-slate-300">
+                {{ order.quantity }} {{ order.ticketType }}
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <!-- เปลี่ยนที่นั่ง -->
-        <!-- <button
-          v-if="order.status === 'PAID' && order.seats?.length > 0"
-          class="px-4 py-2 text-sm font-medium border border-blue-500 text-blue-400 rounded-lg flex items-center gap-2 justify-center w-full sm:max-w-[220px] hover:bg-blue-900/20 hover:shadow-sm transition-all duration-200"
-          @click="$emit('change-seats', order)"
-        >
-          <i class="mdi mdi-swap-horizontal-bold text-base"></i>
-          เปลี่ยนที่นั่ง
-        </button> -->
+        <!-- Order Details -->
+        <div class="p-4">
+          <div class="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-4 gap-4">
+            <!-- Customer & Contact Info -->
+            <div class="space-y-2">
+              <h4
+                class="text-xs font-semibold text-slate-400 uppercase tracking-wide"
+              >
+                ข้อมูลลูกค้า
+              </h4>
+              <div class="space-y-1 text-sm">
+                <div class="flex items-center gap-2 text-white">
+                  <i class="mdi mdi-account text-slate-400 text-sm"></i>
+                  <span class="truncate">{{
+                    order.customerName || "ไม่ระบุชื่อ"
+                  }}</span>
+                </div>
+                <div class="flex items-center gap-2 text-white">
+                  <i class="mdi mdi-phone text-slate-400 text-sm"></i>
+                  <span>{{ order.customerPhone || "ไม่ระบุเบอร์โทร" }}</span>
+                </div>
+                <div class="flex items-center gap-2 text-white">
+                  <i class="mdi mdi-email text-slate-400 text-sm"></i>
+                  <span class="truncate">{{
+                    order.email || "ไม่ระบุอีเมล"
+                  }}</span>
+                </div>
+              </div>
+            </div>
 
-        <!-- อัปเดตสถานะ -->
-        <button
-          v-if="
-            order.status === 'BOOKED' ||
-            (order.status === 'PENDING' && order.seats?.length == 0)
-          "
-          class="px-4 py-2 text-sm font-medium border border-purple-500 text-purple-400 rounded-lg flex items-center gap-2 justify-center w-full sm:max-w-[220px] hover:bg-purple-900/20 hover:shadow-sm transition-all duration-200"
-          @click="$emit('update-status', order)"
-        >
-          <i class="mdi mdi-update text-base"></i>
-          อัปเดตสถานะ
-        </button>
+            <!-- Seat Information -->
+            <div class="space-y-2">
+              <h4
+                class="text-xs font-semibold text-slate-400 uppercase tracking-wide"
+              >
+                ที่นั่ง
+              </h4>
+              <div
+                v-if="order.seats && order.seats.length > 0"
+                class="space-y-1"
+              >
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="seat in order.seats.slice(0, 4)"
+                    :key="seat.id"
+                    class="px-2 py-1 bg-slate-700 text-slate-200 rounded text-xs font-medium"
+                  >
+                    {{ seat.seatNumber }}
+                  </span>
+                  <span
+                    v-if="order.seats.length > 4"
+                    class="px-2 py-1 bg-slate-600 text-slate-300 rounded text-xs"
+                  >
+                    +{{ order.seats.length - 4 }}
+                  </span>
+                </div>
+                <div v-if="order.seats[0]?.zone" class="text-xs text-slate-400">
+                  Zone:
+                  {{ order.seats[0].zone.name.replace("-", " ").toUpperCase() }}
+                </div>
+              </div>
+              <!-- Standing Tickets -->
+              <div
+                v-if="order.standingAdultQty > 0 || order.standingChildQty > 0"
+                class="text-sm text-white"
+              >
+                <div class="flex gap-3">
+                  <span v-if="order.standingAdultQty > 0"
+                    >ผู้ใหญ่: {{ order.standingAdultQty }}</span
+                  >
+                  <span v-if="order.standingChildQty > 0"
+                    >เด็ก: {{ order.standingChildQty }}</span
+                  >
+                </div>
+              </div>
+            </div>
 
-        <!-- ออกตั๋ว -->
-        <button
-          v-if="order.status === 'PAID'"
-          class="px-4 py-2 text-sm font-medium border border-green-500 text-green-400 rounded-lg flex items-center gap-2 justify-center w-full sm:max-w-[220px] hover:bg-green-900/20 hover:shadow-sm transition-all duration-200"
-          @click="$emit('generate-tickets', order)"
-        >
-          <i class="mdi mdi-ticket-confirmation text-base"></i>
-          ออกตั๋ว
-        </button>
+            <!-- Order Details -->
+            <div class="space-y-2">
+              <h4
+                class="text-xs font-semibold text-slate-400 uppercase tracking-wide"
+              >
+                รายละเอียด
+              </h4>
+              <div class="space-y-1 text-sm text-white">
+                <div class="flex items-center gap-2">
+                  <i class="mdi mdi-calendar text-slate-400 text-sm"></i>
+                  <span>{{ formatDate(order.showDate) }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="mdi mdi-credit-card text-slate-400 text-sm"></i>
+                  <span>{{ getPaymentMethodLabel(order.paymentMethod) }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="mdi mdi-cash text-slate-400 text-sm"></i>
+                  <span>฿{{ formatCurrency(order.price) }}/ใบ</span>
+                </div>
+              </div>
+            </div>
 
-        <!-- ยกเลิก -->
-        <button
-          v-if="order.status === 'PENDING' || order.status === 'BOOKED'"
-          class="px-4 py-2 text-sm font-medium border border-red-500 text-red-400 rounded-lg flex items-center gap-2 justify-center w-full sm:max-w-[220px] hover:bg-red-900/20 hover:shadow-sm transition-all duration-200"
-          @click="$emit('cancel-order', order)"
-        >
-          <i class="mdi mdi-close-circle-outline text-base"></i>
-          ยกเลิก
-        </button>
+            <!-- Additional Info -->
+            <div class="space-y-2">
+              <h4
+                class="text-xs font-semibold text-slate-400 uppercase tracking-wide"
+              >
+                เพิ่มเติม
+              </h4>
+              <div class="space-y-1 text-sm text-white">
+                <div class="flex items-center gap-2">
+                  <i class="mdi mdi-tag text-slate-400 text-sm"></i>
+                  <span>{{ order.referrerCode || "ไม่มี" }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="mdi mdi-source-branch text-slate-400 text-sm"></i>
+                  <span>{{ order.source }}</span>
+                </div>
+                <div class="text-xs text-slate-400">
+                  สร้าง: {{ formatDateTime(order.createdAt) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Note -->
+          <div v-if="order.note" class="mt-4 pt-3 border-t border-slate-600">
+            <div
+              class="text-sm text-slate-300 bg-slate-700 bg-opacity-50 p-2 rounded"
+            >
+              <span class="text-slate-400">หมายเหตุ:</span> {{ order.note }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="px-4 pb-4">
+          <div class="flex flex-wrap gap-2 justify-end">
+            <button
+              v-if="
+                !['CANCELLED', 'EXPIRED'].includes(order.status) &&
+                order.ticketType !== 'STANDING'
+              "
+              @click="$emit('edit-order', order)"
+              class="flex items-center gap-1 px-3 py-1.5 bg-slate-600 hover:bg-slate-500 text-white rounded text-sm font-medium transition-colors"
+            >
+              <i class="mdi mdi-pencil text-sm"></i>
+              <span>แก้ไข</span>
+            </button>
+
+            <!-- <button
+              v-if="order.status !== 'CANCELLED'"
+              @click="$emit('change-seats', order)"
+              class="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-sm font-medium transition-colors"
+            >
+              <i class="mdi mdi-seat-passenger text-sm"></i>
+              <span>เปลี่ยนที่นั่ง</span>
+            </button> -->
+
+            <button
+              v-if="
+                order.status !== 'PAID' &&
+                order.ticketType === 'STANDING' &&
+                order.status !== 'CANCELLED' &&
+                order.ticketType === 'STANDING'
+              "
+              @click="$emit('update-status', order)"
+              class="flex items-center gap-1 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded text-sm font-medium transition-colors"
+            >
+              <i class="mdi mdi-update text-sm"></i>
+              <span>อัปเดต</span>
+            </button>
+
+            <button
+              v-if="order.status === 'PAID' && order.paymentStatus === 'PAID'"
+              @click="$emit('generate-tickets', order)"
+              class="flex items-center gap-1 px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded text-sm font-medium transition-colors"
+            >
+              <i class="mdi mdi-ticket text-sm"></i>
+              <span>ออกตั๋ว</span>
+            </button>
+
+            <button
+              v-if="order.status !== 'CANCELLED'"
+              @click="$emit('cancel-order', order)"
+              class="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded text-sm font-medium transition-colors"
+            >
+              <i class="mdi mdi-cancel text-sm"></i>
+              <span>ยกเลิก</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -287,43 +349,98 @@ const paginationNumbers = computed(() => {
   return pages;
 });
 
-const statusClass = (status) => {
+// Status helpers
+const getStatusClass = (status) => {
   switch (status) {
-    case "PAID":
-      return "bg-green-100 text-green-700";
+    case "PENDING":
+      return "bg-yellow-100 text-yellow-800 border-yellow-300";
     case "BOOKED":
-      return "bg-yellow-100 text-yellow-800";
+      return "bg-blue-100 text-blue-800 border-blue-300";
+    case "PAID":
+      return "bg-green-100 text-green-800 border-green-300";
     case "CANCELLED":
-      return "bg-red-100 text-red-700";
+      return "bg-red-100 text-red-800 border-red-300";
+    case "EXPIRED":
+      return "bg-gray-100 text-gray-800 border-gray-300";
     default:
-      return "bg-gray-100 text-gray-600";
+      return "bg-slate-100 text-slate-800 border-slate-300";
   }
 };
 
-const statusText = (status) => {
+const getStatusLabel = (status) => {
   switch (status) {
-    case "PAID":
-      return "PAID";
+    case "PENDING":
+      return "รอดำเนินการ";
     case "BOOKED":
-      return "BOOKED";
+      return "จองแล้ว";
+    case "PAID":
+      return "ชำระแล้ว";
     case "CANCELLED":
-      return "CANCELLED";
+      return "ยกเลิกแล้ว";
+    case "EXPIRED":
+      return "หมดอายุ";
     default:
-      return status || "-";
+      return "ไม่ทราบสถานะ";
   }
+};
+
+const getPaymentStatusClass = (status) => {
+  switch (status) {
+    case "PENDING":
+      return "bg-orange-100 text-orange-800 border-orange-300";
+    case "PAID":
+      return "bg-emerald-100 text-emerald-800 border-emerald-300";
+    case "FAILED":
+      return "bg-red-100 text-red-800 border-red-300";
+    case "REFUNDED":
+      return "bg-purple-100 text-purple-800 border-purple-300";
+    default:
+      return "bg-slate-100 text-slate-800 border-slate-300";
+  }
+};
+
+const getPaymentStatusLabel = (status) => {
+  switch (status) {
+    case "PENDING":
+      return "รอการชำระ";
+    case "PAID":
+      return "ชำระแล้ว";
+    case "FAILED":
+      return "ชำระไม่สำเร็จ";
+    case "REFUNDED":
+      return "คืนเงินแล้ว";
+    default:
+      return "ไม่ทราบสถานะ";
+  }
+};
+
+const getPaymentMethodLabel = (method) => {
+  switch (method) {
+    case "CASH":
+      return "เงินสด";
+    case "CARD":
+      return "บัตรเครดิต";
+    case "TRANSFER":
+      return "โอนเงิน";
+    case "QR":
+      return "QR Code";
+    default:
+      return method || "ไม่ระบุ";
+  }
+};
+
+const formatCurrency = (amount) => {
+  if (!amount) return "0";
+  return Number(amount).toLocaleString();
 };
 
 const formatDate = (dateStr) => {
-  if (!dateStr) return "-";
-  return dayjs(dateStr).format("YYYY-MM-DD");
+  if (!dateStr) return "ไม่ระบุ";
+  return dayjs(dateStr).format("DD/MM/YYYY");
 };
 
-onMounted(() => {
-  handleResize();
-  window.addEventListener("resize", handleResize);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", handleResize);
-});
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return "ไม่ระบุ";
+  return dayjs(dateStr).format("DD/MM/YYYY HH:mm");
+};
 </script>

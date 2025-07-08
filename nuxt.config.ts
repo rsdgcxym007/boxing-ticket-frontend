@@ -3,7 +3,6 @@ import { defineNuxtConfig } from "nuxt/config";
 export default defineNuxtConfig({
   css: [
     "@/assets/css/fonts.css",
-    "@/assets/css/tailwind.css",
     "@/assets/css/main.css",
     "@fortawesome/fontawesome-free/css/all.min.css",
     "@mdi/font/css/materialdesignicons.min.css",
@@ -29,6 +28,9 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      meta: [
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+      ],
       charset: "utf-8",
       title: "PATONG BOXING",
       link: [

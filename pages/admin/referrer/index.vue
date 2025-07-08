@@ -32,12 +32,12 @@
               <span
                 :class="[
                   'text-xs font-semibold px-3 py-1 rounded-full',
-                  ref.status === true
+                  ref.isActive === true
                     ? 'bg-green-600 text-white'
                     : 'bg-red-500 text-white',
                 ]"
               >
-                {{ ref.status ? "ใช้งาน" : "ไม่ใช้งาน" }}
+                {{ ref.isActive ? "ใช้งาน" : "ไม่ใช้งาน" }}
               </span>
             </div>
 
@@ -156,13 +156,24 @@
           />
         </div>
 
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >เบอร์โทร</label
+          >
+          <input
+            v-model="pageData.newRef.phone"
+            type="text"
+            class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 px-4 py-2 text-sm bg-gray-50"
+          />
+        </div>
+
         <!-- Status -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-1"
             >สถานะ</label
           >
           <select
-            v-model="pageData.newRef.status"
+            v-model="pageData.newRef.isActive"
             class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 px-4 py-2 text-sm bg-white"
           >
             <option :value="true">Active</option>
@@ -206,7 +217,12 @@ const pageData = reactive({
   referrers: [],
   showCreateModal: false,
   editing: false,
-  newRef: { name: "", code: "", status: "active" },
+  newRef: {
+    name: "",
+    code: "",
+    phone: "",
+    isActive: "active",
+  },
   filters: { keyword: "" },
   page: 1,
   limit: 10,
@@ -240,12 +256,30 @@ const handleSaveReferrer = async () => {
   try {
     if (pageData.editing) {
       const { id, ...payload } = pageData.newRef;
-      await updateReferrer(id, payload);
+      console.log("payload", payload);
+
+      await updateReferrer(id, {
+        name: pageData.newRef.name,
+        code: pageData.newRef.code,
+        phone: pageData.newRef.phone,
+        isActive: pageData.newRef.isActive,
+        status: true,
+      });
     } else {
-      await createReferrer(pageData.newRef);
+      await createReferrer({
+        name: pageData.newRef.name,
+        code: pageData.newRef.code,
+        phone: pageData.newRef.phone,
+        status: true,
+      });
     }
     pageData.showCreateModal = false;
-    pageData.newRef = { name: "", code: "", status: "active" };
+    pageData.newRef = {
+      name: "",
+      code: "",
+      phone: "",
+      isActive: "active",
+    };
     pageData.editing = false;
     await fetchReferrers();
     data.loading = false;
@@ -264,7 +298,7 @@ const editReferrer = (ref) => {
 const deleteReferrers = async (ref) => {
   try {
     // ใช้ updateReferrer เพื่อเปลี่ยนสถานะเป็น inactive แทนการลบ
-    await updateReferrer(ref.id, { status: false });
+    await updateReferrer(ref.id, { isActive: false });
     await fetchReferrers();
   } catch (err) {
     console.error("ปิดการใช้งาน Referrer ไม่สำเร็จ:", err);
@@ -273,10 +307,10 @@ const deleteReferrers = async (ref) => {
 
 const toggleStatus = async (ref) => {
   try {
-    const newStatus = ref.status === true ? false : true;
+    const newStatus = ref.isActive === true ? false : true;
     console.log("newStatus", newStatus);
 
-    await updateReferrer(ref.id, { status: newStatus });
+    await updateReferrer(ref.id, { isActive: newStatus });
     await fetchReferrers();
   } catch (err) {
     console.error("เปลี่ยนสถานะไม่สำเร็จ:", err);

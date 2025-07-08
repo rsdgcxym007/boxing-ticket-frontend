@@ -6,6 +6,8 @@ const config: Config = {
     "./layouts/**/*.vue",
     "./pages/**/*.vue",
     "./app.vue",
+    "./**/*.html",
+    "./**/*.{vue,js,ts}",
   ],
   theme: {
     extend: {

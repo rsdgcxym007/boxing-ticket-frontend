@@ -73,6 +73,7 @@ export const useOrder = () => {
     source,
     standingAdultQty,
     standingChildQty,
+    status,
   }: {
     customerName: string;
     customerPhone: string;
@@ -87,6 +88,7 @@ export const useOrder = () => {
     source?: string;
     standingAdultQty?: number;
     standingChildQty?: number;
+    status?: string; // Optional status for the order
   }) => {
     const payload = {
       customerName,
@@ -102,6 +104,7 @@ export const useOrder = () => {
       source,
       standingAdultQty,
       standingChildQty,
+      status,
     };
 
     try {
@@ -183,7 +186,6 @@ export const useOrder = () => {
         `/api/v1/orders/${id}/update-standing-order`,
         payload
       );
-      toast.success("อัปเดตออเดอร์สำเร็จ");
       return res;
     } catch (err: any) {
       toast.error(`อัปเดตออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
