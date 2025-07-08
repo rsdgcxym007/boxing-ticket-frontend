@@ -28,7 +28,7 @@
 
     <!-- Quick Stats Overview -->
     <div
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8"
+      class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8"
     >
       <div
         class="bg-gradient-to-br from-blue-500/10 to-blue-600/10 p-4 rounded-xl border border-blue-500/20"
@@ -110,7 +110,9 @@
     </div>
 
     <!-- Revenue Overview -->
-    <div class="grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 mb-8">
+    <div
+      class="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-8"
+    >
       <div
         class="bg-gradient-to-br from-[#1a2b4d] to-[#0f1f3c] p-6 rounded-xl border border-blue-500/20"
       >

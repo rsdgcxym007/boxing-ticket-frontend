@@ -186,7 +186,6 @@ export const useOrder = () => {
         `/api/v1/orders/${id}/update-standing-order`,
         payload
       );
-      toast.success("อัปเดตออเดอร์สำเร็จ");
       return res;
     } catch (err: any) {
       toast.error(`อัปเดตออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);

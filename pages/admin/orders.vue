@@ -10,16 +10,18 @@
       </div>
 
       <!-- ส่วนกรองข้อมูล -->
-      <BaseCard class="bg-[#1a2b4d] border-blue-60 overflow-visible">
+      <BaseCard
+        class="bg-gradient-to-r from-[#0f1f3c] to-[#1a2b4d] border-[#3a6ea5] overflow-visible shadow-xl rounded-lg"
+      >
         <template #header>
           <h2 class="text-lg font-semibold text-white">กรองข้อมูล</h2>
         </template>
 
         <div
-          class="grid sm:grid-cols-2 md:grid-cols-2 gap-4 relative z-10 overflow-visible"
+          class="grid sm:grid-cols-2 md:grid-cols-2 gap-6 relative z-10 overflow-visible p-4"
         >
           <div>
-            <label class="block text-sm font-medium text-white"
+            <label class="block text-sm font-medium text-white mb-2"
               >สถานะออเดอร์</label
             >
             <Listbox
@@ -28,7 +30,7 @@
             >
               <div class="relative z-40">
                 <ListboxButton
-                  class="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-10 text-left text-black border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-10 text-left text-black border shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-blue-50"
                 >
                   <span class="block truncate">
                     {{ getStatusLabel(pageData.filters.status) }}
@@ -60,7 +62,7 @@
                       :key="option.value"
                       :value="option.value"
                       v-slot="{ selected }"
-                      class="cursor-pointer select-none relative py-2 pl-10 pr-4 hover:bg-blue-50"
+                      class="cursor-pointer select-none relative py-2 pl-10 pr-4 hover:bg-blue-100"
                     >
                       <span
                         class="block truncate"
@@ -80,14 +82,14 @@
             </Listbox>
           </div>
           <div>
-            <label class="block text-sm font-medium text-white">โซน</label>
+            <label class="block text-sm font-medium text-white mb-2">โซน</label>
             <Listbox
               v-model="pageData.filters.zone"
               @update:modelValue="onZoneChange"
             >
               <div class="relative z-30">
                 <ListboxButton
-                  class="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-10 text-left text-black border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-10 text-left text-black border shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-blue-50"
                 >
                   <span class="block truncate">
                     {{ getZoneLabel(pageData.filters.zone) }}
@@ -119,7 +121,7 @@
                       :key="zone.value"
                       :value="zone.value"
                       v-slot="{ selected }"
-                      class="cursor-pointer select-none relative py-2 pl-10 pr-4 hover:bg-blue-50"
+                      class="cursor-pointer select-none relative py-2 pl-10 pr-4 hover:bg-blue-100"
                     >
                       <span
                         class="block truncate"
@@ -139,24 +141,24 @@
             </Listbox>
           </div>
           <div>
-            <label class="block text-sm font-medium text-white"
+            <label class="block text-sm font-medium text-white mb-2"
               >ค้นหา Order ID</label
             >
             <BaseInput
               v-model="pageData.filters.search"
               @input="onOrderIdChange"
               placeholder="พิมพ์ Order ID..."
-              class="bg-white text-black"
+              class="bg-white text-black border shadow-md rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-blue-50"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-white"
+            <label class="block text-sm font-medium text-white mb-2"
               >รายการต่อหน้า</label
             >
             <Listbox v-model="pageData.limit" @update:modelValue="fetchData">
               <div class="relative z-20">
                 <ListboxButton
-                  class="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-10 text-left text-black border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-10 text-left text-black border shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-blue-50"
                 >
                   <span class="block truncate">
                     {{ pageData.limit }} รายการ
@@ -188,7 +190,7 @@
                       :key="n"
                       :value="n"
                       v-slot="{ selected }"
-                      class="cursor-pointer select-none relative py-2 pl-10 pr-4 hover:bg-blue-50"
+                      class="cursor-pointer select-none relative py-2 pl-10 pr-4 hover:bg-blue-100"
                     >
                       <span
                         class="block truncate"
@@ -244,7 +246,7 @@
     :tickets="generatedTickets"
     @close="showTicketModal = false"
   />
-  <!-- Modal สำหรับตั๋วยืน -->
+  <!-- Modal สำหรับตัวยืน -->
   <StandingTicketModal
     v-model:showModal="showModal"
     :order="orderData"
@@ -443,6 +445,90 @@ watch(orderData, (newValue) => {
 </script>
 
 <style scoped>
+/* BaseCard Styling */
+.BaseCard {
+  background: linear-gradient(135deg, #0f1f3c, #1a2b4d);
+  border: 1px solid #2a4a6e;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  overflow: visible;
+}
+
+/* Header Styling */
+.BaseCard h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #d1d5db;
+  margin-bottom: 1rem;
+}
+
+/* Grid Styling */
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Listbox Styling */
+.ListboxButton {
+  background: #1a2b4d;
+  color: #d1d5db;
+  border: 1px solid #2a4a6e;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+.ListboxButton:hover {
+  background: #2a4a6e;
+  border-color: #3a6ea5;
+}
+.ListboxButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(58, 110, 165, 0.5);
+}
+
+/* Listbox Options Styling */
+.ListboxOptions {
+  background: #1a2b4d;
+  color: #d1d5db;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+.ListboxOption {
+  padding: 0.5rem 1rem;
+  transition: background 0.3s ease;
+}
+.ListboxOption:hover {
+  background: #2a4a6e;
+}
+.ListboxOption.selected {
+  font-weight: 600;
+  color: #3a6ea5;
+}
+
+/* Input Styling */
+.BaseInput {
+  background: #1a2b4d;
+  color: #d1d5db;
+  border: 1px solid #2a4a6e;
+  border-radius: 4px;
+  padding: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+.BaseInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(58, 110, 165, 0.5);
+}
+
+/* Label Styling */
+label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #d1d5db;
+  margin-bottom: 0.5rem;
+}
+
 /* CSS Animation สำหรับการเปลี่ยนแปลงที่นุ่มนวล */
 .fade-enter-active,
 .fade-leave-active {

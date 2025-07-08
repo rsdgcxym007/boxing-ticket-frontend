@@ -1,7 +1,7 @@
 <template>
   <section class="w-full bg-[#0f172a] py-4">
     <div
-      class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center"
+      class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-1 gap-12 items-center"
     >
       <!-- Hero Left: Responsive heading + countdown + info -->
       <div

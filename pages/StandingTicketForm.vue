@@ -267,9 +267,7 @@ const bookStandingTicketNew = async () => {
     standingAdultQty + standingChildQty === 0 ||
     !customerName.trim()
   ) {
-    toast.error(
-      "❌ กรุณากรอกข้อมูลให้ครบถ้วน (ชื่อลูกค้า,จำนวนตั๋ว, วันที่)"
-    );
+    toast.error("❌ กรุณากรอกข้อมูลให้ครบถ้วน (ชื่อลูกค้า,จำนวนตั๋ว, วันที่)");
     return;
   }
 
@@ -340,8 +338,8 @@ const confirmPaymentForOrder = async () => {
     };
     orderId.value = null;
   } catch (error) {
-    console.error("❌ เกิดข้อผิดพลาดในการยืนยันการชำระเงิน:", error);
-    toast.error("❌ ไม่สามารถยืนยันการชำระเงินได้ กรุณาลองใหม่อีกครั้ง");
+    // console.error("❌ เกิดข้อผิดพลาดในการยืนยันการชำระเงิน:", error);
+    toast.error(`❌ ${error}`);
   } finally {
     isLoading.loading = false;
   }

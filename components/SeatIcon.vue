@@ -50,10 +50,21 @@ const { seat, selectedSeats } = toRefs(props);
 
 const isBooked = computed(() => {
   const isOwnSeat = props.ownSeatIds.includes(seat.value?.id);
-  const isStatusBlocked = ["BOOKED", "PAID", "PENDING"].includes(
+
+  // ✅ ใช้ bookingStatus เป็นหลัก (ตามข้อมูลจริงจาก API)
+  const isStatusBlocked = ["BOOKED", "PAID", "PENDING", "RESERVED"].includes(
     seat.value?.bookingStatus
   );
-  return isStatusBlocked && !isOwnSeat;
+
+  // ตรวจสอบจาก bookedSeats ที่ส่งมาจาก parent component (backup)
+  const isInBookedList = props.bookedSeats.some(
+    (bookedSeat) => bookedSeat.id === seat.value?.id
+  );
+
+  // ลด log ให้แสดงเฉพาะที่นั่งที่มีการเปลี่ยนแปลง status
+  const finalIsBooked = (isStatusBlocked || isInBookedList) && !isOwnSeat;
+
+  return finalIsBooked;
 });
 
 const isSelected = computed(() =>

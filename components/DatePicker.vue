@@ -11,6 +11,7 @@
       :auto-apply="true"
       :enable-time-picker="false"
       :clearable="false"
+      :disabled-dates="shouldDisable"
       :id="id"
       input-class-name="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
       :placeholder="placeholder"
@@ -44,7 +45,11 @@ defineProps({
 
 // ✅ จำกัดวันย้อนหลัง
 const today = computed(() => new Date());
+const allowedWeekdays = [0, 1, 2, 4, 6];
 
+const shouldDisable = (d) => {
+  return !allowedWeekdays.includes(d.getDay());
+};
 // ✅ รูปแบบแสดงผล (DD-MM-YYYY)
 const displayFormat = (date) => {
   const d = new Date(date);
