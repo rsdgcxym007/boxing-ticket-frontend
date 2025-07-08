@@ -144,6 +144,48 @@ export const useReferrer = () => {
     }
   };
 
+  // สำหรับ PDF Preview - ใช้ Blob URL
+  const getReferrerPdfForPreview = async (
+    id: string,
+    params?: {
+      startDate?: string;
+      endDate?: string;
+    }
+  ) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params?.startDate) queryParams.append("startDate", params.startDate);
+      if (params?.endDate) queryParams.append("endDate", params.endDate);
+
+      const url = `${base}/api/v1/referrers/${id}/export-pdf?${queryParams.toString()}`;
+
+      // Fetch PDF as blob
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Accept: "application/pdf",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      return {
+        success: true,
+        url: blobUrl,
+        blob: blob,
+      };
+    } catch (err: any) {
+      console.error("Error fetching PDF:", err);
+      toast.error(`ไม่สามารถโหลด PDF ได้: ${err.message || "Unknown error"}`);
+      throw err;
+    }
+  };
+
   // Legacy method - รองรับเดิม
   const getReferrerById = async (id: string) => {
     try {
@@ -166,6 +208,7 @@ export const useReferrer = () => {
     updateReferrer,
     getReferrerOrders,
     exportReferrerReport,
+    getReferrerPdfForPreview, // เพิ่มฟังก์ชันใหม่
     // Legacy methods
     getReferrerById,
   };

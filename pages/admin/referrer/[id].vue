@@ -184,7 +184,8 @@
           <div class="flex items-center gap-2">
             <i class="mdi mdi-seat-outline text-lg text-white"></i>
             <span
-              ><strong>ที่นั่ง Ringside:</strong> {{ order.seats.length }}</span
+              ><strong>ที่นั่ง Ringside:</strong>
+              {{ order.seatBookings?.length }}</span
             >
           </div>
           <div class="flex items-center gap-2">
@@ -237,8 +238,8 @@
           </p>
           <ul class="flex flex-wrap gap-2 text-sm">
             <li
-              v-for="seat in order.seats"
-              :key="seat.id || seat.seatNumber"
+              v-for="seat in order.seatBookings"
+              :key="seat.seatNumber || seat.seatNumber"
               class="bg-indigo-600/20 border border-indigo-400 rounded-md px-3 py-1"
             >
               เบอร์ {{ seat.seatNumber }}

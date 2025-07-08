@@ -54,6 +54,8 @@ export const useTicketBookingManager = () => {
     try {
       currentShowDate.value = showDate;
 
+      console.log("showDate", showDate);
+
       // Join WebSocket room
       joinShowRoom(showDate);
 
@@ -66,6 +68,7 @@ export const useTicketBookingManager = () => {
 
       // ตรวจสอบสถานะระบบ
       const checkSystemHealths = await checkSystemHealth();
+      console.log("checkSystemHealths", checkSystemHealths);
 
       toast.success("เริ่มต้นระบบจองตั๋วสำเร็จ");
     } catch (error) {
@@ -124,7 +127,7 @@ export const useTicketBookingManager = () => {
         clearSelection();
       }, 4);
 
-      // toast.success("เลือกที่นั่งสำเร็จ");
+      toast.success("เลือกที่นั่งสำเร็จ");
     } catch (error) {
       console.error("Failed to select seats:", error);
       toast.error("ไม่สามารถเลือกที่นั่งได้");
@@ -170,8 +173,6 @@ export const useTicketBookingManager = () => {
       } else {
         toast.error("ไม่สามารถสร้างออเดอร์ได้");
       }
-
-      console.log("orderData.seatIds", orderData.seatIds);
 
       throw error;
     } finally {

@@ -23,3 +23,33 @@
     padding: 10px 12px !important;
   }
 }
+
+@import "./fonts.css"; /* ✅ ต้อง import font ก่อน */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    font-size: clamp(0.875rem, 1vw, 1.125rem);
+  }
+
+  body {
+    margin: 0;
+    font-family: "Anuphan", sans-serif;
+    background-color: #fff;
+    color: #111;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}

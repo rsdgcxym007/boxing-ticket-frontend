@@ -157,7 +157,6 @@ export const useSeatManager = () => {
       if (callback) {
         await callback();
       }
-      console.log("✅ Refreshed seat data successfully");
     } catch (error) {
       console.error("❌ Failed to refresh seat data:", error);
       toast.error("ไม่สามารถอัปเดตข้อมูลที่นั่งได้");
