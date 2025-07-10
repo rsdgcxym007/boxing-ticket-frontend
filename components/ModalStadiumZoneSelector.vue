@@ -25,21 +25,6 @@
                 {{ pageData.zoneKey.replace("-", " ").toUpperCase() }}
               </span>
             </p>
-
-            <!-- Connection Status -->
-            <div class="flex justify-center mt-2">
-              <div class="flex items-center gap-2 text-xs">
-                <div
-                  :class="[
-                    'w-2 h-2 rounded-full',
-                    isConnected ? 'bg-green-500' : 'bg-red-500',
-                  ]"
-                ></div>
-                <span :class="isConnected ? 'text-green-600' : 'text-red-600'">
-                  {{ isConnected ? "เชื่อมต่อแล้ว" : "ไม่ได้เชื่อมต่อ" }}
-                </span>
-              </div>
-            </div>
           </div>
 
           <!-- ✅ Content Scrollable -->
@@ -416,7 +401,7 @@ const handleConfirm = async () => {
       pageData.totalAmount = order.total || seatManager.totalPrice.value;
       pageData.showSummaryModal = true;
 
-      toast.success("สร้างการจองสำเร็จ");
+      // toast.success("สร้างการจองสำเร็จ");
     }
   } catch (error) {
     console.error("❌ สร้างการจองล้มเหลว:", error);
@@ -549,7 +534,7 @@ const onClear = async () => {
   const success = await clearAllSelections();
   if (success) {
     pageData.totalAmount = 0;
-    toast.success("ยกเลิกการเลือกที่นั่งทั้งหมดแล้ว");
+    // toast.success("ยกเลิกการเลือกที่นั่งทั้งหมดแล้ว");
   }
 };
 

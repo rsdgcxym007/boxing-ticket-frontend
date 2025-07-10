@@ -83,7 +83,7 @@ export const useTicketBookingManager = () => {
     onOrderCreated((event) => {
       console.log("🎫 New order created:", event);
       refreshSeatAvailability(currentShowDate.value);
-      toast.success("มีการจองใหม่!");
+      // toast.success("มีการจองใหม่!");
     });
 
     // เมื่อมีการยกเลิก order
@@ -126,8 +126,6 @@ export const useTicketBookingManager = () => {
         await unlockSeats(seatIds, currentShowDate.value);
         clearSelection();
       }, 4);
-
-      toast.success("เลือกที่นั่งสำเร็จ");
     } catch (error) {
       console.error("Failed to select seats:", error);
       toast.error("ไม่สามารถเลือกที่นั่งได้");

@@ -190,6 +190,16 @@
             <button
               v-if="
                 !['CANCELLED', 'EXPIRED'].includes(order.status) &&
+                order.ticketType === 'STANDING'
+              "
+              @click="$emit('edit-order', order)"
+              class="flex items-center gap-1 px-3 py-1.5 bg-slate-600 hover:bg-slate-500 text-white rounded text-sm font-medium transition-colors"
+            >
+              <span>ดูรายละเอียด</span>
+            </button>
+            <button
+              v-if="
+                !['CANCELLED', 'EXPIRED'].includes(order.status) &&
                 order.ticketType !== 'STANDING'
               "
               @click="$emit('edit-order', order)"

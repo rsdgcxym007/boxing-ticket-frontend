@@ -135,7 +135,7 @@
             <input
               type="radio"
               v-model="pageData.method"
-              value="cash"
+              value="CASH"
               class="accent-green-600 w-5 h-5"
             />
             <div class="flex items-center gap-3">
@@ -144,7 +144,26 @@
               </div>
               <div>
                 <p class="font-bold text-gray-800">{{ t("summary.cash") }}</p>
-                <p class="text-sm text-gray-600">ชำระเงินสดหน้าร้าน</p>
+              </div>
+            </div>
+          </label>
+        </div>
+        <div class="space-y-3 mt-2">
+          <label
+            class="flex items-center gap-4 cursor-pointer p-4 rounded-xl border-2 border-green-200 hover:border-green-400 bg-white/70 hover:bg-green-50 transition-all duration-300"
+          >
+            <input
+              type="radio"
+              v-model="pageData.method"
+              value="VISA"
+              class="accent-green-600 w-5 h-5"
+            />
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-green-100 rounded-lg">
+                <i class="mdi mdi-wallet-outline text-green-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="font-bold text-gray-800">{{ "VISA CARD" }}</p>
               </div>
             </div>
           </label>
@@ -153,7 +172,7 @@
 
       <!-- Customer Information Form -->
       <div
-        v-if="pageData.method === 'cash'"
+        v-if="['CASH', 'VISA'].includes(pageData.method)"
         class="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-6 shadow-lg"
       >
         <div class="flex items-center gap-2 mb-6">
@@ -206,10 +225,10 @@
             />
           </div>
 
-          <div>
+          <!-- <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">
               <i class="mdi mdi-email mr-1"></i>
-              อีเมล <span class="text-red-500">*</span>
+              อีเมล <span class="text-red-500">(ใส่หรือไม่ใส่ก็ได้)</span>
             </label>
             <input
               v-model="pageData.customerEmail"
@@ -230,12 +249,12 @@
               <i class="mdi mdi-alert-circle-outline"></i>
               กรุณากรอกอีเมลที่ถูกต้อง
             </p>
-          </div>
-
+          </div> -->
+          <!-- 
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">
               <i class="mdi mdi-phone mr-1"></i>
-              เบอร์โทร <span class="text-red-500">*</span>
+              เบอร์โทร <span class="text-red-500">(ใส่หรือไม่ใส่ก็ได้)</span>
             </label>
             <input
               v-model="pageData.customerPhone"
@@ -256,7 +275,7 @@
               <i class="mdi mdi-alert-circle-outline"></i>
               กรุณากรอกเบอร์โทร 10 หลัก
             </p>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -382,7 +401,7 @@ const isValidPhone = computed(() => {
 });
 
 const isValid = computed(() => {
-  if (pageData.method === "CASH") {
+  if (["CASH", "VISA"].includes(pageData.method)) {
     return pageData.customerName?.trim()?.length > 0;
   }
   return true;
