@@ -95,7 +95,7 @@
         <div class="text-xs text-gray-400">ที่นั่ง</div>
       </div>
 
-      <div
+      <!-- <div
         class="bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 p-4 rounded-xl border border-emerald-500/20"
       >
         <div class="flex items-center gap-2 mb-2">
@@ -106,7 +106,7 @@
           {{ pageData.quickStats?.successRate || 0 }}%
         </div>
         <div class="text-xs text-gray-400">อัตราสำเร็จ</div>
-      </div>
+      </div> -->
     </div>
 
     <!-- Revenue Overview -->
@@ -443,12 +443,6 @@
             {{ pageData.customers?.summary?.repeatCustomers || 0 }}
           </div>
           <div class="text-xs text-gray-400">ลูกค้าประจำ</div>
-        </div>
-        <div class="text-center">
-          <div class="text-2xl font-bold text-purple-400">
-            {{ pageData.customers?.summary?.avgOrdersPerCustomer || 0 }}
-          </div>
-          <div class="text-xs text-gray-400">ออเดอร์เฉลี่ย/คน</div>
         </div>
       </div>
     </div>

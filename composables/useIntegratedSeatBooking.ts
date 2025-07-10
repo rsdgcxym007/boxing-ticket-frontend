@@ -297,7 +297,7 @@ export const useIntegratedSeatBooking = () => {
       // ส่ง WebSocket event
       await broadcastSeatUpdate("seats_cancelled", selectedSeatIds);
 
-      toast.success("ยกเลิกการเลือกที่นั่งทั้งหมดแล้ว");
+      // toast.success("ยกเลิกการเลือกที่นั่งทั้งหมดแล้ว");
       return true;
     } catch (error) {
       console.error("❌ ล้างการเลือกล้มเหลว:", error);
