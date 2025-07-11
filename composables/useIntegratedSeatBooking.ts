@@ -127,7 +127,7 @@ export const useIntegratedSeatBooking = () => {
       const seats = await fetchFunction(zoneKey, showDate);
 
       // เริ่มต้น seat manager
-      seatManager.initializeSeats(seats);
+      seatManager.initializeSeats(seats.data);
 
       // ตั้งค่า WebSocket
       setupWebSocketListeners();

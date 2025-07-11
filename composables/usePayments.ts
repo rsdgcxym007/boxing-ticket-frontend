@@ -15,7 +15,7 @@ export const usePayments = () => {
   }) => {
     try {
       const res = await post("/api/v1/payments/standing", payload);
-      return res;
+      return res.data;
     } catch (err: any) {
       // toast.error(
       //   `สร้างการจองล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
@@ -37,7 +37,7 @@ export const usePayments = () => {
   }) => {
     try {
       const res = await post("/api/v1/payments/seated", payload);
-      return res;
+      return res.data;
     } catch (err: any) {
       toast.error(
         `สร้างการจองล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
@@ -54,7 +54,7 @@ export const usePayments = () => {
 
       const res = await post(`/api/v1/payments/${paymentId}/slip`, formData);
       toast.success("อัพโหลดสลิปสำเร็จ");
-      return res;
+      return res.data;
     } catch (err: any) {
       toast.error(
         `อัพโหลดสลิปล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
@@ -67,7 +67,7 @@ export const usePayments = () => {
   const getPaymentDetails = async (paymentId: string) => {
     try {
       const data = await get(`/api/v1/payments/${paymentId}`);
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถโหลดข้อมูลการชำระเงินได้: ${
@@ -82,7 +82,7 @@ export const usePayments = () => {
   const getPaymentByOrderId = async (orderId: string) => {
     try {
       const data = await get(`/api/v1/payments/order/${orderId}`);
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถโหลดข้อมูลการชำระเงินได้: ${
@@ -103,7 +103,7 @@ export const usePayments = () => {
   }) => {
     try {
       const data = await get("/api/v1/payments", { query: params });
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถโหลดรายการการชำระเงินได้: ${

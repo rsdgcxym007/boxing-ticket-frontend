@@ -26,7 +26,7 @@ export const useReferrer = () => {
       if (search) query.search = search;
 
       const data = await get("/api/v1/referrers", { query });
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถโหลดรายชื่อผู้แนะนำได้: ${
@@ -48,7 +48,7 @@ export const useReferrer = () => {
     try {
       const data = await post("/api/v1/referrers", payload);
       toast.success("สร้างผู้แนะนำสำเร็จ");
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `สร้างผู้แนะนำล้มเหลว: ${
@@ -75,7 +75,7 @@ export const useReferrer = () => {
     try {
       const data = await patch(`/api/v1/referrers/${id}`, payload);
       toast.success("อัพเดทผู้แนะนำสำเร็จ");
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `อัพเดทผู้แนะนำล้มเหลว: ${
@@ -101,7 +101,7 @@ export const useReferrer = () => {
       const data = await get(`/api/v1/referrers/${id}/orders`, {
         query: params,
       });
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถโหลดข้อมูลออเดอร์ได้: ${
@@ -190,7 +190,7 @@ export const useReferrer = () => {
   const getReferrerById = async (id: string) => {
     try {
       const data = await get(`/referrers/${id}/orders`);
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถโหลดข้อมูลภายในได้: ${
