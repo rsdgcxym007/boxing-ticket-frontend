@@ -47,7 +47,7 @@ export const useOrder = () => {
   const getOrderById = async (orderId: string) => {
     try {
       const data = await get(`/api/v1/orders/${orderId}`);
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถโหลดข้อมูลออเดอร์ได้: ${
@@ -109,7 +109,9 @@ export const useOrder = () => {
 
     try {
       const res = await post("/api/v1/orders", payload);
-      return res;
+      console.log("res", res);
+
+      return res.data;
     } catch (err: any) {
       // toast.error(`สร้างออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
       throw err;
@@ -120,7 +122,7 @@ export const useOrder = () => {
   const cancelOrder = async (orderId: string) => {
     try {
       const res = await patch(`/api/v1/orders/${orderId}/cancel`, {});
-      return res;
+      return res.data;
     } catch (err: any) {
       toast.error(`ยกเลิกออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
       throw err;
@@ -131,7 +133,7 @@ export const useOrder = () => {
   const confirmPayment = async (orderId: string) => {
     try {
       const res = await patch(`/api/v1/orders/${orderId}/confirm-payment`, {});
-      return res;
+      return res.data;
     } catch (err: any) {
       toast.error(
         `ยืนยันการชำระเงินล้มเหลว: ${err.message || "Unknown error"}`

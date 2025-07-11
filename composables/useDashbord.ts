@@ -9,7 +9,7 @@ export const useDashboard = () => {
   const getDashboard = async () => {
     try {
       const data = await get("/api/v1/dashboard");
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถเรียก Dashboard ได้: ${
@@ -24,7 +24,7 @@ export const useDashboard = () => {
   const getTodayReferrerPerformance = async () => {
     try {
       const data = await get("/api/v1/dashboard/referrer-performance");
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถเรียกข้อมูล Referrer วันนี้ได้: ${
@@ -69,7 +69,7 @@ export const useDashboard = () => {
   const getRevenueSummary = async () => {
     try {
       const data = await get("/api/v1/dashboard/revenue-summary");
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถเรียกข้อมูลรายได้ได้: ${
@@ -86,7 +86,7 @@ export const useDashboard = () => {
       const data = await get("/api/v1/dashboard/seat-availability", {
         query: { showDate },
       });
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถเรียกข้อมูลที่นั่งว่างได้: ${
@@ -101,7 +101,7 @@ export const useDashboard = () => {
   const getCustomerAnalytics = async () => {
     try {
       const data = await get("/api/v1/dashboard/customer-analytics");
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถเรียกข้อมูลลูกค้าได้: ${
@@ -116,7 +116,7 @@ export const useDashboard = () => {
   const getSystemHealth = async () => {
     try {
       const data = await get("/api/v1/dashboard/system-health");
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถเรียกข้อมูลสถานะระบบได้: ${
@@ -131,7 +131,7 @@ export const useDashboard = () => {
   const getQuickStats = async () => {
     try {
       const data = await get("/api/v1/dashboard/quick-stats");
-      return data;
+      return data.data;
     } catch (err: any) {
       toast.error(
         `ไม่สามารถเรียกข้อมูลสถิติด่วนได้: ${
