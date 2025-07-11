@@ -17,8 +17,7 @@ export const useApi = () => {
     if (!res.ok || result.statusCode >= 400) {
       throw new Error(result.message || "Unknown error");
     }
-
-    return result.data?.data ?? result.data;
+    return result;
   };
 
   const get = async (

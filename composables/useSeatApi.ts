@@ -264,9 +264,21 @@ export function useSeatApi() {
     }
   };
 
+  const refreshSeatAvailability = async (zoneId, showDate) => {
+    try {
+      const seats = await getSeatsByZoneId(zoneId, showDate);
+      return seats;
+    } catch (error) {
+      console.error("refreshSeatAvailability - error:", error);
+      toast.error(`ไม่สามารถรีเฟรชที่นั่งได้: ${error?.message || "Unknown error"}`);
+      return [];
+    }
+  };
+
   return {
     getSeatsByZone,
     getBookedSeats,
     getSeatsByZoneId,
+    refreshSeatAvailability,
   };
 }
