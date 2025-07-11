@@ -329,11 +329,10 @@ const fetchData = async () => {
       search: pageData.filters.search,
       zone: ZONE_IDS_BY_NAME[pageData.filters.zone] || undefined,
     });
-
     // อัพเดทข้อมูลในหน้า
-    pageData.orders = res.items;
-    pageData.totalCount = res.total;
-    pageData.totalPage = res.totalPages;
+    pageData.orders = res.data;
+    pageData.totalCount = res.meta.total;
+    pageData.totalPage = res.meta.totalPages;
     // showModal.value = false;
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);

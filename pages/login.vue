@@ -139,16 +139,16 @@ const login = async () => {
     }
 
     // ตรวจสอบว่ามี access_token หรือไม่
-    if (!data.access_token && !data.token) {
+    if (!data.data.access_token && !data.data.token) {
       throw new Error("ไม่พบ access_token ในการตอบกลับ");
     }
 
     // บันทึกข้อมูลการเข้าสู่ระบบ
-    const token = data.access_token || data.token;
+    const token = data.data.access_token || data.data.token;
     localStorage.setItem("token", token);
     localStorage.setItem(
       "user",
-      JSON.stringify(data.user || data.data?.user || {})
+      JSON.stringify(data.data.user || data.data?.user || {})
     );
 
     toast.success("🎉 เข้าสู่ระบบสำเร็จ");

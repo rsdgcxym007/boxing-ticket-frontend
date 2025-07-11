@@ -250,7 +250,7 @@ const {
 // ตั้งค่า event listeners
 onOrderCreated((event) => {
   console.log('New order:', event.data.orderNumber);
-  refreshSeatAvailability(event.data.showDate);
+  // refreshSeatAvailability(event.data.showDate);
 });
 
 onSeatLocked((event) => {
@@ -289,7 +289,7 @@ try {
 socket.on('concurrency_error', (event) => {
   console.error('Concurrency error:', event);
   toast.error(event.data.message);
-  refreshSeatAvailability();
+  // refreshSeatAvailability();
 });
 
 socket.on('disconnect', () => {

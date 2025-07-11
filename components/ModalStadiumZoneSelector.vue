@@ -310,8 +310,6 @@ const fetchAndInitializeSeats = async () => {
       pageData.bookedSeats = seatManager.allSeats.value.filter(
         (seat) => seatManager.getSeatStatus(seat) === "BOOKED"
       );
-
-      console.log("✅ โหลดที่นั่งสำเร็จ (ใหม่)");
     }
   } catch (error) {
     console.error("❌ โหลดที่นั่งล้มเหลว:", error);
@@ -359,16 +357,6 @@ const getSeatStatus = (seat) => {
   if (!seat) return "unavailable";
 
   const status = seatManager.getSeatStatus(seat);
-
-  // Debug log เฉพาะที่นั่งที่ถูกล็อค
-  if (status === "locked") {
-    console.log(`🔒 Seat ${seat.seatNumber} status:`, {
-      status,
-      bookingStatus: seat.bookingStatus,
-      isLockedUntil: seat.isLockedUntil,
-      seat: seat,
-    });
-  }
 
   return status;
 };
@@ -443,12 +431,10 @@ const handleMarkOrder = async () => {
 onMounted(() => {
   pageData.showDate = props.orderData?.showDate || new Date();
   pageData.zoneKey = props.zoneKey;
-  console.log("🚀 Modal mounted");
 });
 
 onBeforeUnmount(() => {
   cleanup();
-  console.log("🔚 Modal unmounted");
 });
 
 // ====================
@@ -458,7 +444,6 @@ watch(
   () => props.isOpen,
   async (isOpen) => {
     if (isOpen) {
-      console.log("📱 Modal เปิดแล้ว");
       pageData.showSeatModal = true;
       pageData.showDate = props.orderData?.showDate || new Date();
 
@@ -475,7 +460,6 @@ watch(
         });
       }
     } else {
-      console.log("📱 Modal ปิดแล้ว");
     }
   }
 );
@@ -545,6 +529,5 @@ const onCloseSummaryModal = async () => {
 
 onBeforeUnmount(() => {
   cleanup();
-  console.log("🔚 Modal unmounted");
 });
 </script>

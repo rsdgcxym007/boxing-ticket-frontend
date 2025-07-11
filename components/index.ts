@@ -7,6 +7,11 @@ export { default as BaseCard } from "./base/BaseCard.vue";
 export { default as BaseAlert } from "./base/BaseAlert.vue";
 export { default as BaseSpinner } from "./base/BaseSpinner.vue";
 
+// New Form Components
+export { default as BaseSelect } from "./base/BaseSelect.vue";
+export { default as BaseCheckbox } from "./base/BaseCheckbox.vue";
+export { default as BaseRadioGroup } from "./base/BaseRadioGroup.vue";
+
 // Application Components Export
 export { default as ActionButtons } from "./ActionButtons.vue";
 export { default as BaseLoading } from "./BaseLoading.vue";
