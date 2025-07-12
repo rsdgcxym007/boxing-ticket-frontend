@@ -8,7 +8,7 @@ export const useWebSocket = () => {
   const isConnected = ref(false);
   const currentRoom = ref<string | null>(null);
   const config = useRuntimeConfig();
-  const base = config.public.apiBase;
+  const base = config.public.socketUrl;
 
   // เชื่อมต่อ WebSocket
   const connect = (url: string = `${base}/order-updates`) => {
