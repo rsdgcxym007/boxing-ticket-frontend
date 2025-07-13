@@ -13,7 +13,3 @@ export default defineNuxtRouteMiddleware(() => {
     return navigateTo("/dashboard");
   }
 });
-
-// definePageMeta({
-//     middleware: ['redirect-admin-staff'],
-//   })

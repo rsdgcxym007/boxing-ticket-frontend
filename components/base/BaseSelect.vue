@@ -11,99 +11,180 @@
       <span v-if="required" class="text-red-500 ml-1">*</span>
     </label>
 
-    <!-- Select Container -->
-    <div class="relative" :class="containerClasses">
-      <!-- Select Element -->
-      <select
+    <!-- Custom Dropdown Container -->
+    <div
+      class="relative"
+      :class="containerClasses"
+      v-click-outside="closeDropdown"
+    >
+      <!-- Trigger Button -->
+      <button
+        ref="triggerRef"
         :id="inputId"
-        :value="modelValue"
+        type="button"
         :disabled="disabled"
-        :required="required"
-        :multiple="multiple"
-        :class="selectClasses"
-        v-bind="$attrs"
-        @input="handleInput"
-        @change="handleChange"
-        @focus="handleFocus"
-        @blur="handleBlur"
+        :class="triggerClasses"
+        @click="toggleDropdown"
+        @keydown.enter.prevent="toggleDropdown"
+        @keydown.space.prevent="toggleDropdown"
+        @keydown.escape="closeDropdown"
+        @keydown.arrow-down.prevent="highlightNext"
+        @keydown.arrow-up.prevent="highlightPrevious"
       >
-        <!-- Placeholder option -->
-        <option
-          v-if="placeholder && !multiple"
-          value=""
-          disabled
-          :selected="!modelValue"
+        <!-- Selected Value Display -->
+        <div class="flex items-center flex-1 min-w-0">
+          <span
+            v-if="selectedDisplay"
+            class="block truncate"
+            :class="selectedValueClasses"
+          >
+            {{ selectedDisplay }}
+          </span>
+          <span v-else class="block truncate text-gray-500">
+            {{ placeholder }}
+          </span>
+          <div
+            class="flex items-start justify-center space-x-2 flex-shrink-0 ml-auto"
+          >
+            <!-- Clear Button -->
+            <button
+              v-if="clearable && modelValue && !disabled"
+              type="button"
+              class="p-1 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+              @click.stop="clear"
+            >
+              <i
+                class="mdi mdi-close text-gray-400 hover:text-gray-600 text-sm"
+              ></i>
+            </button>
+
+            <!-- Loading Spinner -->
+            <i
+              v-if="loading"
+              class="mdi mdi-loading mdi-spin text-gray-400 flex-shrink-0"
+            ></i>
+
+            <!-- Arrow Icon -->
+            <i
+              v-else
+              :class="[
+                arrowIcon,
+                'text-gray-400 transition-transform duration-200 flex-shrink-0',
+                { 'rotate-180': isOpen },
+              ]"
+            ></i>
+          </div>
+        </div>
+
+        <!-- Icons -->
+      </button>
+
+      <!-- Dropdown Menu -->
+      <Teleport to="body">
+        <div
+          v-if="isOpen"
+          ref="dropdownRef"
+          :class="dropdownClasses"
+          :style="dropdownStyle"
         >
-          {{ placeholder }}
-        </option>
+          <!-- Search Input -->
+          <div v-if="searchable" class="p-2 border-b border-gray-100">
+            <div class="relative">
+              <i
+                class="mdi mdi-magnify absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              ></i>
+              <input
+                ref="searchInput"
+                v-model="searchQuery"
+                type="text"
+                placeholder="ค้นหา..."
+                class="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                @keydown.escape="closeDropdown"
+                @keydown.arrow-down.prevent="highlightNext"
+                @keydown.arrow-up.prevent="highlightPrevious"
+                @keydown.enter.prevent="selectHighlighted"
+              />
+            </div>
+          </div>
 
-        <!-- Options from array -->
-        <option
-          v-for="option in normalizedOptions"
-          :key="option.value"
-          :value="option.value"
-          :disabled="option.disabled"
-        >
-          {{ option.label }}
-        </option>
+          <!-- Options List -->
+          <div class="max-h-60 overflow-auto py-1">
+            <!-- No Options Message -->
+            <div
+              v-if="filteredOptions.length === 0"
+              class="px-4 py-3 text-sm text-gray-500 text-center"
+            >
+              {{ searchQuery ? "ไม่พบข้อมูลที่ค้นหา" : "ไม่มีตัวเลือก" }}
+            </div>
 
-        <!-- Slot for custom options -->
-        <slot name="options" />
-      </select>
+            <!-- Option Items -->
+            <button
+              v-for="(option, index) in filteredOptions"
+              :key="option.value"
+              type="button"
+              :disabled="option.disabled"
+              :class="optionClasses(option, index)"
+              @click="selectOption(option)"
+              @mouseenter="highlightedIndex = index"
+            >
+              <!-- Option Content -->
+              <div class="flex items-center justify-between w-full">
+                <div class="flex items-center space-x-3">
+                  <!-- Option Icon -->
+                  <i
+                    v-if="option.icon"
+                    :class="[option.icon, 'text-gray-400']"
+                  ></i>
 
-      <!-- Custom Arrow Icon -->
-      <div
-        v-if="!multiple"
-        class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
-        :class="iconClasses"
-      >
-        <i
-          :class="[
-            arrowIcon,
-            'transition-transform duration-200',
-            { 'rotate-180': isFocused },
-          ]"
-        ></i>
-      </div>
+                  <!-- Option Label -->
+                  <span class="block truncate">{{ option.label }}</span>
 
-      <!-- Loading Spinner -->
-      <div
-        v-if="loading"
-        class="absolute inset-y-0 right-0 flex items-center pr-3"
-      >
-        <i class="mdi mdi-loading mdi-spin text-gray-400"></i>
-      </div>
+                  <!-- Option Badge/Description -->
+                  <span
+                    v-if="option.badge"
+                    class="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full"
+                  >
+                    {{ option.badge }}
+                  </span>
+                </div>
+
+                <!-- Selected Indicator -->
+                <i
+                  v-if="isSelected(option)"
+                  class="mdi mdi-check text-blue-600 ml-2"
+                ></i>
+              </div>
+            </button>
+          </div>
+        </div>
+      </Teleport>
     </div>
-
-    <!-- Helper Text -->
-    <p
-      v-if="helperText && !error"
-      class="mt-1 text-sm"
-      :class="helperTextClasses"
-    >
-      {{ helperText }}
-    </p>
-
-    <!-- Error Message -->
-    <p v-if="error" class="mt-1 text-sm text-red-600 flex items-center gap-1">
-      <i class="mdi mdi-alert-circle text-sm"></i>
-      {{ error }}
-    </p>
-
-    <!-- Success Message -->
-    <p
-      v-if="success"
-      class="mt-1 text-sm text-green-600 flex items-center gap-1"
-    >
-      <i class="mdi mdi-check-circle text-sm"></i>
-      {{ success }}
-    </p>
   </div>
+
+  <!-- Helper Text -->
+  <p
+    v-if="helperText && !error"
+    class="mt-1 text-sm"
+    :class="helperTextClasses"
+  >
+    {{ helperText }}
+  </p>
+
+  <!-- Error Message -->
+  <p v-if="error" class="mt-1 text-sm text-red-600 flex items-center gap-1">
+    <i class="mdi mdi-alert-circle text-sm"></i>
+    {{ error }}
+  </p>
+
+  <!-- Success Message -->
+  <p v-if="success" class="mt-1 text-sm text-green-600 flex items-center gap-1">
+    <i class="mdi mdi-check-circle text-sm"></i>
+    {{ success }}
+  </p>
 </template>
 
 <script setup>
-import { computed, ref, useAttrs } from "vue";
-import { generateId } from "@/utils/generateId";
+import { computed, ref, nextTick, onMounted, onUnmounted } from "vue";
 
 // Props
 const props = defineProps({
@@ -124,7 +205,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: "Select an option",
+    default: "เลือกตัวเลือก",
   },
   size: {
     type: String,
@@ -207,8 +288,12 @@ const emit = defineEmits([
 ]);
 
 // Reactive state
-const isFocused = ref(false);
-const inputId = generateId("select");
+const isOpen = ref(false);
+const searchQuery = ref("");
+const highlightedIndex = ref(-1);
+const dropdownRef = ref(null);
+const searchInput = ref(null);
+const inputId = `select-${Math.random().toString(36).substr(2, 9)}`;
 
 // Computed
 const normalizedOptions = computed(() => {
@@ -224,14 +309,60 @@ const normalizedOptions = computed(() => {
       label: option.label || option.text || String(option.value),
       value: option.value,
       disabled: option.disabled || false,
+      icon: option.icon || null,
+      badge: option.badge || null,
     };
   });
+});
+
+const filteredOptions = computed(() => {
+  if (!props.searchable || !searchQuery.value) {
+    return normalizedOptions.value;
+  }
+
+  return normalizedOptions.value.filter((option) =>
+    option.label.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+const selectedDisplay = computed(() => {
+  if (props.multiple && Array.isArray(props.modelValue)) {
+    if (props.modelValue.length === 0) return null;
+    if (props.modelValue.length === 1) {
+      const option = normalizedOptions.value.find(
+        (opt) => opt.value === props.modelValue[0]
+      );
+      return option?.label;
+    }
+    return `${props.modelValue.length} รายการที่เลือก`;
+  }
+
+  const option = normalizedOptions.value.find(
+    (opt) => opt.value === props.modelValue
+  );
+  return option?.label || null;
+});
+
+const triggerRef = ref(null);
+
+const dropdownStyle = computed(() => {
+  if (!triggerRef.value) return {};
+
+  const rect = triggerRef.value.getBoundingClientRect();
+
+  return {
+    position: "absolute",
+    top: `${rect.bottom + window.scrollY}px`,
+    left: `${rect.left + window.scrollX}px`,
+    width: `${rect.width}px`,
+    zIndex: 9999,
+  };
 });
 
 // Size classes
 const sizeClasses = computed(() => {
   const sizes = {
-    sm: "px-3 py-1.5 text-sm",
+    sm: "px-3 py-2 text-sm",
     md: "px-4 py-2.5 text-base",
     lg: "px-4 py-3 text-lg",
     xl: "px-6 py-4 text-xl",
@@ -242,9 +373,9 @@ const sizeClasses = computed(() => {
 // Variant classes
 const variantClasses = computed(() => {
   const variants = {
-    default: `border-gray-300 bg-white focus:border-${props.color}-500 focus:ring-${props.color}-500`,
-    outline: `border-2 border-${props.color}-500 bg-transparent focus:border-${props.color}-600 focus:ring-${props.color}-500`,
-    filled: `border-transparent bg-${props.color}-50 focus:bg-white focus:border-${props.color}-500 focus:ring-${props.color}-500`,
+    default: `border-gray-300 bg-white hover:border-gray-400 focus:border-${props.color}-500 focus:ring-${props.color}-500`,
+    outline: `border-2 border-${props.color}-500 bg-transparent hover:bg-${props.color}-50 focus:border-${props.color}-600 focus:ring-${props.color}-500`,
+    filled: `border-transparent bg-${props.color}-50 hover:bg-${props.color}-100 focus:bg-white focus:border-${props.color}-500 focus:ring-${props.color}-500`,
     ghost: `border-transparent bg-transparent hover:bg-${props.color}-50 focus:bg-white focus:border-${props.color}-500 focus:ring-${props.color}-500`,
   };
   return variants[props.variant];
@@ -277,9 +408,9 @@ const containerClasses = computed(() => ({
   ...props.customClasses.container,
 }));
 
-const selectClasses = computed(() => [
+const triggerClasses = computed(() => [
   // Base classes
-  "block w-full rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 appearance-none",
+  "relative w-full rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 text-left",
 
   // Size classes
   sizeClasses.value,
@@ -296,22 +427,30 @@ const selectClasses = computed(() => [
     "cursor-pointer": !props.disabled,
   },
 
-  // Multiple select classes
+  // Open state
   {
-    "pr-10": !props.multiple,
-    "pr-8": props.multiple,
+    [`border-${props.color}-500 ring-2 ring-${props.color}-500 ring-opacity-50`]:
+      isOpen.value && !props.error,
   },
 
   // Custom classes
-  props.customClasses.select,
+  props.customClasses.trigger,
 ]);
 
-const iconClasses = computed(() => ({
-  "text-gray-400": !props.error && !props.success,
-  "text-red-500": props.error,
-  "text-green-500": props.success,
-  ...props.customClasses.icon,
+const selectedValueClasses = computed(() => ({
+  "text-gray-900": !props.error,
+  "text-red-900": props.error,
 }));
+
+const dropdownClasses = computed(() => [
+  "absolute z-[9999] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden",
+  "top-full left-0 right-0",
+  "transform translate-y-0",
+  {
+    "border-red-300": props.error,
+    "border-green-300": props.success,
+  },
+]);
 
 const helperTextClasses = computed(() => ({
   "text-gray-500": true,
@@ -319,66 +458,212 @@ const helperTextClasses = computed(() => ({
 }));
 
 // Methods
-const handleInput = (event) => {
-  const value = props.multiple
-    ? Array.from(event.target.selectedOptions, (option) => option.value)
-    : event.target.value;
+const toggleDropdown = () => {
+  if (props.disabled) return;
 
-  emit("update:modelValue", value);
+  if (isOpen.value) {
+    closeDropdown();
+  } else {
+    openDropdown();
+  }
 };
 
-const handleChange = (event) => {
-  const value = props.multiple
-    ? Array.from(event.target.selectedOptions, (option) => option.value)
-    : event.target.value;
+const openDropdown = async () => {
+  isOpen.value = true;
+  highlightedIndex.value = -1;
+  searchQuery.value = "";
 
-  emit("change", value, event);
+  await nextTick();
+
+  // Focus search input if searchable
+  if (props.searchable && searchInput.value) {
+    searchInput.value.focus();
+  }
+
+  emit("focus");
 };
 
-const handleFocus = (event) => {
-  isFocused.value = true;
-  emit("focus", event);
+const closeDropdown = () => {
+  isOpen.value = false;
+  highlightedIndex.value = -1;
+  emit("blur");
 };
 
-const handleBlur = (event) => {
-  isFocused.value = false;
-  emit("blur", event);
+const selectOption = (option) => {
+  if (option.disabled) return;
+
+  if (props.multiple) {
+    const currentValue = Array.isArray(props.modelValue)
+      ? props.modelValue
+      : [];
+    const newValue = currentValue.includes(option.value)
+      ? currentValue.filter((v) => v !== option.value)
+      : [...currentValue, option.value];
+
+    emit("update:modelValue", newValue);
+    emit("change", newValue);
+  } else {
+    emit("update:modelValue", option.value);
+    emit("change", option.value);
+    closeDropdown();
+  }
+};
+
+const isSelected = (option) => {
+  if (props.multiple && Array.isArray(props.modelValue)) {
+    return props.modelValue.includes(option.value);
+  }
+  return props.modelValue === option.value;
+};
+
+const optionClasses = (option, index) => [
+  "w-full px-4 py-3 text-left text-sm transition-colors duration-150",
+  {
+    "bg-gray-50 text-gray-400 cursor-not-allowed": option.disabled,
+    "hover:bg-gray-50 cursor-pointer": !option.disabled,
+    "bg-blue-50 text-blue-700":
+      index === highlightedIndex.value && !option.disabled,
+    "bg-blue-100": isSelected(option) && !option.disabled,
+  },
+];
+
+const highlightNext = () => {
+  if (filteredOptions.value.length === 0) return;
+
+  highlightedIndex.value =
+    highlightedIndex.value < filteredOptions.value.length - 1
+      ? highlightedIndex.value + 1
+      : 0;
+};
+
+const highlightPrevious = () => {
+  if (filteredOptions.value.length === 0) return;
+
+  highlightedIndex.value =
+    highlightedIndex.value > 0
+      ? highlightedIndex.value - 1
+      : filteredOptions.value.length - 1;
+};
+
+const selectHighlighted = () => {
+  if (
+    highlightedIndex.value >= 0 &&
+    filteredOptions.value[highlightedIndex.value]
+  ) {
+    selectOption(filteredOptions.value[highlightedIndex.value]);
+  }
 };
 
 const clear = () => {
   const value = props.multiple ? [] : "";
   emit("update:modelValue", value);
+  emit("change", value);
   emit("clear");
 };
 
-// Remove inherited attributes
-defineOptions({
-  inheritAttrs: false,
+// Click outside directive
+const clickOutsideHandler = (event) => {
+  const container = event.target.closest(".base-select");
+  if (!container || !container.contains(event.target)) {
+    closeDropdown();
+  }
+};
+
+// Lifecycle
+onMounted(() => {
+  document.addEventListener("click", clickOutsideHandler);
 });
+
+onUnmounted(() => {
+  document.removeEventListener("click", clickOutsideHandler);
+});
+
+// Custom directive for click outside
+const vClickOutside = {
+  beforeMount(el, binding) {
+    el.clickOutsideEvent = function (event) {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value(event);
+      }
+    };
+    document.addEventListener("click", el.clickOutsideEvent);
+  },
+  unmounted(el) {
+    document.removeEventListener("click", el.clickOutsideEvent);
+  },
+};
 </script>
 
 <style scoped>
-/* Custom scrollbar for multiple select */
-select[multiple] {
+/* Custom scrollbar for dropdown options */
+.max-h-60 {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e0 #f7fafc; /* Replace theme("colors.gray.400") and theme("colors.gray.100") */
+  scrollbar-color: #cbd5e0 #f7fafc;
 }
 
-select[multiple]::-webkit-scrollbar {
-  width: 8px;
+.max-h-60::-webkit-scrollbar {
+  width: 6px;
 }
 
-select[multiple]::-webkit-scrollbar-track {
-  background: #f7fafc; /* Replace theme("colors.gray.100") */
-  border-radius: 4px;
+.max-h-60::-webkit-scrollbar-track {
+  background: #f7fafc;
+  border-radius: 3px;
 }
 
-select[multiple]::-webkit-scrollbar-thumb {
-  background: #cbd5e0; /* Replace theme("colors.gray.400") */
-  border-radius: 4px;
+.max-h-60::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
 }
 
-select[multiple]::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0; /* Replace theme("colors.gray.500") */
+.max-h-60::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Ensure relative container for proper dropdown positioning */
+.base-select {
+  position: relative;
+}
+
+/* Dropdown animation */
+.absolute.z-50 {
+  animation: dropdown-enter 0.2s ease-out;
+  transform-origin: top;
+}
+
+@keyframes dropdown-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Smooth transitions */
+.base-select * {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Focus ring animation */
+.focus\:ring-2:focus {
+  animation: ring-pulse 0.2s ease-out;
+}
+
+@keyframes ring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  100% {
+    box-shadow: 0 0 0 3px currentColor;
+  }
+}
+
+/* Prevent container overflow issues */
+.relative {
+  overflow: visible;
 }
 </style>
