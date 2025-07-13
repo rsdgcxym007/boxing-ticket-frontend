@@ -1,9 +1,9 @@
 export const ZONE_NAMES = {
-  "61c2dea0-beb5-4a8d-b26d-6ca45ad3f194": "back-left",
-  "35cb87bd-9e7f-4c8a-8ce5-f233a981a97d": "back-right",
-  "f79cebc6-81aa-49b4-8e45-b81197760ded": "left",
-  "d5b3d095-c93a-4ce4-a601-482e9475f954": "right",
-  "ddb14cab-e1eb-42b6-b284-077081b48585": "front-ringside",
+  "79d13d9a-5702-4443-b584-5b2dbd52c856": "back-left",
+  "1307175c-2b70-4c6c-8d45-1d0c16b33e6c": "back-right",
+  "0cb3e92c-e46c-4ae2-b107-817f1ad06394": "left",
+  "be4d651e-a83e-4858-959c-1638fe6f7854": "right",
+  "e461e040-532a-4af9-b61e-9dbf9ae9fa8b": "front-ringside",
 } as const;
 
 export const ZONE_LABELS = {
@@ -15,9 +15,9 @@ export const ZONE_LABELS = {
 } as const;
 
 export const ZONE_IDS_BY_NAME = {
-  "back-left": "61c2dea0-beb5-4a8d-b26d-6ca45ad3f194",
-  "back-right": "35cb87bd-9e7f-4c8a-8ce5-f233a981a97d",
-  left: "f79cebc6-81aa-49b4-8e45-b81197760ded",
-  right: "d5b3d095-c93a-4ce4-a601-482e9475f954",
-  "front-ringside": "ddb14cab-e1eb-42b6-b284-077081b48585",
+  "back-left": "79d13d9a-5702-4443-b584-5b2dbd52c856",
+  "back-right": "1307175c-2b70-4c6c-8d45-1d0c16b33e6c",
+  left: "0cb3e92c-e46c-4ae2-b107-817f1ad06394",
+  right: "be4d651e-a83e-4858-959c-1638fe6f7854",
+  "front-ringside": "e461e040-532a-4af9-b61e-9dbf9ae9fa8b",
 } as const;
