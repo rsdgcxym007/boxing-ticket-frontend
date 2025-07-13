@@ -43,3 +43,22 @@ export interface Order {
   payment: Payment | null;
   seatBookings: Seat[];
 }
+
+export interface AuditLog {
+  id: string;
+  userId: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  oldData?: any;
+  newData?: any;
+  ipAddress: string;
+  userAgent: string;
+  timestamp: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+}

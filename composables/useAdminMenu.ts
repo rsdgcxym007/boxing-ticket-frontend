@@ -15,5 +15,15 @@ export const useAdminMenu = () => {
       label: "จัดการผู้แนะนำ",
       to: "/admin/referrer/",
     },
+    {
+      icon: "mdi-account-group",
+      label: "จัดการพนักงาน",
+      to: "/admin/staff",
+    },
+    {
+      icon: "mdi-account-group",
+      label: "ระบบตรวจสอบ",
+      to: "/admin/audit",
+    },
   ];
 };
