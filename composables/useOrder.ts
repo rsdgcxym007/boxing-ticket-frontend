@@ -254,7 +254,7 @@ export const useOrder = () => {
     console.log(orderId, newSeatIds, showDate);
 
     try {
-      const data = await patch(`/orders/update-booked/${orderId}`, {
+      const data = await patch(`api/v1/orders/update-booked/${orderId}`, {
         seatIds: newSeatIds,
         showDate,
       });
@@ -270,7 +270,7 @@ export const useOrder = () => {
 
   const generateTickets = async (orderId: string) => {
     try {
-      const data = await get(`/orders/${orderId}/tickets`);
+      const data = await get(`api/v1/orders/${orderId}/tickets`);
       toast.success("ออกตั๋วสำเร็จ");
       return data;
     } catch (err: any) {

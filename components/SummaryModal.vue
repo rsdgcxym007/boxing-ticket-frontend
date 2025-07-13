@@ -96,22 +96,6 @@
               </div>
             </div>
           </div>
-
-          <!-- System Health Status -->
-          <div
-            v-if="systemHealth && systemHealth.status !== 'healthy'"
-            class="mt-3 p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-xl"
-          >
-            <div class="flex items-center gap-3">
-              <i
-                class="mdi mdi-alert-circle-outline text-orange-600 text-xl"
-              ></i>
-              <div>
-                <p class="font-semibold text-orange-700">ระบบมีปัญหาเล็กน้อย</p>
-                <p class="text-sm text-orange-600">กรุณาตรวจสอบการเชื่อมต่อ</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
