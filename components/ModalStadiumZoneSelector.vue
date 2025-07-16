@@ -32,10 +32,13 @@
             <!-- Selectors -->
             <div class="flex justify-center px-6 pt-4">
               <div class="w-full max-w-xs sm:max-w-sm md:max-w-md p-4">
-                <ZoneSelect
+                <BaseSelect
                   v-model="pageData.zoneKey"
                   :options="pageData.zoneOptions"
                   label="ค้นหาโซน"
+                  placeholder="เลือกโซน"
+                  searchable
+                  clearable
                   @update:modelValue="onZoneChange"
                 />
                 <div class="mt-4">
@@ -515,15 +518,18 @@ const onClose = async () => {
 };
 
 const onClear = async () => {
+  pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(
+    seatManager.allSeats.value
+  );
   const success = await clearAllSelections();
   if (success) {
     pageData.totalAmount = 0;
-    // toast.success("ยกเลิกการเลือกที่นั่งทั้งหมดแล้ว");
   }
 };
 
 const onCloseSummaryModal = async () => {
   pageData.showSummaryModal = false;
+  const success = await clearAllSelections();
   await resetAndClose();
 };
 

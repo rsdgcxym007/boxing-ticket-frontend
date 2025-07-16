@@ -445,7 +445,11 @@
     </div>
 
     <!-- Modals -->
-    <AuditDetailModal :isOpen="showDetailModal" :audit-log="selectedLog" />
+    <AuditDetailModal
+      :isOpen="showDetailModal"
+      :audit-log="selectedLog"
+      @close="onClose"
+    />
 
     <AuditExportModal v-model="showExportModal" @export="handleExport" />
 
@@ -596,6 +600,10 @@ function showAuditDetail(log: any) {
   showDetailModal.value = true;
 }
 
+const onClose = () => {
+  showDetailModal.value = false;
+  selectedLog.value = null;
+};
 async function handleExport(params: any) {
   try {
     await exportAuditReport(params);

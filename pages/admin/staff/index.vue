@@ -62,31 +62,31 @@
         <StaffStatsCard
           title="พนักงานทั้งหมด"
           :value="summary?.counts.total || 0"
-          icon="mdi-account-group"
+          icon="mdi mdi-account-group"
           color="blue"
         />
         <StaffStatsCard
           title="ปฏิบัติงาน"
           :value="summary?.counts.active || 0"
-          icon="mdi-account-check"
+          icon="mdi mdi-account-check"
           color="green"
         />
         <StaffStatsCard
           title="ไม่ปฏิบัติงาน"
           :value="summary?.counts.inactive || 0"
-          icon="mdi-account-off"
+          icon="mdi mdi-account-off"
           color="gray"
         />
         <StaffStatsCard
           title="ถูกระงับ"
           :value="summary?.counts.suspended || 0"
-          icon="mdi-account-alert"
+          icon="mdi mdi-account-alert"
           color="yellow"
         />
         <StaffStatsCard
           title="ถูกไล่ออก"
           :value="summary?.counts.terminated || 0"
-          icon="mdi-account-remove"
+          icon="mdi mdi-account-remove"
           color="red"
         />
       </div>
