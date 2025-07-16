@@ -275,18 +275,76 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style scoped>
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.3s ease;
+<style>
+/* Fade Slide Animation */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.35s ease-out;
 }
-.slide-fade-enter-from,
-.slide-fade-leave-to {
+.fade-slide-enter-from,
+.fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-10px);
 }
-button:hover svg {
-  transform: rotate(180deg);
-  transition: transform 0.2s;
+
+@keyframes fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-slide {
+  animation: fade-slide 0.35s ease-out;
+}
+
+/* Navbar Modern Look */
+nav {
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Dropdown Enhancements */
+nav ul li a,
+nav ul li button {
+  transition: all 0.25s ease-in-out;
+  white-space: nowrap;
+}
+
+nav ul li a:hover,
+nav ul li button:hover {
+  transform: scale(1.05);
+  color: #34d399;
+}
+
+/* Mobile Admin Submenu Styling */
+nav .admin-sub ul {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+}
+
+/* Active Underline Effect */
+nav a.relative::after,
+nav button.relative::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(to right, #34d399, #60a5fa);
+  width: 0%;
+  transition: width 0.4s ease-in-out;
+}
+nav a.relative:hover::after,
+nav button.relative:hover::after {
+  width: 100%;
 }
 </style>

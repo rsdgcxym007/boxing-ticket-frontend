@@ -42,7 +42,6 @@ export const usePageData = defineStore("pageData", {
       { name: "ยกเลิก", value: "CANCELLED" },
     ],
     zoneOptions: [
-      { label: "ทั้งหมด", value: "" },
       { label: "Back Left", value: "back-left" },
       { label: "Back Right", value: "back-right" },
       { label: "Left", value: "left" },
