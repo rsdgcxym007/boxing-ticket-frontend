@@ -36,13 +36,13 @@
             <div class="flex justify-between">
               <span class="text-sm font-medium text-gray-600">ชื่อ:</span>
               <span class="text-sm text-gray-900">{{
-                auditLog.user?.name || "ไม่ระบุ"
+                JSON.parse(auditLog.metadata).user || "ไม่ระบุ"
               }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm font-medium text-gray-600">อีเมล:</span>
               <span class="text-sm text-gray-900">{{
-                auditLog.user?.email || "ไม่ระบุ"
+                JSON.parse(auditLog.metadata).email || "ไม่ระบุ"
               }}</span>
             </div>
             <div class="flex justify-between">

@@ -55,6 +55,7 @@ export interface AuditLog {
   ipAddress: string;
   userAgent: string;
   timestamp: string;
+  metadata: any;
   user?: {
     id: string;
     name: string;

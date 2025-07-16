@@ -210,7 +210,7 @@ const isGeneratingPDF = ref(false);
 
 const getTicketType = (type) => {
   switch (type) {
-    case "SEAT":
+    case "RINGSIDE":
       return "ที่นั่ง";
     case "STANDING":
       return "ตั๋วยืน";

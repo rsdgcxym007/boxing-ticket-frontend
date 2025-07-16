@@ -282,6 +282,7 @@ import { Transition } from "vue";
 import { ZONE_IDS_BY_NAME } from "~~/utils/zoneEnums";
 import { useOrder } from "~/composables/useOrder";
 import { usePageData } from "~/stores/pageData";
+import TicketDisplay from "~/components/TicketDisplay.vue";
 
 // ตั้งค่า metadata สำหรับหน้า
 definePageMeta({
@@ -366,20 +367,26 @@ const onCancelOrder = async (order) => {
 const onGenerateTickets = async (order) => {
   try {
     const tickets = await generateTickets(order.id);
-
     // แสดงตั๋วที่ออกมา
-    generatedTickets.value = tickets;
+    console.log("tickets.tickets", tickets.tickets);
+
+    generatedTickets.value = tickets.tickets.map((ticket) => ({
+      orderId: ticket.id,
+      seatNumber: ticket?.seatNumber,
+      customerName: ticket.customerName || "ผู้ซื้อตั๋ว",
+      showDate: ticket.showDate || "01/07/2025",
+      type: ticket.type,
+      zone: ticket?.zone?.name,
+    }));
     showTicketModal.value = true;
 
-    fetchData(); // รีเฟรชข้อมูล
+    fetchData();
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการออกตั๋ว:", error);
   }
 };
 
 const onEditOrder = (order) => {
-  console.log("Edit order clicked:", order);
-  console.log("Order ID:", order.id);
   // Navigate to edit page
   navigateTo(`/admin/order/${order.id}/edit`);
 };
