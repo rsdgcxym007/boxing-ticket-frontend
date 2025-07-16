@@ -138,7 +138,7 @@
               <div class="space-y-1 text-sm text-white">
                 <div class="flex items-center gap-2">
                   <i class="mdi mdi-calendar text-slate-400 text-sm"></i>
-                  <span>{{ formatDate(order.showDate) }}</span>
+                  <span>{{ order.showDate }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <i class="mdi mdi-credit-card text-slate-400 text-sm"></i>
