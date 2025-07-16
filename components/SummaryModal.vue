@@ -139,7 +139,7 @@
             <input
               type="radio"
               v-model="pageData.method"
-              value="VISA"
+              value="CREDIT_CARD"
               class="accent-green-600 w-5 h-5"
             />
             <div class="flex items-center gap-3">
@@ -156,7 +156,7 @@
 
       <!-- Customer Information Form -->
       <div
-        v-if="['CASH', 'VISA'].includes(pageData.method)"
+        v-if="['CASH', 'CREDIT_CARD'].includes(pageData.method)"
         class="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-6 shadow-lg"
       >
         <div class="flex items-center gap-2 mb-6">
@@ -385,7 +385,7 @@ const isValidPhone = computed(() => {
 });
 
 const isValid = computed(() => {
-  if (["CASH", "VISA"].includes(pageData.method)) {
+  if (["CASH", "CREDIT_CARD"].includes(pageData.method)) {
     return pageData.customerName?.trim()?.length > 0;
   }
   return true;
