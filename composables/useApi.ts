@@ -13,9 +13,8 @@ export const useApi = () => {
 
   const handleResponse = async (res: Response) => {
     const result = await res.json();
-
     if (!res.ok || result.statusCode >= 400) {
-      throw new Error(result.message || "Unknown error");
+      throw new Error(result.error || result.message || "Unknown error");
     }
     return result;
   };

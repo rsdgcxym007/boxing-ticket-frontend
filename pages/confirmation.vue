@@ -135,21 +135,17 @@ const onGenerateTickets = async () => {
   try {
     // เรียก API สำหรับสร้างตั๋วจริง
     const tickets = await generateTickets(orderId);
-    console.log("สร้างตั๋วสำเร็จ:", tickets);
-
-    // แสดงตั๋วที่สร้างขึ้น
-    generatedTickets.value = tickets;
+    generatedTickets.value = tickets.tickets.map((ticket) => ({
+      orderId: ticket.id,
+      seatNumber: ticket.seatNumber,
+      customerName: ticket.customerName || "ผู้ซื้อตั๋ว",
+      showDate: ticket.showDate || "01/07/2025",
+      type: ticket.type || (zone.includes("STANDING") ? "STANDING" : "SEAT"),
+      zone: ticket.zone.name,
+    }));
     showTicketModal.value = true;
-
-    // แสดงข้อความแจ้งเตือน
-    alert(`สร้างตั๋วเสร็จสิ้น! จำนวน ${tickets.length} ใบ`);
   } catch (error) {
     console.error("ไม่สามารถสร้างตั๋วได้:", error);
-
-    // ใช้ข้อมูลตัวอย่างเมื่อ API ล้มเหลว
-    console.log("API ล้มเหลว ใช้ข้อมูลตัวอย่าง");
-
-    // สร้างตั๋วจากข้อมูลการจอง
     const tickets = seats.map((seat, index) => ({
       orderId: orderId,
       seatNumber: seat,
