@@ -270,7 +270,7 @@
                         วันที่แสดง
                       </label>
                       <p class="text-white text-base md:text-lg font-semibold">
-                        {{ formatDate(orderData.showDate) }}
+                        {{ orderData.showDate }}
                       </p>
                     </div>
                   </div>

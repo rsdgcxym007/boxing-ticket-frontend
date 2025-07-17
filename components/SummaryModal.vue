@@ -53,7 +53,10 @@
                 t("summary.seats")
               }}</span>
             </div>
-            <div class="flex flex-wrap gap-1">
+            <div
+              v-if="pageData.selectedSeats.length"
+              class="flex flex-wrap gap-1"
+            >
               <span
                 v-for="seat in pageData.selectedSeats"
                 :key="seat.id"
@@ -351,7 +354,7 @@ const {
 
 // API Composables
 const { cancelOrder } = useOrder();
-const { createSeatedPayment } = usePayments();
+const { createSeatedPayment, createStandingPayment } = usePayments();
 
 // ==================== PROPS & EMITS ====================
 const props = defineProps({
@@ -423,7 +426,10 @@ const initializeData = () => {
   pageData.zoneKey = props.zone;
   pageData.selectedSeats = props.selectedSeats;
   pageData.total = props.total;
-
+  pageData.customerName = props.dataZoneSelected?.customerName || "";
+  pageData.customerPhone = props.dataZoneSelected?.customerPhone || "";
+  pageData.customerEmail = props.dataZoneSelected?.customerEmail || "";
+  pageData.referrerCode = props.dataZoneSelected?.referrerCode || "";
   // Initialize customer fields if empty
   if (!pageData.customerName) pageData.customerName = "";
   if (!pageData.customerEmail) pageData.customerEmail = "";
@@ -465,16 +471,19 @@ const submitOrders = async () => {
 
   try {
     const paymentData = {
-      orderId: props.dataZoneSelected?.orderId,
-      amount: pageData.total,
+      orderId: props.dataZoneSelected?.orderId || props.dataZoneSelected?.id,
+      amount: normalizeCurrency(pageData.total),
       method: pageData.method.toUpperCase(),
       customerName: pageData.customerName.trim(),
       customerEmail: pageData.customerEmail.trim(),
       customerPhone: pageData.customerPhone.trim(),
       referrerCode: pageData.referrerCode?.trim() || undefined,
     };
-
-    await createSeatedPayment(paymentData);
+    if (props.dataZoneSelected.id) {
+      await createStandingPayment(paymentData);
+    } else {
+      await createSeatedPayment(paymentData);
+    }
 
     // Handle success based on mode
     await handlePaymentSuccess();
@@ -482,6 +491,10 @@ const submitOrders = async () => {
     console.error("Payment submission error:", error);
     handlePaymentError(error);
   }
+};
+const normalizeCurrency = (input) => {
+  if (typeof input === "number") return input;
+  return parseFloat(input.replace(/,/g, ""));
 };
 
 const handlePaymentSuccess = async () => {
@@ -496,7 +509,7 @@ const handlePaymentSuccess = async () => {
       query: {
         orderId,
         zone: pageData.zoneKey,
-        seats: pageData.selectedSeats.map((s) => s.seatNumber).join(","),
+        seats: pageData.selectedSeats?.map((s) => s.seatNumber).join(","),
         total: pageData.total,
       },
     });
