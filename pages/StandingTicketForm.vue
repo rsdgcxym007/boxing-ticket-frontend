@@ -169,7 +169,54 @@
           :dark="true"
         />
       </div>
-
+      <!-- <div class="space-y-3">
+        <label
+          class="flex items-center gap-4 cursor-pointer p-4 rounded-xl border-2 border-green-200 hover:border-green-400 bg-white hover:bg-green-50 transition-all duration-300"
+        >
+          <input
+            type="radio"
+            v-model="pageData.paymentMethod"
+            value="CASH"
+            class="accent-green-600 w-5 h-5"
+          />
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-green-100 rounded-lg">
+              <i class="mdi mdi-wallet-outline text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="font-bold text-gray-800">{{ "CASH" }}</p>
+            </div>
+          </div>
+        </label>
+      </div> -->
+      <!-- <div class="space-y-3 mt-2">
+        <label
+          class="flex items-center gap-4 cursor-pointer p-4 rounded-xl border-2 border-green-200 hover:border-green-400 bg-white hover:bg-green-50 transition-all duration-300"
+        >
+          <input
+            type="radio"
+            v-model="pageData.paymentMethod"
+            value="CREDIT_CARD"
+            class="accent-green-600 w-5 h-5"
+          />
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-green-100 rounded-lg">
+              <i class="mdi mdi-wallet-outline text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="font-bold text-gray-800">{{ "VISA CARD" }}</p>
+            </div>
+          </div>
+        </label>
+      </div>
+      <div
+        class="text-right text-lg font-semibold text-white bg-white/10 p-4 rounded-xl border border-white/20"
+      >
+        รวมทั้งหมด:
+        <span class="text-green-400">
+          {{ calculateTotal().toLocaleString() }} บาท
+        </span>
+      </div> -->
       <!-- ปุ่มดำเนินการ -->
       <div class="flex flex-col gap-3 pt-2">
         <!-- 🆕 ปุ่มจองแบบใหม่ (แนะนำ) -->
@@ -185,7 +232,7 @@
         </BaseButton>
 
         <!-- 🆕 ปุ่มยืนยันการชำระเงิน -->
-        <BaseButton
+        <!-- <BaseButton
           @click="confirmPaymentForOrder"
           variant="success"
           size="lg"
@@ -194,10 +241,21 @@
         >
           <i class="mdi mdi-cash-check-outline text-xl text-green-500" />
           ยืนยันการชำระเงิน
-        </BaseButton>
+        </BaseButton> -->
       </div>
     </div>
   </div>
+  <SummaryModal
+    v-if="showSummaryModal"
+    :visible="showSummaryModal"
+    :selectedSeats="[]"
+    :zone="'Standing'"
+    :total="calculateTotal().toLocaleString()"
+    :userRole="''"
+    :dataZoneSelected="dataOrder"
+    :mode="'CASH'"
+    @close="onCloseSummaryModal"
+  />
 </template>
 
 <script setup lang="ts">
@@ -211,15 +269,20 @@ import { useOrder } from "../composables/useOrder";
 // 🏪 Store Management
 import { useAuthStore } from "../stores/auth";
 import { usePageData } from "../stores/pageData";
+import { useIntegratedSeatBooking } from "../composables/useIntegratedSeatBooking";
 
 // 📱 การตั้งค่าเริ่มต้น
 const auth = useAuthStore();
 const isLoading = usePageData();
 const toast = useToast();
-
+const showSummaryModal = ref(false);
+const dataOrder = ref();
+const seatBookingSystem = useIntegratedSeatBooking();
+const { clearAllSelections } = seatBookingSystem;
 // 🎫 Payment & Order API - ใช้ฟังก์ชันใหม่
 const {
-  submitOrder, // 🆕 ใช้ API ใหม่สำหรับสร้างออเดอร์
+  submitOrder,
+  cancelOrder, // 🆕 ใช้ API ใหม่สำหรับสร้างออเดอร์
 } = useOrder();
 const {
   createStandingPayment, // 🆕 ใช้ API ใหม่สำหรับชำระเงิน
@@ -239,6 +302,7 @@ const pageData = ref({
   standingAdultQty: 0, // จำนวนตั๋วผู้ใหญ่
   standingChildQty: 0, // จำนวนตั๋วเด็ก
   referrerCode: "", // รหัสผู้แนะนำ
+  paymentMethod: "CASH", // วิธีการชำระเงิน (เริ่มต้นเป็นเงินสด)
   showDate: `${yyyy}-${mm}-${dd}`, // วันที่แสดง
 });
 
@@ -259,6 +323,7 @@ const bookStandingTicketNew = async () => {
     customerName,
     customerPhone,
     customerEmail,
+    paymentMethod,
   } = pageData.value;
 
   // ✅ ตรวจสอบข้อมูลก่อนส่ง
@@ -283,12 +348,15 @@ const bookStandingTicketNew = async () => {
       customerName: customerName.trim(),
       customerPhone: customerPhone.trim(),
       customerEmail: customerEmail.trim(),
-      paymentMethod: "CASH",
+      paymentMethod,
       referrerCode: pageData.value.referrerCode || undefined,
     };
 
     const response = await submitOrder(bookingData);
+    dataOrder.value = response;
+    console.log("dataOrder.value", dataOrder.value);
 
+    showSummaryModal.value = true;
     // 🎉 แสดงผลลัพธ์การจอง
     toast.success("🎉 จองตั๋วยืนสำเร็จ! คุณสามารถชำระเงินได้แล้ว");
 
@@ -315,7 +383,7 @@ const confirmPaymentForOrder = async () => {
   try {
     const paymentData = {
       orderId: orderId.value,
-      method: "CASH",
+      method: pageData.value.paymentMethod,
       amount: calculateTotal(),
       customerName: pageData.value.customerName.trim(),
       referrerCode: pageData.value.referrerCode || undefined,
@@ -334,6 +402,7 @@ const confirmPaymentForOrder = async () => {
       standingAdultQty: 0,
       standingChildQty: 0,
       referrerCode: "",
+      paymentMethod: "CASH",
       showDate: `${yyyy}-${mm}-${dd}`,
     };
     orderId.value = null;
@@ -343,5 +412,9 @@ const confirmPaymentForOrder = async () => {
   } finally {
     isLoading.loading = false;
   }
+};
+const onCloseSummaryModal = async () => {
+  showSummaryModal.value = false;
+  const success = await cancelOrder(dataOrder.value.id);
 };
 </script>
