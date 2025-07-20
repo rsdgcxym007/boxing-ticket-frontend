@@ -217,7 +217,29 @@
                         v-if="orderData.status === 'PAID'"
                         class="text-white text-base md:text-lg font-semibold"
                       >
-                        {{ orderData.referrerCode || "ไม่มีข้อมูล" }}
+                        {{ orderData.referrer?.name || "ไม่มีข้อมูล" }}
+                      </p>
+                      <BaseInput
+                        v-else
+                        v-model="formData.newReferrerCode"
+                        class="bg-white text-black"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
+                      >
+                        ค่าคอมมิชชั่นผู้แนะนำ
+                      </label>
+                      <p
+                        v-if="orderData.status === 'PAID'"
+                        class="text-white text-base md:text-lg font-semibold"
+                      >
+                        {{
+                          orderData.ticketType === "RINGSIDE"
+                            ? orderData.referrerCommission
+                            : orderData.standingCommission || "ไม่มีข้อมูล"
+                        }}
                       </p>
                       <BaseInput
                         v-else
@@ -469,6 +491,15 @@
               <div
                 class="bg-[#0f1f3c] p-4 md:p-6 rounded-lg border border-blue-700"
               >
+                <button
+                  @click="isShowModal = true"
+                  class="px-6 md:px-8 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 mx-auto text-base md:text-lg"
+                >
+                  <i class="mdi mdi-refresh"></i>
+                  ลองใหม่
+                </button>
+                {{ orderData.seats[0].zone.name }}
+
                 <label
                   class="text-base md:text-lg lg:text-xl font-medium text-blue-300 mb-4 flex items-center gap-2"
                 >
@@ -579,6 +610,14 @@
       </div>
     </div>
   </div>
+  <ModalStadiumZoneSelector
+    v-if="isShowModal"
+    :zoneKey="orderData.seats[0].zone.name"
+    :isOpen="isShowModal"
+    mode="change"
+    @close="isShowModal = false"
+    :orderData="orderData"
+  />
 </template>
 
 <script setup>
@@ -593,7 +632,7 @@ const router = useRouter();
 const { getOrderById, changeSeats } = useOrder();
 const toast = useToast();
 const { createSeatedPayment } = usePayments();
-
+const isShowModal = ref(false);
 // Reactive data
 const orderId = route.params.id;
 const loading = ref(true);
@@ -723,6 +762,8 @@ const loadOrder = async () => {
     const data = await getOrderById(orderId);
     orderData.value = data;
 
+    console.log("orderData", orderData.value);
+
     // Initialize form data
     formData.value = {
       seatIds: data.seats.map((seat) => seat.id) || [],
@@ -730,14 +771,30 @@ const loadOrder = async () => {
       newCustomerName: data.customerName || "",
       newCustomerPhone: data.customerPhone || "",
       newCustomerEmail: data.email || "",
-      newShowDate: data.showDate
-        ? dayjs(data.showDate).format("YYYY-MM-DD")
-        : "",
+      newShowDate: (() => {
+        if (!data.showDate) return "";
+        // Try ISO first
+        let d = dayjs(data.showDate, "YYYY-MM-DD", true);
+        if (d.isValid()) return d.format("YYYY-MM-DD");
+        // Try DD/MM/YYYY
+        d = dayjs(data.showDate, "DD/MM/YYYY", true);
+        if (d.isValid()) return d.format("YYYY-MM-DD");
+        // Try native parse (for Date objects or fallback)
+        d = dayjs(data.showDate);
+        if (d.isValid()) return d.format("YYYY-MM-DD");
+        // Fallback: manual split for dd/MM/yyyy
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(data.showDate)) {
+          const [day, month, year] = data.showDate.split("/");
+          return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        }
+        return "";
+      })(),
       totalAmount: data.totalAmount || 0,
       newSource: data.source || "",
       status: data.status,
       paymentStatus: data.paymentStatus,
     };
+    console.log(" formData.value", formData.value);
 
     seatIdsText.value = data.seats.map((seat) => seat.seatNumber).join(", ");
   } catch (err) {
@@ -747,7 +804,7 @@ const loadOrder = async () => {
   }
 };
 const handleDateChange = async (newDate) => {
-  pageData.showDate = newDate;
+  formData.newShowDate = newDate;
 };
 // Save changes
 const saveChanges = async () => {

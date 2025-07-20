@@ -476,10 +476,11 @@ watch(
         pageData.zoneKey,
         pageData.showDate
       );
+      console.log("updatedSeats", updatedSeats);
 
       // Update pageData.currentZoneSeats dynamically
       pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(
-        updatedSeats.map((seat) => {
+        updatedSeats.data.map((seat) => {
           return {
             ...seat,
             bookingStatus: seatManager.getSeatStatus(seat),
@@ -488,7 +489,7 @@ watch(
       );
 
       // Update bookedSeats array to force SeatIcon re-render
-      pageData.bookedSeats = updatedSeats.filter(
+      pageData.bookedSeats = updatedSeats.data.filter(
         (seat) =>
           seatManager.getSeatStatus(seat) === "BOOKED" ||
           seatManager.getSeatStatus(seat) === "locked"

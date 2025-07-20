@@ -161,7 +161,18 @@
               <div class="space-y-1 text-sm text-white">
                 <div class="flex items-center gap-2">
                   <i class="mdi mdi-tag text-slate-400 text-sm"></i>
-                  <span>{{ order.referrerCode || "ไม่มี" }}</span>
+                  <span>{{ order.referrer?.name || "ไม่มี" }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="mdi mdi-credit-card text-slate-400 text-sm"></i>
+                  <span>
+                    ค่าคอม :
+                    {{
+                      order.ticketType === "RINGSIDE"
+                        ? order.referrerCommission
+                        : order.standingCommission || 0
+                    }}</span
+                  >
                 </div>
                 <div class="flex items-center gap-2">
                   <i class="mdi mdi-source-branch text-slate-400 text-sm"></i>
