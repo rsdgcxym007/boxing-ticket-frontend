@@ -5,6 +5,7 @@
       class="fixed inset-0 bg-black/50 z-50 overflow-auto"
       @click.self="onClose"
     >
+      {{ props.isOpen }}
       <div class="flex justify-center items-start p-4 sm:p-6 md:p-10">
         <div
           class="w-full max-w-[95%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-10 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] overflow-hidden"
@@ -82,9 +83,7 @@
                           :zoneKey="pageData.zoneKey"
                           @toggle="handleSeatToggle"
                           :ownSeatIds="
-                            props.orderData?.seatBookings.map(
-                              (b) => b.seat.id
-                            ) || []
+                            props.orderData?.seats.map((b) => b.id) || []
                           "
                           class="w-8 sm:w-10 md:w-11 transition-transform hover:scale-105 cursor-pointer"
                         />
@@ -235,6 +234,7 @@ import { useSeatApi } from "@/composables/useSeatApi";
 import { useOrder } from "@/composables/useOrder";
 import { buildSeatLayoutFromCoordinates } from "@/utils/buildSeatLayout";
 import { useIntegratedSeatBooking } from "@/composables/useIntegratedSeatBooking";
+import { ref as vueRef } from "vue";
 
 const { t } = useI18n();
 const pageData = usePageData();
@@ -432,7 +432,33 @@ const handleMarkOrder = async () => {
 // Lifecycle Hooks
 // ====================
 onMounted(() => {
-  pageData.showDate = props.orderData?.showDate || new Date();
+  let showDate = props.orderData?.showDate;
+  if (showDate) {
+    // Try ISO first
+    let d = dayjs(showDate, "YYYY-MM-DD", true);
+    if (d.isValid()) showDate = d.format("YYYY-MM-DD");
+    else {
+      // Try DD/MM/YYYY
+      d = dayjs(showDate, "DD/MM/YYYY", true);
+      if (d.isValid()) showDate = d.format("YYYY-MM-DD");
+      else {
+        d = dayjs(showDate);
+        if (d.isValid()) showDate = d.format("YYYY-MM-DD");
+        else if (/^\d{2}\/\d{2}\/\d{4}$/.test(showDate)) {
+          const [day, month, year] = showDate.split("/");
+          showDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
+            2,
+            "0"
+          )}`;
+        } else {
+          showDate = new Date();
+        }
+      }
+    }
+  } else {
+    showDate = new Date();
+  }
+  pageData.showDate = showDate;
   pageData.zoneKey = props.zoneKey;
 });
 
@@ -443,29 +469,79 @@ onBeforeUnmount(() => {
 // ====================
 // Watchers
 // ====================
-watch(
-  () => props.isOpen,
-  async (isOpen) => {
-    if (isOpen) {
-      pageData.showSeatModal = true;
-      pageData.showDate = props.orderData?.showDate || new Date();
 
-      await onZoneChange(props.zoneKey);
+const prevState = vueRef({
+  isOpen: false,
+  zoneKey: undefined,
+  showDate: undefined,
+  orderId: undefined,
+  mode: undefined,
+});
 
-      // จัดการโหมดเปลี่ยนที่นั่ง
-      if (props.mode === "change" && props.orderData) {
-        const fallbackSeats = props.orderData.seatBookings.map((b) => b.seat);
-        originalSeatCount.value = fallbackSeats.length;
-
-        // Pre-select seats for change mode
-        fallbackSeats.forEach((seat) => {
-          seatManager.selectSeat(seat.id);
-        });
-      }
-    } else {
-    }
+watchEffect(async () => {
+  if (!props.isOpen) {
+    prevState.value.isOpen = false;
+    return;
   }
-);
+
+  // Detect if modal just opened or data changed
+  const currOrderId =
+    props.orderData?.id || props.orderData?.orderId || undefined;
+  const changed =
+    !prevState.value.isOpen ||
+    prevState.value.zoneKey !== props.zoneKey ||
+    prevState.value.showDate !== props.orderData?.showDate ||
+    prevState.value.orderId !== currOrderId ||
+    prevState.value.mode !== props.mode;
+
+  if (!changed) return;
+
+  prevState.value.isOpen = true;
+  prevState.value.zoneKey = props.zoneKey;
+  prevState.value.showDate = props.orderData?.showDate;
+  prevState.value.orderId = currOrderId;
+  prevState.value.mode = props.mode;
+
+  console.log(
+    "[ModalStadiumZoneSelector] Modal opened/changed, mode:",
+    props.mode,
+    "zone:",
+    props.zoneKey,
+    "date:",
+    props.orderData?.showDate
+  );
+  // 1. Reset pageData (กัน state ค้าง)
+
+  // 2. Set zoneKey/showDate จาก props/orderData
+  pageData.zoneKey = props.zoneKey;
+  pageData.showDate = props.orderData?.showDate || new Date();
+ 
+
+  // 3. Clear selections
+  await clearAllSelections();
+  // 4. Fetch seats ใหม่
+  await fetchAndInitializeSeats();
+
+
+  // 5. Pre-select seats เฉพาะโหมด change และ id ต้องมีอยู่จริง
+  if (props.mode === "change" && props.orderData) {
+    const fallbackSeats = props.orderData.seats.map((b) => b.seat);
+    originalSeatCount.value = fallbackSeats.length;
+    const allSeatIds = seatManager.allSeats.value.map((s) => s.id);
+    let selectedCount = 0;
+    fallbackSeats.forEach((seat) => {
+      if (allSeatIds.includes(seat.id)) {
+        seatManager.selectSeat(seat.id);
+        selectedCount++;
+      }
+    });
+    console.log(
+      "[ModalStadiumZoneSelector] Pre-selected seats:",
+      selectedCount,
+      fallbackSeats.map((s) => s.id)
+    );
+  }
+});
 
 watch(
   () => seatManager.lastUpdateTimestamp.value,
@@ -476,7 +552,6 @@ watch(
         pageData.zoneKey,
         pageData.showDate
       );
-      console.log("updatedSeats", updatedSeats);
 
       // Update pageData.currentZoneSeats dynamically
       pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(
