@@ -250,7 +250,7 @@
     :visible="showSummaryModal"
     :selectedSeats="[]"
     :zone="'Standing'"
-    :total="calculateTotal().toLocaleString()"
+    :total="calculateTotal()"
     :userRole="''"
     :dataZoneSelected="dataOrder"
     :mode="'CASH'"

@@ -28,7 +28,7 @@
 
     <!-- Quick Stats Overview -->
     <div
-      class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8"
+      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4 mb-8"
     >
       <div
         class="bg-gradient-to-br from-blue-500/10 to-blue-600/10 p-4 rounded-xl border border-blue-500/20"
@@ -56,7 +56,7 @@
         <div class="text-xs text-gray-400">ออเดอร์</div>
       </div>
 
-      <div
+      <!-- <div
         class="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 p-4 rounded-xl border border-yellow-500/20"
       >
         <div class="flex items-center gap-2 mb-2">
@@ -80,7 +80,7 @@
           {{ pageData.quickStats?.expiredOrders || 0 }}
         </div>
         <div class="text-xs text-gray-400">ออเดอร์</div>
-      </div>
+      </div> -->
 
       <div
         class="bg-gradient-to-br from-purple-500/10 to-purple-600/10 p-4 rounded-xl border border-purple-500/20"
@@ -111,7 +111,7 @@
 
     <!-- Revenue Overview -->
     <div
-      class="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-8"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8"
     >
       <div
         class="bg-gradient-to-br from-[#1a2b4d] to-[#0f1f3c] p-6 rounded-xl border border-blue-500/20"
@@ -148,7 +148,7 @@
         </div>
       </div>
 
-      <div
+      <!-- <div
         class="bg-gradient-to-br from-[#1a2b4d] to-[#0f1f3c] p-6 rounded-xl border border-blue-500/20"
       >
         <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -183,7 +183,7 @@
             }}</span>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <div
         class="bg-gradient-to-br from-[#1a2b4d] to-[#0f1f3c] p-6 rounded-xl border border-blue-500/20"
@@ -369,7 +369,7 @@
             <div>
               <span class="text-gray-400">ยอดขาย:</span>
               <span class="font-semibold ml-1">{{
-                formatCurrency(referrer.totalAmount)
+                formatCurrency(referrer.totalAmount - referrer.totalCommission)
               }}</span>
             </div>
           </div>
@@ -393,7 +393,8 @@
             <div class="text-xl font-bold text-green-400">
               {{
                 formatCurrency(
-                  pageData.todayReferrers?.summary?.totalAmount || 0
+                  pageData.todayReferrers?.summary?.totalAmount -
+                    pageData.todayReferrers?.summary?.totalCommission || 0
                 )
               }}
             </div>
@@ -414,7 +415,7 @@
     </div>
 
     <!-- Customer Stats -->
-    <div
+    <!-- <div
       class="bg-gradient-to-br from-[#1a2b4d] to-[#0f1f3c] p-6 rounded-xl border border-blue-500/20"
     >
       <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -445,7 +446,7 @@
           <div class="text-xs text-gray-400">ลูกค้าประจำ</div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
