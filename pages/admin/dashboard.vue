@@ -126,21 +126,51 @@
         </h3>
         <div class="space-y-3">
           <div class="flex justify-between">
-            <span class="text-gray-400">รายได้รวม</span>
+            <span class="text-gray-400">
+              เงินสด
+              <span class="ml-1"
+                >({{
+                  pageData.revenue?.today?.countpaymentCash || 0
+                }}
+                ออเดอร์)</span
+              >
+            </span>
+            <span class="font-bold text-green-400">{{
+              formatCurrency(pageData.revenue?.today?.totalAmountCash || 0)
+            }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">
+              บัตรเครดิต
+              <span class="ml-1"
+                >({{
+                  pageData.revenue?.today?.countpaymentCertificate || 0
+                }}
+                ออเดอร์)</span
+              >
+            </span>
+            <span class="font-bold text-green-400">{{
+              formatCurrency(
+                pageData.revenue?.today?.totalAmountCreditCard || 0
+              )
+            }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">ยอดขายรวม</span>
             <span class="font-bold text-green-400">{{
               formatCurrency(pageData.revenue?.today?.grossRevenue || 0)
             }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-400">คอมมิชชัน</span>
-            <span class="font-bold text-red-400"
-              >-{{
+            <span class="text-gray-400">หักคอมมิชชัน</span>
+            <span class="font-bold text-red-400">
+              -{{
                 formatCurrency(pageData.revenue?.today?.totalCommission || 0)
-              }}</span
-            >
+              }}
+            </span>
           </div>
           <div class="flex justify-between border-t border-gray-700 pt-2">
-            <span class="text-gray-400">รายได้สุทธิ</span>
+            <span class="text-gray-400 font-semibold">รายได้สุทธิ</span>
             <span class="font-bold text-xl text-white">{{
               formatCurrency(pageData.revenue?.today?.netRevenue || 0)
             }}</span>
@@ -198,21 +228,51 @@
         </h3>
         <div class="space-y-3">
           <div class="flex justify-between">
-            <span class="text-gray-400">รายได้รวม</span>
+            <span class="text-gray-400">
+              เงินสด
+              <span class="ml-1"
+                >({{
+                  pageData.revenue?.allTime?.countpaymentCash || 0
+                }}
+                ออเดอร์)</span
+              >
+            </span>
+            <span class="font-bold text-green-400">{{
+              formatCurrency(pageData.revenue?.allTime?.totalAmountCash || 0)
+            }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">
+              บัตรเครดิต
+              <span class="ml-1"
+                >({{
+                  pageData.revenue?.allTime?.countpaymentCertificate || 0
+                }}
+                ออเดอร์)</span
+              >
+            </span>
+            <span class="font-bold text-green-400">{{
+              formatCurrency(
+                pageData.revenue?.allTime?.totalAmountCreditCard || 0
+              )
+            }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">ยอดขายรวม</span>
             <span class="font-bold text-green-400">{{
               formatCurrency(pageData.revenue?.allTime?.grossRevenue || 0)
             }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-400">คอมมิชชัน</span>
-            <span class="font-bold text-red-400"
-              >-{{
+            <span class="text-gray-400">หักคอมมิชชัน</span>
+            <span class="font-bold text-red-400">
+              -{{
                 formatCurrency(pageData.revenue?.allTime?.totalCommission || 0)
-              }}</span
-            >
+              }}
+            </span>
           </div>
           <div class="flex justify-between border-t border-gray-700 pt-2">
-            <span class="text-gray-400">รายได้สุทธิ</span>
+            <span class="text-gray-400 font-semibold">รายได้สุทธิ</span>
             <span class="font-bold text-xl text-white">{{
               formatCurrency(pageData.revenue?.allTime?.netRevenue || 0)
             }}</span>
