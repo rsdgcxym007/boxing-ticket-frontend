@@ -498,7 +498,6 @@
                   <i class="mdi mdi-refresh"></i>
                   ลองใหม่
                 </button> -->
-
                 <label
                   class="text-base md:text-lg lg:text-xl font-medium text-blue-300 mb-4 flex items-center gap-2"
                 >
