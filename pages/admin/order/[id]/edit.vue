@@ -42,7 +42,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center py-12">
-        <BaseLoading />
+        <BaseLoading :visible="loading" />
       </div>
 
       <!-- Order Details -->
@@ -491,15 +491,13 @@
               <div
                 class="bg-[#0f1f3c] p-4 md:p-6 rounded-lg border border-blue-700"
               >
-                <button
+                <!-- <button
                   @click="isShowModal = true"
                   class="px-6 md:px-8 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 mx-auto text-base md:text-lg"
                 >
                   <i class="mdi mdi-refresh"></i>
                   ลองใหม่
-                </button>
-                {{ orderData.seats[0].zone.name }}
-
+                </button> -->
                 <label
                   class="text-base md:text-lg lg:text-xl font-medium text-blue-300 mb-4 flex items-center gap-2"
                 >
