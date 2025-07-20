@@ -20,10 +20,10 @@ export const useAdminMenu = () => {
       label: "จัดการพนักงาน",
       to: "/admin/staff",
     },
-    {
-      icon: "mdi-account-group",
-      label: "ระบบตรวจสอบ",
-      to: "/admin/audit",
-    },
+    // {
+    //   icon: "mdi-account-group",
+    //   label: "ระบบตรวจสอบ",
+    //   to: "/admin/audit",
+    // },
   ];
 };

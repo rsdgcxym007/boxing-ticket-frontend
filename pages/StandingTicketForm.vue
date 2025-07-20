@@ -110,7 +110,7 @@
             </button>
           </div>
         </div>
-        <div class="flex-1">
+        <!-- <div class="flex-1">
           <label class="text-sm mb-1 flex items-center gap-2 text-pink-300">
             <i class="mdi mdi-human-child text-pink-400" />
             เด็ก <span class="text-xs text-gray-400">(1300)</span>
@@ -140,7 +140,7 @@
               <i class="mdi mdi-plus" />
             </button>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- Referrer -->
