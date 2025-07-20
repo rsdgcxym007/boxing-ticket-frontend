@@ -156,7 +156,7 @@
                     >
                       ยกเลิกทั้งหมด
                     </button>
-                    <button
+                    <!-- <button
                       @click="handleMarkOrder"
                       :disabled="
                         isBookingInProgress ||
@@ -176,7 +176,7 @@
                             : "ยืนยันการจอง"
                         }}
                       </span>
-                    </button>
+                    </button> -->
                     <button
                       @click="handleConfirm"
                       :disabled="
