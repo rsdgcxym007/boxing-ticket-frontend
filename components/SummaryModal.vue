@@ -425,7 +425,9 @@ const initializeData = () => {
   pageData.method = "CASH";
   pageData.zoneKey = props.zone;
   pageData.selectedSeats = props.selectedSeats;
-  pageData.total = props.total;
+  console.log("props.total", typeof props.total);
+
+  pageData.total = props.total || props.dataZoneSelected?.total || 0;
   pageData.customerName = props.dataZoneSelected?.customerName || "";
   pageData.customerPhone = props.dataZoneSelected?.customerPhone || "";
   pageData.customerEmail = props.dataZoneSelected?.customerEmail || "";

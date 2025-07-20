@@ -20,11 +20,11 @@
         <div
           class="grid sm:grid-cols-2 md:grid-cols-2 gap-6 relative z-10 overflow-visible p-4"
         >
-          <div>
+          <!-- <div>
             <label class="block text-sm font-medium text-white mb-2"
               >สถานะออเดอร์</label
-            >
-            <Listbox
+            > -->
+          <!-- <Listbox
               v-model="pageData.filters.status"
               @update:modelValue="onStatusChange"
             >
@@ -79,11 +79,11 @@
                   </ListboxOptions>
                 </Transition>
               </div>
-            </Listbox>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-white mb-2">โซน</label>
-            <Listbox
+            </Listbox> -->
+          <!-- </div> -->
+          <!-- <div> -->
+          <!-- <label class="block text-sm font-medium text-white mb-2">โซน</label> -->
+          <!-- <Listbox
               v-model="pageData.filters.zone"
               @update:modelValue="onZoneChange"
             >
@@ -138,8 +138,8 @@
                   </ListboxOptions>
                 </Transition>
               </div>
-            </Listbox>
-          </div>
+            </Listbox> -->
+          <!-- </div> -->
           <div>
             <label class="block text-sm font-medium text-white mb-2"
               >ค้นหา Order ID</label

@@ -34,9 +34,11 @@
           <li v-if="!auth?.user">
             <a href="/login" class="hover:text-green-400">เข้าสู่ระบบ</a>
           </li>
-
           <!-- Admin Dropdown -->
-          <li v-if="auth?.user?.role === 'admin'" class="relative group">
+          <li
+            v-if="['admin', 'staff'].includes(auth?.user?.role)"
+            class="relative group"
+          >
             <button
               @click="toggleAdminMenu"
               @touchstart="adminMenuHover = true"
@@ -45,7 +47,11 @@
               class="hover:text-green-400 flex items-center gap-1"
             >
               <i class="mdi mdi-shield-account-outline text-lg"></i>
-              หน้าแอดมิน
+              {{
+                ["admin"].includes(auth?.user?.role)
+                  ? "หน้าแอดมิน"
+                  : "หน้าเจ้าหน้าที่"
+              }}
               <svg
                 class="w-4 h-4 mt-0.5"
                 fill="currentColor"
@@ -68,7 +74,9 @@
               class="absolute top-full left-0 mt-2 w-56 bg-[#0f1f3c] text-white shadow-xl rounded-xl z-50 py-2 border border-white/10"
             >
               <a
-                v-for="item in adminMenu"
+                v-for="item in adminMenu.filter(
+                  (i) => !i.role || i.role.includes(auth?.user?.role)
+                )"
                 :key="item.to"
                 :href="item.to"
                 class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
@@ -174,13 +182,20 @@
           </li>
 
           <!-- Admin Dropdown (Mobile) -->
-          <li v-if="auth?.user?.role === 'admin'" class="flex flex-col">
+          <li
+            v-if="['admin', 'staff'].includes(auth?.user?.role)"
+            class="flex flex-col"
+          >
             <button
               @click="adminSubOpen = !adminSubOpen"
               class="flex items-center gap-3 w-full text-left hover:text-blue-400"
             >
               <i class="mdi mdi-shield-account-outline text-xl"></i>
-              หน้าแอดมิน
+              {{
+                ["admin"].includes(auth?.user?.role)
+                  ? "หน้าแอดมิน"
+                  : "หน้าเจ้าหน้าที่"
+              }}
               <i
                 class="mdi"
                 :class="adminSubOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
@@ -191,7 +206,12 @@
                 v-if="adminSubOpen"
                 class="mt-2 ml-6 flex flex-col gap-2 text-sm text-white/80"
               >
-                <li v-for="item in adminMenu" :key="item.to">
+                <li
+                  v-for="item in adminMenu.filter(
+                    (i) => !i.role || i.role.includes(auth?.user?.role)
+                  )"
+                  :key="item.to"
+                >
                   <a
                     :href="item.to"
                     class="flex items-center gap-2 hover:text-white"
