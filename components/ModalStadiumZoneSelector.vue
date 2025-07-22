@@ -75,15 +75,15 @@
                     >
                       <SeatIcon
                         v-if="seat && seat.seatNumber"
-                        :seat="seat"
+                        :seat="{ ...seat }"
                         :status="getSeatStatus(seat)"
-                        :selectedSeats="seatManager.mySelectedSeats.value"
-                        :bookedSeats="pageData.bookedSeats"
+                        :selectedSeats="[...seatManager.mySelectedSeats.value]"
+                        :bookedSeats="[...(pageData.bookedSeats || [])]"
                         :zoneKey="pageData.zoneKey"
                         @toggle="handleSeatToggle"
-                        :ownSeatIds="
-                          props.orderData?.seats.map((b) => b.id) || []
-                        "
+                        :ownSeatIds="[
+                          ...(props.orderData?.seats.map((b) => b.id) || []),
+                        ]"
                         class="w-8 sm:w-10 md:w-11 transition-transform hover:scale-105 cursor-pointer"
                       />
                     </div>
@@ -337,9 +337,26 @@ const handleSeatToggle = async (seat) => {
 const getSeatStatus = (seat) => {
   if (!seat) return "unavailable";
 
-  const status = seatManager.getSeatStatus(seat);
+  // ปลดล็อคทันทีถ้า isLockedUntil ไม่มีค่า
+  if (seat.isLockedUntil === null || seat.isLockedUntil === undefined) {
+    // console.log("seat", seat);
 
-  return status;
+    // ถ้า seat ถูกจองจริง ๆ ให้คืน "BOOKED"
+    if (
+      seat.bookingStatus === "BOOKED" ||
+      seatManager.getSeatStatus(seat) === "BOOKED"
+    ) {
+      return "BOOKED";
+    }
+    return "AVAILABLE";
+  }
+  // ถ้า isLockedUntil มีค่า ให้คืน "locked"
+  if (seat.isLockedUntil) {
+    return "locked";
+  }
+
+  // fallback: คืนสถานะจาก seatManager
+  return seatManager.getSeatStatus(seat);
 };
 
 // ====================
@@ -410,41 +427,7 @@ const handleMarkOrder = async () => {
 // ====================
 // Lifecycle Hooks
 // ====================
-onMounted(() => {
-  let showDate = props.orderData?.showDate;
-  if (showDate) {
-    // Try ISO first
-    let d = dayjs(showDate, "YYYY-MM-DD", true);
-    if (d.isValid()) showDate = d.format("YYYY-MM-DD");
-    else {
-      // Try DD/MM/YYYY
-      d = dayjs(showDate, "DD/MM/YYYY", true);
-      if (d.isValid()) showDate = d.format("YYYY-MM-DD");
-      else {
-        d = dayjs(showDate);
-        if (d.isValid()) showDate = d.format("YYYY-MM-DD");
-        else if (/^\d{2}\/\d{2}\/\d{4}$/.test(showDate)) {
-          const [day, month, year] = showDate.split("/");
-          showDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
-            2,
-            "0"
-          )}`;
-        } else {
-          showDate = new Date();
-        }
-      }
-    }
-  } else {
-    showDate = new Date();
-  }
-
-  console.log("pageData.zoneKey", pageData.zoneKey);
-  console.log("pageData.showDate = showDate", (pageData.showDate = showDate));
-
-  pageData.showDate = showDate;
-
-  pageData.zoneKey = props.zoneKey;
-});
+// ไม่ต้องเซ็ตค่าอะไรใน onMounted
 
 onBeforeUnmount(() => {
   cleanup();
@@ -454,95 +437,94 @@ onBeforeUnmount(() => {
 // Watchers
 // ====================
 
-const prevState = vueRef({
-  isOpen: false,
-  zoneKey: undefined,
-  showDate: undefined,
-  orderId: undefined,
-  mode: undefined,
-});
 watch(
   () => props.isOpen,
-  (newVal) => {
-    if (newVal) {
+  async (isOpen) => {
+    if (isOpen) {
       document.body.classList.add("overflow-hidden");
+
+      // 1. เซ็ตค่า pageData
+      let showDate = props.orderData?.showDate;
+      if (showDate) {
+        let d = dayjs(showDate, "YYYY-MM-DD", true);
+        if (d.isValid()) showDate = d.format("YYYY-MM-DD");
+        else {
+          d = dayjs(showDate, "DD/MM/YYYY", true);
+          if (d.isValid()) showDate = d.format("YYYY-MM-DD");
+          else {
+            d = dayjs(showDate);
+            if (d.isValid()) showDate = d.format("YYYY-MM-DD");
+            else if (/^\d{2}\/\d{2}\/\d{4}$/.test(showDate)) {
+              const [day, month, year] = showDate.split("/");
+              showDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
+                2,
+                "0"
+              )}`;
+            } else {
+              showDate = new Date();
+            }
+          }
+        }
+      } else {
+        showDate = new Date();
+      }
+      pageData.zoneKey = props.zoneKey;
+      pageData.showDate = showDate;
+
+      // 2. clear selections (ไม่ await เพื่อไม่ trigger ซ้อน)
+      clearAllSelections();
+
+      // 3. fetch/init seats
+      await fetchAndInitializeSeats();
+
+      // 4. fallback select seats (mode change)
+      if (props.mode === "change" && props.orderData) {
+        const fallbackSeats = props.orderData.seats.map((b) => b.seat);
+        originalSeatCount.value = fallbackSeats.length;
+        const allSeatIds = seatManager.allSeats.value.map((s) => s.id);
+        fallbackSeats.forEach((seat) => {
+          if (allSeatIds.includes(seat.id)) {
+            seatManager.selectSeat(seat.id);
+          }
+        });
+      }
     } else {
       document.body.classList.remove("overflow-hidden");
     }
   }
 );
 
-watchEffect(async () => {
-  const currOrderId =
-    props.orderData?.id || props.orderData?.orderId || undefined;
-  const changed =
-    props.isOpen &&
-    (!prevState.value.isOpen ||
-      prevState.value.zoneKey !== props.zoneKey ||
-      prevState.value.showDate !== props.orderData?.showDate ||
-      prevState.value.orderId !== currOrderId ||
-      prevState.value.mode !== props.mode);
-
-  if (!changed) return;
-  await nextTick();
-
-  prevState.value.isOpen = true;
-  prevState.value.zoneKey = props.zoneKey;
-  prevState.value.showDate = props.orderData?.showDate;
-  prevState.value.orderId = currOrderId;
-  prevState.value.mode = props.mode;
-
-  pageData.zoneKey = props.zoneKey;
-  pageData.showDate = props.orderData?.showDate || new Date();
-
-  await clearAllSelections();
-  await fetchAndInitializeSeats();
-
-  if (props.mode === "change" && props.orderData) {
-    const fallbackSeats = props.orderData.seats.map((b) => b.seat);
-    originalSeatCount.value = fallbackSeats.length;
-    const allSeatIds = seatManager.allSeats.value.map((s) => s.id);
-    let selectedCount = 0;
-    fallbackSeats.forEach((seat) => {
-      if (allSeatIds.includes(seat.id)) {
-        seatManager.selectSeat(seat.id);
-        selectedCount++;
-      }
-    });
-  }
-});
-
 watch(
   () => seatManager.lastUpdateTimestamp.value,
   async () => {
     try {
+      pageData.loading = true;
       // Trigger API call to fetch updated seat data
       const updatedSeats = await getSeatsByZoneId(
         pageData.zoneKey,
         pageData.showDate
       );
-
-      // Update pageData.currentZoneSeats dynamically
-      pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(
-        updatedSeats.data.map((seat) => {
-          return {
-            ...seat,
-            bookingStatus: seatManager.getSeatStatus(seat),
-          };
-        })
+      // Sync state in seatManager
+      seatManager.initializeSeats(updatedSeats.data);
+      // เคลียร์ layout และ bookedSeats ก่อน เพื่อ force Vue ให้ render ใหม่
+      pageData.currentZoneSeats = [];
+      pageData.bookedSeats = [];
+      await Promise.resolve(); // nextTick workaround
+      // Build layout ใหม่จาก state ล่าสุด
+      const freshSeats = seatManager.allSeats.value.map((seat) => ({
+        ...seat,
+        bookingStatus: seatManager.getSeatStatus(seat),
+      }));
+      pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(freshSeats);
+      pageData.bookedSeats = freshSeats.filter(
+        (seat) => seatManager.getSeatStatus(seat) === "BOOKED"
       );
-
-      // Update bookedSeats array to force SeatIcon re-render
-      pageData.bookedSeats = updatedSeats.data.filter(
-        (seat) =>
-          seatManager.getSeatStatus(seat) === "BOOKED" ||
-          seatManager.getSeatStatus(seat) === "locked"
-      );
-
-      // Force component to re-render by updating a reactive property
+      console.log("[DEBUG] currentZoneSeats", pageData.currentZoneSeats);
+      console.log("[DEBUG] bookedSeats", pageData.bookedSeats);
       pageData.loading = false;
     } catch (error) {
       console.error("❌ Failed to fetch updated seats:", error);
+      pageData.loading = false;
     }
   }
 );
