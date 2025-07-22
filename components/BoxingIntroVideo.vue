@@ -1,5 +1,5 @@
 <template>
-  <section class="relative w-full h-[50vh] overflow-hidden bg-black">
+  <section class="relative w-full h-[100vh] overflow-hidden bg-black">
     <!-- Video Background -->
     <video
       ref="videoEl"
@@ -9,7 +9,7 @@
       playsinline
       class="absolute inset-0 w-full h-full object-cover"
     >
-      <source src="/videos/boxing-intro.mp4" type="video/mp4" />
+      <source src="/videos/LUDEPATONGBOXINGlast.mp4" type="video/mp4" />
     </video>
   </section>
 </template>
