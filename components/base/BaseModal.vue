@@ -12,14 +12,14 @@
 
       <!-- Modal Content -->
       <div
-        class="relative z-10 w-full mx-4 my-10 bg-white rounded-2xl shadow-xl transition-all overflow-hidden"
+        class="relative z-10 w-full mx-4 my-10 bg-white rounded-2xl shadow-xl transition-all overflow-hidden flex flex-col h-[90vh]"
         :class="sizeClasses"
         @click.stop
       >
         <!-- Header -->
         <div
           v-if="title || $slots.header"
-          class="flex items-center justify-between p-6 border-b"
+          class="sticky top-0 z-20 bg-white flex items-center justify-between p-6 border-b"
         >
           <h3 class="text-lg font-medium text-gray-900">
             <slot name="header">{{ title }}</slot>
@@ -33,14 +33,14 @@
         </div>
 
         <!-- Body -->
-        <div class="p-6 max-h-[80vh] overflow-y-auto">
+        <div class="flex-1 overflow-y-auto p-6">
           <slot />
         </div>
 
         <!-- Footer -->
         <div
           v-if="$slots.footer"
-          class="flex items-center justify-end p-6 border-t bg-gray-50 rounded-b-lg"
+          class="sticky bottom-0 z-20 bg-gray-50 border-t p-6 flex items-center justify-end rounded-b-2xl"
         >
           <slot name="footer" />
         </div>
