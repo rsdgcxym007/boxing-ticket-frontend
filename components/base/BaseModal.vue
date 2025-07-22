@@ -5,7 +5,6 @@
       <!-- Backdrop + Wrapper -->
       <div
         class="fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm transition-opacity flex justify-center items-start"
-        @click.self="closeModal"
       >
         <!-- Modal Content -->
         <div
