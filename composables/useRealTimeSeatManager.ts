@@ -102,12 +102,17 @@ export const useRealTimeSeatManager = () => {
 
     // Check if permanently booked
     if (bookedSeats.value.has(seatId)) {
+      console.log("seatId", seatId);
+
       return "BOOKED";
     }
 
     // Check booking status from server
     const bookingStatus = seat.bookingStatus as string;
-    if (["BOOKED", "PAID", "PENDING", "RESERVED"].includes(bookingStatus)) {
+    if (["RESERVED"].includes(bookingStatus)) {
+      return "locked"; // Treat RESERVED as locked
+    }
+    if (["BOOKED", "PAID", "PENDING"].includes(bookingStatus)) {
       return "BOOKED";
     }
 
@@ -148,6 +153,7 @@ export const useRealTimeSeatManager = () => {
   // ===== Seat Management Functions =====
   const initializeSeats = (seats: Seat[]) => {
     console.log("🔄 กำลังเริ่มต้นข้อมูลที่นั่ง:", seats.length);
+    console.log("seats", seats);
 
     // Clear existing data
     allSeats.value.clear();
@@ -160,15 +166,21 @@ export const useRealTimeSeatManager = () => {
       // ✅ ถ้าเป็นที่นั่งที่เราเลือกอยู่ ไม่ต้องเปลี่ยน bookingStatus
       const isMySelection = mySelectedSeats.value.has(seat.id);
 
+      // If seat is not truly booked and isLockedUntil is null, reset bookingStatus
       if (!isMySelection) {
-        // Handle booked seats
         const currentDateKey = getDateKey(new Date());
         const seatLockDate = seat.isLockedUntil
           ? getDateKey(new Date(seat.isLockedUntil))
           : null;
 
+        // If locked for today, mark as RESERVED
         if (seat.isLockedUntil && seatLockDate === currentDateKey) {
           seat.bookingStatus = "RESERVED";
+        }
+
+        // If not locked and not truly booked, reset bookingStatus
+        if (!seat.isLockedUntil && seat.bookingStatus === "SELECTED") {
+          seat.bookingStatus = "AVAILABLE";
         }
       }
 
@@ -220,65 +232,90 @@ export const useRealTimeSeatManager = () => {
     console.log("🧹 ล้างการเลือกที่นั่งทั้งหมด:", count);
   };
 
-  // ===== WebSocket Event Handling =====
+  // ===== WebSocket Event Handling (Source of Truth) =====
   const handleWebSocketEvent = (event: WebSocketSeatEvent) => {
     const currentUserId = getCurrentUserId();
-
-    console.log("📡 รับ WebSocket event:", event);
-
-    // Skip self-generated events
-    if (event.userId === currentUserId) {
-      console.log("🔄 ข้าม event จากตัวเอง");
-      return;
-    }
-
-    // Update last update timestamp - ทำให้ reactive
-    lastUpdateTimestamp.value = new Date().toISOString();
-
-    // Handle different event types
+    if (event.userId === currentUserId) return;
+    // Update state only, do not fetch API
     switch (event.action) {
       case "seat_selected":
-        handleOtherUserSeatSelection(event);
+        event.seatIds.forEach((seatId) => {
+          if (!mySelectedSeats.value.has(seatId)) {
+            otherUsersSelections.value.set(seatId, {
+              seatId,
+              userId: event.userId,
+              timestamp: event.timestamp,
+              isTemporary: true,
+            });
+            // Mark seat as locked in allSeats
+            const seat = allSeats.value.get(seatId);
+            if (seat) {
+              allSeats.value.set(seatId, {
+                ...seat,
+                isLockedUntil: event.timestamp,
+                bookingStatus: "SELECTED",
+              });
+            }
+          }
+        });
         break;
       case "seat_deselected":
-        handleOtherUserSeatDeselection(event);
+      case "seat_unlocked":
+        event.seatIds.forEach((seatId) => {
+          const selection = otherUsersSelections.value.get(seatId);
+          if (selection && selection.userId === event.userId) {
+            otherUsersSelections.value.delete(seatId);
+            // Unlock seat in allSeats
+            const seat = allSeats.value.get(seatId);
+            if (seat) {
+              allSeats.value.set(seatId, {
+                ...seat,
+                isLockedUntil: undefined,
+                bookingStatus: "AVAILABLE",
+              });
+            }
+          }
+        });
         break;
       case "seats_cancelled":
-        handleOtherUserCancellation(event);
+        // Remove all selections from this user
+        otherUsersSelections.value.forEach((selection, seatId) => {
+          if (selection.userId === event.userId) {
+            otherUsersSelections.value.delete(seatId);
+            const seat = allSeats.value.get(seatId);
+            if (seat) {
+              allSeats.value.set(seatId, {
+                ...seat,
+                isLockedUntil: undefined,
+                bookingStatus: "AVAILABLE",
+              });
+            }
+          }
+        });
         break;
       case "seat_locked":
-        handleSeatLocked(event);
-        break;
-      case "seat_unlocked":
-        handleSeatUnlocked(event);
+        event.seatIds.forEach((seatId) => {
+          if (!mySelectedSeats.value.has(seatId)) {
+            otherUsersSelections.value.set(seatId, {
+              seatId,
+              userId: event.userId,
+              timestamp: event.timestamp,
+              isTemporary: false,
+            });
+            const seat = allSeats.value.get(seatId);
+            if (seat) {
+              allSeats.value.set(seatId, {
+                ...seat,
+                isLockedUntil: event.timestamp,
+                bookingStatus: "RESERVED",
+              });
+            }
+          }
+        });
         break;
     }
-
-    // Force re-render by updating seats data
-    const updatedSeats = Array.from(allSeats.value.values()).map((seat) => {
-      if (event.seatIds.includes(seat.id)) {
-        // ✅ ถ้าเป็นที่นั่งที่เราเลือกอยู่ ไม่ต้องเปลี่ยน bookingStatus
-        const isMySelection = mySelectedSeats.value.has(seat.id);
-
-        if (!isMySelection) {
-          return {
-            ...seat,
-            isLockedUntil:
-              event.action === "seat_locked" || event.action === "seat_selected"
-                ? new Date().toISOString()
-                : undefined,
-            bookingStatus:
-              event.action === "seat_selected"
-                ? "SELECTED"
-                : seat.bookingStatus,
-          };
-        }
-      }
-      return seat;
-    });
-
-    // Re-initialize with updated data
-    initializeSeats(updatedSeats);
+    // Update timestamp for UI reactivity
+    lastUpdateTimestamp.value = new Date().toISOString();
   };
 
   const handleOtherUserSeatSelection = (event: WebSocketSeatEvent) => {
@@ -381,6 +418,8 @@ export const useRealTimeSeatManager = () => {
       const freshSeats = await fetchFunction(zoneKey, showDate);
 
       // Reinitialize seats
+      console.log("freshSeats", freshSeats);
+
       initializeSeats(freshSeats);
 
       // Restore my selections (only if seats still exist and are available)

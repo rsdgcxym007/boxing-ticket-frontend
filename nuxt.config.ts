@@ -15,6 +15,13 @@ export default defineNuxtConfig({
     dirs: ["composables", "stores", "components", "utils", "vue-i18n", "dayjs"],
   },
 
+  components: [
+    {
+      path: "@/components",
+      pathPrefix: false, // ถ้าอยากให้ใช้ชื่อไฟล์ตรงๆ โดยไม่ต้องพิมพ์ชื่อโฟลเดอร์
+    },
+  ],
+
   i18n: {
     defaultLocale: "th",
     detectBrowserLanguage: false,
