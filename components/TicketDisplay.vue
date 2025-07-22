@@ -187,6 +187,14 @@
             <i class="mdi mdi-loading mdi-spin" v-else></i>
             {{ isGeneratingPDF ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF" }}
           </button>
+          <button
+            @click="$emit('download-thermal', tickets[0]?.orderId)"
+            class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 transition-colors"
+            :disabled="!tickets[0]?.orderId"
+          >
+            <i class="mdi mdi-file-pdf-box"></i>
+            Thermal Receipt
+          </button>
         </div>
       </div>
     </div>

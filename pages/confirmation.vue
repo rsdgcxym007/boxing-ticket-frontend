@@ -93,7 +93,52 @@
       v-if="showTicketModal"
       :tickets="generatedTickets"
       @close="showTicketModal = false"
+      @download-thermal="handleDownloadThermal"
     />
+    <div v-if="showTicketModal" class="flex justify-center mt-6">
+      <button
+        @click="handleDownloadThermal(generatedTickets[0]?.orderId)"
+        class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 transition-colors"
+        :disabled="isDownloadingThermal || !generatedTickets[0]?.orderId"
+      >
+        <i class="mdi mdi-file-pdf-box"></i>
+        <span v-if="isDownloadingThermal">กำลังโหลด...</span>
+        <span v-else>แสดง Thermal Receipt PDF</span>
+      </button>
+    </div>
+
+    <!-- Modal สำหรับแสดง Thermal Receipt PDF -->
+    <div
+      v-if="showThermalModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+    >
+      <div
+        class="bg-white rounded-lg shadow-2xl max-w-3xl w-full p-4 relative flex flex-col items-center"
+      >
+        <button
+          @click="closeThermalModal"
+          class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+        >
+          ✕
+        </button>
+        <h3 class="text-lg font-bold mb-4 text-center">
+          Thermal Receipt PDF Preview
+        </h3>
+        <div
+          v-if="thermalPdfError"
+          class="text-red-600 text-center font-bold mb-4"
+        >
+          ไม่สามารถแสดงไฟล์ PDF ได้ หรือไฟล์ว่าง/ผิดรูปแบบ
+        </div>
+        <iframe
+          v-if="!thermalPdfError"
+          :src="thermalPdfUrl"
+          width="100%"
+          height="600px"
+          style="border: none"
+        ></iframe>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -102,6 +147,7 @@
 import { useRoute } from "vue-router";
 import { ref } from "vue";
 import { useOrder } from "~/composables/useOrder";
+const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
 import TicketDisplay from "~/components/TicketDisplay.vue";
 
 // ตั้งค่า metadata สำหรับหน้า
@@ -111,7 +157,6 @@ definePageMeta({
 });
 
 // ใช้ composables
-const { cancelOrder, generateTickets } = useOrder();
 const route = useRoute();
 
 // ดึงข้อมูลจาก URL parameters หรือใช้ค่าเริ่มต้น
@@ -124,6 +169,44 @@ const total = parseInt(route.query.total || "5400");
 const isGeneratingTickets = ref(false);
 const generatedTickets = ref([]);
 const showTicketModal = ref(false);
+const isDownloadingThermal = ref(false);
+const showThermalModal = ref(false);
+const thermalPdfUrl = ref("");
+const thermalPdfError = ref(false);
+// ฟังก์ชันสำหรับดาวน์โหลด thermal receipt จาก TicketDisplay
+const handleDownloadThermal = async (orderId) => {
+  isDownloadingThermal.value = true;
+  thermalPdfError.value = false;
+  try {
+    const blob = await downloadThermalReceipt(orderId);
+    console.log("Thermal PDF blob:", blob);
+    console.log("orderId:", orderId);
+    if (!blob || blob.size < 1000) {
+      thermalPdfError.value = true;
+      thermalPdfUrl.value = "";
+      showThermalModal.value = true;
+      return;
+    }
+    const url = window.URL.createObjectURL(blob);
+    thermalPdfUrl.value = url;
+    showThermalModal.value = true;
+  } catch (err) {
+    thermalPdfError.value = true;
+    thermalPdfUrl.value = "";
+    showThermalModal.value = true;
+  } finally {
+    isDownloadingThermal.value = false;
+  }
+};
+
+const closeThermalModal = () => {
+  showThermalModal.value = false;
+  thermalPdfError.value = false;
+  if (thermalPdfUrl.value) {
+    window.URL.revokeObjectURL(thermalPdfUrl.value);
+    thermalPdfUrl.value = "";
+  }
+};
 
 /**
  * ฟังก์ชันสำหรับสร้างตั๋วจาก API
@@ -136,7 +219,7 @@ const onGenerateTickets = async () => {
     // เรียก API สำหรับสร้างตั๋วจริง
     const tickets = await generateTickets(orderId);
     generatedTickets.value = tickets.tickets.map((ticket) => ({
-      orderId: ticket.id,
+      orderId: ticket.orderId,
       seatNumber: ticket.seatNumber,
       customerName: ticket.customerName || "ผู้ซื้อตั๋ว",
       showDate: ticket.showDate || "01/07/2025",

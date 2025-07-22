@@ -1,10 +1,12 @@
+import { useRuntimeConfig } from "nuxt/app";
 import { useApi } from "../composables/useApi";
 import { useSingleToast } from "./useSingleToast";
 
 export const useOrder = () => {
   const { get, post, patch, put } = useApi();
   const { showToast } = useSingleToast();
-
+  const config = useRuntimeConfig();
+  const base = config.public.apiBase;
   // ตรงกับ API: GET /api/v1/orders
   const getOrders = async ({
     page = 1,
@@ -291,6 +293,28 @@ export const useOrder = () => {
     }
   };
 
+  const downloadThermalReceipt = async (orderId: string) => {
+    try {
+      const response = await fetch(
+        `${base}/api/v1/referrers/${orderId}/thermal-receipt`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/pdf",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("ไม่สามารถดาวน์โหลดใบเสร็จได้");
+      }
+      const blob = await response.blob();
+      return blob;
+    } catch (err) {
+      console.error("Error in downloadThermalReceipt:", err);
+      return undefined;
+    }
+  };
+
   return {
     getOrders,
     getOrderById,
@@ -302,5 +326,10 @@ export const useOrder = () => {
     updateOrderBooked,
     updateStanding,
     generateTickets,
+    downloadThermalReceipt,
   };
 };
+
+/**
+ * ดาวน์โหลด Thermal Receipt PDF สำหรับ orderId
+ */

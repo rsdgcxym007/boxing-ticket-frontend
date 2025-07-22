@@ -245,7 +245,52 @@
     v-if="showTicketModal"
     :tickets="generatedTickets"
     @close="showTicketModal = false"
+    @download-thermal="handleDownloadThermal"
   />
+  <div v-if="showTicketModal" class="flex justify-center mt-6">
+    <button
+      @click="handleDownloadThermal(generatedTickets[0]?.orderId)"
+      class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 transition-colors"
+      :disabled="isDownloadingThermal || !generatedTickets[0]?.orderId"
+    >
+      <i class="mdi mdi-file-pdf-box"></i>
+      <span v-if="isDownloadingThermal">กำลังโหลด...</span>
+      <span v-else>แสดง Thermal Receipt PDF</span>
+    </button>
+  </div>
+  <!-- Modal สำหรับแสดง Thermal Receipt PDF -->
+  <div
+    v-if="showThermalModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+  >
+    <div
+      class="bg-white rounded-lg shadow-2xl max-w-3xl w-full p-4 relative flex flex-col items-center"
+      style="z-index: 9999"
+    >
+      <button
+        @click="closeThermalModal"
+        class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+      >
+        ✕
+      </button>
+      <h3 class="text-lg font-bold mb-4 text-center">
+        Thermal Receipt PDF Preview
+      </h3>
+      <div
+        v-if="thermalPdfError"
+        class="text-red-600 text-center font-bold mb-4"
+      >
+        ไม่สามารถแสดงไฟล์ PDF ได้ หรือไฟล์ว่าง/ผิดรูปแบบ
+      </div>
+      <iframe
+        v-if="!thermalPdfError"
+        :src="thermalPdfUrl"
+        width="100%"
+        height="600px"
+        style="border: none"
+      ></iframe>
+    </div>
+  </div>
   <!-- Modal สำหรับตัวยืน -->
   <StandingTicketModal
     v-model:showModal="showModal"
@@ -298,12 +343,14 @@ const pageData = usePageData();
 const route = useRoute();
 const router = useRouter();
 const orderData = reactive({});
-const { cancelOrder, generateTickets } = useOrder();
+const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
 const collapsed = ref(false);
-
-// ตัวแปรสำหรับแสดงตั๋วที่ออกมา
+const showThermalModal = ref(false);
 const showTicketModal = ref(false);
 const generatedTickets = ref([]);
+const isDownloadingThermal = ref(false);
+const thermalPdfUrl = ref("");
+const thermalPdfError = ref(false);
 
 const getZoneLabel = (value) => {
   return (
@@ -363,7 +410,37 @@ const onCancelOrder = async (order) => {
     console.error("เกิดข้อผิดพลาดในการยกเลิกออเดอร์:", error);
   }
 };
+const handleDownloadThermal = async (orderId) => {
+  isDownloadingThermal.value = true;
+  thermalPdfError.value = false;
+  try {
+    const blob = await downloadThermalReceipt(orderId);
+    if (!blob || blob.size < 1000) {
+      thermalPdfError.value = true;
+      thermalPdfUrl.value = "";
+      showThermalModal.value = true;
+      return;
+    }
+    const url = window.URL.createObjectURL(blob);
+    thermalPdfUrl.value = url;
+    showThermalModal.value = true;
+  } catch (err) {
+    thermalPdfError.value = true;
+    thermalPdfUrl.value = "";
+    showThermalModal.value = true;
+  } finally {
+    isDownloadingThermal.value = false;
+  }
+};
 
+const closeThermalModal = () => {
+  showThermalModal.value = false;
+  thermalPdfError.value = false;
+  if (thermalPdfUrl.value) {
+    window.URL.revokeObjectURL(thermalPdfUrl.value);
+    thermalPdfUrl.value = "";
+  }
+};
 const onGenerateTickets = async (order) => {
   try {
     const tickets = await generateTickets(order.id);
@@ -371,7 +448,7 @@ const onGenerateTickets = async (order) => {
     console.log("tickets.tickets", tickets.tickets);
 
     generatedTickets.value = tickets.tickets.map((ticket) => ({
-      orderId: ticket.id,
+      orderId: ticket.orderId,
       seatNumber: ticket?.seatNumber,
       customerName: ticket.customerName || "ผู้ซื้อตั๋ว",
       showDate: ticket.showDate || "01/07/2025",
