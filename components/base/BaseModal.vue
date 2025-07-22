@@ -2,17 +2,16 @@
 <template>
   <Teleport to="body">
     <div v-if="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
-      <!-- Backdrop -->
+      <!-- Backdrop + Wrapper -->
       <div
-        class="fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm transition-opacity"
-        @click="closeModal"
-      ></div>
-
-      <!-- Modal Content -->
-      <div class="flex min-h-screen items-center justify-center p-4">
+        class="fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm transition-opacity flex justify-center items-start"
+        @click.self="closeModal"
+      >
+        <!-- Modal Content -->
         <div
-          class="relative bg-white rounded-lg shadow-xl transform transition-all w-full max-w-md mx-auto"
+          class="relative bg-white rounded-lg shadow-xl transform transition-all w-full max-w-md mx-auto my-10"
           :class="sizeClasses"
+          @click.stop
         >
           <!-- Header -->
           <div

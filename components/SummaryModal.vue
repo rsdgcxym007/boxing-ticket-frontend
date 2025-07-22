@@ -180,6 +180,8 @@
               type="text"
               placeholder="กรอกชื่อลูกค้า"
               required
+              @focus.stop.prevent="() => {}"
+              @input.stop.prevent="() => {}"
               :class="[
                 'w-full p-4 border-2 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all duration-300',
                 !pageData.customerName.trim() && pageData.customerName !== ''
@@ -373,7 +375,7 @@ const emit = defineEmits(["close", "confirmed"]);
 const slipFile = ref(null);
 const slipPreview = ref(null);
 const submitted = ref(false);
-const countdown = ref(300); // 5 minutes
+const countdown = ref(300); // 5 นาที (300 วินาที)
 let countdownTimer = null;
 
 // ==================== COMPUTED PROPERTIES ====================
