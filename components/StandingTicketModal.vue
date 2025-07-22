@@ -206,7 +206,7 @@
 <script setup lang="ts">
 // นำเข้า utilities และ composables ที่จำเป็น
 import { ref, watch, computed } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "../composables/useSingleToast";
 import { usePayments } from "../composables/usePayments";
 import { useOrder } from "../composables/useOrder";
 import { useAuthStore } from "../stores/auth";
@@ -255,7 +255,7 @@ const props = defineProps<{
 const emit = defineEmits(["update:showModal", "update:modelValue", "success"]);
 
 // ใช้ composables และ stores
-const toast = useToast();
+const { showToast } = useSingleToast();
 const auth = useAuthStore();
 const isLoading = usePageData();
 const { updateStanding } = useOrder();
@@ -309,13 +309,13 @@ const handleCreateOrder = async () => {
     !customerPhone.trim() ||
     !customerEmail.trim()
   ) {
-    toast.error("กรุณากรอกข้อมูลให้ครบถ้วน");
+    showToast("error", "กรุณากรอกข้อมูลให้ครบถ้วน");
     isLoading.loading = false;
     return;
   }
 
   if (standingAdultQty + standingChildQty === 0) {
-    toast.error("กรุณาระบุจำนวนตั๋วอย่างน้อย 1 ใบ");
+    showToast("error", "กรุณาระบุจำนวนตั๋วอย่างน้อย 1 ใบ");
     isLoading.loading = false;
     return;
   }
@@ -337,7 +337,7 @@ const handleCreateOrder = async () => {
     orderId.value = res.id;
   } catch (err: any) {
     console.error("เกิดข้อผิดพลาดในการอัพเดทออเดอร์:", err);
-    toast.error(err.message || "เกิดข้อผิดพลาดในการอัพเดทออเดอร์");
+    showToast("error", err.message || "เกิดข้อผิดพลาดในการอัพเดทออเดอร์");
   } finally {
     isLoading.loading = false;
   }
@@ -348,7 +348,7 @@ const handleCreateOrder = async () => {
  */
 const handlePayNow = async () => {
   if (!orderId.value) {
-    toast.error("กรุณาอัพเดทออเดอร์ก่อนชำระเงิน");
+    showToast("error", "กรุณาอัพเดทออเดอร์ก่อนชำระเงิน");
     return;
   }
 
@@ -367,14 +367,14 @@ const handlePayNow = async () => {
       referrerCode: referrerCode || undefined,
     });
 
-    toast.success("ชำระเงินสำเร็จ");
+    showToast("success", "ชำระเงินสำเร็จ");
 
     // ปิด modal และแจ้งเตือนว่าสำเร็จ
     emit("update:modelValue", false);
     emit("success");
   } catch (err: any) {
     console.error("เกิดข้อผิดพลาดในการชำระเงิน:", err);
-    toast.error(err.message || "ไม่สามารถชำระเงินได้");
+    showToast("error", err.message || "ไม่สามารถชำระเงินได้");
   } finally {
     isLoading.loading = false;
   }

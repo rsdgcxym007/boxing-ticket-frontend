@@ -1,9 +1,9 @@
 import { useApi } from "../composables/useApi";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 
 export const usePayments = () => {
   const { get, post, patch } = useApi();
-  const toast = useToast();
+  const { showToast } = useSingleToast();
 
   // ตรงกับ API: POST /api/v1/payments/standing
   const createStandingPayment = async (payload: {
@@ -39,7 +39,8 @@ export const usePayments = () => {
       const res = await post("/api/v1/payments/seated", payload);
       return res.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `สร้างการจองล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
       );
       throw err;
@@ -53,10 +54,11 @@ export const usePayments = () => {
       formData.append("slip", slipFile);
 
       const res = await post(`/api/v1/payments/${paymentId}/slip`, formData);
-      toast.success("อัพโหลดสลิปสำเร็จ");
+      showToast("success", "อัพโหลดสลิปสำเร็จ");
       return res.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `อัพโหลดสลิปล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
       );
       throw err;
@@ -69,7 +71,8 @@ export const usePayments = () => {
       const data = await get(`/api/v1/payments/${paymentId}`);
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดข้อมูลการชำระเงินได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -84,7 +87,8 @@ export const usePayments = () => {
       const data = await get(`/api/v1/payments/order/${orderId}`);
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดข้อมูลการชำระเงินได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -105,7 +109,8 @@ export const usePayments = () => {
       const data = await get("/api/v1/payments", { query: params });
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดรายการการชำระเงินได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -125,9 +130,10 @@ export const usePayments = () => {
   }) => {
     try {
       await post("/api/v1/payments/seated", payload);
-      toast.success("ชำระเงินสำเร็จ");
+      showToast("success", "ชำระเงินสำเร็จ");
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ชำระเงินล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
       );
       throw err;

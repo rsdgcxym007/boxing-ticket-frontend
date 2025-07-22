@@ -1,6 +1,6 @@
 // composables/useIntegratedSeatBooking.ts
 import { ref, computed, onBeforeUnmount } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 import {
   useRealTimeSeatManager,
   type WebSocketSeatEvent,
@@ -10,7 +10,7 @@ import { useTicketBookingManager } from "./useTicketBookingManager";
 import dayjs from "dayjs";
 
 export const useIntegratedSeatBooking = () => {
-  const toast = useToast();
+  const { showToast } = useSingleToast();
   const seatManager = useRealTimeSeatManager();
   const webSocket = useWebSocket();
 
@@ -137,11 +137,10 @@ export const useIntegratedSeatBooking = () => {
         await bookingManager.initializeBooking(currentShowDate.value);
       }
 
-      console.log("✅ เริ่มต้นที่นั่งสำเร็จ");
       return true;
     } catch (error) {
       console.error("❌ เริ่มต้นที่นั่งล้มเหลว:", error);
-      toast.error("ไม่สามารถโหลดข้อมูลที่นั่งได้");
+      showToast("error", "ไม่สามารถโหลดข้อมูลที่นั่งได้");
       return false;
     } finally {
       isProcessing.value = false;
@@ -161,7 +160,7 @@ export const useIntegratedSeatBooking = () => {
   // ===== Seat Selection =====
   const selectSeat = async (seat: any): Promise<boolean> => {
     if (isProcessing.value || isBookingInProgress.value) {
-      toast.warning("กำลังดำเนินการ กรุณารอสักครู่");
+      showToast("warning", "กำลังดำเนินการ กรุณารอสักครู่");
       return false;
     }
 
@@ -169,13 +168,14 @@ export const useIntegratedSeatBooking = () => {
 
     // ตรวจสอบว่าสามารถเลือกได้
     if (!seatManager.canSelectSeat(seatId)) {
-      toast.warning("ไม่สามารถเลือกที่นั่งนี้ได้");
+      showToast("warning", "ไม่สามารถเลือกที่นั่งนี้ได้");
       return false;
     }
 
     // ตรวจสอบจำนวนสูงสุด
     if (seatManager.selectedSeatCount.value >= maxSelectableSeats.value) {
-      toast.warning(
+      showToast(
+        "warning",
         `คุณสามารถเลือกได้สูงสุด ${maxSelectableSeats.value} ที่นั่ง`
       );
       return false;
@@ -187,7 +187,7 @@ export const useIntegratedSeatBooking = () => {
       // เลือกที่นั่งใน local state ก่อน
       const selected = seatManager.selectSeat(seatId);
       if (!selected) {
-        toast.error("ไม่สามารถเลือกที่นั่งได้");
+        showToast("error", "ไม่สามารถเลือกที่นั่งได้");
         return false;
       }
 
@@ -201,21 +201,19 @@ export const useIntegratedSeatBooking = () => {
       if (apiSuccess) {
         // ส่ง WebSocket event
         await broadcastSeatUpdate("seat_selected", [seatId]);
-
-        toast.success(`เลือกที่นั่ง ${seat.seatNumber} สำเร็จ`, {
+        showToast("success", `เลือกที่นั่ง ${seat.seatNumber} สำเร็จ`, {
           timeout: 2000,
         });
         return true;
       } else {
-        // ล้มเหลว - ยกเลิกการเลือกใน local state
         seatManager.deselectSeat(seatId);
-        toast.error("ไม่สามารถเลือกที่นั่งได้ อาจมีคนอื่นเลือกไปแล้ว");
+        showToast("error", "ไม่สามารถเลือกที่นั่งได้ อาจมีคนอื่นเลือกไปแล้ว");
         return false;
       }
     } catch (error) {
       console.error("❌ เลือกที่นั่งล้มเหลว:", error);
       seatManager.deselectSeat(seatId);
-      toast.error("เกิดข้อผิดพลาดในการเลือกที่นั่ง");
+      showToast("error", "เกิดข้อผิดพลาดในการเลือกที่นั่ง");
       return false;
     } finally {
       isProcessing.value = false;
@@ -224,7 +222,7 @@ export const useIntegratedSeatBooking = () => {
 
   const deselectSeat = async (seatId: string): Promise<boolean> => {
     if (isProcessing.value || isBookingInProgress.value) {
-      toast.warning("กำลังดำเนินการ กรุณารอสักครู่");
+      showToast("warning", "กำลังดำเนินการ กรุณารอสักครู่");
       return false;
     }
 
@@ -271,7 +269,7 @@ export const useIntegratedSeatBooking = () => {
 
   const clearAllSelections = async (): Promise<boolean> => {
     if (isProcessing.value || isBookingInProgress.value) {
-      toast.warning("กำลังดำเนินการ กรุณารอสักครู่");
+      showToast("warning", "กำลังดำเนินการ กรุณารอสักครู่");
       return false;
     }
 
@@ -301,7 +299,7 @@ export const useIntegratedSeatBooking = () => {
       return true;
     } catch (error) {
       console.error("❌ ล้างการเลือกล้มเหลว:", error);
-      toast.error("เกิดข้อผิดพลาดในการยกเลิกที่นั่ง");
+      showToast("error", "เกิดข้อผิดพลาดในการยกเลิกที่นั่ง");
       return false;
     } finally {
       isProcessing.value = false;
@@ -333,7 +331,7 @@ export const useIntegratedSeatBooking = () => {
   // ===== Booking Functions =====
   const createBooking = async (orderData: any) => {
     if (seatManager.selectedSeatCount.value === 0) {
-      toast.warning("กรุณาเลือกที่นั่งก่อน");
+      showToast("warning", "กรุณาเลือกที่นั่งก่อน");
       return null;
     }
 

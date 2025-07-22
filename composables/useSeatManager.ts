@@ -1,9 +1,9 @@
 import { ref, computed } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 import { useRuntimeConfig } from "nuxt/app";
 
 export const useSeatManager = () => {
-  const toast = useToast();
+  const { showToast } = useSingleToast();
   const seatStates = ref(new Map<string, string>());
   const selectedSeats = ref<string[]>([]);
   const lockTimeout = ref<NodeJS.Timeout | null>(null);
@@ -107,7 +107,7 @@ export const useSeatManager = () => {
 
     lockTimeout.value = setTimeout(() => {
       callback();
-      toast.warning("การเลือกที่นั่งหมดอายุ กรุณาเลือกใหม่");
+      showToast("warning", "การเลือกที่นั่งหมดอายุ กรุณาเลือกใหม่");
     }, minutes * 60 * 1000);
   };
 
@@ -159,7 +159,7 @@ export const useSeatManager = () => {
       }
     } catch (error) {
       console.error("❌ Failed to refresh seat data:", error);
-      toast.error("ไม่สามารถอัปเดตข้อมูลที่นั่งได้");
+      showToast("error", "ไม่สามารถอัปเดตข้อมูลที่นั่งได้");
     }
   };
 

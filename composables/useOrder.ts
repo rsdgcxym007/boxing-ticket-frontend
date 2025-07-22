@@ -1,9 +1,9 @@
 import { useApi } from "../composables/useApi";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 
 export const useOrder = () => {
   const { get, post, patch, put } = useApi();
-  const toast = useToast();
+  const { showToast } = useSingleToast();
 
   // ตรงกับ API: GET /api/v1/orders
   const getOrders = async ({
@@ -34,7 +34,8 @@ export const useOrder = () => {
       const data = await get("/api/v1/orders", { query });
       return data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดออเดอร์ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -49,7 +50,8 @@ export const useOrder = () => {
       const data = await get(`/api/v1/orders/${orderId}`);
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดข้อมูลออเดอร์ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -124,7 +126,10 @@ export const useOrder = () => {
       const res = await patch(`/api/v1/orders/${orderId}/cancel`, {});
       return res.data;
     } catch (err: any) {
-      toast.error(`ยกเลิกออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
+      showToast(
+        "error",
+        `ยกเลิกออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`
+      );
       throw err;
     }
   };
@@ -135,7 +140,8 @@ export const useOrder = () => {
       const res = await patch(`/api/v1/orders/${orderId}/confirm-payment`, {});
       return res.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ยืนยันการชำระเงินล้มเหลว: ${err.message || "Unknown error"}`
       );
       throw err;
@@ -190,7 +196,10 @@ export const useOrder = () => {
       );
       return res;
     } catch (err: any) {
-      toast.error(`อัปเดตออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
+      showToast(
+        "error",
+        `อัปเดตออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`
+      );
       throw err;
     }
   };
@@ -200,9 +209,10 @@ export const useOrder = () => {
       await patch(`/api/v1/orders/${orderId}/confirm-payment`, {
         ...(refCode && { referrerCode: refCode }),
       });
-      toast.success(`ชำระเงินออเดอร์ ${orderId} สำเร็จ`);
+      showToast("success", `ชำระเงินออเดอร์ ${orderId} สำเร็จ`);
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ชำระเงินล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
       );
       throw err;
@@ -235,9 +245,10 @@ export const useOrder = () => {
 
       await patch(`/api/v1/orders/${orderId}/change-seats`, payload);
 
-      toast.success(`เปลี่ยนที่นั่งออเดอร์ ${orderId} สำเร็จ`);
+      showToast("success", `เปลี่ยนที่นั่งออเดอร์ ${orderId} สำเร็จ`);
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `เปลี่ยนที่นั่งล้มเหลว: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -258,10 +269,11 @@ export const useOrder = () => {
         seatIds: newSeatIds,
         showDate,
       });
-      toast.success(`อัพเดท ${orderId} สำเร็จ`);
+      showToast("success", `อัพเดท ${orderId} สำเร็จ`);
       return data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `อัพเดทล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
       );
       throw err;
@@ -271,10 +283,10 @@ export const useOrder = () => {
   const generateTickets = async (orderId: string) => {
     try {
       const data = await get(`/api/v1/orders/${orderId}/tickets`);
-      toast.success("ออกตั๋วสำเร็จ");
+      showToast("success", "ออกตั๋วสำเร็จ");
       return data.data;
     } catch (err: any) {
-      toast.error(`ออกตั๋วล้มเหลว: ${err || "Unknown error"}`);
+      showToast("error", `ออกตั๋วล้มเหลว: ${err || "Unknown error"}`);
       throw err;
     }
   };

@@ -260,7 +260,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "../composables/useSingleToast";
 
 // 🎯 API Composables - ใช้ฟังก์ชันใหม่ที่อัปเดตแล้ว
 import { usePayments } from "../composables/usePayments";
@@ -274,7 +274,7 @@ import { useIntegratedSeatBooking } from "../composables/useIntegratedSeatBookin
 // 📱 การตั้งค่าเริ่มต้น
 const auth = useAuthStore();
 const isLoading = usePageData();
-const toast = useToast();
+const { showToast } = useSingleToast();
 const showSummaryModal = ref(false);
 const dataOrder = ref();
 const seatBookingSystem = useIntegratedSeatBooking();
@@ -332,7 +332,10 @@ const bookStandingTicketNew = async () => {
     standingAdultQty + standingChildQty === 0 ||
     !customerName.trim()
   ) {
-    toast.error("❌ กรุณากรอกข้อมูลให้ครบถ้วน (ชื่อลูกค้า,จำนวนตั๋ว, วันที่)");
+    showToast(
+      "error",
+      "❌ กรุณากรอกข้อมูลให้ครบถ้วน (ชื่อลูกค้า,จำนวนตั๋ว, วันที่)"
+    );
     return;
   }
 
@@ -358,7 +361,7 @@ const bookStandingTicketNew = async () => {
 
     showSummaryModal.value = true;
     // 🎉 แสดงผลลัพธ์การจอง
-    toast.success("🎉 จองตั๋วยืนสำเร็จ! คุณสามารถชำระเงินได้แล้ว");
+    showToast("success", "🎉 จองตั๋วยืนสำเร็จ! คุณสามารถชำระเงินได้แล้ว");
 
     // 📋 เก็บข้อมูลการจองสำหรับขั้นตอนถัดไป
     if (response.id) {
@@ -366,7 +369,7 @@ const bookStandingTicketNew = async () => {
     }
   } catch (error) {
     console.error("❌ เกิดข้อผิดพลาดในการจองตั๋ว:", error);
-    toast.error("❌ ไม่สามารถจองตั๋วได้ กรุณาลองใหม่อีกครั้ง");
+    showToast("error", "❌ ไม่สามารถจองตั๋วได้ กรุณาลองใหม่อีกครั้ง");
   } finally {
     isLoading.loading = false;
   }
@@ -375,7 +378,7 @@ const bookStandingTicketNew = async () => {
 // 🆕 ยืนยันการชำระเงิน
 const confirmPaymentForOrder = async () => {
   if (!orderId.value) {
-    toast.error("❌ ไม่พบข้อมูลออเดอร์ กรุณาจองตั๋วก่อน");
+    showToast("error", "❌ ไม่พบข้อมูลออเดอร์ กรุณาจองตั๋วก่อน");
     return;
   }
   isLoading.loading = true;
@@ -391,7 +394,7 @@ const confirmPaymentForOrder = async () => {
 
     await createStandingPayment(paymentData as any);
 
-    toast.success("🎉 ยืนยันการชำระเงินสำเร็จ!");
+    showToast("success", "🎉 ยืนยันการชำระเงินสำเร็จ!");
     console.log("✅ ยืนยันการชำระเงินสำเร็จ");
 
     // 🆕 ล้างค่าฟอร์มเพื่อสร้างออเดอร์ใหม่
@@ -408,7 +411,7 @@ const confirmPaymentForOrder = async () => {
     orderId.value = null;
   } catch (error) {
     // console.error("❌ เกิดข้อผิดพลาดในการยืนยันการชำระเงิน:", error);
-    toast.error(`❌ ${error}`);
+    showToast("error", `❌ ${error}`);
   } finally {
     isLoading.loading = false;
   }

@@ -42,6 +42,12 @@ export default defineNuxtConfig({
       title: "PATONG BOXING",
       link: [
         {
+          rel: "icon",
+          type: "image/svg+xml",
+          href: "/images/logo/LOGOFC.svg",
+        },
+
+        {
           rel: "stylesheet",
           href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
         },

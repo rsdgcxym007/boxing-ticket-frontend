@@ -1,6 +1,5 @@
 // composables/useRealTimeSeatManager.ts
 import { ref, computed, reactive, watch } from "vue";
-import { useToast } from "vue-toastification";
 import { useAuthStore } from "../stores/auth";
 import dayjs from "dayjs";
 
@@ -37,7 +36,6 @@ export interface WebSocketSeatEvent {
 }
 
 export const useRealTimeSeatManager = () => {
-  const toast = useToast();
   const authStore = useAuthStore();
 
   // ===== Core State =====

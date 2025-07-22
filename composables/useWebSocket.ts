@@ -1,9 +1,9 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { io, Socket } from "socket.io-client";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 import { useRuntimeConfig } from "nuxt/app";
 export const useWebSocket = () => {
-  const toast = useToast();
+  const { showToast } = useSingleToast();
   const socket = ref<Socket | null>(null);
   const isConnected = ref(false);
   const currentRoom = ref<string | null>(null);
@@ -52,12 +52,12 @@ export const useWebSocket = () => {
     // Error handling
     socket.value.on("concurrency_error", (event) => {
       console.error("Concurrency error:", event);
-      toast.error(event.data.message || "เกิดข้อผิดพลาดในระบบ");
+      showToast("error", event.data.message || "เกิดข้อผิดพลาดในระบบ");
     });
 
     socket.value.on("connect_error", (error) => {
       console.error("Connection error:", error);
-      toast.error("ไม่สามารถเชื่อมต่อได้");
+      showToast("error", "ไม่สามารถเชื่อมต่อได้");
     });
   };
 

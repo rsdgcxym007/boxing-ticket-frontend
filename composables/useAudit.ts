@@ -1,6 +1,6 @@
 import { ref, reactive } from "vue";
 import { useApi } from "../composables/useApi";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 import type { AuditLog } from "../types/order";
 
 export interface AuditStats {
@@ -52,7 +52,7 @@ export interface EntityHistory {
 
 export const useAudit = () => {
   const { get, post, put } = useApi();
-  const toast = useToast();
+  const { showToast } = useSingleToast();
 
   // Reactive state
   const loading = ref(false);
@@ -94,7 +94,8 @@ export const useAudit = () => {
       };
     } catch (err: any) {
       auditLogs.value = [];
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลด audit logs ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -112,7 +113,8 @@ export const useAudit = () => {
       stats.value = data.data;
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดสถิติ audit ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -139,7 +141,8 @@ export const useAudit = () => {
       const data = await get("/api/v1/audit/user-activity", { query });
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดกิจกรรมผู้ใช้ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -159,7 +162,8 @@ export const useAudit = () => {
       });
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดประวัติ entity ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -195,7 +199,8 @@ export const useAudit = () => {
       const data = await get("/api/v1/audit/search", { query: searchParams });
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถค้นหา audit logs ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -224,7 +229,8 @@ export const useAudit = () => {
       return data.data || [];
     } catch (err: any) {
       suspiciousActivities.value = [];
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดรายงานกิจกรรมที่น่าสงสัยได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -266,12 +272,13 @@ export const useAudit = () => {
         link.click();
         document.body.removeChild(link);
 
-        toast.success("กำลังดาวน์โหลดรายงาน...");
+        showToast("success", "กำลังดาวน์โหลดรายงาน...");
       }
 
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถส่งออกรายงานได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -289,10 +296,11 @@ export const useAudit = () => {
       const data = await put(`/api/v1/audit/suspicious/${id}/status`, {
         status,
       });
-      toast.success("อัปเดตสถานะเรียบร้อยแล้ว");
+      showToast("success", "อัปเดตสถานะเรียบร้อยแล้ว");
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถอัปเดตสถานะได้: ${
           err.response?.data?.message || "Unknown error"
         }`

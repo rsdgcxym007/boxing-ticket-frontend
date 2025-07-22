@@ -203,7 +203,8 @@
 <script setup>
 import dayjs from "dayjs";
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "@/composables/useSingleToast";
+const { showToast } = useSingleToast();
 import { useI18n } from "vue-i18n";
 import { SummaryModal } from "@/components";
 import { usePageData } from "@/stores/pageData";
@@ -217,7 +218,6 @@ import { ref as vueRef } from "vue";
 const { t } = useI18n();
 const pageData = usePageData();
 const { getSeatsByZoneId } = useSeatApi();
-const toast = useToast();
 const auth = useAuthStore();
 
 // ===== New Integrated Seat Booking System =====
@@ -294,7 +294,7 @@ const fetchAndInitializeSeats = async () => {
     }
   } catch (error) {
     console.error("❌ โหลดที่นั่งล้มเหลว:", error);
-    toast.error("ไม่สามารถโหลดข้อมูลที่นั่งได้");
+    showToast("error", "ไม่สามารถโหลดข้อมูลที่นั่งได้");
   } finally {
     pageData.loading = false;
   }
@@ -364,7 +364,7 @@ const getSeatStatus = (seat) => {
 // ====================
 const handleConfirm = async () => {
   if (seatManager.selectedSeatCount.value === 0) {
-    toast.warning("กรุณาเลือกที่นั่งก่อน");
+    showToast("warning", "กรุณาเลือกที่นั่งก่อน");
     return;
   }
 
@@ -392,13 +392,13 @@ const handleConfirm = async () => {
     }
   } catch (error) {
     console.error("❌ สร้างการจองล้มเหลว:", error);
-    toast.error("เกิดข้อผิดพลาดในการจอง");
+    showToast("error", "เกิดข้อผิดพลาดในการจอง");
   }
 };
 
 const handleMarkOrder = async () => {
   if (seatManager.selectedSeatCount.value === 0) {
-    toast.warning("กรุณาเลือกที่นั่งก่อน");
+    showToast("warning", "กรุณาเลือกที่นั่งก่อน");
     return;
   }
 
@@ -416,11 +416,14 @@ const handleMarkOrder = async () => {
 
     await createBooking(orderData);
 
-    toast.success("จองที่นั่งเรียบร้อยแล้ว");
+    showToast("success", "จองที่นั่งเรียบร้อยแล้ว");
     await resetAndClose();
   } catch (error) {
     console.error("❌ จองที่นั่งล้มเหลว:", error);
-    toast.error("เกิดข้อผิดพลาดในการจอง");
+    showToast("error", "เกิดข้อผิดพลาดในการจอง");
+    if (!success) {
+      showToast("warning", "ไม่สามารถเลือกที่นั่งนี้ได้");
+    }
   }
 };
 
@@ -519,8 +522,6 @@ watch(
       pageData.bookedSeats = freshSeats.filter(
         (seat) => seatManager.getSeatStatus(seat) === "BOOKED"
       );
-      console.log("[DEBUG] currentZoneSeats", pageData.currentZoneSeats);
-      console.log("[DEBUG] bookedSeats", pageData.bookedSeats);
       pageData.loading = false;
     } catch (error) {
       console.error("❌ Failed to fetch updated seats:", error);

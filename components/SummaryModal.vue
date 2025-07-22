@@ -329,7 +329,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "@/composables/useSingleToast";
 import { useAuthStore } from "../stores/auth";
 import { usePageData } from "@/stores/pageData";
 import { useOrder } from "@/composables/useOrder";
@@ -338,7 +338,7 @@ import { useTicketBookingManager } from "@/composables/useTicketBookingManager";
 
 // ==================== STORES & COMPOSABLES ====================
 const auth = useAuthStore();
-const toast = useToast();
+const { showToast } = useSingleToast();
 const { t } = useI18n();
 const router = useRouter();
 const pageData = usePageData();
@@ -417,7 +417,7 @@ const clearCountdown = () => {
 };
 
 const handleTimeout = () => {
-  toast.warning(t("summary.timeout") || "หมดเวลาการจอง");
+  showToast("warning", t("summary.timeout") || "หมดเวลาการจอง");
   emit("close");
 };
 
@@ -425,7 +425,6 @@ const initializeData = () => {
   pageData.method = "CASH";
   pageData.zoneKey = props.zone;
   pageData.selectedSeats = props.selectedSeats;
-  console.log("props.total", typeof props.total);
 
   pageData.total = props.total || props.dataZoneSelected?.total || 0;
   pageData.customerName = props.dataZoneSelected?.customerName || "";
@@ -450,10 +449,10 @@ const onCancel = async () => {
       await cancelOrder(props.dataZoneSelected.orderId);
     }
 
-    toast.success("ยกเลิกการจองเรียบร้อยแล้ว");
+    showToast("success", "ยกเลิกการจองเรียบร้อยแล้ว");
   } catch (error) {
     console.error("Error canceling booking:", error);
-    toast.error(t("summary.cancelError") || "เกิดข้อผิดพลาดในการยกเลิก");
+    showToast("error", t("summary.cancelError") || "เกิดข้อผิดพลาดในการยกเลิก");
   } finally {
     emit("close");
   }
@@ -462,12 +461,12 @@ const onCancel = async () => {
 const submitOrders = async () => {
   // Validate required fields
   if (!pageData.customerName?.trim()) {
-    toast.warning("กรุณากรอกชื่อลูกค้าก่อนดำเนินการ");
+    showToast("warning", "กรุณากรอกชื่อลูกค้าก่อนดำเนินการ");
     return;
   }
 
   if (!isValid.value) {
-    toast.warning("กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง");
+    showToast("warning", "กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง");
     return;
   }
 
@@ -490,7 +489,6 @@ const submitOrders = async () => {
     // Handle success based on mode
     await handlePaymentSuccess();
   } catch (error) {
-    console.error("Payment submission error:", error);
     handlePaymentError(error);
   }
 };
@@ -502,7 +500,7 @@ const normalizeCurrency = (input) => {
 const handlePaymentSuccess = async () => {
   const orderId = props.dataZoneSelected?.orderId;
 
-  toast.success("ยืนยันการชำระเงินเรียบร้อยแล้ว");
+  showToast("success", "ยืนยันการชำระเงินเรียบร้อยแล้ว");
 
   if (props.mode === "booking") {
     // Regular booking flow
@@ -527,16 +525,18 @@ const handlePaymentSuccess = async () => {
 };
 
 const handlePaymentError = (error) => {
+  console.log("error", error);
+
   const errorMessage = error.message?.toLowerCase() || "";
 
   if (errorMessage.includes("seat")) {
-    toast.error("ที่นั่งถูกจองแล้ว กรุณาเลือกที่นั่งอื่น");
+    showToast("error", "ที่นั่งถูกจองแล้ว กรุณาเลือกที่นั่งอื่น");
   } else if (errorMessage.includes("timeout")) {
-    toast.error("หมดเวลาการจอง กรุณาเริ่มต้นใหม่");
+    showToast("error", "หมดเวลาการจอง กรุณาเริ่มต้นใหม่");
   } else if (errorMessage.includes("network")) {
-    toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+    showToast("error", "เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
   } else {
-    toast.error(t("summary.submitError") || "เกิดข้อผิดพลาดในการส่งข้อมูล");
+    showToast("error", error.message);
   }
 };
 
@@ -548,7 +548,7 @@ onMounted(async () => {
     await checkSystemHealth();
   } catch (error) {
     console.error("Error initializing SummaryModal:", error);
-    toast.error("เกิดข้อผิดพลาดในการเริ่มต้นระบบ");
+    showToast("error", "เกิดข้อผิดพลาดในการเริ่มต้นระบบ");
   }
 });
 

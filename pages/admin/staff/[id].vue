@@ -297,13 +297,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "../../../composables/useSingleToast";
 import { useStaff, type Staff } from "../../../composables/useStaff";
 import dayjs from "dayjs";
 
 const route = useRoute();
 const router = useRouter();
-const toast = useToast();
+const { showToast } = useSingleToast();
 const { getStaffById, deleteStaff, getDepartments } = useStaff();
 
 // State
@@ -366,7 +366,7 @@ const handleDelete = async () => {
   try {
     deleting.value = true;
     await deleteStaff(staff.value.id);
-    toast.success("ลบพนักงานสำเร็จ");
+    showToast("success", "ลบพนักงานสำเร็จ");
     router.push("/admin/staff");
   } catch (error) {
     console.error("Failed to delete staff:", error);
