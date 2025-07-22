@@ -390,6 +390,7 @@ const handleConfirm = async () => {
     if (order) {
       pageData.orderId = order.id || order.orderId;
       pageData.totalAmount = order.total || seatManager.totalPrice.value;
+      await onClose();
       pageData.showSummaryModal = true;
 
       // toast.success("สร้างการจองสำเร็จ");
@@ -515,13 +516,11 @@ watchEffect(async () => {
   // 2. Set zoneKey/showDate จาก props/orderData
   pageData.zoneKey = props.zoneKey;
   pageData.showDate = props.orderData?.showDate || new Date();
- 
 
   // 3. Clear selections
   await clearAllSelections();
   // 4. Fetch seats ใหม่
   await fetchAndInitializeSeats();
-
 
   // 5. Pre-select seats เฉพาะโหมด change และ id ต้องมีอยู่จริง
   if (props.mode === "change" && props.orderData) {
