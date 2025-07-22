@@ -1,45 +1,48 @@
-<!-- BaseModal.vue -->
 <template>
   <Teleport to="body">
-    <div v-if="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
-      <!-- Backdrop + Wrapper -->
+    <div
+      v-if="isOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center"
+    >
+      <!-- Backdrop -->
       <div
-        class="fixed inset-0 bg-black/50 bg-opacity-50 backdrop-blur-sm transition-opacity flex justify-center items-start"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        @click.self="closeModal"
+      ></div>
+
+      <!-- Modal Content -->
+      <div
+        class="relative z-10 w-full mx-4 my-10 bg-white rounded-2xl shadow-xl transition-all overflow-hidden"
+        :class="sizeClasses"
+        @click.stop
       >
-        <!-- Modal Content -->
+        <!-- Header -->
         <div
-          class="relative bg-white rounded-lg shadow-xl transform transition-all w-full max-w-md mx-auto my-10"
-          :class="sizeClasses"
-          @click.stop
+          v-if="title || $slots.header"
+          class="flex items-center justify-between p-6 border-b"
         >
-          <!-- Header -->
-          <div
-            v-if="title || $slots.header"
-            class="flex items-center justify-between p-6 border-b"
+          <h3 class="text-lg font-medium text-gray-900">
+            <slot name="header">{{ title }}</slot>
+          </h3>
+          <button
+            @click="closeModal"
+            class="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg p-1"
           >
-            <h3 class="text-lg font-medium text-gray-900">
-              <slot name="header">{{ title }}</slot>
-            </h3>
-            <button
-              @click="closeModal"
-              class="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-lg p-1"
-            >
-              <i class="mdi mdi-close text-xl"></i>
-            </button>
-          </div>
+            <i class="mdi mdi-close text-xl"></i>
+          </button>
+        </div>
 
-          <!-- Body -->
-          <div class="p-6">
-            <slot />
-          </div>
+        <!-- Body -->
+        <div class="p-6 max-h-[80vh] overflow-y-auto">
+          <slot />
+        </div>
 
-          <!-- Footer -->
-          <div
-            v-if="$slots.footer"
-            class="flex items-center justify-end p-6 border-t bg-gray-50 rounded-b-lg"
-          >
-            <slot name="footer" />
-          </div>
+        <!-- Footer -->
+        <div
+          v-if="$slots.footer"
+          class="flex items-center justify-end p-6 border-t bg-gray-50 rounded-b-lg"
+        >
+          <slot name="footer" />
         </div>
       </div>
     </div>

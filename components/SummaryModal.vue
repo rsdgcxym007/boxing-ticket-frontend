@@ -1,10 +1,5 @@
 <template>
-  <BaseModal
-    :isOpen="visible"
-    @close="$emit('close')"
-    size="lg"
-    :persistent="true"
-  >
+  <BaseModal :isOpen="visible" @close="$emit('close')" size="lg">
     <template #header>
       <div class="flex items-center justify-center gap-3">
         <div
@@ -185,8 +180,6 @@
               type="text"
               placeholder="กรอกชื่อลูกค้า"
               required
-              @focus.stop.prevent="() => {}"
-              @input.stop.prevent="() => {}"
               :class="[
                 'w-full p-4 border-2 rounded-xl focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all duration-300',
                 !pageData.customerName.trim() && pageData.customerName !== ''
