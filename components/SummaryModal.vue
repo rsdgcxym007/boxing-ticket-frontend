@@ -1,5 +1,10 @@
 <template>
-  <BaseModal :isOpen="visible" @close="$emit('close')" size="lg">
+  <BaseModal
+    :isOpen="visible"
+    @close="$emit('close')"
+    size="lg"
+    :persistent="true"
+  >
     <template #header>
       <div class="flex items-center justify-center gap-3">
         <div
