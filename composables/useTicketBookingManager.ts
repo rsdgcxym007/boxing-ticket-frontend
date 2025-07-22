@@ -90,7 +90,7 @@ export const useTicketBookingManager = () => {
     onOrderCancelled((event) => {
       console.log("❌ Order cancelled:", event);
       refreshSeatAvailability(currentShowDate.value);
-      toast.info("มีการยกเลิกจอง");
+      // toast.info("มีการยกเลิกจอง");
     });
 
     // เมื่อมีที่นั่งถูกล็อก
