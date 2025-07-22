@@ -1,12 +1,12 @@
 import { useApi } from "../composables/useApi";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 import { useRuntimeConfig } from "nuxt/app";
 
 export const useReferrer = () => {
   const config = useRuntimeConfig();
   const base = config.public.apiBase;
   const { get, post, patch, remove } = useApi();
-  const toast = useToast();
+  const { showToast } = useSingleToast();
 
   // ตรงกับ API: GET /api/v1/referrers
   const getReferrers = async ({
@@ -28,7 +28,8 @@ export const useReferrer = () => {
       const data = await get("/api/v1/referrers", { query });
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดรายชื่อผู้แนะนำได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -47,10 +48,11 @@ export const useReferrer = () => {
   }) => {
     try {
       const data = await post("/api/v1/referrers", payload);
-      toast.success("สร้างผู้แนะนำสำเร็จ");
+      showToast("success", "สร้างผู้แนะนำสำเร็จ");
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `สร้างผู้แนะนำล้มเหลว: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -74,10 +76,11 @@ export const useReferrer = () => {
   ) => {
     try {
       const data = await patch(`/api/v1/referrers/${id}`, payload);
-      toast.success("อัพเดทผู้แนะนำสำเร็จ");
+      showToast("success", "อัพเดทผู้แนะนำสำเร็จ");
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `อัพเดทผู้แนะนำล้มเหลว: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -103,7 +106,8 @@ export const useReferrer = () => {
       });
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดข้อมูลออเดอร์ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -131,11 +135,12 @@ export const useReferrer = () => {
 
       // Open PDF in new tab
       window.open(url, "_blank");
-      toast.success("กำลังเตรียมรายงาน...");
+      showToast("success", "กำลังเตรียมรายงาน...");
 
       return { success: true, url };
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถส่งออกรายงานได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -181,7 +186,10 @@ export const useReferrer = () => {
       };
     } catch (err: any) {
       console.error("Error fetching PDF:", err);
-      toast.error(`ไม่สามารถโหลด PDF ได้: ${err.message || "Unknown error"}`);
+      showToast(
+        "error",
+        `ไม่สามารถโหลด PDF ได้: ${err.message || "Unknown error"}`
+      );
       throw err;
     }
   };
@@ -192,7 +200,8 @@ export const useReferrer = () => {
       const data = await get(`/referrers/${id}/orders`);
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดข้อมูลภายในได้: ${
           err.response?.data?.message || "Unknown error"
         }`

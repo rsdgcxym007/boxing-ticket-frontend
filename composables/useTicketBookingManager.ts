@@ -1,5 +1,5 @@
 import { ref, computed } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 import { useWebSocket } from "./useWebSocket";
 import { useSeatManager } from "./useSeatManager";
 import { useEnhancedOrderSystem } from "./useEnhancedOrderSystem";
@@ -23,7 +23,7 @@ export interface OrderData {
 }
 
 export const useTicketBookingManager = () => {
-  const toast = useToast();
+  const { showToast } = useSingleToast();
   const {
     joinShowRoom,
     onOrderCreated,
@@ -70,10 +70,10 @@ export const useTicketBookingManager = () => {
       const checkSystemHealths = await checkSystemHealth();
       console.log("checkSystemHealths", checkSystemHealths);
 
-      toast.success("เริ่มต้นระบบจองตั๋วสำเร็จ");
+      showToast("success", "เริ่มต้นระบบจองตั๋วสำเร็จ");
     } catch (error) {
       console.error("Failed to initialize booking:", error);
-      toast.error("ไม่สามารถเริ่มต้นระบบจองตั๋วได้");
+      showToast("error", "ไม่สามารถเริ่มต้นระบบจองตั๋วได้");
     }
   };
 
@@ -128,7 +128,7 @@ export const useTicketBookingManager = () => {
       }, 4);
     } catch (error) {
       console.error("Failed to select seats:", error);
-      toast.error("ไม่สามารถเลือกที่นั่งได้");
+      showToast("error", "ไม่สามารถเลือกที่นั่งได้");
       throw error;
     }
   };
@@ -136,7 +136,7 @@ export const useTicketBookingManager = () => {
   // สร้าง order พร้อมป้องกัน concurrency
   const createOrderWithProtection = async (orderData: OrderData) => {
     if (isBookingInProgress.value) {
-      toast.warning("กำลังดำเนินการจอง กรุณารอสักครู่");
+      showToast("warning", "กำลังดำเนินการจอง กรุณารอสักครู่");
       return;
     }
 
@@ -157,19 +157,19 @@ export const useTicketBookingManager = () => {
       // ล้างการเลือกที่นั่ง
       clearSelection();
 
-      toast.success("สร้างออเดอร์สำเร็จ!");
+      showToast("success", "สร้างออเดอร์สำเร็จ!");
       return result;
     } catch (error: any) {
       console.error("Failed to create order:", error);
 
       // จัดการ error ตาม status code
       if (error.response?.status === 409) {
-        toast.error("ที่นั่งถูกจองแล้ว กรุณาเลือกที่นั่งอื่น");
+        showToast("error", "ที่นั่งถูกจองแล้ว กรุณาเลือกที่นั่งอื่น");
         await refreshSeatAvailability(currentShowDate.value);
       } else if (error.response?.status === 429) {
-        toast.error("คำขอมากเกินไป กรุณาลองใหม่อีกครั้ง");
+        showToast("error", "คำขอมากเกินไป กรุณาลองใหม่อีกครั้ง");
       } else {
-        toast.error("ไม่สามารถสร้างออเดอร์ได้");
+        showToast("error", "ไม่สามารถสร้างออเดอร์ได้");
       }
 
       throw error;
@@ -186,11 +186,11 @@ export const useTicketBookingManager = () => {
       // รีเฟรช seat availability
       await refreshSeatAvailability(currentShowDate.value);
 
-      toast.success("ยกเลิกออเดอร์สำเร็จ");
+      showToast("success", "ยกเลิกออเดอร์สำเร็จ");
       return result;
     } catch (error) {
       console.error("Failed to cancel order:", error);
-      toast.error("ไม่สามารถยกเลิกออเดอร์ได้");
+      showToast("error", "ไม่สามารถยกเลิกออเดอร์ได้");
       throw error;
     }
   };
@@ -208,7 +208,7 @@ export const useTicketBookingManager = () => {
       return health;
     } catch (error) {
       console.error("Failed to check system health:", error);
-      toast.error("ไม่สามารถตรวจสอบสถานะระบบได้");
+      showToast("error", "ไม่สามารถตรวจสอบสถานะระบบได้");
     }
   };
 
@@ -218,7 +218,7 @@ export const useTicketBookingManager = () => {
       await unlockSeats(seatsId, currentShowDate.value);
       clearSelection();
       clearAutoUnlockTimer();
-      toast.info("ยกเลิกการเลือกที่นั่งแล้ว");
+      showToast("info", "ยกเลิกการเลือกที่นั่งแล้ว");
     }
   };
 

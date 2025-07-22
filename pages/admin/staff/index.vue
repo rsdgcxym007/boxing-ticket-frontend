@@ -537,7 +537,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "../../../composables/useSingleToast";
 import {
   useStaff,
   type Staff,
@@ -547,7 +547,7 @@ import { useDebounceFn } from "@vueuse/core";
 import dayjs from "dayjs";
 
 // Composables
-const toast = useToast();
+const { showToast } = useSingleToast();
 const {
   getStaffList,
   getStaffSummary,
@@ -790,7 +790,10 @@ const handleResetPassword = async () => {
     await resetStaffPassword(selectedStaff.value.id);
     showResetPasswordModal.value = false;
     selectedStaff.value = null;
-    toast.success(`รีเซ็ตรหัสผ่านสำเร็จ รหัสผ่านใหม่: Staff${staffCode}!`);
+    showToast(
+      "success",
+      `รีเซ็ตรหัสผ่านสำเร็จ รหัสผ่านใหม่: Staff${staffCode}!`
+    );
   } catch (error) {
     console.error("Failed to reset password:", error);
   } finally {

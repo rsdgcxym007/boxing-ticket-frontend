@@ -1,9 +1,9 @@
 import { useApi } from "../composables/useApi";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 
 export const useDashboard = () => {
   const { get, post, patch } = useApi();
-  const toast = useToast();
+  const { showToast } = useSingleToast();
 
   // ตรงกับ API: GET /api/v1/dashboard
   const getDashboard = async () => {
@@ -11,7 +11,8 @@ export const useDashboard = () => {
       const data = await get("/api/v1/dashboard");
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถเรียก Dashboard ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -26,7 +27,8 @@ export const useDashboard = () => {
       const data = await get("/api/v1/dashboard/referrer-performance");
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถเรียกข้อมูล Referrer วันนี้ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -41,7 +43,8 @@ export const useDashboard = () => {
       const data = await get("/api/v1/dashboard/all-referrers");
       return data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถเรียกข้อมูล Referrer ทั้งหมดได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -56,7 +59,8 @@ export const useDashboard = () => {
       const data = await get("/api/v1/dashboard/ticket-sales");
       return data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถเรียกข้อมูลยอดขายตั๋วได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -71,7 +75,8 @@ export const useDashboard = () => {
       const data = await get("/api/v1/dashboard/revenue-summary");
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถเรียกข้อมูลรายได้ได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -88,7 +93,8 @@ export const useDashboard = () => {
       });
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถเรียกข้อมูลที่นั่งว่างได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -103,7 +109,8 @@ export const useDashboard = () => {
       const data = await get("/api/v1/dashboard/customer-analytics");
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถเรียกข้อมูลลูกค้าได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -118,7 +125,8 @@ export const useDashboard = () => {
       const data = await get("/api/v1/dashboard/system-health");
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถเรียกข้อมูลสถานะระบบได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -133,7 +141,8 @@ export const useDashboard = () => {
       const data = await get("/api/v1/dashboard/quick-stats");
       return data.data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถเรียกข้อมูลสถิติด่วนได้: ${
           err.response?.data?.message || "Unknown error"
         }`

@@ -107,7 +107,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { useToast } from "vue-toastification";
 import { useStaff, type Staff } from "../composables/useStaff";
 
 interface Props {
@@ -123,7 +122,6 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const toast = useToast();
 const { changeStaffStatus } = useStaff();
 
 // State

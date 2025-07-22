@@ -113,13 +113,13 @@
           href="/StandingTicketForm"
           class="text-xs px-3 py-1 rounded-full border border-white/20 hover:bg-white hover:text-black transition"
         >
-          ยืน
+          ซื้อตั๋วยืน
         </a>
         <a
           href="/ringside"
           class="text-xs px-3 py-1 rounded-full border border-white/20 hover:bg-white hover:text-black transition"
         >
-          ริง
+          ซื้อตั๋วริงไซด์
         </a>
 
         <!-- Hamburger Icon -->

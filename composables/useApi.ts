@@ -12,9 +12,29 @@ export const useApi = () => {
   };
 
   const handleResponse = async (res: Response) => {
-    const result = await res.json();
-    if (!res.ok || result.statusCode >= 400) {
-      throw new Error(result.error || result.message || "Unknown error");
+    let result;
+    try {
+      result = await res.json();
+    } catch (e) {
+      // fallback กรณี response ไม่ใช่ json
+      throw new Error("API ส่งข้อมูลผิดรูปแบบ");
+    }
+
+    // กรณี error response แบบใหม่
+    if (!res.ok || result.success === false || result.statusCode >= 400) {
+      // รวม message, errors, path, timestamp
+      let errorMsg = result.message || result.error || "Unknown error";
+      if (Array.isArray(result.errors) && result.errors.length > 0) {
+        errorMsg +=
+          "\n" + result.errors.map((e: any) => e.message || e).join("\n");
+      }
+      if (result.path) {
+        errorMsg += `\n[API Path: ${result.path}]`;
+      }
+      if (result.timestamp) {
+        errorMsg += `\n[Time: ${result.timestamp}]`;
+      }
+      throw new Error(errorMsg);
     }
     return result;
   };

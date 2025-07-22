@@ -121,7 +121,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, reactive } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "../composables/useSingleToast";
 import {
   useStaff,
   type Staff,
@@ -144,7 +144,7 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const toast = useToast();
+const { showToast } = useSingleToast();
 const { createStaff, updateStaff } = useStaff();
 
 // State
@@ -351,7 +351,7 @@ const handleSubmit = async () => {
       };
 
       await updateStaff(props.staff.id, updateData);
-      toast.success("อัปเดตข้อมูลพนักงานสำเร็จ");
+      showToast("success", "อัปเดตข้อมูลพนักงานสำเร็จ");
     } else {
       const createData: CreateStaffData = {
         firstName: form.firstName,
@@ -365,7 +365,7 @@ const handleSubmit = async () => {
       };
 
       await createStaff(createData);
-      toast.success("สร้างพนักงานใหม่สำเร็จ");
+      showToast("success", "สร้างพนักงานใหม่สำเร็จ");
     }
 
     emit("saved");

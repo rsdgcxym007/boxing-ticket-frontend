@@ -202,7 +202,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "../composables/useSingleToast";
 import type { SuspiciousActivity } from "../composables/useAudit";
 import dayjs from "dayjs";
 
@@ -218,7 +218,7 @@ const emit = defineEmits<{
   refresh: [];
 }>();
 
-const toast = useToast();
+const { showToast } = useSingleToast();
 const selectedRiskLevel = ref("");
 
 const riskLevels = [
@@ -341,17 +341,17 @@ const formatUserAgent = (userAgent: string) => {
 };
 
 const investigateActivity = (activity: SuspiciousActivity) => {
-  toast.info(`เริ่มการสอบสวนกิจกรรม: ${activity.activity}`);
+  showToast("info", `เริ่มการสอบสวนกิจกรรม: ${activity.activity}`);
   // Implement investigation logic
 };
 
 const blockIP = (ipAddress: string) => {
-  toast.warning(`บล็อค IP Address: ${ipAddress}`);
+  showToast("warning", `บล็อค IP Address: ${ipAddress}`);
   // Implement IP blocking logic
 };
 
 const markAsResolved = (activity: SuspiciousActivity) => {
-  toast.success(`ทำเครื่องหมายว่าแก้ไขแล้ว: ${activity.activity}`);
+  showToast("success", `ทำเครื่องหมายว่าแก้ไขแล้ว: ${activity.activity}`);
   // Implement mark as resolved logic
 };
 </script>

@@ -622,13 +622,13 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useOrder } from "@/composables/useOrder";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "@/composables/useSingleToast";
 import { formatCurrency } from "@/utils/formatCurrency";
 import dayjs from "dayjs";
 const route = useRoute();
 const router = useRouter();
 const { getOrderById, changeSeats } = useOrder();
-const toast = useToast();
+const { showToast } = useSingleToast();
 const { createSeatedPayment } = usePayments();
 const isShowModal = ref(false);
 // Reactive data
@@ -845,10 +845,10 @@ const saveChanges = async () => {
       });
       router.push("/admin/orders");
     }
-    toast.success("บันทึกการเปลี่ยนแปลงเรียบร้อย");
+    showToast("success", "บันทึกการเปลี่ยนแปลงเรียบร้อย");
   } catch (err) {
     console.error("Error saving changes:", err);
-    toast.error("เกิดข้อผิดพลาดในการบันทึกการเปลี่ยนแปลง");
+    showToast("error", "เกิดข้อผิดพลาดในการบันทึกการเปลี่ยนแปลง");
   } finally {
     saving.value = false;
   }

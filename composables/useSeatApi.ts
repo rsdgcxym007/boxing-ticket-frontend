@@ -1,11 +1,11 @@
 import { useApi } from "../composables/useApi";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "./useSingleToast";
 import { ZONE_IDS_BY_NAME } from "../utils/zoneEnums";
 import { useRouter } from "vue-router";
 
 export function useSeatApi() {
   const { get, post, patch } = useApi();
-  const toast = useToast();
+  const { showToast } = useSingleToast();
   const rounter = useRouter();
   // ตรงกับ API: GET /api/v1/seats/available
   const getAvailableSeats = async (params?: {
@@ -17,7 +17,8 @@ export function useSeatApi() {
       const data = await get("/api/v1/seats/available", { query: params });
       return data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `ไม่สามารถโหลดที่นั่งได้: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -35,10 +36,11 @@ export function useSeatApi() {
   }) => {
     try {
       const data = await post("/api/v1/seats/reserve", payload);
-      toast.success("จองที่นั่งสำเร็จ");
+      showToast("success", "จองที่นั่งสำเร็จ");
       return data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `จองที่นั่งล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
       );
       throw err;
@@ -70,12 +72,15 @@ export function useSeatApi() {
 
       if (error?.message === "Unauthorized") {
         rounter.push("/login");
-        toast.warning(`กรุณาเข้าสู่ระบบเพื่อดําเนินการต่อ`);
+        showToast("warning", `กรุณาเข้าสู่ระบบเพื่อดําเนินการต่อ`);
         return [];
       }
 
       console.log("getSeatsByZoneId - error message:", error?.message);
-      toast.error(`โหลดที่นั่งล้มเหลว: ${error?.message || "Unknown error"}`);
+      showToast(
+        "error",
+        `โหลดที่นั่งล้มเหลว: ${error?.message || "Unknown error"}`
+      );
       return [];
     }
   };
@@ -89,10 +94,11 @@ export function useSeatApi() {
     try {
       const payload = { status, ...(reason && { reason }) };
       const data = await patch(`/api/v1/seats/${seatId}/status`, payload);
-      toast.success("อัพเดทสถานะที่นั่งสำเร็จ");
+      showToast("success", "อัพเดทสถานะที่นั่งสำเร็จ");
       return data;
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `อัพเดทสถานะที่นั่งล้มเหลว: ${
           err.response?.data?.message || "Unknown error"
         }`
@@ -256,7 +262,8 @@ export function useSeatApi() {
       const { data } = await get("/api/orders/seats/booked");
       return data || [];
     } catch (err: any) {
-      toast.error(
+      showToast(
+        "error",
         `โหลดที่นั่งที่ถูกจองล้มเหลว: ${err.message || "Unknown error"}`
       );
       console.error("getBookedSeats error:", err);
@@ -270,7 +277,10 @@ export function useSeatApi() {
       return seats;
     } catch (error) {
       console.error("refreshSeatAvailability - error:", error);
-      toast.error(`ไม่สามารถรีเฟรชที่นั่งได้: ${error?.message || "Unknown error"}`);
+      showToast(
+        "error",
+        `ไม่สามารถรีเฟรชที่นั่งได้: ${error?.message || "Unknown error"}`
+      );
       return [];
     }
   };

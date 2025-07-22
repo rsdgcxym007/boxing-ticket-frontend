@@ -48,6 +48,75 @@
         เข้าสู่ระบบ
       </BaseButton>
 
+      <!-- ปุ่มเปลี่ยนรหัสผ่าน -->
+      <BaseButton
+        @click="showChangePassword = true"
+        variant="secondary"
+        size="md"
+        class="w-full mt-2"
+      >
+        เปลี่ยนรหัสผ่าน
+      </BaseButton>
+
+      <!-- Modal เปลี่ยนรหัสผ่าน -->
+      <BaseModal
+        v-if="showChangePassword"
+        :isOpen="showChangePassword"
+        @close="showChangePassword = false"
+      >
+        <template #header>
+          <h2 class="text-xl font-bold text-center">เปลี่ยนรหัสผ่าน</h2>
+        </template>
+        <div class="space-y-4 p-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >อีเมล</label
+            >
+            <BaseInput
+              v-model="changePasswordData.email"
+              type="email"
+              placeholder="กรอกอีเมล"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >รหัสผ่านเดิม</label
+            >
+            <BaseInput
+              v-model="changePasswordData.oldPassword"
+              type="password"
+              placeholder="รหัสผ่านเดิม"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >รหัสผ่านใหม่</label
+            >
+            <BaseInput
+              v-model="changePasswordData.newPassword"
+              type="password"
+              placeholder="รหัสผ่านใหม่"
+              required
+            />
+          </div>
+        </div>
+        <template #footer>
+          <div class="flex gap-2 justify-end">
+            <BaseButton @click="showChangePassword = false" variant="secondary"
+              >ยกเลิก</BaseButton
+            >
+            <BaseButton
+              @click="changePassword"
+              :loading="changePasswordData.loading"
+              variant="primary"
+              >บันทึก</BaseButton
+            >
+          </div>
+        </template>
+      </BaseModal>
+
       <!-- ข้อมูลทดสอบ -->
       <BaseAlert type="warning" class="text-sm mt-5 mb-3">
         <p><strong>ข้อมูลทดสอบ: role Admin</strong></p>
@@ -66,7 +135,7 @@
 <script setup lang="ts">
 // นำเข้า composables และ utilities ที่จำเป็น
 import { reactive } from "vue";
-import { useToast } from "vue-toastification";
+import { useSingleToast } from "../composables/useSingleToast";
 import { useApi } from "../composables/useApi";
 import { useRouter } from "vue-router";
 import { useRuntimeConfig } from "nuxt/app";
@@ -82,10 +151,80 @@ const pageData = reactive({
   loading: false,
 });
 
+// State สำหรับ modal เปลี่ยนรหัสผ่าน
+import { ref } from "vue";
+const showChangePassword = ref(false);
+const changePasswordData = reactive({
+  email: "",
+  oldPassword: "",
+  newPassword: "",
+  loading: false,
+});
+
 // ใช้ composables
-const toast = useToast();
+const { showToast } = useSingleToast();
 const router = useRouter();
 const { post } = useApi();
+
+/**
+ * ฟังก์ชันเปลี่ยนรหัสผ่าน (ต้องอยู่นอก login)
+ */
+const changePassword = async () => {
+  changePasswordData.loading = true;
+  try {
+    const token = localStorage.getItem("token");
+    // PATCH change password
+    const res = await fetch(`${base}/api/v1/users/change-password`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        email: changePasswordData.email,
+        oldPassword: changePasswordData.oldPassword,
+        newPassword: changePasswordData.newPassword,
+      }),
+    });
+    if (!res.ok) {
+      // Try to parse error response
+      let errorData;
+      try {
+        errorData = await res.json();
+      } catch {}
+      if (errorData && errorData.code === "NO_PASSWORD") {
+        showToast(
+          "error",
+          "บัญชีนี้ยังไม่ได้ตั้งรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ"
+        );
+        changePasswordData.loading = false;
+        return;
+      }
+      throw new Error("เปลี่ยนรหัสผ่านไม่สำเร็จ");
+    }
+    // // Send email notification
+    // await fetch(`${base}/users/send-password-changed-email`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${token}`,
+    //   },
+    //   body: JSON.stringify({
+    //     email: changePasswordData.email,
+    //   }),
+    // });
+    // showToast("success", "✅ เปลี่ยนรหัสผ่านสำเร็จ และส่งอีเมลแจ้งเตือนแล้ว");
+    showChangePassword.value = false;
+    // reset form
+    changePasswordData.email = "";
+    changePasswordData.oldPassword = "";
+    changePasswordData.newPassword = "";
+  } catch (err: any) {
+    showToast("error", `🚫 ${err.message || "เปลี่ยนรหัสผ่านล้มเหลว"}`);
+  } finally {
+    changePasswordData.loading = false;
+  }
+};
 
 /**
  * ฟังก์ชันสำหรับเข้าสู่ระบบ
@@ -125,6 +264,19 @@ const login = async () => {
             throw new Error("API ส่งกลับข้อมูลที่ไม่ใช่ JSON");
           }
         } else {
+          // Try to parse error response
+          let errorData;
+          try {
+            errorData = await res.json();
+          } catch {}
+          if (errorData && errorData.code === "NO_PASSWORD") {
+            showToast(
+              "error",
+              "บัญชีนี้ยังไม่ได้ตั้งรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ"
+            );
+            pageData.loading = false;
+            return;
+          }
           console.log(`❌ ${endpoint} ล้มเหลว:`, res.status, res.statusText);
         }
       } catch (fetchError) {
@@ -151,7 +303,7 @@ const login = async () => {
       JSON.stringify(data.data.user || data.data?.user || {})
     );
 
-    toast.success("🎉 เข้าสู่ระบบสำเร็จ");
+    showToast("success", "🎉 เข้าสู่ระบบสำเร็จ");
     console.log("🏠 กำลังเปลี่ยนเส้นทางไปหน้าแรก...");
 
     // เปลี่ยนเส้นทางไปหน้าแรก
@@ -168,7 +320,7 @@ const login = async () => {
       errorMessage = err.response.data.message;
     }
 
-    toast.error(`🚫 ${errorMessage}`);
+    showToast("error", `🚫 ${errorMessage}`);
 
     // แสดงข้อมูลเพิ่มเติมสำหรับการ debug
     console.log("🔍 ข้อมูลการ debug:");
