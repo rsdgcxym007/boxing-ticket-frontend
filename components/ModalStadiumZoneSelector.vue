@@ -390,7 +390,7 @@ const handleConfirm = async () => {
     if (order) {
       pageData.orderId = order.id || order.orderId;
       pageData.totalAmount = order.total || seatManager.totalPrice.value;
-      await onClose();
+      emit("close");
       pageData.showSummaryModal = true;
 
       // toast.success("สร้างการจองสำเร็จ");
