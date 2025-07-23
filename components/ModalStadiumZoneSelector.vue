@@ -176,7 +176,7 @@
                 {{
                   props.mode === "change" && props?.orderData?.status === "PAID"
                     ? "ยืนยันเปลี่ยนที่นั่ง"
-                    : "ซื้ตัว"
+                    : "ซิ้อตั๋ว"
                 }}
               </span>
             </button>
