@@ -289,6 +289,16 @@
                       <label
                         class="block text-sm md:text-base font-medium text-gray-300 mb-1"
                       >
+                        รับชำระเงินโดย
+                      </label>
+                      <p class="text-white text-base md:text-lg font-semibold">
+                        {{ orderData.paidByName }}
+                      </p>
+                    </div>
+                    <div>
+                      <label
+                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
+                      >
                         วันที่แสดง
                       </label>
                       <p class="text-white text-base md:text-lg font-semibold">
@@ -317,6 +327,9 @@
                       >
                         สร้างเมื่อ
                       </label>
+                      <p>
+                        {{ orderData.createdByName || "ไม่ทราบ" }}
+                      </p>
                       <p class="text-white text-sm md:text-base font-mono">
                         {{ formatDateTime(orderData.createdAt) }}
                       </p>
@@ -327,6 +340,9 @@
                       >
                         อัปเดตล่าสุด
                       </label>
+                      <p>
+                        {{ orderData.paidByName || "ไม่ทราบ" }}
+                      </p>
                       <p class="text-white text-sm md:text-base font-mono">
                         {{ formatDateTime(orderData.updatedAt) }}
                       </p>
