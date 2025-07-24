@@ -160,10 +160,10 @@ definePageMeta({
 const route = useRoute();
 
 // ดึงข้อมูลจาก URL parameters หรือใช้ค่าเริ่มต้น
-const orderId = route.query.orderId || "12345";
-const zone = route.query.zone || "BACK-RIGHT";
-const seats = (route.query.seats || "A1,A2,A3").toString().split(",");
-const total = parseInt(route.query.total || "5400");
+const orderId = route.query.orderId || "";
+const zone = route.query.zone || "";
+const seats = (route.query.seats || "").toString().split(",");
+const total = parseInt(route.query.total || "0");
 
 // ตัวแปร reactive สำหรับจัดการสถานะ
 const isGeneratingTickets = ref(false);
