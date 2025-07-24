@@ -498,7 +498,7 @@ const normalizeCurrency = (input) => {
 };
 
 const handlePaymentSuccess = async () => {
-  const orderId = props.dataZoneSelected?.orderId;
+  const orderId = props.dataZoneSelected?.orderId || props.dataZoneSelected?.id;
 
   showToast("success", "ยืนยันการชำระเงินเรียบร้อยแล้ว");
 
@@ -514,9 +514,14 @@ const handlePaymentSuccess = async () => {
       },
     });
   } else {
-    // Admin flow
     await router.push({
-      path: "/admin/orders",
+      path: "/confirmation",
+      query: {
+        orderId,
+        zone: pageData.zoneKey,
+        seats: pageData.selectedSeats?.map((s) => s.seatNumber).join(","),
+        total: pageData.total,
+      },
     });
   }
 
