@@ -241,6 +241,7 @@
   </div>
 
   <!-- Modal สำหรับแสดงตั๋วที่ออกมา -->
+  <!--
   <TicketDisplay
     v-if="showTicketModal"
     :tickets="generatedTickets"
@@ -258,6 +259,7 @@
       <span v-else>แสดง Thermal Receipt PDF</span>
     </button>
   </div>
+  -->
   <!-- Modal สำหรับแสดง Thermal Receipt PDF -->
   <div
     v-if="showThermalModal"
@@ -444,9 +446,6 @@ const closeThermalModal = () => {
 const onGenerateTickets = async (order) => {
   try {
     const tickets = await generateTickets(order.id);
-    // แสดงตั๋วที่ออกมา
-    console.log("tickets.tickets", tickets.tickets);
-
     generatedTickets.value = tickets.tickets.map((ticket) => ({
       orderId: ticket.orderId,
       seatNumber: ticket?.seatNumber,
@@ -455,8 +454,10 @@ const onGenerateTickets = async (order) => {
       type: ticket.type,
       zone: ticket?.zone?.name,
     }));
-    showTicketModal.value = true;
-
+    // เปิด preview thermal receipt PDF อัตโนมัติหลังสร้างตั๋ว
+    if (generatedTickets.value.length > 0) {
+      await handleDownloadThermal(generatedTickets.value[0].orderId);
+    }
     fetchData();
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการออกตั๋ว:", error);
