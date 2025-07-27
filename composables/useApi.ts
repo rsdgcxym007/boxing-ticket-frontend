@@ -16,26 +16,64 @@ export const useApi = () => {
     try {
       result = await res.json();
     } catch (e) {
-      // fallback กรณี response ไม่ใช่ json
       throw new Error("API ส่งข้อมูลผิดรูปแบบ");
     }
 
-    // กรณี error response แบบใหม่
+    // 🧠 รองรับ string, array, object ทุกชนิด
+    function extractMessage(obj: any): string {
+      if (!obj) return "";
+
+      if (typeof obj === "string") {
+        // ข้ามข้อความที่ดูเหมือน status code เช่น "400"
+        if (obj === result.statusCode?.toString()) return "";
+        return obj;
+      }
+
+      if (Array.isArray(obj)) {
+        return obj.map(extractMessage).filter(Boolean).join("\n");
+      }
+
+      if (typeof obj === "object") {
+        if (obj.message) return extractMessage(obj.message);
+        if (obj.error) return extractMessage(obj.error);
+        return Object.values(obj)
+          .map(extractMessage)
+          .filter(Boolean)
+          .join("\n");
+      }
+
+      return String(obj);
+    }
+
+    // ⚠️ ตรวจจับ error case
     if (!res.ok || result.success === false || result.statusCode >= 400) {
-      // รวม message, errors, path, timestamp
-      let errorMsg = result.message || result.error || "Unknown error";
+      // ✅ ลำดับความสำคัญ: message > error > fallback
+      let errorMsg = extractMessage(result.message);
+
+      if (!errorMsg || errorMsg.trim() === "") {
+        errorMsg = extractMessage(result.error) || "Unknown error";
+      }
+
+      // 🔁 รวม errors array ถ้ามี
       if (Array.isArray(result.errors) && result.errors.length > 0) {
         errorMsg +=
-          "\n" + result.errors.map((e: any) => e.message || e).join("\n");
+          "\n" + result.errors.map((e: any) => extractMessage(e)).join("\n");
       }
+
+      // 🔖 เพิ่ม path และเวลา
       if (result.path) {
         errorMsg += `\n[API Path: ${result.path}]`;
       }
       if (result.timestamp) {
         errorMsg += `\n[Time: ${result.timestamp}]`;
       }
+      console.log("errorMsg", errorMsg);
+
       throw new Error(errorMsg);
     }
+
+    // Success toast (optional, only if you want to show on every success)
+    // toast.success(result.message || "สำเร็จ");
     return result;
   };
 

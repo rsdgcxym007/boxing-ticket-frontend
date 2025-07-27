@@ -34,7 +34,7 @@ export const useOrder = () => {
       if (endDate) query.endDate = endDate;
 
       const data = await get("/api/v1/orders", { query });
-      return data;
+      return data.data;
     } catch (err: any) {
       showToast(
         "error",
@@ -113,11 +113,9 @@ export const useOrder = () => {
 
     try {
       const res = await post("/api/v1/orders", payload);
-      console.log("res", res);
-
       return res.data;
     } catch (err: any) {
-      // toast.error(`สร้างออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`);
+      showToast("error", `${err || "Unknown error"}`);
       throw err;
     }
   };
@@ -128,10 +126,7 @@ export const useOrder = () => {
       const res = await patch(`/api/v1/orders/${orderId}/cancel`, {});
       return res.data;
     } catch (err: any) {
-      showToast(
-        "error",
-        `ยกเลิกออเดอร์ล้มเหลว: ${err.message || "Unknown error"}`
-      );
+      showToast("error", `ยกเลิกออเดอร์ล้มเหลว: ${err || "Unknown error"}`);
       throw err;
     }
   };
@@ -142,10 +137,7 @@ export const useOrder = () => {
       const res = await patch(`/api/v1/orders/${orderId}/confirm-payment`, {});
       return res.data;
     } catch (err: any) {
-      showToast(
-        "error",
-        `ยืนยันการชำระเงินล้มเหลว: ${err.message || "Unknown error"}`
-      );
+      showToast("error", `ยืนยันการชำระเงินล้มเหลว: ${err || "Unknown error"}`);
       throw err;
     }
   };

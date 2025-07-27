@@ -9,71 +9,100 @@
     <form @submit.prevent="handleSubmit" class="space-y-6">
       <!-- Personal Information -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BaseInput
-          v-model="form.firstName"
-          label="ชื่อ"
-          placeholder="กรอกชื่อ"
-          required
-          :error="errors.firstName"
-        />
-        <BaseInput
-          v-model="form.lastName"
-          label="นามสกุล"
-          placeholder="กรอกนามสกุล"
-          required
-          :error="errors.lastName"
-        />
+        <div>
+          <BaseInput
+            v-model="form.firstName"
+            label="ชื่อ"
+            placeholder="กรอกชื่อ"
+            required
+            :error="errors.firstName"
+            @input="validateFirstName()"
+          />
+          <p class="text-red-500 text-xs mt-1 min-h-[1.25em]">
+            {{ errors.firstName }}
+          </p>
+        </div>
+        <div>
+          <BaseInput
+            v-model="form.lastName"
+            label="นามสกุล"
+            placeholder="กรอกนามสกุล"
+            required
+            :error="errors.lastName"
+            @input="validateLastName()"
+          />
+        </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BaseInput
-          v-model="form.email"
-          label="อีเมล"
-          type="email"
-          placeholder="example@company.com"
-          required
-          :error="errors.email"
-        />
-        <BaseInput
-          v-model="form.phone"
-          label="เบอร์โทรศัพท์"
-          placeholder="08x-xxx-xxxx"
-          :error="errors.phone"
-        />
+        <div>
+          <BaseInput
+            v-model="form.email"
+            label="อีเมล"
+            type="email"
+            placeholder="example@company.com"
+            required
+            :error="errors.email"
+            @input="validateEmail()"
+          />
+        </div>
+        <div>
+          <BaseInput
+            v-model="form.phone"
+            label="เบอร์โทรศัพท์"
+            placeholder="08x-xxx-xxxx"
+            :error="errors.phone"
+            type="tel"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            @input="validatePhone()"
+          />
+        </div>
       </div>
 
       <!-- Role and Department -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BaseSelect
-          v-model="form.role"
-          label="ตำแหน่ง"
-          :options="roleOptions"
-          placeholder="เลือกตำแหน่ง"
-          searchable
-          clearable
-          required
-          :error="errors.role"
-        />
-        <BaseSelect
-          v-model="form.department"
-          label="แผนก"
-          :options="departmentOptions"
-          placeholder="เลือกแผนก"
-          searchable
-          clearable
-          :error="errors.department"
-        />
+        <div>
+          <BaseSelect
+            v-model="form.role"
+            label="ตำแหน่ง"
+            :options="roleOptions"
+            placeholder="เลือกตำแหน่ง"
+            searchable
+            clearable
+            required
+            :error="errors.role"
+            @update:modelValue="validateRole()"
+          />
+        </div>
+        <!-- <div>
+          <BaseSelect
+            v-model="form.department"
+            label="แผนก"
+            :options="departmentOptions"
+            placeholder="เลือกแผนก"
+            searchable
+            clearable
+            :error="errors.department"
+            @update:modelValue="null"
+          />
+        </div> -->
       </div>
 
-      <BaseInput
-        v-model="form.position"
-        label="ตำแหน่งงาน"
-        placeholder="กรอกตำแหน่งงาน"
-        :error="errors.position"
-      />
+      <div>
+        <BaseInput
+          v-model="form.position"
+          label="ตำแหน่งงาน"
+          placeholder="กรอกตำแหน่งงาน"
+          :error="errors.position"
+        />
+        <p class="text-red-500 text-xs mt-1 min-h-[1.25em]">
+          {{ errors.position }}
+        </p>
+      </div>
 
       <!-- Permissions -->
-      <div>
+      <!-- <div>
         <label class="block text-sm font-medium text-gray-700 mb-3">
           สิทธิ์การใช้งาน
         </label>
@@ -99,7 +128,7 @@
             </div>
           </label>
         </div>
-      </div>
+      </div> -->
 
       <!-- Form Actions -->
       <div class="flex justify-end space-x-4 pt-6 border-t">
@@ -170,6 +199,73 @@ const errors = reactive({
   position: "",
 });
 
+// --- Per-field validation ---
+const validateFirstName = () => {
+  if (!form.firstName.trim()) {
+    errors.firstName = "กรุณากรอกชื่อ";
+  } else if (form.firstName.length > 30) {
+    errors.firstName = "ชื่อห้ามเกิน 30 ตัวอักษร";
+  } else {
+    errors.firstName = "";
+  }
+};
+const validateLastName = () => {
+  if (!form.lastName.trim()) {
+    errors.lastName = "กรุณากรอกนามสกุล";
+  } else if (form.lastName.length > 30) {
+    errors.lastName = "นามสกุลห้ามเกิน 30 ตัวอักษร";
+  } else {
+    errors.lastName = "";
+  }
+};
+const validateEmail = () => {
+  if (!form.email.trim()) {
+    errors.email = "กรุณากรอกอีเมล";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    errors.email = "รูปแบบอีเมลไม่ถูกต้อง";
+  } else {
+    errors.email = "";
+  }
+};
+const validatePhone = () => {
+  // Remove all non-digits first and limit to 10 digits
+  form.phone = form.phone.replace(/\D/g, "").slice(0, 10);
+  if (!form.phone.trim()) {
+    errors.phone = "กรุณากรอกเบอร์โทรศัพท์";
+  } else if (!/^\d{10}$/.test(form.phone)) {
+    errors.phone = "เบอร์โทรศัพท์ต้องเป็นตัวเลข 10 หลัก";
+  } else {
+    errors.phone = "";
+  }
+};
+const validateRole = () => {
+  if (!form.role) {
+    errors.role = "กรุณาเลือกตำแหน่ง";
+  } else {
+    errors.role = "";
+  }
+};
+// --- Validate all (for submit) ---
+const validateForm = () => {
+  validateFirstName();
+  validateLastName();
+  validateEmail();
+  validatePhone();
+  validateRole();
+  // Toast for all failed fields
+  const failed: string[] = [];
+  if (errors.firstName) failed.push("ชื่อ");
+  if (errors.lastName) failed.push("นามสกุล");
+  if (errors.email) failed.push("อีเมล");
+  if (errors.phone) failed.push("เบอร์โทรศัพท์");
+  if (errors.role) failed.push("ตำแหน่ง");
+  if (failed.length > 0) {
+    showToast("error", `กรุณาตรวจสอบ: ${failed.join(", ")}`);
+    return false;
+  }
+  return true;
+};
+
 // Computed
 const isOpen = computed({
   get: () => props.modelValue,
@@ -190,18 +286,18 @@ const roleOptions = [
     icon: "mdi mdi-shield-crown",
     badge: "Admin",
   },
-  {
-    value: "manager",
-    label: "ผู้จัดการ",
-    icon: "mdi mdi-account-tie",
-    badge: "Manager",
-  },
-  {
-    value: "supervisor",
-    label: "หัวหน้างาน",
-    icon: "mdi mdi-account-star",
-    badge: "Supervisor",
-  },
+  // {
+  //   value: "manager",
+  //   label: "ผู้จัดการ",
+  //   icon: "mdi mdi-account-tie",
+  //   badge: "Manager",
+  // },
+  // {
+  //   value: "supervisor",
+  //   label: "หัวหน้างาน",
+  //   icon: "mdi mdi-account-star",
+  //   badge: "Supervisor",
+  // },
   { value: "staff", label: "พนักงาน", icon: "mdi mdi-account", badge: "Staff" },
 ];
 
@@ -297,40 +393,6 @@ const populateForm = (staff: Staff) => {
   form.department = staff.department || "";
   form.position = staff.position || "";
   form.permissions = [...staff.permissions];
-};
-
-const validateForm = () => {
-  let isValid = true;
-
-  // Reset errors
-  Object.keys(errors).forEach((key) => {
-    errors[key as keyof typeof errors] = "";
-  });
-
-  if (!form.firstName.trim()) {
-    errors.firstName = "กรุณากรอกชื่อ";
-    isValid = false;
-  }
-
-  if (!form.lastName.trim()) {
-    errors.lastName = "กรุณากรอกนามสกุล";
-    isValid = false;
-  }
-
-  if (!form.email.trim()) {
-    errors.email = "กรุณากรอกอีเมล";
-    isValid = false;
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = "รูปแบบอีเมลไม่ถูกต้อง";
-    isValid = false;
-  }
-
-  if (!form.role) {
-    errors.role = "กรุณาเลือกตำแหน่ง";
-    isValid = false;
-  }
-
-  return isValid;
 };
 
 const handleSubmit = async () => {

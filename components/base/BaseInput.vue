@@ -4,7 +4,7 @@
     <label
       v-if="label"
       :for="inputId"
-      class="block text-sm font-medium text-gray-700 mb-1"
+      class="block text-sm font-medium text-gray-700 mb-2"
     >
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
@@ -26,6 +26,8 @@
         :placeholder="placeholder"
         :disabled="disabled"
         :required="required"
+        :inputmode="inputmode"
+        :pattern="pattern"
         :class="inputClasses"
         @input="handleInput"
         @blur="$emit('blur', $event)"
@@ -64,6 +66,17 @@ interface Props {
   error?: string;
   hint?: string;
   size?: "sm" | "md" | "lg";
+  className?: string; // เพิ่ม prop className
+  inputmode?:
+    | "text"
+    | "search"
+    | "email"
+    | "tel"
+    | "url"
+    | "none"
+    | "numeric"
+    | "decimal";
+  pattern?: string; // เพิ่ม prop pattern
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -71,6 +84,8 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   required: false,
   size: "md",
+  inputmode: undefined,
+  pattern: undefined,
 });
 
 const emit = defineEmits<{
@@ -86,46 +101,19 @@ const inputId = computed(
 );
 
 const inputClasses = computed(() => {
+  // If className is provided, use only that (plus base, state, disabled classes). Otherwise, use defaultShape.
+  const defaultShape = "rounded-lg w-full h-[40.5px] px-4 py-2.5";
   const baseClasses =
-    "block w-full border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200";
-  const sizes = {
-    sm: "py-1.5 text-sm",
-    md: "py-2 text-base",
-    lg: "py-3 text-lg",
-  };
-
-  // Adjust padding based on slots
-  const paddingClasses = () => {
-    let leftPadding = "pl-3";
-    let rightPadding = "pr-3";
-
-    if (props.size === "lg") {
-      leftPadding = "pl-4";
-      rightPadding = "pr-4";
-    }
-
-    if (slots.prefix) {
-      leftPadding = props.size === "lg" ? "pl-12" : "pl-10";
-    }
-
-    if (slots.suffix) {
-      rightPadding = props.size === "lg" ? "pr-12" : "pr-10";
-    }
-
-    return `${leftPadding} ${rightPadding}`;
-  };
-
+    "block shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200";
   const stateClasses = props.error
-    ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-    : "border-gray-300 focus:border-blue-500 focus:ring-blue-500 hover:border-gray-400";
-
+    ? "border border-red-300 focus:border-red-500 focus:ring-red-500"
+    : "border border-gray-300 focus:border-blue-500 focus:ring-blue-500 hover:border-gray-400";
   const disabledClasses = props.disabled
     ? "bg-gray-50 cursor-not-allowed opacity-60"
     : "bg-white";
-
-  return `${baseClasses} ${
-    sizes[props.size]
-  } ${paddingClasses()} ${stateClasses} ${disabledClasses}`;
+  return `${baseClasses} ${stateClasses} ${disabledClasses} ${
+    props.className ? props.className : defaultShape
+  }  px-4 py-2.5`.trim();
 });
 
 const handleInput = (event: Event) => {

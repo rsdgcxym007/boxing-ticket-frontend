@@ -369,7 +369,7 @@ const bookStandingTicketNew = async () => {
     }
   } catch (error) {
     console.error("❌ เกิดข้อผิดพลาดในการจองตั๋ว:", error);
-    showToast("error", "❌ ไม่สามารถจองตั๋วได้ กรุณาลองใหม่อีกครั้ง");
+    // showToast("error", "❌ ไม่สามารถจองตั๋วได้ กรุณาลองใหม่อีกครั้ง");
   } finally {
     isLoading.loading = false;
   }

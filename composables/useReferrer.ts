@@ -14,16 +14,19 @@ export const useReferrer = () => {
     limit = 10,
     status,
     search,
+    sortBy,
   }: {
     page?: number;
     limit?: number;
     status?: string;
     search?: string;
+    sortBy?: string;
   }) => {
     try {
       const query: Record<string, any> = { page, limit };
       if (status) query.status = status;
       if (search) query.search = search;
+      if (sortBy) query.sortBy = sortBy;
 
       const data = await get("/api/v1/referrers", { query });
       return data.data;

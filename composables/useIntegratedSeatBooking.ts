@@ -20,6 +20,7 @@ export const useIntegratedSeatBooking = () => {
   const currentZoneKey = ref<string>("");
   const currentShowDate = ref<string>("");
   const listenersSetup = ref(false);
+  let seatUpdateUnsubscribe: (() => void) | null | undefined = null;
 
   // ===== Booking Manager =====
   let bookingManager: any = null;
@@ -93,13 +94,23 @@ export const useIntegratedSeatBooking = () => {
   };
 
   const setupWebSocketListeners = () => {
-    if (listenersSetup.value) {
-      console.log("🔗 WebSocket listeners ถูกตั้งค่าไว้แล้ว");
-      return;
+    // ถ้ามี listener เดิมอยู่ ให้ถอดออกก่อน
+    if (seatUpdateUnsubscribe) {
+      if (typeof seatUpdateUnsubscribe === "function") {
+        seatUpdateUnsubscribe();
+      }
+      seatUpdateUnsubscribe = null;
+      listenersSetup.value = false;
+      console.log("🔗 ถอด WebSocket listener เดิมออกแล้ว");
     }
 
     if (webSocket.onSeatUpdate) {
-      webSocket.onSeatUpdate(handleWebSocketEvent);
+      const unsub = webSocket.onSeatUpdate(handleWebSocketEvent);
+      if (typeof unsub === "function") {
+        seatUpdateUnsubscribe = unsub;
+      } else {
+        seatUpdateUnsubscribe = null;
+      }
       listenersSetup.value = true;
       console.log("🔗 ตั้งค่า WebSocket listeners สำเร็จ");
     }
@@ -372,7 +383,14 @@ export const useIntegratedSeatBooking = () => {
   // ===== Cleanup =====
   const cleanup = () => {
     seatManager.cleanup();
-    listenersSetup.value = false;
+    if (seatUpdateUnsubscribe) {
+      if (typeof seatUpdateUnsubscribe === "function") {
+        seatUpdateUnsubscribe();
+        console.log("🔗 ถอด WebSocket listener ตอน cleanup");
+      }
+      seatUpdateUnsubscribe = null;
+      listenersSetup.value = false;
+    }
     currentZoneKey.value = "";
     currentShowDate.value = "";
     console.log("🧹 ล้างข้อมูลทั้งหมด");

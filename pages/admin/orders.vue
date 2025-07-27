@@ -148,7 +148,7 @@
               v-model="pageData.filters.search"
               @input="onOrderIdChange"
               placeholder="พิมพ์ Order ID..."
-              class="bg-white text-black border shadow-md rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-blue-50"
+              :className="'w-full bg-white text-black border shadow-md rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-blue-50 h-[37px]'"
             />
           </div>
           <div>
@@ -380,9 +380,11 @@ const fetchData = async () => {
       zone: ZONE_IDS_BY_NAME[pageData.filters.zone] || undefined,
     });
     // อัพเดทข้อมูลในหน้า
+    console.log("res", res);
+
     pageData.orders = res.data;
-    pageData.totalCount = res.meta.total;
-    pageData.totalPage = res.meta.totalPages;
+    pageData.totalCount = res.total;
+    pageData.totalPage = res.totalPages;
     // showModal.value = false;
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);

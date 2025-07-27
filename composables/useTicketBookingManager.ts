@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref, computed, onBeforeUnmount } from "vue";
 import { useSingleToast } from "./useSingleToast";
 import { useWebSocket } from "./useWebSocket";
 import { useSeatManager } from "./useSeatManager";
@@ -77,40 +77,79 @@ export const useTicketBookingManager = () => {
     }
   };
 
+  // ===== WebSocket Listener Management =====
+  let unsubOrderCreated: (() => void) | null = null;
+  let unsubOrderCancelled: (() => void) | null = null;
+  let unsubSeatLocked: (() => void) | null = null;
+  let unsubSeatUnlocked: (() => void) | null = null;
+  let unsubSeatAvailabilityChanged: (() => void) | null = null;
+
+  const removeWebSocketListeners = () => {
+    if (typeof unsubOrderCreated === "function") unsubOrderCreated();
+    if (typeof unsubOrderCancelled === "function") unsubOrderCancelled();
+    if (typeof unsubSeatLocked === "function") unsubSeatLocked();
+    if (typeof unsubSeatUnlocked === "function") unsubSeatUnlocked();
+    if (typeof unsubSeatAvailabilityChanged === "function")
+      unsubSeatAvailabilityChanged();
+    unsubOrderCreated = null;
+    unsubOrderCancelled = null;
+    unsubSeatLocked = null;
+    unsubSeatUnlocked = null;
+    unsubSeatAvailabilityChanged = null;
+  };
+
+  // Cleanup function สำหรับถอด WebSocket listeners
+  const cleanup = () => {
+    removeWebSocketListeners();
+    // ... สามารถเพิ่ม logic cleanup อื่นๆ ได้ที่นี่ ...
+    console.log("🧹 Cleanup: ถอด WebSocket listeners แล้ว");
+  };
+
+  // ถอด listener อัตโนมัติเมื่อ component ถูก unmount
+  onBeforeUnmount(() => {
+    cleanup();
+  });
+
   // ตั้งค่า WebSocket event listeners
   const setupWebSocketListeners = () => {
+    removeWebSocketListeners();
     // เมื่อมี order ใหม่
-    onOrderCreated((event) => {
+    const oc = onOrderCreated((event) => {
       console.log("🎫 New order created:", event);
       refreshSeatAvailability(currentShowDate.value);
-      // toast.success("มีการจองใหม่!");
     });
+    unsubOrderCreated = typeof oc === "function" ? oc : null;
 
     // เมื่อมีการยกเลิก order
-    onOrderCancelled((event) => {
+    const occ = onOrderCancelled((event) => {
       console.log("❌ Order cancelled:", event);
       refreshSeatAvailability(currentShowDate.value);
-      // toast.info("มีการยกเลิกจอง");
     });
+    unsubOrderCancelled = typeof occ === "function" ? occ : null;
 
     // เมื่อมีที่นั่งถูกล็อก
-    onSeatLocked((event) => {
+    const osl = onSeatLocked((event) => {
       console.log("🔒 Seats locked:", event);
       updateSeatStatus(event.data.seatIds, SEAT_STATUS.LOCKED);
     });
+    unsubSeatLocked = typeof osl === "function" ? osl : null;
 
     // เมื่อมีที่นั่งถูกปลดล็อก
-    onSeatUnlocked((event) => {
+    const osu = onSeatUnlocked((event) => {
       console.log("🔓 Seats unlocked:", event);
       updateSeatStatus(event.data.seatIds, SEAT_STATUS.AVAILABLE);
     });
+    unsubSeatUnlocked = typeof osu === "function" ? osu : null;
 
     // เมื่อสถานะที่นั่งเปลี่ยน
-    onSeatAvailabilityChanged((event) => {
+    const osac = onSeatAvailabilityChanged((event) => {
       console.log("🎯 Seat availability changed:", event);
       updateSeatStatus(event.data.seatIds, event.data.status);
     });
+    unsubSeatAvailabilityChanged = typeof osac === "function" ? osac : null;
   };
+  // ถอด WebSocket listeners ตอนจำเป็น (เช่น cleanup)
+  // removeWebSocketListeners(); // เรียกใช้ในจุดที่ต้องการ cleanup
 
   // เลือกที่นั่งพร้อมล็อก
   const selectSeatsWithLock = async (seatIds: string[]) => {
@@ -156,7 +195,7 @@ export const useTicketBookingManager = () => {
 
       // ล้างการเลือกที่นั่ง
       clearSelection();
-
+      // ===== WebSocket Listener Management =====
       showToast("success", "สร้างออเดอร์สำเร็จ!");
       return result;
     } catch (error: any) {
@@ -255,5 +294,6 @@ export const useTicketBookingManager = () => {
     cancelSeatSelection,
     getSystemStatistics,
     refreshSeatAvailability,
+    cleanup, // เผื่อเรียก manual cleanup
   };
 };

@@ -87,26 +87,41 @@ export const useWebSocket = () => {
   const onOrderCreated = (callback: (event: any) => void) => {
     if (!socket.value) return;
     socket.value.on("order_created", callback);
+    return () => {
+      if (socket.value) socket.value.off("order_created", callback);
+    };
   };
 
   const onOrderCancelled = (callback: (event: any) => void) => {
     if (!socket.value) return;
     socket.value.on("order_cancelled", callback);
+    return () => {
+      if (socket.value) socket.value.off("order_cancelled", callback);
+    };
   };
 
   const onSeatLocked = (callback: (event: any) => void) => {
     if (!socket.value) return;
     socket.value.on("seat_locked", callback);
+    return () => {
+      if (socket.value) socket.value.off("seat_locked", callback);
+    };
   };
 
   const onSeatUnlocked = (callback: (event: any) => void) => {
     if (!socket.value) return;
     socket.value.on("seat_unlocked", callback);
+    return () => {
+      if (socket.value) socket.value.off("seat_unlocked", callback);
+    };
   };
 
   const onSeatAvailabilityChanged = (callback: (event: any) => void) => {
     if (!socket.value) return;
     socket.value.on("seat_availability_changed", callback);
+    return () => {
+      if (socket.value) socket.value.off("seat_availability_changed", callback);
+    };
   };
 
   // ส่งข้อมูลการเปลี่ยนแปลงที่นั่ง
@@ -135,7 +150,6 @@ export const useWebSocket = () => {
 
     console.log("🔗 Setting up seat update listeners...");
 
-    // ป้องกันการตั้งค่า listeners ซ้ำ โดยการยกเลิก listeners เก่าก่อน
     const eventTypes = [
       "seat_update",
       "seat_selected",
@@ -147,32 +161,35 @@ export const useWebSocket = () => {
     ];
 
     const socketInstance = socket.value;
-
-    // ยกเลิก listeners เก่า
+    // สร้าง handler ใหม่เพื่อ reference สำหรับถอด listener
+    const eventHandlers: { [key: string]: (event: any) => void } = {};
     eventTypes.forEach((eventType) => {
-      socketInstance.off(eventType);
-    });
-    socketInstance.offAny();
-
-    // ตั้งค่า listeners ใหม่
-    eventTypes.forEach((eventType) => {
-      socketInstance.on(eventType, (event) => {
+      eventHandlers[eventType] = (event) => {
         console.log(`📥 Received ${eventType} event:`, event);
         callback(event);
-      });
+      };
+      socketInstance.on(eventType, eventHandlers[eventType]);
     });
 
     // ฟัง event ทั่วไป
-    socketInstance.onAny((eventName, ...args) => {
+    const anyHandler = (eventName: string, ...args: any[]) => {
       console.log(`📨 Any event received: ${eventName}`, args);
-
-      // ถ้าเป็น event ที่เกี่ยวกับ seat ให้เรียก callback
       if (eventName.includes("seat") || eventName.includes("order")) {
         callback(args[0] || { action: eventName, data: args });
       }
-    });
+    };
+    socketInstance.onAny(anyHandler);
 
     console.log("✅ Seat update listeners configured successfully");
+
+    // คืน unsubscribe function
+    return () => {
+      eventTypes.forEach((eventType) => {
+        socketInstance.off(eventType, eventHandlers[eventType]);
+      });
+      socketInstance.offAny(anyHandler);
+      console.log("🧹 Unsubscribed seat update listeners");
+    };
   };
 
   // ส่งข้อมูล emit ทั่วไป
