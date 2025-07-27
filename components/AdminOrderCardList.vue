@@ -236,6 +236,54 @@
       </div>
     </div>
   </div>
+  <!-- Pagination -->
+  <nav v-if="totalPages > 1" class="flex justify-center mt-8">
+    <ul class="inline-flex items-center space-x-1">
+      <li>
+        <button
+          class="px-2 py-1 rounded text-sm"
+          :class="
+            props.page === 1
+              ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+              : 'bg-slate-700 text-white hover:bg-slate-600'
+          "
+          :disabled="props.page === 1"
+          @click="emit('update:page', props.page - 1)"
+        >
+          <i class="mdi mdi-chevron-left"></i>
+        </button>
+      </li>
+      <li v-for="page in paginationNumbers" :key="page">
+        <button
+          v-if="page !== '...'"
+          class="px-3 py-1 rounded text-sm font-medium"
+          :class="
+            props.page === page
+              ? 'bg-indigo-600 text-white'
+              : 'bg-slate-700 text-white hover:bg-slate-600'
+          "
+          @click="emit('update:page', page)"
+        >
+          {{ page }}
+        </button>
+        <span v-else class="px-2 py-1 text-gray-400">...</span>
+      </li>
+      <li>
+        <button
+          class="px-2 py-1 rounded text-sm"
+          :class="
+            props.page === totalPages
+              ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+              : 'bg-slate-700 text-white hover:bg-slate-600'
+          "
+          :disabled="props.page === totalPages"
+          @click="emit('update:page', props.page + 1)"
+        >
+          <i class="mdi mdi-chevron-right"></i>
+        </button>
+      </li>
+    </ul>
+  </nav>
 </template>
 
 <script setup>
@@ -371,7 +419,7 @@ const getPaymentMethodLabel = (method) => {
   switch (method) {
     case "CASH":
       return "เงินสด";
-    case "CARD":
+    case "CREDIT_CARD":
       return "บัตรเครดิต";
     case "TRANSFER":
       return "โอนเงิน";

@@ -91,17 +91,15 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="relative">
+          <div class="relative w-full">
             <BaseInput
               v-model="pageData.filters.keyword"
               label="ค้นหา"
               placeholder="ค้นหาชื่อหรือโค้ด Referrer"
-              class="pl-10"
             />
-            <i class="mdi mdi-magnify absolute left-3 top-9 text-gray-400"></i>
           </div>
 
-          <div>
+          <div class="w-full">
             <BaseSelect
               v-model="statusFilter"
               :options="statusOptions"
@@ -109,16 +107,18 @@
               placeholder="เลือกสถานะ"
               clearable
               @change="fetchReferrers"
+              class="w-full"
             />
           </div>
 
-          <div>
+          <div class="w-full">
             <BaseSelect
               v-model="sortBy"
               :options="sortOptions"
               label="เรียงลำดับ"
               placeholder="เลือกการเรียงลำดับ"
               @change="fetchReferrers"
+              class="w-full"
             />
           </div>
         </div>
@@ -430,7 +430,6 @@
             <BaseInput
               v-model="pageData.newRef.name"
               placeholder="กรอกชื่อผู้แนะนำ"
-              class="w-full"
             />
           </div>
 
@@ -442,7 +441,6 @@
             <BaseInput
               v-model="pageData.newRef.code"
               placeholder="กรอกรหัสผู้แนะนำ"
-              class="w-full"
             />
           </div>
 
@@ -454,7 +452,6 @@
             <BaseInput
               v-model="pageData.newRef.phone"
               placeholder="กรอกหมายเลขโทรศัพท์"
-              class="w-full"
             />
           </div>
 
@@ -503,6 +500,9 @@ import { reactive, ref, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import debounce from "lodash/debounce";
 import dayjs from "dayjs";
+import { useReferrerMasterData } from "@/composables/useReferrerMasterData";
+// Master data composable for referrer
+const { fetchMasterData } = useReferrerMasterData();
 
 // Define page meta
 // definePageMeta({
@@ -555,12 +555,14 @@ const pageData = reactive({
 // Methods
 const fetchReferrers = async () => {
   data.loading = true;
+
   try {
     const res = await getReferrers({
       page: pageData.page,
       limit: pageData.limit,
       search: pageData.filters.keyword.trim() || undefined,
       status: statusFilter.value || undefined,
+      sortBy: sortBy.value || undefined,
     });
     pageData.referrers = res.items;
     pageData.totalPages = res.totalPages || 1;
@@ -615,6 +617,7 @@ const handleSaveReferrer = async () => {
     };
     pageData.editing = false;
     await fetchReferrers();
+    await fetchMasterData();
     data.loading = false;
   } catch (err) {
     data.loading = false;
@@ -633,6 +636,7 @@ const toggleStatus = async (ref) => {
     const newStatus = ref.isActive === true ? false : true;
     await updateReferrer(ref.id, { isActive: newStatus });
     await fetchReferrers();
+    await fetchMasterData();
   } catch (err) {
     console.error("เปลี่ยนสถานะไม่สำเร็จ:", err);
   }

@@ -120,11 +120,7 @@
             label="ค้นหา"
             placeholder="ค้นหาชื่อ, อีเมล, หรือรหัสพนักงาน"
             @input="debouncedSearch"
-            class="mt-[5px]"
           >
-            <template #prefix>
-              <i class="mdi mdi-magnify text-gray-400"></i>
-            </template>
           </BaseInput>
         </div>
 

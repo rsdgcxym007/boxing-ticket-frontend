@@ -41,7 +41,15 @@
               v-model="filters.start"
               placeholder="เลือกวันที่เริ่ม"
               minDate=""
-              input-class-name="w-full px-4 py-2 text-black rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500"
+              :inputClassName="'w-full text-black rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500'"
+              :wrapperClassName="'w-full h-[40.5px]'"
+              :inputStyle="{
+                height: '40.5px',
+                padding: '0 14px',
+                minHeight: 0,
+                maxHeight: 'none',
+                boxSizing: 'border-box',
+              }"
             />
           </div>
 
@@ -57,7 +65,43 @@
               v-model="filters.end"
               minDate=""
               placeholder="เลือกวันที่สิ้นสุด"
-              input-class-name="w-full px-4 py-2 text-black rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500"
+              :inputClassName="'w-full text-black rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500'"
+              :wrapperClassName="'w-full h-[40.5px]'"
+              :inputStyle="{
+                height: '40.5px',
+                padding: '0 14px',
+                minHeight: 0,
+                maxHeight: 'none',
+                boxSizing: 'border-box',
+              }"
+            />
+          </div>
+
+          <!-- Order Status Filter -->
+          <div class="flex-1 min-w-[180px]">
+            <label class="text-sm font-semibold text-white mb-1 block">
+              สถานะออเดอร์
+            </label>
+            <BaseSelect
+              v-model="filters.status"
+              :options="orderStatusOptions"
+              placeholder="เลือกสถานะ"
+              clearable
+              className="w-full"
+            />
+          </div>
+
+          <!-- Payment Method Filter -->
+          <div class="flex-1 min-w-[180px]">
+            <label class="text-sm font-semibold text-white mb-1 block">
+              วิธีชำระเงิน
+            </label>
+            <BaseSelect
+              v-model="filters.paymentMethod"
+              :options="paymentMethodOptions"
+              placeholder="เลือกวิธีชำระเงิน"
+              clearable
+              className="w-full"
             />
           </div>
 
@@ -159,16 +203,32 @@
               <span
                 :class="[
                   'font-semibold',
-                  order.status === 'PAID' ? 'text-green-400' : 'text-red-400',
+                  order.status === 'PAID'
+                    ? 'text-green-400'
+                    : order.status === 'CANCELLED'
+                    ? 'text-yellow-400'
+                    : 'text-red-400',
                 ]"
               >
-                {{ order.status === "PAID" ? "ชำระแล้ว" : "ยังไม่ชำระ" }}
+                {{
+                  order.status === "PAID"
+                    ? "ชำระแล้ว"
+                    : order.status === "CANCELLED"
+                    ? "ถูกยกเลิก"
+                    : "ยังไม่ชำระ"
+                }}
               </span>
             </div>
             <div class="flex items-center gap-1">
               <i class="mdi mdi-credit-card-outline text-gray-400"></i>
               <span class="text-gray-400">วิธีชำระ:</span>
-              <span class="text-white font-semibold">{{ order.method }}</span>
+              <span class="text-white font-semibold">{{
+                order.payment?.method === "CREDIT_CARD"
+                  ? "บัตรเครดิต"
+                  : order.payment?.method === "CASH"
+                  ? "เงินสด"
+                  : "อื่นๆ"
+              }}</span>
             </div>
           </div>
         </div>
@@ -264,6 +324,10 @@ import { useRoute } from "vue-router";
 import dayjs from "dayjs";
 import type { Order } from "../../../types/Order";
 import { usePageData } from "../../../stores/pageData";
+import {
+  orderStatusOptions,
+  paymentMethodOptions,
+} from "../../../utils/orderOptions";
 const loading = usePageData();
 const orders = ref<Order[]>([]);
 
@@ -274,6 +338,8 @@ const referrerName = ref("");
 const filters = ref({
   start: dayjs(new Date()).format("YYYY-MM-DD"),
   end: dayjs(new Date()).format("YYYY-MM-DD"),
+  status: undefined as string | undefined,
+  paymentMethod: undefined as string | undefined,
 });
 
 const fetchOrders = async () => {
@@ -287,6 +353,13 @@ const fetchOrders = async () => {
 
     if (filters.value.end) {
       query.endDate = dayjs(filters.value.end).format("YYYY-MM-DD");
+    }
+
+    if (filters.value.status) {
+      query.status = filters.value.status;
+    }
+    if (filters.value.paymentMethod) {
+      query.paymentMethod = filters.value.paymentMethod;
     }
 
     const referrerId = Array.isArray(route.params.id)
@@ -367,3 +440,17 @@ const totalCommission = computed(
   () => totalReferrerCommission.value + totalStandingCommission.value
 );
 </script>
+<style scoped>
+:deep(.dp__input_reg) {
+  height: 40.5px;
+  padding: 0 30px;
+  min-height: 0;
+  max-height: none;
+  box-sizing: border-box;
+  width: 100%;
+  color: #000;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+</style>

@@ -149,11 +149,13 @@
           <i class="mdi mdi-account-star-outline text-yellow-400" />
           Referrer Code (ถ้ามี)
         </label>
-        <input
+        <BaseSelect
           v-model="pageData.referrerCode"
-          type="text"
-          placeholder="เช่น FRESHYTOUR"
-          class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition hover:border-yellow-300 hover:ring-1"
+          :options="masterData || []"
+          placeholder="กรอกรหัสผู้แนะนำ เช่น FRESHYTOUR"
+          clearable
+          searchable
+          className="w-full"
         />
       </div>
 
@@ -259,6 +261,15 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, computed } from "vue";
+import { useReferrerMasterData } from "../composables/useReferrerMasterData";
+import BaseSelect from "../components/base/BaseSelect.vue";
+// Referrer options from master data
+const { masterData, fetchMasterData } = useReferrerMasterData();
+onMounted(() => {
+  fetchMasterData();
+});
+
 import { ref } from "vue";
 import { useSingleToast } from "../composables/useSingleToast";
 
@@ -369,7 +380,7 @@ const bookStandingTicketNew = async () => {
     }
   } catch (error) {
     console.error("❌ เกิดข้อผิดพลาดในการจองตั๋ว:", error);
-    showToast("error", "❌ ไม่สามารถจองตั๋วได้ กรุณาลองใหม่อีกครั้ง");
+    // showToast("error", "❌ ไม่สามารถจองตั๋วได้ กรุณาลองใหม่อีกครั้ง");
   } finally {
     isLoading.loading = false;
   }

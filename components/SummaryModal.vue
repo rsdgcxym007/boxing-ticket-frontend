@@ -277,11 +277,14 @@
           <h3 class="text-lg font-bold text-gray-800">รหัสผู้แนะนำ</h3>
           <span class="text-sm text-gray-500">(ถ้ามี)</span>
         </div>
-        <input
+
+        <BaseSelect
           v-model="pageData.referrerCode"
-          type="text"
-          placeholder="กรอกรหัสผู้แนะนำ"
-          class="w-full p-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-gray-300 focus:border-gray-500 bg-white transition-all duration-300"
+          :options="masterData || []"
+          placeholder="กรอกรหัสผู้แนะนำ เช่น FRESHYTOUR"
+          clearable
+          searchable
+          className="w-full"
         />
       </div>
     </div>
@@ -335,9 +338,11 @@ import { usePageData } from "@/stores/pageData";
 import { useOrder } from "@/composables/useOrder";
 import { usePayments } from "@/composables/usePayments";
 import { useTicketBookingManager } from "@/composables/useTicketBookingManager";
-
+import { useReferrerMasterData } from "../composables/useReferrerMasterData";
+import BaseSelect from "../components/base/BaseSelect.vue";
 // ==================== STORES & COMPOSABLES ====================
 const auth = useAuthStore();
+const { masterData, fetchMasterData } = useReferrerMasterData();
 const { showToast } = useSingleToast();
 const { t } = useI18n();
 const router = useRouter();
@@ -548,6 +553,7 @@ const handlePaymentError = (error) => {
 // ==================== LIFECYCLE HOOKS ====================
 onMounted(async () => {
   try {
+    fetchMasterData();
     setupCountdown();
     initializeData();
     await checkSystemHealth();
