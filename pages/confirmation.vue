@@ -89,6 +89,7 @@
     </BaseCard>
 
     <!-- Modal สำหรับแสดงตั๋ว -->
+    <!--
     <TicketDisplay
       v-if="showTicketModal"
       :tickets="generatedTickets"
@@ -106,6 +107,7 @@
         <span v-else>แสดง Thermal Receipt PDF</span>
       </button>
     </div>
+    -->
 
     <!-- Modal สำหรับแสดง Thermal Receipt PDF -->
     <div
@@ -148,7 +150,7 @@ import { useRoute } from "vue-router";
 import { ref } from "vue";
 import { useOrder } from "~/composables/useOrder";
 const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
-import TicketDisplay from "~/components/TicketDisplay.vue";
+// import TicketDisplay from "~/components/TicketDisplay.vue";
 
 // ตั้งค่า metadata สำหรับหน้า
 definePageMeta({
@@ -168,7 +170,7 @@ const total = parseInt(route.query.total || "0");
 // ตัวแปร reactive สำหรับจัดการสถานะ
 const isGeneratingTickets = ref(false);
 const generatedTickets = ref([]);
-const showTicketModal = ref(false);
+// const showTicketModal = ref(false);
 const isDownloadingThermal = ref(false);
 const showThermalModal = ref(false);
 const thermalPdfUrl = ref("");
@@ -214,7 +216,6 @@ const closeThermalModal = () => {
  */
 const onGenerateTickets = async () => {
   isGeneratingTickets.value = true;
-
   try {
     // เรียก API สำหรับสร้างตั๋วจริง
     const tickets = await generateTickets(orderId);
@@ -226,41 +227,27 @@ const onGenerateTickets = async () => {
       type: ticket.type || (zone.includes("STANDING") ? "STANDING" : "SEAT"),
       zone: ticket.zone.name,
     }));
-    showTicketModal.value = true;
+    // เปิด preview thermal receipt PDF อัตโนมัติหลังสร้างตั๋ว
+    if (generatedTickets.value.length > 0) {
+      await handleDownloadThermal(generatedTickets.value[0].orderId);
+    }
   } catch (error) {
     console.error("ไม่สามารถสร้างตั๋วได้:", error);
     const tickets = seats.map((seat, index) => ({
       orderId: orderId,
       seatNumber: seat,
-      customerName: `ผู้ซื้อตั๋ว ${index + 1}`, // สามารถปรับแต่งได้
-      showDate: "01/07/2025", // สามารถดึงจากข้อมูลการจองได้
+      customerName: `ผู้ซื้อตั๋ว ${index + 1}`,
+      showDate: "01/07/2025",
       type: zone.includes("STANDING") ? "STANDING" : "SEAT",
       zone: zone,
     }));
-
     generatedTickets.value = tickets;
-    showTicketModal.value = true;
-
-    alert(`สร้างตั๋วเสร็จสิ้น! จำนวน ${tickets.length} ใบ (ใช้ข้อมูลตัวอย่าง)`);
+    // alert(`สร้างตั๋วเสร็จสิ้น! จำนวน ${tickets.length} ใบ (ใช้ข้อมูลตัวอย่าง)`);
+    if (generatedTickets.value.length > 0) {
+      await handleDownloadThermal(generatedTickets.value[0].orderId);
+    }
   } finally {
     isGeneratingTickets.value = false;
   }
 };
 </script>
-
-<style scoped>
-/* ใช้ฟอนต์ Prompt สำหรับการแสดงผล */
-body {
-  font-family: "Prompt", sans-serif;
-}
-
-/* Animation สำหรับเอฟเฟค hover */
-.hover\\:scale-105:hover {
-  transform: scale(1.05);
-}
-
-/* การเปลี่ยนแปลงที่นุ่มนวล */
-.transition-colors {
-  transition: color 0.2s ease;
-}
-</style>
