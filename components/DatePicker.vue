@@ -4,18 +4,21 @@
       {{ label }}
     </label>
 
-    <Datepicker
-      v-model="displayDate"
-      :min-date="minDate"
-      :format="displayFormat"
-      :auto-apply="true"
-      :enable-time-picker="false"
-      :clearable="false"
-      :disabled-dates="shouldDisable"
-      :id="id"
-      input-class-name="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-      :placeholder="placeholder"
-    />
+    <div :class="wrapperClassName + ' flex items-stretch'">
+      <Datepicker
+        v-model="displayDate"
+        :min-date="minDate"
+        :format="displayFormat"
+        :auto-apply="true"
+        :enable-time-picker="false"
+        :clearable="false"
+        :disabled-dates="shouldDisable"
+        :id="id"
+        :input-class-name="inputClassName + ' !h-full !min-h-0 !max-h-none'"
+        :input-style="props.inputStyle"
+        :placeholder="placeholder"
+      />
+    </div>
   </div>
 </template>
 
@@ -28,7 +31,7 @@ import dayjs from "dayjs";
 const model = defineModel(); // format: YYYY-MM-DD
 const displayDate = ref(null);
 
-defineProps({
+const props = defineProps({
   label: {
     type: String,
     default: "",
@@ -40,6 +43,18 @@ defineProps({
   minDate: {
     type: Date,
     default: new Date(),
+  },
+  inputClassName: {
+    type: String,
+    default: "",
+  },
+  wrapperClassName: {
+    type: String,
+    default: "",
+  },
+  inputStyle: {
+    type: [Object, String],
+    default: undefined,
   },
 });
 

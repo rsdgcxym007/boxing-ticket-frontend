@@ -213,6 +213,21 @@ export const useReferrer = () => {
     }
   };
 
+  const getReferrerMasterData = async () => {
+    try {
+      const data = await get("/api/v1/referrers/master-data");
+      return data.data;
+    } catch (err: any) {
+      showToast(
+        "error",
+        `ไม่สามารถโหลดข้อมูลผู้แนะนำได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
+
   return {
     // New API methods
     getReferrers,
@@ -220,7 +235,9 @@ export const useReferrer = () => {
     updateReferrer,
     getReferrerOrders,
     exportReferrerReport,
-    getReferrerPdfForPreview, // เพิ่มฟังก์ชันใหม่
+    getReferrerPdfForPreview,
+    getReferrerMasterData,
+    // เพิ่มฟังก์ชันใหม่
     // Legacy methods
     getReferrerById,
   };

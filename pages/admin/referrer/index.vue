@@ -500,6 +500,9 @@ import { reactive, ref, onMounted, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import debounce from "lodash/debounce";
 import dayjs from "dayjs";
+import { useReferrerMasterData } from "@/composables/useReferrerMasterData";
+// Master data composable for referrer
+const { fetchMasterData } = useReferrerMasterData();
 
 // Define page meta
 // definePageMeta({
@@ -614,6 +617,7 @@ const handleSaveReferrer = async () => {
     };
     pageData.editing = false;
     await fetchReferrers();
+    await fetchMasterData();
     data.loading = false;
   } catch (err) {
     data.loading = false;
@@ -632,6 +636,7 @@ const toggleStatus = async (ref) => {
     const newStatus = ref.isActive === true ? false : true;
     await updateReferrer(ref.id, { isActive: newStatus });
     await fetchReferrers();
+    await fetchMasterData();
   } catch (err) {
     console.error("เปลี่ยนสถานะไม่สำเร็จ:", err);
   }

@@ -419,7 +419,7 @@ const getPaymentMethodLabel = (method) => {
   switch (method) {
     case "CASH":
       return "เงินสด";
-    case "CARD":
+    case "CREDIT_CARD":
       return "บัตรเครดิต";
     case "TRANSFER":
       return "โอนเงิน";
