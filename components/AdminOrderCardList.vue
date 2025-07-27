@@ -343,6 +343,8 @@ const getPaymentStatusClass = (status) => {
       return "bg-red-100 text-red-800 border-red-300";
     case "REFUNDED":
       return "bg-purple-100 text-purple-800 border-purple-300";
+    case "CANCELLED":
+      return "bg-red-100 text-red-800 border-red-300";
     default:
       return "bg-slate-100 text-slate-800 border-slate-300";
   }
@@ -358,6 +360,8 @@ const getPaymentStatusLabel = (status) => {
       return "ชำระไม่สำเร็จ";
     case "REFUNDED":
       return "คืนเงินแล้ว";
+    case "CANCELLED":
+      return "ยกเลิกการชำระ";
     default:
       return "ไม่ทราบสถานะ";
   }
