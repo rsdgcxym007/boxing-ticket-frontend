@@ -1,6 +1,6 @@
 // stores/pageData.ts
 import { defineStore } from "pinia";
-
+import dayjs from "dayjs";
 const today = new Date();
 const yyyy = today.getFullYear();
 const mm = String(today.getMonth() + 1).padStart(2, "0");
@@ -29,7 +29,13 @@ export const usePageData = defineStore("pageData", {
     page: 1,
     limit: 10,
     selectedSeatsMap: {},
-    filters: { status: "", zone: "", search: "" },
+    filters: {
+      status: "",
+      zone: "",
+      search: "",
+      showDate: dayjs(new Date()).format("YYYY-MM-DD"),
+      createdBy: "",
+    },
     orders: [],
     hasNext: false,
     totalPage: 0,

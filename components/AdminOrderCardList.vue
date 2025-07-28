@@ -18,32 +18,61 @@
       >
         <!-- Header -->
         <div
-          class="bg-slate-700/70 p-4 flex flex-col md:flex-row md:justify-between gap-2"
+          class="order-header px-4 py-4 sm:px-5 sm:py-5 flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-3 border-b"
         >
-          <div>
-            <h3 class="text-white text-sm font-semibold tracking-wide">
-              เลขที่ออเดอร์: {{ order.orderNumber }}
+          <div class="flex-1 min-w-0 flex flex-col gap-2 sm:gap-0">
+            <h3 class="text-white text-base font-bold tracking-wide mb-1">
+              <span class="text-blue-400"
+                >เลขที่ออเดอร์ : {{ order.orderNumber }}</span
+              >
             </h3>
-            <div class="flex gap-2 mt-2 flex-wrap">
+            <div class="flex gap-2 mt-1 flex-wrap">
               <span
-                class="px-2 py-0.5 rounded-full text-xs font-medium border"
+                class="px-2 py-0.5 rounded-full text-xs font-semibold border border-transparent group-hover:border-blue-400 transition-colors"
                 :class="getStatusClass(order.status)"
               >
                 สถานะ: {{ getStatusLabel(order.status) }}
               </span>
               <span
-                class="px-2 py-0.5 rounded-full text-xs font-medium border"
+                class="px-2 py-0.5 rounded-full text-xs font-semibold border border-transparent group-hover:border-blue-400 transition-colors"
                 :class="getPaymentStatusClass(order.paymentStatus)"
               >
                 ชำระเงิน: {{ getPaymentStatusLabel(order.paymentStatus) }}
               </span>
             </div>
           </div>
-          <div class="text-right">
-            <div class="text-lg font-bold text-gray-100">
-              รวมเงิน: ฿{{ formatCurrency(order.totalAmount) }}
+          <div
+            class="text-right flex flex-row sm:flex-col gap-2 sm:gap-1 justify-center items-end sm:items-end min-w-[160px] sm:min-w-[180px] mt-2 sm:mt-0"
+          >
+            <div class="text-base font-bold text-green-400">
+              ฿{{ formatCurrency(order.totalAmount) }}
+              <span class="text-xs text-gray-400 font-normal ml-1"
+                >รวมเงิน</span
+              >
             </div>
-            <div class="text-xs text-gray-400">
+            <div class="text-base font-bold text-yellow-300">
+              ฿{{
+                order.ticketType === "RINGSIDE"
+                  ? order.referrerCommission
+                  : order.standingCommission || 0
+              }}
+              <span class="text-xs text-gray-400 font-normal ml-1">ค่าคอม</span>
+            </div>
+            <div class="text-base font-bold text-pink-300">
+              ฿{{
+                order.ticketType === "RINGSIDE"
+                  ? formatCurrency(
+                      order.totalAmount - (order.referrerCommission || 0)
+                    )
+                  : formatCurrency(
+                      order.totalAmount - (order.standingCommission || 0)
+                    )
+              }}
+              <span class="text-xs text-gray-400 font-normal ml-1"
+                >ยอดสุทธิ</span
+              >
+            </div>
+            <div class="text-xs text-gray-400 mt-1 w-full text-right">
               {{ order.quantity }} ใบ ({{ order.ticketType }})
             </div>
           </div>

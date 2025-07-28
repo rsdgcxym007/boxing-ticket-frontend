@@ -16,6 +16,9 @@ export const useOrder = () => {
     search,
     startDate,
     endDate,
+    createdBy,
+    showDate,
+    paymentMethod,
   }: {
     page?: number;
     limit?: number;
@@ -24,14 +27,22 @@ export const useOrder = () => {
     search?: string;
     startDate?: string;
     endDate?: string;
+    createdBy?: string;
+    showDate?: string;
+    paymentMethod?: string;
   }) => {
     try {
       const query: Record<string, any> = { page, limit };
+      console.log("showDate"), showDate;
+
       if (status) query.status = status;
       if (zone) query.zone = zone;
       if (search) query.search = search;
       if (startDate) query.startDate = startDate;
       if (endDate) query.endDate = endDate;
+      if (createdBy) query.createdBy = createdBy;
+      if (showDate) query.showDate = showDate;
+      if (paymentMethod) query.paymentMethod = paymentMethod;
 
       const data = await get("/api/v1/orders", { query });
       return data.data;
@@ -306,6 +317,20 @@ export const useOrder = () => {
       return undefined;
     }
   };
+  const getMasterStaffAdmin = async () => {
+    try {
+      const data = await get("/api/v1/orders/master/staff-admin");
+      return data.data;
+    } catch (err: any) {
+      showToast(
+        "error",
+        `ไม่สามารถโหลดข้อมูลผู้แนะนำได้: ${
+          err.response?.data?.message || "Unknown error"
+        }`
+      );
+      throw err;
+    }
+  };
 
   return {
     getOrders,
@@ -319,6 +344,7 @@ export const useOrder = () => {
     updateStanding,
     generateTickets,
     downloadThermalReceipt,
+    getMasterStaffAdmin,
   };
 };
 
