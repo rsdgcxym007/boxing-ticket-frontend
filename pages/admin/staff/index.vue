@@ -327,7 +327,7 @@
                 <div class="flex items-center gap-2">
                   <i class="mdi mdi-domain text-purple-500"></i>
                   <span class="text-sm text-gray-900 font-medium">
-                    {{ staff.department || "-" }}
+                    {{ staff.position || "-" }}
                   </span>
                 </div>
               </td>
