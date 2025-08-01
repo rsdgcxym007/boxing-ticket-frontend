@@ -24,6 +24,7 @@ if (process.platform === "win32") {
 }
 
 function createSplashWindow() {
+  console.log("[Electron] Creating splash window");
   splashWindow = new BrowserWindow({
     width: 400,
     height: 300,
@@ -36,17 +37,23 @@ function createSplashWindow() {
     },
   });
 
-  splashWindow.loadFile(path.join(__dirname, "splash.html"));
+  const splashPath = path.join(__dirname, "splash.html");
+  console.log("[Electron] Loading splash:", splashPath);
+  splashWindow.loadFile(splashPath);
 
   splashWindow.on("closed", () => {
+    console.log("[Electron] Splash window closed");
     splashWindow = null;
   });
 }
 
 function createWindow() {
-  // Debug log
-  console.log("isDev:", isDev);
-  console.log("Directory path:", path.join(__dirname, "../.output/public"));
+  console.log("[Electron] Creating main window");
+  console.log("[Electron] isDev:", isDev);
+  console.log(
+    "[Electron] Directory path:",
+    path.join(__dirname, "../.output/public")
+  );
 
   // Create the browser window
   mainWindow = new BrowserWindow({
@@ -68,21 +75,25 @@ function createWindow() {
 
   // Load the app
   if (isDev) {
+    console.log("[Electron] Loading dev server: http://localhost:3000");
     mainWindow.loadURL("http://localhost:3000");
   } else {
     // For production Electron, we need to serve static files properly
     const serve = require("electron-serve");
+    const staticDir = path.join(__dirname, "../.output/public");
+    console.log("[Electron] Serving static from:", staticDir);
     const loadURL = serve({
-      directory: path.join(__dirname, "../.output/public"),
+      directory: staticDir,
       scheme: "app",
     });
     loadURL(mainWindow).catch((err) => {
-      console.error("Failed to load app:", err);
+      console.error("[Electron] Failed to load app:", err);
     });
   }
 
   // Show window when ready
   mainWindow.once("ready-to-show", () => {
+    console.log("[Electron] Main window ready to show");
     if (splashWindow) {
       splashWindow.close();
     }
@@ -90,29 +101,35 @@ function createWindow() {
 
     // Check for updates after app is ready
     if (!isDev) {
+      console.log("[Electron] Checking for updates...");
       autoUpdater.checkForUpdatesAndNotify();
     }
   });
 
   // Open DevTools in development
   if (isDev) {
+    console.log("[Electron] Opening DevTools");
     mainWindow.webContents.openDevTools();
   }
 
   // Handle window closed
   mainWindow.on("closed", () => {
+    console.log("[Electron] Main window closed");
     mainWindow = null;
   });
 
   // Handle external links
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    console.log("[Electron] External link opened:", url);
     shell.openExternal(url);
     return { action: "deny" };
   });
 }
 
 // Create application menu
+// Debug: log menu creation
 function createMenu() {
+  console.log("[Electron] Creating application menu");
   const template = [
     {
       label: "File",
@@ -314,14 +331,17 @@ function createMenu() {
 
 // App event handlers
 app.whenReady().then(() => {
+  console.log("[Electron] App ready");
   createSplashWindow();
 
   setTimeout(() => {
+    console.log("[Electron] Creating main window and menu after splash");
     createWindow();
     createMenu();
   }, 2000);
 
   app.on("activate", () => {
+    console.log("[Electron] App activate");
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
@@ -329,6 +349,7 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
+  console.log("[Electron] All windows closed");
   if (process.platform !== "darwin") {
     app.quit();
   }
@@ -336,14 +357,14 @@ app.on("window-all-closed", () => {
 
 // Auto updater events
 autoUpdater.on("checking-for-update", () => {
-  console.log("Checking for update...");
+  console.log("[Electron] Checking for update...");
   if (mainWindow) {
     mainWindow.webContents.send("update-status", "checking");
   }
 });
 
 autoUpdater.on("update-available", (info) => {
-  console.log("Update available.");
+  console.log("[Electron] Update available.", info);
   if (mainWindow) {
     mainWindow.webContents.send("update-status", "available", info);
     dialog
@@ -355,7 +376,9 @@ autoUpdater.on("update-available", (info) => {
         defaultId: 0,
       })
       .then((result) => {
+        console.log("[Electron] Update dialog result:", result);
         if (result.response === 0) {
+          console.log("[Electron] User chose to download update");
           autoUpdater.downloadUpdate();
         }
       });
@@ -363,25 +386,26 @@ autoUpdater.on("update-available", (info) => {
 });
 
 autoUpdater.on("update-not-available", (info) => {
-  console.log("Update not available.");
+  console.log("[Electron] Update not available.", info);
   if (mainWindow) {
     mainWindow.webContents.send("update-status", "not-available");
   }
 });
 
 autoUpdater.on("error", (err) => {
-  console.log("Error in auto-updater. " + err);
+  console.log("[Electron] Error in auto-updater:", err);
   if (mainWindow) {
     mainWindow.webContents.send("update-status", "error", err.message);
   }
 });
 
 autoUpdater.on("download-progress", (progressObj) => {
-  let log_message = "Download speed: " + progressObj.bytesPerSecond;
-  log_message = log_message + " - Downloaded " + progressObj.percent + "%";
-  log_message =
-    log_message +
-    " (" +
+  let log_message =
+    "[Electron] Download speed: " +
+    progressObj.bytesPerSecond +
+    " - Downloaded " +
+    progressObj.percent +
+    "% (" +
     progressObj.transferred +
     "/" +
     progressObj.total +
@@ -394,7 +418,7 @@ autoUpdater.on("download-progress", (progressObj) => {
 });
 
 autoUpdater.on("update-downloaded", (info) => {
-  console.log("Update downloaded");
+  console.log("[Electron] Update downloaded", info);
   if (mainWindow) {
     mainWindow.webContents.send("update-status", "downloaded");
     dialog
@@ -407,7 +431,9 @@ autoUpdater.on("update-downloaded", (info) => {
         defaultId: 0,
       })
       .then((result) => {
+        console.log("[Electron] Update ready dialog result:", result);
         if (result.response === 0) {
+          console.log("[Electron] Restarting to install update");
           autoUpdater.quitAndInstall();
         }
       });
@@ -416,10 +442,12 @@ autoUpdater.on("update-downloaded", (info) => {
 
 // IPC handlers
 ipcMain.handle("app-version", () => {
+  console.log("[Electron] IPC: app-version");
   return app.getVersion();
 });
 
 ipcMain.handle("check-for-updates", () => {
+  console.log("[Electron] IPC: check-for-updates");
   if (!isDev) {
     autoUpdater.checkForUpdatesAndNotify();
   }
@@ -427,31 +455,37 @@ ipcMain.handle("check-for-updates", () => {
 });
 
 ipcMain.handle("show-message-box", async (event, options) => {
+  console.log("[Electron] IPC: show-message-box", options);
   const result = await dialog.showMessageBox(mainWindow, options);
   return result;
 });
 
 ipcMain.handle("show-open-dialog", async (event, options) => {
+  console.log("[Electron] IPC: show-open-dialog", options);
   const result = await dialog.showOpenDialog(mainWindow, options);
   return result;
 });
 
 ipcMain.handle("show-save-dialog", async (event, options) => {
+  console.log("[Electron] IPC: show-save-dialog", options);
   const result = await dialog.showSaveDialog(mainWindow, options);
   return result;
 });
 
 ipcMain.handle("get-platform", () => {
+  console.log("[Electron] IPC: get-platform");
   return process.platform;
 });
 
 ipcMain.handle("minimize-window", () => {
+  console.log("[Electron] IPC: minimize-window");
   if (mainWindow) {
     mainWindow.minimize();
   }
 });
 
 ipcMain.handle("maximize-window", () => {
+  console.log("[Electron] IPC: maximize-window");
   if (mainWindow) {
     if (mainWindow.isMaximized()) {
       mainWindow.unmaximize();
@@ -462,12 +496,14 @@ ipcMain.handle("maximize-window", () => {
 });
 
 ipcMain.handle("close-window", () => {
+  console.log("[Electron] IPC: close-window");
   if (mainWindow) {
     mainWindow.close();
   }
 });
 
 ipcMain.handle("is-maximized", () => {
+  console.log("[Electron] IPC: is-maximized");
   return mainWindow ? mainWindow.isMaximized() : false;
 });
 
