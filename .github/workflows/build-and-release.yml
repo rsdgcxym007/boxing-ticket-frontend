@@ -14,7 +14,7 @@ jobs:
     
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-13, windows-latest, ubuntu-latest]
 
     steps:
     - name: Check out Git repository
@@ -32,8 +32,15 @@ jobs:
     - name: Build Nuxt app
       run: npm run build
 
+    - name: List dist-electron directory
+      if: always()
+      run: |
+        echo "Listing dist-electron contents..."
+        ls -la dist-electron/ || echo "dist-electron directory not found"
+        find . -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.msi" -o -name "*.zip" | head -10
+
     - name: Build Electron app (macOS)
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-13'
       run: npm run build:electron:mac
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,32 +58,31 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload macOS artifacts
-      if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v3
+      if: matrix.os == 'macos-13'
+      uses: actions/upload-artifact@v4
       with:
         name: macos-build
         path: |
-          dist-electron/*.dmg
-          dist-electron/*.zip
+          dist-electron/
+        if-no-files-found: warn
 
     - name: Upload Windows artifacts
       if: matrix.os == 'windows-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: windows-build
         path: |
-          dist-electron/*.exe
-          dist-electron/*.msi
+          dist-electron/
+        if-no-files-found: warn
 
     - name: Upload Linux artifacts
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: linux-build
         path: |
-          dist-electron/*.AppImage
-          dist-electron/*.deb
-          dist-electron/*.rpm
+          dist-electron/
+        if-no-files-found: warn
 
   release:
     needs: build
@@ -85,7 +91,7 @@ jobs:
     
     steps:
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
