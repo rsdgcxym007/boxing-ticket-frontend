@@ -128,10 +128,21 @@ const isSelected = computed(() =>
 );
 
 function getSeatImage() {
-  if (isBooked.value) return "/images/seat-booked.png";
-  if (isLocked.value) return "/images/seat-booked.png"; // ใช้ภาพเดียวกับที่จองแล้วแต่จะมีสีต่าง
-  if (isSelected.value) return "/images/seat-selected.png";
-  return "/images/armchair.png";
+  // Detect Electron production
+  const isProd = process.env.NODE_ENV === "production";
+  let basePath = "/images/";
+  if (
+    isProd &&
+    typeof window !== "undefined" &&
+    window?.process?.type === "renderer"
+  ) {
+    // Electron production: use file protocol
+    basePath = `file://${__dirname}/../.output/public/images/`;
+  }
+  if (isBooked.value) return basePath + "seat-booked.png";
+  if (isLocked.value) return basePath + "seat-booked.png";
+  if (isSelected.value) return basePath + "seat-selected.png";
+  return basePath + "armchair.png";
 }
 </script>
 

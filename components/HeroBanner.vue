@@ -16,11 +16,11 @@
         </h1>
 
         <p class="mt-4 text-sm sm:text-base text-white/90 font-medium">
-          {{ $t("hero.subtitle") }}
+          {{ t("hero.subtitle") }}
         </p>
 
         <p class="text-xs sm:text-sm font-semibold mt-2">
-          {{ $t("hero.dateLabel") }}:
+          {{ t("hero.dateLabel") }}:
           <span class="underline decoration-dotted decoration-white"
             >5th January 2024</span
           >
@@ -37,7 +37,7 @@
             <div
               class="text-[10px] sm:text-xs mt-1 font-semibold uppercase tracking-wide text-gray-600"
             >
-              {{ $t(`hero.${label}`) }}
+              {{ t(`hero.${label}`) }}
             </div>
           </div>
         </div>
@@ -46,26 +46,26 @@
         <h2
           class="text-lg sm:text-xl font-bold border-b pb-3 border-gray-300 text-white mt-8"
         >
-          {{ $t("hero.dayTitle") }}
+          {{ t("hero.dayTitle") }}
         </h2>
 
         <p class="text-sm sm:text-base mt-4 text-white/90 leading-relaxed">
-          {{ $t("hero.dayInfo") }}
+          {{ t("hero.dayInfo") }}
         </p>
         <p class="text-xs sm:text-sm mt-2 text-slate-300">
-          {{ $t("hero.time") }}
+          {{ t("hero.time") }}
         </p>
 
         <p class="mt-5 text-xs sm:text-sm font-semibold text-white">
-          {{ $t("hero.price") }}:
-          <span class="text-red-400 font-bold">{{ $t("hero.ringside") }}</span>
+          {{ t("hero.price") }}:
+          <span class="text-red-400 font-bold">{{ t("hero.ringside") }}</span>
         </p>
         <p class="text-xs sm:text-sm text-slate-300">
-          {{ $t("hero.stadium") }}
+          {{ t("hero.stadium") }}
         </p>
 
         <p class="mt-4 text-xs sm:text-sm text-slate-300">
-          {{ $t("hero.door") }}
+          {{ t("hero.door") }}
         </p>
       </div>
     </div>

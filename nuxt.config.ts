@@ -15,7 +15,17 @@ export default defineNuxtConfig({
   nitro: {
     preset: "static",
   },
-
+  i18n: {
+    locales: [
+      { code: "th", file: "th.json" },
+      { code: "en", file: "en.json" },
+    ],
+    defaultLocale: "th",
+    strategy: "prefix",
+    langDir: "locales/",
+    detectBrowserLanguage: false,
+    lazy: true,
+  },
   vite: {
     build: {
       chunkSizeWarningLimit: 1000, // เพิ่มขีดจำกัดคำเตือนเป็น 1MB

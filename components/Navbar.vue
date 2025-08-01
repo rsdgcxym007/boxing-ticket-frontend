@@ -20,29 +20,31 @@
       <div v-if="isDesktop" class="flex items-center gap-8">
         <ul class="flex gap-8 text-sm md:text-base font-semibold tracking-wide">
           <li>
-            <router-link to="/" class="hover:text-green-400"
-              >หน้าหลัก</router-link
+            <router-link to="/" class="hover:text-green-400">{{
+              t("home")
+            }}</router-link>
+          </li>
+          <li>
+            <router-link
+              to="/StandingTicketForm"
+              class="hover:text-green-400"
+              >{{ t("stadiumTicket") }}</router-link
             >
           </li>
           <li>
-            <router-link to="/StandingTicketForm" class="hover:text-green-400"
-              >ซื้อตั๋วยืน</router-link
-            >
+            <router-link to="/ringside" class="hover:text-green-400">{{
+              t("ringsideTicket")
+            }}</router-link>
           </li>
           <li>
-            <router-link to="/ringside" class="hover:text-green-400"
-              >ซื้อตั๋วริงไซด์</router-link
-            >
-          </li>
-          <li>
-            <router-link to="/contacts" class="hover:text-green-400"
-              >ติดต่อเรา</router-link
-            >
+            <router-link to="/contacts" class="hover:text-green-400">{{
+              t("contact")
+            }}</router-link>
           </li>
           <li v-if="!auth?.user">
-            <router-link to="/login" class="hover:text-green-400"
-              >เข้าสู่ระบบ</router-link
-            >
+            <router-link to="/login" class="hover:text-green-400">{{
+              t("login") || "เข้าสู่ระบบ"
+            }}</router-link>
           </li>
           <!-- Admin Dropdown -->
           <li
@@ -272,7 +274,11 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth";
 import { useAdminMenu } from "@/composables/useAdminMenu";
-const { locale, t, setLocale } = useI18n();
+import { useRouter } from "vue-router";
+import { useSwitchLocalePath } from "#imports";
+const { locale, t } = useI18n();
+const router = useRouter();
+const switchLocalePath = useSwitchLocalePath();
 const auth = useAuthStore();
 
 const isOpen = ref(false);
@@ -287,9 +293,10 @@ const toggleAdminMenu = () => {
 };
 
 const toggleLang = () => {
-  setLocale(locale.value === "th" ? "en" : "th");
+  const newLocale = locale.value === "th" ? "en" : "th";
+  const path = switchLocalePath(newLocale);
+  router.push(path);
 };
-
 const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");

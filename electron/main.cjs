@@ -1,3 +1,4 @@
+const path = require("path");
 const {
   app,
   BrowserWindow,
@@ -7,9 +8,15 @@ const {
   shell,
 } = require("electron");
 const { autoUpdater } = require("electron-updater");
-const path = require("path");
+// ...existing code...
 const fs = require("fs");
-
+if (process.env.NODE_ENV === "production") {
+  require("dotenv").config({
+    path: path.join(__dirname, "../.env.production"),
+  });
+} else {
+  require("dotenv").config({ path: path.join(__dirname, "../.env") });
+}
 // More reliable development detection
 const isDev =
   process.env.NODE_ENV === "development" ||
