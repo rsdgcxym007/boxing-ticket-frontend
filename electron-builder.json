@@ -5,7 +5,7 @@
     "output": "dist-electron"
   },
   "files": [
-    "dist/**/*",
+    ".output/**/*",
     "electron/**/*",
     "node_modules/**/*",
     "package.json"
@@ -16,8 +16,7 @@
   "publish": {
     "provider": "github",
     "owner": "rsdgcxym007",
-    "repo": "boxing-ticket-frontend",
-    "private": true
+    "repo": "boxing-ticket-frontend"
   },
   "mac": {
     "category": "public.app-category.business",

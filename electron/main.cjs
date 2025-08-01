@@ -8,7 +8,14 @@ const {
 } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const path = require("path");
-const isDev = require("electron-is-dev");
+const fs = require("fs");
+
+// More reliable development detection
+const isDev =
+  process.env.NODE_ENV === "development" ||
+  process.defaultApp ||
+  /[\\/]electron-prebuilt[\\/]/.test(process.execPath) ||
+  /[\\/]electron[\\/]/.test(process.execPath);
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -68,7 +75,7 @@ function createWindow() {
       contextIsolation: true,
       enableRemoteModule: false,
       preload: path.join(__dirname, "preload.js"),
-      webSecurity: false, // Disable for local file serving
+      webSecurity: isDev ? true : false, // Enable security in dev, disable in production for local files
     },
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
   });
@@ -78,17 +85,50 @@ function createWindow() {
     console.log("[Electron] Loading dev server: http://localhost:3000");
     mainWindow.loadURL("http://localhost:3000");
   } else {
-    // For production Electron, we need to serve static files properly
-    const serve = require("electron-serve");
-    const staticDir = path.join(__dirname, "../.output/public");
-    console.log("[Electron] Serving static from:", staticDir);
-    const loadURL = serve({
-      directory: staticDir,
-      scheme: "app",
-    });
-    loadURL(mainWindow).catch((err) => {
-      console.error("[Electron] Failed to load app:", err);
-    });
+    console.log("[Electron] Production mode detected");
+    console.log("[Electron] process.execPath:", process.execPath);
+    console.log("[Electron] __dirname:", __dirname);
+    console.log("[Electron] app.isPackaged:", app.isPackaged);
+    console.log("[Electron] process.defaultApp:", process.defaultApp);
+
+    // Try multiple possible locations for the build files
+    const possiblePaths = [
+      path.join(__dirname, ".output", "public"), // In asar
+      path.join(__dirname, "../.output/public"), // Source relative
+      path.join(__dirname, "../../.output/public"), // Alternative source
+      path.join(process.resourcesPath, "app", ".output", "public"), // Resources
+      path.join(process.resourcesPath, ".output", "public"), // Direct resources
+    ];
+
+    let staticDir = null;
+    let indexPath = null;
+
+    for (const testPath of possiblePaths) {
+      console.log("[Electron] Testing path:", testPath);
+      if (fs.existsSync(testPath)) {
+        const testIndexPath = path.join(testPath, "index.html");
+        if (fs.existsSync(testIndexPath)) {
+          console.log("[Electron] Found valid build at:", testPath);
+          staticDir = testPath;
+          indexPath = testIndexPath;
+          break;
+        } else {
+          console.log("[Electron] Path exists but no index.html:", testPath);
+        }
+      } else {
+        console.log("[Electron] Path does not exist:", testPath);
+      }
+    }
+
+    if (staticDir && indexPath) {
+      console.log("[Electron] Loading file:", indexPath);
+      mainWindow.loadFile(indexPath);
+    } else {
+      console.error("[Electron] No valid build found, showing error page");
+      mainWindow.loadURL(
+        "data:text/html,<h1>Build directory not found. Please run 'npm run build' first.</h1>"
+      );
+    }
   }
 
   // Show window when ready
@@ -101,8 +141,12 @@ function createWindow() {
 
     // Check for updates after app is ready
     if (!isDev) {
-      console.log("[Electron] Checking for updates...");
-      autoUpdater.checkForUpdatesAndNotify();
+      try {
+        console.log("[Electron] Checking for updates...");
+        autoUpdater.checkForUpdatesAndNotify();
+      } catch (err) {
+        console.log("[Electron] Error checking for updates:", err.message);
+      }
     }
   });
 
@@ -449,7 +493,11 @@ ipcMain.handle("app-version", () => {
 ipcMain.handle("check-for-updates", () => {
   console.log("[Electron] IPC: check-for-updates");
   if (!isDev) {
-    autoUpdater.checkForUpdatesAndNotify();
+    try {
+      autoUpdater.checkForUpdatesAndNotify();
+    } catch (err) {
+      console.log("[Electron] Error checking for updates:", err.message);
+    }
   }
   return "Checking for updates...";
 });
