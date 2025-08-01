@@ -11,6 +11,11 @@ export default defineNuxtConfig({
 
   devtools: { enabled: false },
   ssr: false,
+  nitro: {
+    prerender: {
+      routes: ['/']
+    }
+  },
 
   // Electron specific configuration
   router: {
