@@ -14,7 +14,7 @@ jobs:
     
     strategy:
       matrix:
-        os: [macos-13, windows-latest, ubuntu-latest]
+        os: [macos-13, windows-latest]
 
     steps:
     - name: Check out Git repository
@@ -40,21 +40,7 @@ jobs:
         ls -la dist-electron/ || echo "dist-electron directory not found"
         find . -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.msi" -o -name "*.zip" | head -10
 
-    - name: Build Electron app (macOS)
-      if: matrix.os == 'macos-13'
-      run: npm run build:electron:mac
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NODE_ENV: production
 
-    - name: Build Electron app (Windows)
-      if: matrix.os == 'windows-latest'
-      run: npm run build:electron:win
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NODE_ENV: production
-
-    - name: Build Electron app (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: npm run build:electron:linux
       env:
