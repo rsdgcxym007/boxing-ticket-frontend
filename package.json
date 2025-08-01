@@ -1,11 +1,16 @@
 {
   "name": "patong-boxing-ticket-system",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Patong Boxing Ticket Management System - Desktop Application",
   "author": {
     "name": "Patong Boxing",
     "email": "info@patongboxing.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rsdgcxym007/boxing-ticket-frontend.git"
+  },
+  "homepage": "https://github.com/rsdgcxym007/boxing-ticket-frontend",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,13 +25,17 @@
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:pack": "nuxt generate && electron-builder --dir",
     "electron:dist": "nuxt generate && electron-builder",
-    "electron:dist:mac": "nuxt generate && electron-builder --mac",
-    "electron:dist:win": "nuxt generate && electron-builder --win",
-    "electron:dist:linux": "nuxt generate && electron-builder --linux",
+    "electron:dist:mac": "nuxt generate && electron-builder --mac --publish=never",
+    "electron:dist:win": "nuxt generate && electron-builder --win --publish=never",
+    "electron:dist:linux": "nuxt generate && electron-builder --linux --publish=never",
     "build:electron:mac": "nuxt generate && electron-builder --mac --publish=always",
     "build:electron:win": "nuxt generate && electron-builder --win --publish=always",
     "build:electron:linux": "nuxt generate && electron-builder --linux --publish=always",
-    "dist": "nuxt generate && electron-builder --publish=always"
+    "dist": "nuxt generate && electron-builder --publish=always",
+    "release": "nuxt generate && electron-builder --publish=always",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major"
   },
   "main": "electron/main.cjs",
   "dependencies": {

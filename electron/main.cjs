@@ -257,29 +257,59 @@ function createMenu() {
 // Auto-updater events
 autoUpdater.on("checking-for-update", () => {
   console.log("[Auto-Updater] Checking for update...");
+  if (mainWindow) {
+    mainWindow.webContents.send("update-status", {
+      type: "checking",
+      message: "กำลังตรวจสอบอัพเดทใหม่...",
+    });
+  }
 });
 
 autoUpdater.on("update-available", (info) => {
   console.log("[Auto-Updater] Update available:", info);
+  if (mainWindow) {
+    mainWindow.webContents.send("update-status", {
+      type: "available",
+      message: `พบเวอร์ชันใหม่ ${info.version}`,
+      version: info.version,
+    });
+  }
+
   dialog
     .showMessageBox(mainWindow, {
       type: "info",
-      title: "Update available",
-      message:
-        "A new version is available. It will be downloaded in the background.",
-      buttons: ["OK"],
+      title: "มีอัพเดทใหม่",
+      message: `พบเวอร์ชันใหม่ ${info.version}\nจะดาวน์โหลดในพื้นหลัง`,
+      buttons: ["ตกลง", "ข้าม"],
+      defaultId: 0,
+      cancelId: 1,
     })
-    .then(() => {
-      autoUpdater.downloadUpdate();
+    .then((result) => {
+      if (result.response === 0) {
+        autoUpdater.downloadUpdate();
+      }
     });
 });
 
 autoUpdater.on("update-not-available", (info) => {
   console.log("[Auto-Updater] Update not available:", info);
+  if (mainWindow) {
+    mainWindow.webContents.send("update-status", {
+      type: "not-available",
+      message: "ใช้เวอร์ชันล่าสุดแล้ว",
+    });
+  }
 });
 
 autoUpdater.on("error", (err) => {
   console.error("[Auto-Updater] Error:", err);
+  if (mainWindow) {
+    mainWindow.webContents.send("update-status", {
+      type: "error",
+      message: "เกิดข้อผิดพลาดในการอัพเดท",
+      error: err.message,
+    });
+  }
 });
 
 autoUpdater.on("download-progress", (progressObj) => {
@@ -288,17 +318,36 @@ autoUpdater.on("download-progress", (progressObj) => {
   log_message =
     log_message + ` (${progressObj.transferred}/${progressObj.total})`;
   console.log("[Auto-Updater]", log_message);
+
+  if (mainWindow) {
+    mainWindow.webContents.send("update-status", {
+      type: "downloading",
+      message: `กำลังดาวน์โหลด ${Math.round(progressObj.percent)}%`,
+      percent: progressObj.percent,
+      transferred: progressObj.transferred,
+      total: progressObj.total,
+    });
+  }
 });
 
 autoUpdater.on("update-downloaded", (info) => {
   console.log("[Auto-Updater] Update downloaded:", info);
+  if (mainWindow) {
+    mainWindow.webContents.send("update-status", {
+      type: "downloaded",
+      message: "ดาวน์โหลดเสร็จแล้ว พร้อมติดตั้ง",
+      version: info.version,
+    });
+  }
+
   dialog
     .showMessageBox(mainWindow, {
       type: "info",
-      title: "Update ready",
-      message:
-        "Update downloaded. Application will restart to apply the update.",
-      buttons: ["Restart", "Later"],
+      title: "อัพเดทพร้อมติดตั้ง",
+      message: `ดาวน์โหลดเวอร์ชัน ${info.version} เสร็จแล้ว\nต้องการรีสตาร์ทแอปเพื่อติดตั้งหรือไม่?`,
+      buttons: ["รีสตาร์ทตอนนี้", "ติดตั้งทีหลัง"],
+      defaultId: 0,
+      cancelId: 1,
     })
     .then((result) => {
       if (result.response === 0) {

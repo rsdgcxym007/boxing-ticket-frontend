@@ -14,23 +14,72 @@
     "main": "electron/main.cjs"
   },
   "compression": "normal",
+  "publish": {
+    "provider": "github",
+    "owner": "rsdgcxym007",
+    "repo": "boxing-ticket-frontend",
+    "releaseType": "release"
+  },
   "mac": {
     "category": "public.app-category.business",
     "icon": "build/icon.icns",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.plist",
     "target": [
       {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      },
+      {
         "target": "zip",
-        "arch": ["arm64"]
+        "arch": ["x64", "arm64"]
       }
     ]
   },
   "win": {
     "target": [
       {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
         "target": "portable",
         "arch": ["x64"]
       }
     ],
     "icon": "build/icon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "build/icon.ico",
+    "uninstallerIcon": "build/icon.ico",
+    "installerHeaderIcon": "build/icon.ico",
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Patong Boxing Ticket System"
+  },
+  "dmg": {
+    "icon": "build/icon.icns",
+    "iconSize": 100,
+    "contents": [
+      {
+        "x": 380,
+        "y": 280,
+        "type": "link",
+        "path": "/Applications"
+      },
+      {
+        "x": 110,
+        "y": 280,
+        "type": "file"
+      }
+    ],
+    "window": {
+      "width": 540,
+      "height": 380
+    }
   }
 }
