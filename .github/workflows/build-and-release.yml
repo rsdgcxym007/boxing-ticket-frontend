@@ -57,8 +57,7 @@ jobs:
         path: dist-electron/*.exe
         if-no-files-found: warn
 
-    - name: Upload Linux artifacts
-      # Linux build removed (not in matrix)
+    # Linux build removed (not in matrix)
 
   release:
     needs: build
