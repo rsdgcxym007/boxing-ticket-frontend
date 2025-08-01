@@ -19,20 +19,30 @@
       <!-- Desktop Menu -->
       <div v-if="isDesktop" class="flex items-center gap-8">
         <ul class="flex gap-8 text-sm md:text-base font-semibold tracking-wide">
-          <li><a href="/" class="hover:text-green-400">หน้าหลัก</a></li>
           <li>
-            <a href="/StandingTicketForm" class="hover:text-green-400"
-              >ซื้อตั๋วยืน</a
+            <router-link to="/" class="hover:text-green-400"
+              >หน้าหลัก</router-link
             >
           </li>
           <li>
-            <a href="/ringside" class="hover:text-green-400">ซื้อตั๋วริงไซด์</a>
+            <router-link to="/StandingTicketForm" class="hover:text-green-400"
+              >ซื้อตั๋วยืน</router-link
+            >
           </li>
           <li>
-            <a href="/contacts" class="hover:text-green-400">ติดต่อเรา</a>
+            <router-link to="/ringside" class="hover:text-green-400"
+              >ซื้อตั๋วริงไซด์</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/contacts" class="hover:text-green-400"
+              >ติดต่อเรา</router-link
+            >
           </li>
           <li v-if="!auth?.user">
-            <a href="/login" class="hover:text-green-400">เข้าสู่ระบบ</a>
+            <router-link to="/login" class="hover:text-green-400"
+              >เข้าสู่ระบบ</router-link
+            >
           </li>
           <!-- Admin Dropdown -->
           <li
@@ -73,17 +83,17 @@
               @mouseleave="adminMenuHover = false"
               class="absolute top-full left-0 mt-2 w-56 bg-[#0f1f3c] text-white shadow-xl rounded-xl z-50 py-2 border border-white/10"
             >
-              <a
+              <router-link
                 v-for="item in adminMenu.filter(
                   (i) => !i.role || i.role.includes(auth?.user?.role)
                 )"
                 :key="item.to"
-                :href="item.to"
+                :to="item.to"
                 class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
               >
                 <i :class="`mdi ${item.icon} text-lg text-white/80`"></i>
                 <span>{{ item.label }}</span>
-              </a>
+              </router-link>
             </div>
           </li>
         </ul>
@@ -164,20 +174,26 @@
       >
         <ul class="flex flex-col gap-3 text-base font-medium text-white">
           <li>
-            <a href="/" class="flex items-center gap-3 hover:text-blue-400"
-              ><i class="mdi mdi-home-outline text-xl"></i>หน้าหลัก</a
+            <router-link
+              to="/"
+              class="flex items-center gap-3 hover:text-blue-400"
+              ><i class="mdi mdi-home-outline text-xl"></i>หน้าหลัก</router-link
             >
           </li>
           <li>
-            <a
-              href="/contacts"
+            <router-link
+              to="/contacts"
               class="flex items-center gap-3 hover:text-blue-400"
-              ><i class="mdi mdi-email-outline text-xl"></i>ติดต่อเรา</a
+              ><i class="mdi mdi-email-outline text-xl"></i
+              >ติดต่อเรา</router-link
             >
           </li>
           <li v-if="!auth?.user">
-            <a href="/login" class="flex items-center gap-3 hover:text-blue-400"
-              ><i class="mdi mdi-login-variant text-xl"></i>เข้าสู่ระบบ</a
+            <router-link
+              to="/login"
+              class="flex items-center gap-3 hover:text-blue-400"
+              ><i class="mdi mdi-login-variant text-xl"></i
+              >เข้าสู่ระบบ</router-link
             >
           </li>
 
@@ -212,13 +228,13 @@
                   )"
                   :key="item.to"
                 >
-                  <a
-                    :href="item.to"
+                  <router-link
+                    :to="item.to"
                     class="flex items-center gap-2 hover:text-white"
                   >
                     <i :class="`mdi ${item.icon}`"></i>
                     {{ item.label }}
-                  </a>
+                  </router-link>
                 </li>
               </ul>
             </transition>
@@ -251,6 +267,7 @@
 </template>
 
 <script setup>
+import { RouterLink } from "vue-router";
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth";
