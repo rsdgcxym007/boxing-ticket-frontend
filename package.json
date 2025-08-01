@@ -21,9 +21,9 @@
     "electron:dist:mac": "npm run build && electron-builder --mac",
     "electron:dist:win": "npm run build && electron-builder --win",
     "electron:dist:linux": "npm run build && electron-builder --linux",
-    "build:electron:mac": "npm run build && electron-builder --mac",
-    "build:electron:win": "npm run build && electron-builder --win",
-    "build:electron:linux": "npm run build && electron-builder --linux",
+    "build:electron:mac": "npm run build && electron-builder --mac --publish=always",
+    "build:electron:win": "npm run build && electron-builder --win --publish=always",
+    "build:electron:linux": "npm run build && electron-builder --linux --publish=always",
     "dist": "npm run build && electron-builder --publish=always",
     "pack": "npm run build && electron-builder --dir"
   },
