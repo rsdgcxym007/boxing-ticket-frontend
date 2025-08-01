@@ -44,6 +44,10 @@ function createSplashWindow() {
 }
 
 function createWindow() {
+  // Debug log
+  console.log("isDev:", isDev);
+  console.log("Directory path:", path.join(__dirname, "../.output/public"));
+  
   // Create the browser window
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -57,7 +61,7 @@ function createWindow() {
       contextIsolation: true,
       enableRemoteModule: false,
       preload: path.join(__dirname, "preload.js"),
-      webSecurity: !isDev,
+      webSecurity: false, // Disable for local file serving
     },
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
   });
@@ -70,8 +74,11 @@ function createWindow() {
     const serve = require("electron-serve");
     const loadURL = serve({
       directory: path.join(__dirname, "../.output/public"),
+      scheme: "app",
     });
-    loadURL(mainWindow);
+    loadURL(mainWindow).catch((err) => {
+      console.error("Failed to load app:", err);
+    });
   }
 
   // Show window when ready
