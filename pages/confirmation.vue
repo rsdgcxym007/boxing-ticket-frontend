@@ -138,6 +138,8 @@
           width="100%"
           height="600px"
           style="border: none"
+          ref="thermalIframe"
+          @load="onThermalIframeLoad"
         ></iframe>
       </div>
     </div>
@@ -176,6 +178,18 @@ const showThermalModal = ref(false);
 const thermalPdfUrl = ref("");
 const thermalPdfError = ref(false);
 // ฟังก์ชันสำหรับดาวน์โหลด thermal receipt จาก TicketDisplay
+const thermalIframe = ref(null);
+
+// ฟังก์ชัน auto print thermal receipt PDF เมื่อ iframe โหลดเสร็จ (Electron เท่านั้น)
+const onThermalIframeLoad = () => {
+  if (
+    typeof window !== "undefined" &&
+    (window?.electron || window?.process?.versions?.electron)
+  ) {
+    // เรียก IPC ไป main process เพื่อสั่ง print (ต้องมี preload expose window.electron.printThermal)
+    window.electron?.printThermal?.();
+  }
+};
 const handleDownloadThermal = async (orderId) => {
   isDownloadingThermal.value = true;
   thermalPdfError.value = false;
