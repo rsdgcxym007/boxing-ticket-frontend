@@ -4,7 +4,7 @@
     <ElectronMenuBar v-if="isElectron" />
 
     <Navbar />
-    <main class="flex-grow">
+    <main class="flex-grow main-content">
       <slot />
       <BaseLoading :visible="pageData.loading" />
     </main>

@@ -35,10 +35,14 @@ jobs:
     - name: Build Electron app (macOS)
       if: matrix.os == 'macos-13'
       run: npm run electron:dist:mac
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build Electron app (Windows)
       if: matrix.os == 'windows-latest'
       run: npm run electron:dist:win
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: List dist-electron directory
       if: always()

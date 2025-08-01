@@ -310,4 +310,7 @@ body.electron-app .navbar,
 body.electron-app nav.bg-gray-900 {
   display: none !important;
 }
+body.electron-app .main-content {
+  padding-top: 40px;
+}
 </style>

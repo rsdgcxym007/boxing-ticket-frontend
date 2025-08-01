@@ -244,6 +244,13 @@ const onGenerateTickets = async () => {
     // เปิด preview thermal receipt PDF อัตโนมัติหลังสร้างตั๋ว
     if (generatedTickets.value.length > 0) {
       await handleDownloadThermal(generatedTickets.value[0].orderId);
+      // Auto print ทันทีหลังโหลด PDF (Electron เท่านั้น)
+      if (
+        typeof window !== "undefined" &&
+        (window?.electron || window?.process?.versions?.electron)
+      ) {
+        window.electron?.printThermal?.();
+      }
     }
   } catch (error) {
     console.error("ไม่สามารถสร้างตั๋วได้:", error);
@@ -259,6 +266,13 @@ const onGenerateTickets = async () => {
     // alert(`สร้างตั๋วเสร็จสิ้น! จำนวน ${tickets.length} ใบ (ใช้ข้อมูลตัวอย่าง)`);
     if (generatedTickets.value.length > 0) {
       await handleDownloadThermal(generatedTickets.value[0].orderId);
+      // Auto print ทันทีหลังโหลด PDF (Electron เท่านั้น)
+      if (
+        typeof window !== "undefined" &&
+        (window?.electron || window?.process?.versions?.electron)
+      ) {
+        window.electron?.printThermal?.();
+      }
     }
   } finally {
     isGeneratingTickets.value = false;
