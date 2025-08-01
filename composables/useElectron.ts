@@ -35,7 +35,13 @@ declare global {
 
 export const useElectron = () => {
   const isElectron = computed(() => {
-    return process.client && !!window.electronAPI;
+    return (
+      typeof window !== "undefined" &&
+      (window.process?.type === "renderer" ||
+        !!window.process?.versions?.electron ||
+        navigator.userAgent.includes("Electron") ||
+        !!window.electronAPI)
+    );
   });
 
   const platform = computed(() => {

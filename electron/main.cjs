@@ -47,7 +47,7 @@ function createWindow() {
   // Debug log
   console.log("isDev:", isDev);
   console.log("Directory path:", path.join(__dirname, "../.output/public"));
-  
+
   // Create the browser window
   mainWindow = new BrowserWindow({
     width: 1200,
