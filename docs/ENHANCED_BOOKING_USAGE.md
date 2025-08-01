@@ -2,6 +2,7 @@
 
 ## 📋 Overview
 ระบบจองตั๋วที่ปรับปรุงใหม่ พร้อมระบบป้องกัน race conditions, real-time updates และ user experience ที่ดีขึ้น
+fix code
 
 ## 🚀 Quick Start
 
