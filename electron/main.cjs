@@ -45,37 +45,34 @@ function createSplashWindow() {
   });
 
   const splashPath = path.join(__dirname, "splash.html");
-  console.log("[Electron] Loading splash:", splashPath);
-  splashWindow.loadFile(splashPath);
-
-  splashWindow.on("closed", () => {
-    console.log("[Electron] Splash window closed");
+  if (fs.existsSync(splashPath)) {
+    splashWindow.loadFile(splashPath);
+  } else {
+    console.log("[Electron] Splash file not found, skipping splash screen");
     splashWindow = null;
-  });
+  }
+
+  if (splashWindow) {
+    splashWindow.on("closed", () => {
+      splashWindow = null;
+    });
+  }
 }
 
 function createWindow() {
   console.log("[Electron] Creating main window");
-  console.log("[Electron] isDev:", isDev);
-  console.log(
-    "[Electron] Directory path:",
-    path.join(__dirname, "../.output/public")
-  );
 
   // Create the browser window
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    minWidth: 800,
-    minHeight: 600,
-    show: false,
-    icon: path.join(__dirname, "../public/favicon.ico"),
+    show: false, // Don't show until ready-to-show
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
       preload: path.join(__dirname, "preload.js"),
-      webSecurity: isDev ? true : false, // Enable security in dev, disable in production for local files
+      webSecurity: true,
     },
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
   });
@@ -85,50 +82,12 @@ function createWindow() {
     console.log("[Electron] Loading dev server: http://localhost:3000");
     mainWindow.loadURL("http://localhost:3000");
   } else {
-    console.log("[Electron] Production mode detected");
-    console.log("[Electron] process.execPath:", process.execPath);
-    console.log("[Electron] __dirname:", __dirname);
-    console.log("[Electron] app.isPackaged:", app.isPackaged);
-    console.log("[Electron] process.defaultApp:", process.defaultApp);
-
-    // Try multiple possible locations for the build files
-    const possiblePaths = [
-      path.join(__dirname, ".output", "public"), // In asar
-      path.join(__dirname, "../.output/public"), // Source relative
-      path.join(__dirname, "../../.output/public"), // Alternative source
-      path.join(process.resourcesPath, "app", ".output", "public"), // Resources
-      path.join(process.resourcesPath, ".output", "public"), // Direct resources
-    ];
-
-    let staticDir = null;
-    let indexPath = null;
-
-    for (const testPath of possiblePaths) {
-      console.log("[Electron] Testing path:", testPath);
-      if (fs.existsSync(testPath)) {
-        const testIndexPath = path.join(testPath, "index.html");
-        if (fs.existsSync(testIndexPath)) {
-          console.log("[Electron] Found valid build at:", testPath);
-          staticDir = testPath;
-          indexPath = testIndexPath;
-          break;
-        } else {
-          console.log("[Electron] Path exists but no index.html:", testPath);
-        }
-      } else {
-        console.log("[Electron] Path does not exist:", testPath);
-      }
-    }
-
-    if (staticDir && indexPath) {
-      console.log("[Electron] Loading file:", indexPath);
-      mainWindow.loadFile(indexPath);
-    } else {
-      console.error("[Electron] No valid build found, showing error page");
-      mainWindow.loadURL(
-        "data:text/html,<h1>Build directory not found. Please run 'npm run build' first.</h1>"
-      );
-    }
+    // For production, load static files
+    console.log("[Electron] Loading production files");
+    const distPath = path.join(__dirname, "../.output/public/index.html");
+    const fileUrl = `file://${distPath}`;
+    console.log("[Electron] Loading file:", fileUrl);
+    mainWindow.loadFile(path.join(__dirname, "../.output/public/index.html"));
   }
 
   // Show window when ready
@@ -164,376 +123,241 @@ function createWindow() {
 
   // Handle external links
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    console.log("[Electron] External link opened:", url);
+    console.log("[Electron] Opening external URL:", url);
     shell.openExternal(url);
     return { action: "deny" };
   });
+
+  // Prevent new window creation
+  mainWindow.webContents.on("new-window", (event, navigationUrl) => {
+    event.preventDefault();
+    console.log("[Electron] Preventing new window:", navigationUrl);
+    shell.openExternal(navigationUrl);
+  });
+
+  // Log navigation events
+  mainWindow.webContents.on("did-start-loading", () => {
+    console.log("[Electron] Started loading");
+  });
+
+  mainWindow.webContents.on("did-finish-load", () => {
+    console.log("[Electron] Finished loading");
+  });
+
+  mainWindow.webContents.on(
+    "did-fail-load",
+    (event, errorCode, errorDescription, validatedURL) => {
+      console.error(
+        "[Electron] Failed to load:",
+        errorCode,
+        errorDescription,
+        validatedURL
+      );
+    }
+  );
 }
 
 // Create application menu
-// Debug: log menu creation
 function createMenu() {
-  console.log("[Electron] Creating application menu");
+  const isMac = process.platform === "darwin";
+
   const template = [
+    ...(isMac
+      ? [
+          {
+            label: app.getName(),
+            submenu: [
+              { role: "about" },
+              { type: "separator" },
+              { role: "services" },
+              { type: "separator" },
+              { role: "hide" },
+              { role: "hideothers" },
+              { role: "unhide" },
+              { type: "separator" },
+              { role: "quit" },
+            ],
+          },
+        ]
+      : []),
     {
       label: "File",
+      submenu: [isMac ? { role: "close" } : { role: "quit" }],
+    },
+    {
+      label: "Edit",
       submenu: [
-        {
-          label: "New Order",
-          accelerator: "CmdOrCtrl+N",
-          click: () => {
-            mainWindow.webContents.send("menu-action", "new-order");
-          },
-        },
-        {
-          label: "Print Ticket",
-          accelerator: "CmdOrCtrl+P",
-          click: () => {
-            mainWindow.webContents.send("menu-action", "print-ticket");
-          },
-        },
+        { role: "undo" },
+        { role: "redo" },
         { type: "separator" },
-        {
-          label: "Exit",
-          accelerator: process.platform === "darwin" ? "Cmd+Q" : "Ctrl+Q",
-          click: () => {
-            app.quit();
-          },
-        },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        ...(isMac
+          ? [
+              { role: "pasteAndMatchStyle" },
+              { role: "delete" },
+              { role: "selectAll" },
+              { type: "separator" },
+              {
+                label: "Speech",
+                submenu: [{ role: "startspeaking" }, { role: "stopspeaking" }],
+              },
+            ]
+          : [{ role: "delete" }, { type: "separator" }, { role: "selectAll" }]),
       ],
     },
     {
       label: "View",
       submenu: [
-        {
-          label: "Dashboard",
-          accelerator: "CmdOrCtrl+1",
-          click: () => {
-            mainWindow.webContents.send("navigate-to", "/admin/dashboard");
-          },
-        },
-        {
-          label: "Orders",
-          accelerator: "CmdOrCtrl+2",
-          click: () => {
-            mainWindow.webContents.send("navigate-to", "/admin/orders");
-          },
-        },
-        {
-          label: "Staff Management",
-          accelerator: "CmdOrCtrl+3",
-          click: () => {
-            mainWindow.webContents.send("navigate-to", "/admin/staff");
-          },
-        },
-        {
-          label: "Audit",
-          accelerator: "CmdOrCtrl+4",
-          click: () => {
-            mainWindow.webContents.send("navigate-to", "/admin/audit");
-          },
-        },
-        {
-          label: "Referrer",
-          accelerator: "CmdOrCtrl+5",
-          click: () => {
-            mainWindow.webContents.send("navigate-to", "/admin/referrer");
-          },
-        },
+        { role: "reload" },
+        { role: "forceReload" },
+        { role: "toggleDevTools" },
         { type: "separator" },
-        {
-          label: "Ringside Seats",
-          accelerator: "CmdOrCtrl+R",
-          click: () => {
-            mainWindow.webContents.send("navigate-to", "/ringside");
-          },
-        },
-        {
-          label: "Standing Tickets",
-          accelerator: "CmdOrCtrl+S",
-          click: () => {
-            mainWindow.webContents.send("navigate-to", "/StandingTicketForm");
-          },
-        },
+        { role: "resetZoom" },
+        { role: "zoomIn" },
+        { role: "zoomOut" },
         { type: "separator" },
-        {
-          label: "Reload",
-          accelerator: "CmdOrCtrl+R",
-          click: () => {
-            mainWindow.webContents.reload();
-          },
-        },
-        {
-          label: "Force Reload",
-          accelerator: "CmdOrCtrl+Shift+R",
-          click: () => {
-            mainWindow.webContents.reloadIgnoringCache();
-          },
-        },
-        {
-          label: "Toggle Developer Tools",
-          accelerator:
-            process.platform === "darwin" ? "Alt+Cmd+I" : "Ctrl+Shift+I",
-          click: () => {
-            mainWindow.webContents.toggleDevTools();
-          },
-        },
+        { role: "togglefullscreen" },
       ],
     },
     {
       label: "Window",
       submenu: [
-        {
-          label: "Minimize",
-          accelerator: "CmdOrCtrl+M",
-          click: () => {
-            mainWindow.minimize();
-          },
-        },
-        {
-          label: "Close",
-          accelerator: "CmdOrCtrl+W",
-          click: () => {
-            mainWindow.close();
-          },
-        },
+        { role: "minimize" },
+        { role: "close" },
+        ...(isMac
+          ? [
+              { type: "separator" },
+              { role: "front" },
+              { type: "separator" },
+              { role: "window" },
+            ]
+          : []),
       ],
     },
     {
-      label: "Help",
+      role: "help",
       submenu: [
         {
           label: "About",
-          click: () => {
-            dialog.showMessageBox(mainWindow, {
-              type: "info",
-              title: "About",
-              message: "Patong Boxing Ticket System",
-              detail: "Version 1.0.0\nBuilt with Electron and Nuxt.js",
-            });
-          },
-        },
-        {
-          label: "Check for Updates",
-          click: () => {
-            autoUpdater.checkForUpdatesAndNotify();
+          click: async () => {
+            const { shell } = require("electron");
+            await shell.openExternal("https://patongboxing.com");
           },
         },
       ],
     },
   ];
 
-  // macOS specific menu adjustments
-  if (process.platform === "darwin") {
-    template.unshift({
-      label: app.getName(),
-      submenu: [
-        {
-          label: "About " + app.getName(),
-          click: () => {
-            dialog.showMessageBox(mainWindow, {
-              type: "info",
-              title: "About",
-              message: "Patong Boxing Ticket System",
-              detail: "Version 1.0.0\nBuilt with Electron and Nuxt.js",
-            });
-          },
-        },
-        { type: "separator" },
-        {
-          label: "Services",
-          submenu: [],
-        },
-        { type: "separator" },
-        {
-          label: "Hide " + app.getName(),
-          accelerator: "Command+H",
-          click: () => app.hide(),
-        },
-        {
-          label: "Hide Others",
-          accelerator: "Command+Shift+H",
-          click: () => app.hideOthers(),
-        },
-        {
-          label: "Show All",
-          click: () => app.showAll(),
-        },
-        { type: "separator" },
-        {
-          label: "Quit",
-          accelerator: "Command+Q",
-          click: () => app.quit(),
-        },
-      ],
-    });
-  }
-
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 }
 
-// App event handlers
-app.whenReady().then(() => {
-  console.log("[Electron] App ready");
-  createSplashWindow();
-
-  setTimeout(() => {
-    console.log("[Electron] Creating main window and menu after splash");
-    createWindow();
-    createMenu();
-  }, 2000);
-
-  app.on("activate", () => {
-    console.log("[Electron] App activate");
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-  });
-});
-
-app.on("window-all-closed", () => {
-  console.log("[Electron] All windows closed");
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
-// Auto updater events
+// Auto-updater events
 autoUpdater.on("checking-for-update", () => {
-  console.log("[Electron] Checking for update...");
-  if (mainWindow) {
-    mainWindow.webContents.send("update-status", "checking");
-  }
+  console.log("[Auto-Updater] Checking for update...");
 });
 
 autoUpdater.on("update-available", (info) => {
-  console.log("[Electron] Update available.", info);
-  if (mainWindow) {
-    mainWindow.webContents.send("update-status", "available", info);
-    dialog
-      .showMessageBox(mainWindow, {
-        type: "info",
-        title: "Update Available",
-        message: "A new version is available. Do you want to download it now?",
-        buttons: ["Yes", "Later"],
-        defaultId: 0,
-      })
-      .then((result) => {
-        console.log("[Electron] Update dialog result:", result);
-        if (result.response === 0) {
-          console.log("[Electron] User chose to download update");
-          autoUpdater.downloadUpdate();
-        }
-      });
-  }
+  console.log("[Auto-Updater] Update available:", info);
+  dialog
+    .showMessageBox(mainWindow, {
+      type: "info",
+      title: "Update available",
+      message:
+        "A new version is available. It will be downloaded in the background.",
+      buttons: ["OK"],
+    })
+    .then(() => {
+      autoUpdater.downloadUpdate();
+    });
 });
 
 autoUpdater.on("update-not-available", (info) => {
-  console.log("[Electron] Update not available.", info);
-  if (mainWindow) {
-    mainWindow.webContents.send("update-status", "not-available");
-  }
+  console.log("[Auto-Updater] Update not available:", info);
 });
 
 autoUpdater.on("error", (err) => {
-  console.log("[Electron] Error in auto-updater:", err);
-  if (mainWindow) {
-    mainWindow.webContents.send("update-status", "error", err.message);
-  }
+  console.error("[Auto-Updater] Error:", err);
 });
 
 autoUpdater.on("download-progress", (progressObj) => {
-  let log_message =
-    "[Electron] Download speed: " +
-    progressObj.bytesPerSecond +
-    " - Downloaded " +
-    progressObj.percent +
-    "% (" +
-    progressObj.transferred +
-    "/" +
-    progressObj.total +
-    ")";
-  console.log(log_message);
-
-  if (mainWindow) {
-    mainWindow.webContents.send("update-progress", progressObj);
-  }
+  let log_message = `Download speed: ${progressObj.bytesPerSecond}`;
+  log_message = log_message + ` - Downloaded ${progressObj.percent}%`;
+  log_message =
+    log_message + ` (${progressObj.transferred}/${progressObj.total})`;
+  console.log("[Auto-Updater]", log_message);
 });
 
 autoUpdater.on("update-downloaded", (info) => {
-  console.log("[Electron] Update downloaded", info);
-  if (mainWindow) {
-    mainWindow.webContents.send("update-status", "downloaded");
-    dialog
-      .showMessageBox(mainWindow, {
-        type: "info",
-        title: "Update Ready",
-        message:
-          "Update downloaded. Application will restart to apply the update.",
-        buttons: ["Restart Now", "Later"],
-        defaultId: 0,
-      })
-      .then((result) => {
-        console.log("[Electron] Update ready dialog result:", result);
-        if (result.response === 0) {
-          console.log("[Electron] Restarting to install update");
-          autoUpdater.quitAndInstall();
-        }
-      });
-  }
+  console.log("[Auto-Updater] Update downloaded:", info);
+  dialog
+    .showMessageBox(mainWindow, {
+      type: "info",
+      title: "Update ready",
+      message:
+        "Update downloaded. Application will restart to apply the update.",
+      buttons: ["Restart", "Later"],
+    })
+    .then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
 });
 
 // IPC handlers
-ipcMain.handle("app-version", () => {
-  console.log("[Electron] IPC: app-version");
+ipcMain.handle("get-app-version", () => {
   return app.getVersion();
 });
 
-ipcMain.handle("check-for-updates", () => {
-  console.log("[Electron] IPC: check-for-updates");
+ipcMain.handle("check-for-updates", async () => {
   if (!isDev) {
-    try {
-      autoUpdater.checkForUpdatesAndNotify();
-    } catch (err) {
-      console.log("[Electron] Error checking for updates:", err.message);
-    }
+    return await autoUpdater.checkForUpdates();
   }
-  return "Checking for updates...";
+  return null;
 });
 
-ipcMain.handle("show-message-box", async (event, options) => {
-  console.log("[Electron] IPC: show-message-box", options);
-  const result = await dialog.showMessageBox(mainWindow, options);
-  return result;
+ipcMain.handle("download-update", () => {
+  if (!isDev) {
+    autoUpdater.downloadUpdate();
+  }
 });
 
-ipcMain.handle("show-open-dialog", async (event, options) => {
-  console.log("[Electron] IPC: show-open-dialog", options);
-  const result = await dialog.showOpenDialog(mainWindow, options);
-  return result;
+ipcMain.handle("install-update", () => {
+  if (!isDev) {
+    autoUpdater.quitAndInstall();
+  }
 });
 
 ipcMain.handle("show-save-dialog", async (event, options) => {
-  console.log("[Electron] IPC: show-save-dialog", options);
   const result = await dialog.showSaveDialog(mainWindow, options);
   return result;
 });
 
-ipcMain.handle("get-platform", () => {
-  console.log("[Electron] IPC: get-platform");
-  return process.platform;
+ipcMain.handle("show-open-dialog", async (event, options) => {
+  const result = await dialog.showOpenDialog(mainWindow, options);
+  return result;
 });
 
-ipcMain.handle("minimize-window", () => {
-  console.log("[Electron] IPC: minimize-window");
+ipcMain.handle("show-message-box", async (event, options) => {
+  const result = await dialog.showMessageBox(mainWindow, options);
+  return result;
+});
+
+ipcMain.handle("open-external", async (event, url) => {
+  await shell.openExternal(url);
+});
+
+// Window control handlers for custom title bar
+ipcMain.handle("window-minimize", () => {
   if (mainWindow) {
     mainWindow.minimize();
   }
 });
 
-ipcMain.handle("maximize-window", () => {
-  console.log("[Electron] IPC: maximize-window");
+ipcMain.handle("window-maximize", () => {
   if (mainWindow) {
     if (mainWindow.isMaximized()) {
       mainWindow.unmaximize();
@@ -543,19 +367,111 @@ ipcMain.handle("maximize-window", () => {
   }
 });
 
-ipcMain.handle("close-window", () => {
-  console.log("[Electron] IPC: close-window");
+ipcMain.handle("window-close", () => {
   if (mainWindow) {
     mainWindow.close();
   }
 });
 
-ipcMain.handle("is-maximized", () => {
-  console.log("[Electron] IPC: is-maximized");
+ipcMain.handle("window-is-maximized", () => {
   return mainWindow ? mainWindow.isMaximized() : false;
 });
 
-// Handle app protocol for deep linking (optional)
-if (!isDev) {
-  app.setAsDefaultProtocolClient("patong-boxing");
+// Prevent multiple instances
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  console.log("[Electron] Another instance is already running, quitting...");
+  app.quit();
+} else {
+  app.on("second-instance", (event, commandLine, workingDirectory) => {
+    console.log("[Electron] Second instance attempted, focusing main window");
+    // Someone tried to run a second instance, focus our window instead
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
 }
+
+// App event handlers
+app.whenReady().then(async () => {
+  console.log("[Electron] App ready");
+
+  // Set security policies
+  app.setAsDefaultProtocolClient("patong-boxing");
+
+  // Create splash window first
+  createSplashWindow();
+
+  // Create menu
+  createMenu();
+
+  // Create main window
+  createWindow();
+
+  // macOS specific: re-create window when dock icon is clicked
+  app.on("activate", () => {
+    console.log("[Electron] App activated");
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+// Quit when all windows are closed, except on macOS
+app.on("window-all-closed", () => {
+  console.log("[Electron] All windows closed");
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});
+
+app.on("before-quit", (event) => {
+  console.log("[Electron] Before quit");
+});
+
+app.on("will-quit", (event) => {
+  console.log("[Electron] Will quit");
+});
+
+// Security: Prevent new window creation
+app.on("web-contents-created", (event, contents) => {
+  contents.on("new-window", (event, navigationUrl) => {
+    event.preventDefault();
+    console.log("[Electron] Prevented new window:", navigationUrl);
+  });
+
+  contents.on("will-navigate", (event, navigationUrl) => {
+    const parsedUrl = new URL(navigationUrl);
+    const isLocal =
+      parsedUrl.protocol === "file:" ||
+      (parsedUrl.protocol === "http:" && parsedUrl.hostname === "localhost");
+
+    if (!isLocal) {
+      event.preventDefault();
+      console.log("[Electron] Prevented navigation to:", navigationUrl);
+    }
+  });
+});
+
+// Handle certificate errors
+app.on(
+  "certificate-error",
+  (event, webContents, url, error, certificate, callback) => {
+    // Allow localhost certificates in development
+    if (isDev && url.startsWith("https://localhost")) {
+      event.preventDefault();
+      callback(true);
+    } else {
+      callback(false);
+    }
+  }
+);
+
+// Disable hardware acceleration if needed
+if (process.platform === "linux") {
+  app.disableHardwareAcceleration();
+}
+
+console.log("[Electron] Main process initialized");

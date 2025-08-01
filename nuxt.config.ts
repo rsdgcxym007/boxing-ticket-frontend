@@ -11,44 +11,31 @@ export default defineNuxtConfig({
 
   devtools: { enabled: false },
   ssr: false,
+
   nitro: {
     preset: "static",
-    prerender: {
-      routes: ["/"],
-    },
   },
 
-  // Electron specific configuration
-  router: {
-    options: {
-      hashMode: true, // Required for Electron
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 1000, // เพิ่มขีดจำกัดคำเตือนเป็น 1MB
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            "vendor-vue": ["vue", "vue-router"],
+            "vendor-ui": ["@headlessui/vue", "lucide-vue-next"],
+            "vendor-utils": ["date-fns", "lodash"],
+            "vendor-chart": ["chart.js"],
+          },
+        },
+      },
     },
-  },
-
-  imports: {
-    dirs: ["composables", "stores", "components", "utils", "vue-i18n", "dayjs"],
-  },
-
-  components: [
-    {
-      path: "@/components",
-      pathPrefix: false, // ถ้าอยากให้ใช้ชื่อไฟล์ตรงๆ โดยไม่ต้องพิมพ์ชื่อโฟลเดอร์
-    },
-  ],
-
-  i18n: {
-    defaultLocale: "th",
-    detectBrowserLanguage: false,
-    strategy: "no_prefix",
-    langDir: "./locales/",
-    locales: [
-      { code: "en", iso: "en-US", file: "en.json" },
-      { code: "th", iso: "th-TH", file: "th.json" },
-    ],
-    customRoutes: "config",
   },
 
   app: {
+    baseURL: process.env.NUXT_APP_BASE_URL || "./", // ใช้ relative path สำหรับ Electron
+    buildAssetsDir: "_nuxt/", // โฟลเดอร์ asset ตามค่าเริ่มต้น
+    cdnURL: process.env.NUXT_APP_BASE_URL || "./", // สำคัญ: ทำให้ assets เป็น relative
     head: {
       meta: [
         { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -69,6 +56,17 @@ export default defineNuxtConfig({
       ],
     },
   },
+
+  experimental: {
+    payloadExtraction: false, // ป้องกันปัญหา payload ใน static build
+  },
+
+  router: {
+    options: {
+      hashMode: true, // ใช้ Hash mode สำหรับ Electron
+    },
+  },
+
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:4000/api",
