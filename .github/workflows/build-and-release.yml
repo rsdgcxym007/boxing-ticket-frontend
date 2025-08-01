@@ -33,19 +33,13 @@ jobs:
       run: npm run build
 
     - name: List dist-electron directory
+
       if: always()
       shell: bash
       run: |
         echo "Listing dist-electron contents..."
         ls -la dist-electron/ || echo "dist-electron directory not found"
         find . -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.rpm" -o -name "*.msi" -o -name "*.zip" | head -10
-
-
-      if: matrix.os == 'ubuntu-latest'
-      run: npm run build:electron:linux
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NODE_ENV: production
 
     - name: Upload macOS artifacts
       if: matrix.os == 'macos-13'
