@@ -45,12 +45,11 @@ export const useElectron = () => {
   });
 
   const platform = computed(() => {
-    if (process.client && window.nodeAPI) {
+    if (import.meta.client && window.nodeAPI) {
       return window.nodeAPI.platform;
     }
     return "web";
   });
-
   const appVersion = ref<string>("");
   const updateStatus = ref<string>("");
   const updateProgress = ref<any>(null);
@@ -236,7 +235,7 @@ export const useElectron = () => {
   };
 
   // Auto-initialize on client side
-  if (process.client) {
+  if (import.meta.client) {
     onMounted(() => {
       setupUpdateListeners();
       updateMaximizedState();
