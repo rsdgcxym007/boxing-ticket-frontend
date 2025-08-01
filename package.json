@@ -1,5 +1,11 @@
 {
-  "name": "nuxt-app",
+  "name": "patong-boxing-ticket-system",
+  "version": "1.0.0",
+  "description": "Patong Boxing Ticket Management System - Desktop Application",
+  "author": {
+    "name": "Patong Boxing",
+    "email": "info@patongboxing.com"
+  },
   "private": true,
   "type": "module",
   "scripts": {
@@ -7,8 +13,18 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "electron": "wait-on http://localhost:3000 && concurrently \"npm run dev\" \"electron .\"",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:pack": "npm run build && electron-builder --dir",
+    "electron:dist": "npm run build && electron-builder",
+    "electron:dist:mac": "npm run build && electron-builder --mac",
+    "electron:dist:win": "npm run build && electron-builder --win",
+    "electron:dist:linux": "npm run build && electron-builder --linux",
+    "dist": "npm run build && electron-builder --publish=always",
+    "pack": "npm run build && electron-builder --dir"
   },
+  "main": "electron/main.cjs",
   "dependencies": {
     "@fontsource/prompt": "^5.2.6",
     "@fortawesome/fontawesome-free": "^6.7.2",
@@ -45,8 +61,16 @@
     "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/postcss": "^4.1.8",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.0",
+    "cross-env": "^7.0.3",
+    "electron": "^37.2.5",
+    "electron-builder": "^26.0.12",
+    "electron-devtools-installer": "^4.0.0",
+    "electron-is-dev": "^3.0.1",
+    "electron-updater": "^6.6.2",
     "postcss": "^8.5.4",
     "sass-embedded": "^1.89.2",
-    "tailwindcss": "^4.1.8"
+    "tailwindcss": "^4.1.8",
+    "wait-on": "^8.0.4"
   }
 }

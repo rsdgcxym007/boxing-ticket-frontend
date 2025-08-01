@@ -11,6 +11,14 @@ export default defineNuxtConfig({
 
   devtools: { enabled: false },
   ssr: false,
+
+  // Electron specific configuration
+  router: {
+    options: {
+      hashMode: true, // Required for Electron
+    },
+  },
+
   imports: {
     dirs: ["composables", "stores", "components", "utils", "vue-i18n", "dayjs"],
   },
@@ -33,6 +41,7 @@ export default defineNuxtConfig({
     ],
     customRoutes: "config",
   },
+
   app: {
     head: {
       meta: [
