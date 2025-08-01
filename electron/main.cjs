@@ -32,6 +32,16 @@ let splashWindow;
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
 
+// Configure GitHub releases for auto-updater
+if (!isDev) {
+  autoUpdater.setFeedURL({
+    provider: "github",
+    owner: "rsdgcxym007",
+    repo: "boxing-ticket-frontend",
+    private: false,
+  });
+}
+
 // Set the app user model ID for Windows
 if (process.platform === "win32") {
   app.setAppUserModelId("com.patongboxing.ticket.app");
@@ -279,23 +289,12 @@ autoUpdater.on("update-available", (info) => {
       type: "available",
       message: `พบเวอร์ชันใหม่ ${info.version}`,
       version: info.version,
+      info: info,
     });
   }
 
-  dialog
-    .showMessageBox(mainWindow, {
-      type: "info",
-      title: "มีอัพเดทใหม่",
-      message: `พบเวอร์ชันใหม่ ${info.version}\nจะดาวน์โหลดในพื้นหลัง`,
-      buttons: ["ตกลง", "ข้าม"],
-      defaultId: 0,
-      cancelId: 1,
-    })
-    .then((result) => {
-      if (result.response === 0) {
-        autoUpdater.downloadUpdate();
-      }
-    });
+  // ไม่แสดง dialog เนื่องจากมี UI notification แล้ว
+  // User สามารถเลือกดาวน์โหลดจาก notification UI ได้
 });
 
 autoUpdater.on("update-not-available", (info) => {
@@ -314,7 +313,11 @@ autoUpdater.on("error", (err) => {
     mainWindow.webContents.send("update-status", {
       type: "error",
       message: "เกิดข้อผิดพลาดในการอัพเดท",
-      error: err.message,
+      error: {
+        message: err.message,
+        stack: err.stack,
+        code: err.code,
+      },
     });
   }
 });
@@ -333,6 +336,7 @@ autoUpdater.on("download-progress", (progressObj) => {
       percent: progressObj.percent,
       transferred: progressObj.transferred,
       total: progressObj.total,
+      bytesPerSecond: progressObj.bytesPerSecond,
     });
   }
 });
@@ -344,28 +348,25 @@ autoUpdater.on("update-downloaded", (info) => {
       type: "downloaded",
       message: "ดาวน์โหลดเสร็จแล้ว พร้อมติดตั้ง",
       version: info.version,
+      info: info,
     });
   }
 
-  dialog
-    .showMessageBox(mainWindow, {
-      type: "info",
-      title: "อัพเดทพร้อมติดตั้ง",
-      message: `ดาวน์โหลดเวอร์ชัน ${info.version} เสร็จแล้ว\nต้องการรีสตาร์ทแอปเพื่อติดตั้งหรือไม่?`,
-      buttons: ["รีสตาร์ทตอนนี้", "ติดตั้งทีหลัง"],
-      defaultId: 0,
-      cancelId: 1,
-    })
-    .then((result) => {
-      if (result.response === 0) {
-        autoUpdater.quitAndInstall();
-      }
-    });
+  // ไม่แสดง dialog เนื่องจากมี UI notification แล้ว
+  // User สามารถเลือกติดตั้งจาก notification UI ได้
 });
 
 // IPC handlers
 ipcMain.handle("get-app-version", () => {
   return app.getVersion();
+});
+
+ipcMain.handle("app-version", () => {
+  return app.getVersion();
+});
+
+ipcMain.handle("get-platform", () => {
+  return process.platform;
 });
 
 ipcMain.handle("check-for-updates", async () => {

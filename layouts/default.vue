@@ -21,6 +21,7 @@ import BaseLoading from "@/components/BaseLoading.vue";
 import ElectronMenuBar from "@/components/ElectronMenuBar.vue";
 import ElectronUpdateNotification from "@/components/ElectronUpdateNotification.vue";
 import { useAuthStore } from "@/stores/auth";
+import { useElectron } from "@/composables/useElectron";
 
 const pageData = usePageData();
 const auth = useAuthStore();

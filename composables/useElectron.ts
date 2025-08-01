@@ -4,6 +4,8 @@ export interface ElectronAPI {
   getAppVersion: () => Promise<string>;
   getPlatform: () => Promise<string>;
   checkForUpdates: () => Promise<string>;
+  downloadUpdate: () => Promise<void>;
+  installUpdate: () => Promise<void>;
   onUpdateStatus: (
     callback: (event: any, status: string, info?: any) => void
   ) => void;
@@ -59,14 +61,24 @@ export const useElectron = () => {
   const getAppVersion = async (): Promise<string> => {
     if (isElectron.value && window.electronAPI) {
       try {
+        console.log("Attempting to get app version...");
         const version = await window.electronAPI.getAppVersion();
+        console.log("App version received:", version);
         appVersion.value = version;
         return version;
       } catch (error) {
         console.error("Error getting app version:", error);
+        // Try alternative method
+        try {
+          const version = await window.electronAPI.getPlatform();
+          console.log("Platform received:", version);
+        } catch (altError) {
+          console.error("Error getting platform:", altError);
+        }
         return "";
       }
     }
+    console.log("Not running in Electron or electronAPI not available");
     return "";
   };
 
@@ -83,15 +95,53 @@ export const useElectron = () => {
     return "Not available in web version";
   };
 
+  const downloadUpdate = async (): Promise<void> => {
+    if (isElectron.value && window.electronAPI) {
+      try {
+        await window.electronAPI.downloadUpdate();
+      } catch (error) {
+        console.error("Error downloading update:", error);
+        throw error;
+      }
+    }
+  };
+
+  const installUpdate = async (): Promise<void> => {
+    if (isElectron.value && window.electronAPI) {
+      try {
+        await window.electronAPI.installUpdate();
+      } catch (error) {
+        console.error("Error installing update:", error);
+        throw error;
+      }
+    }
+  };
+
   const setupUpdateListeners = () => {
     if (isElectron.value && window.electronAPI) {
-      window.electronAPI.onUpdateStatus((event, status, info) => {
-        updateStatus.value = status;
-        console.log("Update status:", status, info);
+      window.electronAPI.onUpdateStatus((event: any, statusData: any) => {
+        console.log("Update status received:", statusData);
+        if (statusData && typeof statusData === "object") {
+          if (statusData.type) {
+            (updateStatus as any).value = statusData.type;
+          }
+          // สำหรับ downloading progress
+          if (statusData.type === "downloading") {
+            (updateProgress as any).value = {
+              percent: statusData.percent,
+              transferred: statusData.transferred,
+              total: statusData.total,
+              bytesPerSecond: statusData.bytesPerSecond,
+            };
+          }
+        } else {
+          // Legacy support for simple string status
+          (updateStatus as any).value = statusData;
+        }
       });
 
-      window.electronAPI.onUpdateProgress((event, progress) => {
-        updateProgress.value = progress;
+      window.electronAPI.onUpdateProgress((event: any, progress: any) => {
+        (updateProgress as any).value = progress;
         console.log("Update progress:", progress);
       });
     }
@@ -132,9 +182,13 @@ export const useElectron = () => {
   const updateMaximizedState = async (): Promise<void> => {
     if (isElectron.value && window.electronAPI) {
       try {
+        console.log("Attempting to check maximized state...");
         isMaximized.value = await window.electronAPI.isMaximized();
+        console.log("Maximized state:", isMaximized.value);
       } catch (error) {
         console.error("Error checking maximized state:", error);
+        // Set a default value
+        isMaximized.value = false;
       }
     }
   };
@@ -236,10 +290,25 @@ export const useElectron = () => {
 
   // Auto-initialize on client side
   if (import.meta.client) {
-    onMounted(() => {
-      setupUpdateListeners();
-      updateMaximizedState();
-      getAppVersion();
+    onMounted(async () => {
+      console.log("useElectron mounted, isElectron:", isElectron.value);
+      console.log("window.electronAPI:", !!window.electronAPI);
+
+      if (isElectron.value && window.electronAPI) {
+        console.log("Setting up Electron listeners and state...");
+        setupUpdateListeners();
+
+        // Add delays to prevent rapid-fire calls
+        setTimeout(() => {
+          updateMaximizedState();
+        }, 100);
+
+        setTimeout(() => {
+          getAppVersion();
+        }, 200);
+      } else {
+        console.log("Not running in Electron environment");
+      }
     });
 
     onUnmounted(() => {
@@ -251,13 +320,15 @@ export const useElectron = () => {
     isElectron: readonly(isElectron),
     platform: readonly(platform),
     appVersion: readonly(appVersion),
-    updateStatus: readonly(updateStatus),
-    updateProgress: readonly(updateProgress),
+    updateStatus,
+    updateProgress,
     isMaximized: readonly(isMaximized),
 
     // Methods
     getAppVersion,
     checkForUpdates,
+    downloadUpdate,
+    installUpdate,
     setupUpdateListeners,
     minimizeWindow,
     maximizeWindow,

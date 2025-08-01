@@ -4,11 +4,13 @@ const { contextBridge, ipcRenderer } = require("electron");
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld("electronAPI", {
   // App info
-  getAppVersion: () => ipcRenderer.invoke("app-version"),
+  getAppVersion: () => ipcRenderer.invoke("get-app-version"),
   getPlatform: () => ipcRenderer.invoke("get-platform"),
 
   // Updates
   checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
+  downloadUpdate: () => ipcRenderer.invoke("download-update"),
+  installUpdate: () => ipcRenderer.invoke("install-update"),
   onUpdateStatus: (callback) => ipcRenderer.on("update-status", callback),
   onUpdateProgress: (callback) => ipcRenderer.on("update-progress", callback),
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
@@ -19,10 +21,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showSaveDialog: (options) => ipcRenderer.invoke("show-save-dialog", options),
 
   // Window controls
-  minimizeWindow: () => ipcRenderer.invoke("minimize-window"),
-  maximizeWindow: () => ipcRenderer.invoke("maximize-window"),
-  closeWindow: () => ipcRenderer.invoke("close-window"),
-  isMaximized: () => ipcRenderer.invoke("is-maximized"),
+  minimizeWindow: () => ipcRenderer.invoke("window-minimize"),
+  maximizeWindow: () => ipcRenderer.invoke("window-maximize"),
+  closeWindow: () => ipcRenderer.invoke("window-close"),
+  isMaximized: () => ipcRenderer.invoke("window-is-maximized"),
 
   // Menu actions
   onMenuAction: (callback) => ipcRenderer.on("menu-action", callback),

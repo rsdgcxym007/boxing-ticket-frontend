@@ -13,6 +13,7 @@
 
 2. **Push tags:**
    ```bash
+   git push origin featues/newcss  --tags
    git push origin main --tags
    ```
 
