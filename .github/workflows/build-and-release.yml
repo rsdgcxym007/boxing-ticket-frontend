@@ -46,8 +46,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: macos-build
-        path: |
-          dist-electron/
+        path: dist-electron/*.dmg
         if-no-files-found: warn
 
     - name: Upload Windows artifacts
@@ -55,18 +54,11 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: windows-build
-        path: |
-          dist-electron/
+        path: dist-electron/*.exe
         if-no-files-found: warn
 
     - name: Upload Linux artifacts
-      if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: linux-build
-        path: |
-          dist-electron/
-        if-no-files-found: warn
+      # Linux build removed (not in matrix)
 
   release:
     needs: build
