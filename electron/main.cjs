@@ -63,11 +63,16 @@ function createWindow() {
   });
 
   // Load the app
-  const startUrl = isDev
-    ? "http://localhost:3000"
-    : `file://${path.join(__dirname, "../.output/public/index.html")}`;
-
-  mainWindow.loadURL(startUrl);
+  if (isDev) {
+    mainWindow.loadURL("http://localhost:3000");
+  } else {
+    // For production Electron, we need to serve static files properly
+    const serve = require("electron-serve");
+    const loadURL = serve({
+      directory: path.join(__dirname, "../.output/public"),
+    });
+    loadURL(mainWindow);
+  }
 
   // Show window when ready
   mainWindow.once("ready-to-show", () => {
