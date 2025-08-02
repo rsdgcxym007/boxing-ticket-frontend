@@ -56,7 +56,7 @@ export default defineNuxtConfig({
         {
           rel: "icon",
           type: "image/svg+xml",
-          href: "/images/logo/LOGOFC.svg",
+          href: "./images/logo/LOGOFC.svg", // Fixed for Electron
         },
 
         {

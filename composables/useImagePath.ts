@@ -13,8 +13,15 @@ export const useImagePath = () => {
       ? imagePath.slice(1)
       : imagePath;
 
-    // ตรวจสอบว่าเป็น Electron หรือไม่
-    if (typeof window !== "undefined" && window?.process?.type === "renderer") {
+    // ตรวจสอบว่าเป็น Electron หรือไม่ - ใช้หลายวิธีตรวจสอบ
+    const isElectron =
+      typeof window !== "undefined" &&
+      (window?.process?.type === "renderer" ||
+        window?.require !== undefined ||
+        window?.electronAPI !== undefined ||
+        navigator?.userAgent?.includes("Electron"));
+
+    if (isElectron) {
       // สำหรับ Electron ใช้ relative path
       return `./${cleanPath}`;
     }
@@ -28,7 +35,15 @@ export const useImagePath = () => {
    * @returns base path สำหรับ images
    */
   const getImagesBasePath = (): string => {
-    if (typeof window !== "undefined" && window?.process?.type === "renderer") {
+    // ตรวจสอบว่าเป็น Electron หรือไม่ - ใช้หลายวิธีตรวจสอบ
+    const isElectron =
+      typeof window !== "undefined" &&
+      (window?.process?.type === "renderer" ||
+        window?.require !== undefined ||
+        window?.electronAPI !== undefined ||
+        navigator?.userAgent?.includes("Electron"));
+
+    if (isElectron) {
       return "./images/";
     }
     return "/images/";

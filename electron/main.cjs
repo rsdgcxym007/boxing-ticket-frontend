@@ -120,8 +120,31 @@ function createWindow() {
 
   // Load the app
   if (isDev) {
-    console.log("[Electron] Loading dev server: http://localhost:3000");
-    mainWindow.loadURL("http://localhost:3000");
+    // Try common dev server ports
+    const tryPorts = [3000, 3001, 3002, 3003];
+    let currentPortIndex = 0;
+
+    const tryNextPort = () => {
+      if (currentPortIndex >= tryPorts.length) {
+        console.log(
+          "[Electron] All dev ports failed, falling back to production build"
+        );
+        const distPath = path.join(__dirname, "../.output/public/index.html");
+        mainWindow.loadFile(distPath);
+        return;
+      }
+
+      const port = tryPorts[currentPortIndex];
+      console.log(`[Electron] Trying dev server: http://localhost:${port}`);
+
+      mainWindow.loadURL(`http://localhost:${port}`).catch(() => {
+        console.log(`[Electron] Port ${port} failed, trying next...`);
+        currentPortIndex++;
+        tryNextPort();
+      });
+    };
+
+    tryNextPort();
   } else {
     // For production, load static files
     console.log("[Electron] Loading production files");
@@ -383,6 +406,13 @@ autoUpdater.on("update-downloaded", (info) => {
 // IPC handlers
 ipcMain.handle("get-app-version", () => {
   return app.getVersion();
+});
+
+// IPC handler to send environment variables to renderer
+ipcMain.handle("get-env", () => {
+  // Only send safe variables, not all secrets
+  // You can filter here if needed
+  return process.env;
 });
 
 ipcMain.handle("app-version", () => {
