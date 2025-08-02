@@ -155,7 +155,6 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, "../.output/public/index.html"));
   }
 
-  // Show window when ready
   mainWindow.once("ready-to-show", () => {
     console.log("[Electron] Main window ready to show");
     if (splashWindow) {
@@ -163,7 +162,6 @@ function createWindow() {
     }
     mainWindow.show();
 
-    // Check for updates after app is ready (with delay for better UX) - Always run regardless of environment
     setTimeout(() => {
       try {
         console.log(
@@ -171,7 +169,6 @@ function createWindow() {
         );
         autoUpdater.checkForUpdatesAndNotify();
 
-        // Set up periodic update checks (every 2 hours)
         updateCheckInterval = setInterval(() => {
           console.log(
             "[Electron] Periodic update check... (Running in all environments)"
@@ -181,10 +178,9 @@ function createWindow() {
       } catch (err) {
         console.log("[Electron] Error checking for updates:", err.message);
       }
-    }, 3000); // Wait 3 seconds after app is ready
+    }, 3000);
   });
 
-  // Open DevTools in development
   if (isDev) {
     console.log("[Electron] Opening DevTools");
     mainWindow.webContents.openDevTools();
