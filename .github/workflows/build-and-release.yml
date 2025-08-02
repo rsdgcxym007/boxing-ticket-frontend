@@ -86,6 +86,10 @@ jobs:
         if [ -f "dist-electron/latest-mac.yml" ]; then
           mv dist-electron/latest-mac.yml dist-electron/latest-mac-arm64.yml
         fi
+        # Copy latest-mac-arm64.yml to latest-mac.yml for auto-updater compatibility
+        if [ -f "dist-electron/latest-mac-arm64.yml" ]; then
+          cp dist-electron/latest-mac-arm64.yml dist-electron/latest-mac.yml
+        fi
 
     - name: Upload macOS artifacts
       if: matrix.platform == 'mac'
@@ -95,6 +99,7 @@ jobs:
         path: |
           dist-electron/*-arm64-mac.dmg
           dist-electron/latest-mac-arm64.yml
+          dist-electron/latest-mac.yml
         if-no-files-found: warn
 
     - name: Upload Windows artifacts
@@ -147,6 +152,7 @@ jobs:
           dist-electron/*-arm64-mac.dmg
           dist-electron/*-x64-win.exe
           dist-electron/latest-mac-arm64.yml
+          dist-electron/latest-mac.yml
           dist-electron/latest.yml
         draft: false
         prerelease: false
