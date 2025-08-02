@@ -27,12 +27,16 @@ try {
 
 // ...existing code...
 const fs = require("fs");
-if (process.env.NODE_ENV === "production") {
-  require("dotenv").config({
-    path: path.join(__dirname, "../.env.production"),
-  });
-} else {
-  require("dotenv").config({ path: path.join(__dirname, "../.env") });
+try {
+  if (process.env.NODE_ENV === "production") {
+    require("dotenv").config({
+      path: path.join(__dirname, "../.env.production"),
+    });
+  } else {
+    require("dotenv").config({ path: path.join(__dirname, "../.env") });
+  }
+} catch (error) {
+  console.warn("dotenv not available:", error.message);
 }
 // More reliable development detection
 const isDev =
