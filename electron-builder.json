@@ -74,7 +74,6 @@
     "icon": "build/icon.icns",
     "iconSize": 100,
     "format": "UDZO",
-    "universal": false,
     "contents": [
       {
         "x": 380,
