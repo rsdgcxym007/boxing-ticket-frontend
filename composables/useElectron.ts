@@ -47,13 +47,7 @@ export interface NodeAPI {
 
 export const useElectron = () => {
   const isElectron = computed(() => {
-    return (
-      typeof window !== "undefined" &&
-      (window.process?.type === "renderer" ||
-        !!window.process?.versions?.electron ||
-        navigator.userAgent.includes("Electron") ||
-        !!window.electronAPI)
-    );
+    return typeof window !== "undefined" && !!window.electronAPI;
   });
 
   const platform = computed(() => {
@@ -117,41 +111,40 @@ export const useElectron = () => {
   };
 
   const installUpdate = async (): Promise<void> => {
+    console.log("[useElectron] installUpdate called");
     if (isElectron.value && window.electronAPI) {
       try {
-        await window.electronAPI.installUpdate();
+        console.log("[useElectron] Calling window.electronAPI.installUpdate()");
+        const result = await window.electronAPI.installUpdate();
+        console.log("[useElectron] installUpdate result:", result);
+        return result;
       } catch (error) {
-        console.error("Error installing update:", error);
+        console.error("[useElectron] Error installing update:", error);
         throw error;
       }
+    } else {
+      console.warn("[useElectron] installUpdate called but not in Electron context");
+      throw new Error("Not in Electron context");
     }
   };
 
   const setupUpdateListeners = () => {
+    console.log("[useElectron] Setting up update listeners");
     if (isElectron.value && window.electronAPI) {
-      window.electronAPI.onUpdateStatus((event: any, statusData: any) => {
-        console.log("Update status received:", statusData);
-        if (statusData && typeof statusData === "object") {
-          if (statusData.type) {
-            (updateStatus as any).value = statusData.type;
-          }
-          // สำหรับ downloading progress
-          if (statusData.type === "downloading") {
-            (updateProgress as any).value = {
-              percent: statusData.percent,
-              transferred: statusData.transferred,
-              total: statusData.total,
-              bytesPerSecond: statusData.bytesPerSecond,
-            };
-          }
-        } else {
-          // Legacy support for simple string status
-          (updateStatus as any).value = statusData;
+      console.log("[useElectron] electronAPI available, setting up listeners");
+      
+      window.electronAPI.onUpdateStatus((event: any, status: string, info?: any) => {
+        console.log("[useElectron] Update status received:", status, info);
+        updateStatus.value = status;
+        
+        // Store update info for later use
+        if (info) {
+          console.log("[useElectron] Update info received:", info);
         }
       });
 
       window.electronAPI.onUpdateProgress((event: any, progress: any) => {
-        (updateProgress as any).value = progress;
+        updateProgress.value = progress;
         console.log("Update progress:", progress);
       });
     }

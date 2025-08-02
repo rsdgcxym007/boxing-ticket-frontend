@@ -9,15 +9,19 @@
     ".output/public/**/*",
     "electron/**/*",
     "package.json",
-    "!**/node_modules/**/*",
+    "node_modules/electron-updater/**/*",
+    "node_modules/dotenv/**/*",
+    "node_modules/semver/**/*",
+    "node_modules/builder-util-runtime/**/*",
+    "!node_modules/*/{test,__mocks__,example,examples}/**/*",
     "!src/**/*",
     "!electron/src/**/*"
   ],
   "extraMetadata": {
     "main": "electron/main.cjs"
   },
-  "compression": "normal",
-  "artifactName": "Patong-Boxing-Ticket-System-${version}-${arch}-${os}.${ext}",
+  "compression": "maximum",
+  "artifactName": "Patong-Boxing-Ticket-System-${version}-${arch}-mac.${ext}",
   "publish": {
     "provider": "github",
     "owner": "rsdgcxym007",
@@ -33,48 +37,43 @@
     "entitlementsInherit": "build/entitlements.mac.plist",
     "notarize": false,
     "identity": null,
-    "type": "development",
+    "type": "distribution",
     "minimumSystemVersion": "10.15",
     "darkModeSupport": true,
     "target": [
       {
         "target": "dmg",
-        "arch": ["x64", "arm64"]
+        "arch": ["arm64"]
       },
       {
         "target": "zip", 
-        "arch": ["x64", "arm64"]
+        "arch": ["arm64"]
       }
     ]
   },
   "win": {
+    "icon": "build/icon.ico",
     "target": [
       {
         "target": "nsis",
         "arch": ["x64"]
       },
       {
-        "target": "portable",
+        "target": "zip",
         "arch": ["x64"]
       }
-    ],
-    "icon": "build/icon.ico",
-    "verifyUpdateCodeSignature": false,
-    "requestedExecutionLevel": "asInvoker"
+    ]
   },
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
-    "installerIcon": "build/icon.ico",
-    "uninstallerIcon": "build/icon.ico",
-    "installerHeaderIcon": "build/icon.ico",
     "createDesktopShortcut": true,
-    "createStartMenuShortcut": true,
-    "shortcutName": "Patong Boxing Ticket System"
+    "createStartMenuShortcut": true
   },
   "dmg": {
     "icon": "build/icon.icns",
     "iconSize": 100,
+    "format": "UDZO",
     "contents": [
       {
         "x": 380,

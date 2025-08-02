@@ -542,10 +542,7 @@ autoUpdater.on("checking-for-update", () => {
   console.log("[Auto-Updater] 🔍 Checking for update...");
   console.log("[Auto-Updater] Current version:", app.getVersion());
   if (mainWindow) {
-    mainWindow.webContents.send("update-status", {
-      type: "checking",
-      message: "กำลังตรวจสอบอัพเดทใหม่...",
-    });
+    mainWindow.webContents.send("update-status", "checking");
   }
 });
 
@@ -556,12 +553,7 @@ autoUpdater.on("update-available", (info) => {
   console.log("[Auto-Updater] Release info:", info);
 
   if (mainWindow) {
-    mainWindow.webContents.send("update-status", {
-      type: "available",
-      message: `พบเวอร์ชันใหม่ ${info.version}`,
-      version: info.version,
-      info: info,
-    });
+    mainWindow.webContents.send("update-status", "available");
   }
 });
 
@@ -569,13 +561,22 @@ autoUpdater.on("update-not-available", (info) => {
   console.log("[Auto-Updater] ℹ️ No update available");
   console.log("[Auto-Updater] Current version:", app.getVersion());
   console.log("[Auto-Updater] Latest version:", info?.version || "unknown");
+  console.log("[Auto-Updater] Info object:", info);
+
+  // Check if the comparison is wrong
+  const currentVersion = app.getVersion();
+  const latestVersion = info?.version;
+
+  console.log("[Auto-Updater] Version comparison:");
+  console.log("  Current:", currentVersion);
+  console.log("  Latest:", latestVersion);
+  console.log("  Are they equal?", currentVersion === latestVersion);
+
+  // Force check GitHub API directly for debugging
+  console.log("[Auto-Updater] DEBUG: Checking GitHub API directly...");
 
   if (mainWindow) {
-    mainWindow.webContents.send("update-status", {
-      type: "not-available",
-      message: "ใช้เวอร์ชันล่าสุดแล้ว",
-      version: info?.version,
-    });
+    mainWindow.webContents.send("update-status", "not-available");
   }
 });
 
@@ -603,18 +604,7 @@ autoUpdater.on("error", (err) => {
   }
 
   if (mainWindow) {
-    mainWindow.webContents.send("update-status", {
-      type: "error",
-      message: isDev
-        ? "ข้อผิดพลาดในการอัพเดท (Development Mode)"
-        : "เกิดข้อผิดพลาดในการอัพเดท",
-      error: {
-        message: err.message,
-        stack: err.stack,
-        code: err.code,
-        domain: err.domain,
-      },
-    });
+    mainWindow.webContents.send("update-status", "error");
   }
 });
 
@@ -626,19 +616,18 @@ autoUpdater.on("download-progress", (progressObj) => {
   console.log("[Auto-Updater]", log_message);
 
   if (mainWindow) {
-    mainWindow.webContents.send("update-status", {
-      type: "downloading",
-      message: `กำลังดาวน์โหลด ${Math.round(progressObj.percent)}%`,
-      percent: progressObj.percent,
-      transferred: progressObj.transferred,
-      total: progressObj.total,
-      bytesPerSecond: progressObj.bytesPerSecond,
-    });
+    mainWindow.webContents.send("update-status", "downloading");
+    mainWindow.webContents.send("update-progress", progressObj);
   }
 });
 
 autoUpdater.on("update-downloaded", (info) => {
-  console.log("[Auto-Updater] Update downloaded:", info);
+  console.log("[Auto-Updater] ✅ Update downloaded successfully:", info);
+  console.log("[Auto-Updater] Version:", info.version);
+  console.log(
+    "[Auto-Updater] Files:",
+    info.files?.map((f) => f.url) || "No files info"
+  );
 
   // Clear any existing proxy servers
   if (autoUpdater.httpExecutor && autoUpdater.httpExecutor.closeServer) {
@@ -653,36 +642,51 @@ autoUpdater.on("update-downloaded", (info) => {
   }
 
   if (mainWindow) {
-    mainWindow.webContents.send("update-status", {
-      type: "downloaded",
-      message: "ดาวน์โหลดเสร็จแล้ว พร้อมติดตั้ง",
-      version: info.version,
-      info: info,
-    });
+    mainWindow.webContents.send("update-status", "downloaded", info);
   }
 
-  // For development mode, show install dialog immediately
-  if (isDev) {
-    const { dialog } = require("electron");
-    dialog
-      .showMessageBox(mainWindow, {
-        type: "info",
-        title: "Update Ready",
-        message:
-          'Update has been downloaded. Click "Install" to restart and apply the update.',
-        buttons: ["Install Now", "Later"],
-        defaultId: 0,
-      })
-      .then((result) => {
-        if (result.response === 0) {
-          console.log("[Auto-Updater] User chose to install update now");
-          try {
-            autoUpdater.quitAndInstall(false, true);
-          } catch (err) {
-            console.error("[Auto-Updater] Error during quitAndInstall:", err);
-          }
-        }
-      });
+  // According to Electron docs, quitAndInstall() automatically handles app.quit()
+  // On macOS, we can use quitAndInstall() directly - it will close windows and quit properly
+  if (process.platform === "darwin") {
+    console.log(
+      "[Auto-Updater] macOS detected: scheduling quitAndInstall() with proper delay"
+    );
+
+    // Use shorter delay and let Squirrel.Mac handle the lifecycle properly
+    setTimeout(() => {
+      try {
+        console.log(
+          "[Auto-Updater] Calling quitAndInstall() - this will handle app.quit() automatically"
+        );
+        autoUpdater.quitAndInstall();
+      } catch (err) {
+        console.error("[Auto-Updater] quitAndInstall error:", err);
+        // Fallback: If quitAndInstall fails, just quit and update will apply on next start
+        app.quit();
+      }
+    }, 5000); // Reduced from 10s to 5s as per Electron best practices
+  } else {
+    // For other platforms, let the renderer handle the installation UI
+    console.log(
+      "[Auto-Updater] Update ready to install. Waiting for user action from renderer."
+    );
+  }
+});
+
+// Handle the before-quit-for-update event as recommended by Electron docs
+autoUpdater.on("before-quit-for-update", () => {
+  console.log("[Auto-Updater] 🔄 before-quit-for-update event fired");
+  console.log("[Auto-Updater] App is about to quit for update installation");
+
+  // Clear update check interval before quitting
+  if (updateCheckInterval) {
+    clearInterval(updateCheckInterval);
+    updateCheckInterval = null;
+  }
+
+  // Notify renderer that update is being installed
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("update-status", "installing");
   }
 });
 
@@ -712,19 +716,90 @@ ipcMain.handle("check-for-updates", async () => {
     console.log("[IPC] Current app version:", app.getVersion());
     console.log("[IPC] Platform:", process.platform, "Arch:", process.arch);
 
+    // First, check GitHub API directly for debugging
+    console.log("[IPC] DEBUG: Checking GitHub API directly...");
+    try {
+      const https = require("https");
+      const githubCheck = await new Promise((resolve, reject) => {
+        const options = {
+          hostname: "api.github.com",
+          path: "/repos/rsdgcxym007/boxing-ticket-frontend/releases/latest",
+          method: "GET",
+          headers: {
+            "User-Agent": "Patong-Boxing-Ticket-System",
+          },
+        };
+
+        const req = https.request(options, (res) => {
+          let data = "";
+          res.on("data", (chunk) => (data += chunk));
+          res.on("end", () => {
+            try {
+              const release = JSON.parse(data);
+              resolve(release);
+            } catch (e) {
+              reject(e);
+            }
+          });
+        });
+
+        req.on("error", reject);
+        req.setTimeout(5000);
+        req.end();
+      });
+
+      console.log("[IPC] GitHub API response:");
+      console.log("  Latest tag:", githubCheck.tag_name);
+      console.log("  Current version:", app.getVersion());
+      console.log(
+        "  Version match:",
+        app.getVersion() === githubCheck.tag_name.replace("v", "")
+      );
+    } catch (githubError) {
+      console.error("[IPC] GitHub API check failed:", githubError);
+    }
+
     const result = await autoUpdater.checkForUpdates();
     console.log("[IPC] Manual update check result:", result);
-    return result;
+    console.log("[IPC] Update check result type:", typeof result);
+    console.log(
+      "[IPC] Update check result keys:",
+      result ? Object.keys(result) : "null"
+    );
+
+    // Check if update is available based on different possible return formats
+    let hasUpdate = false;
+
+    if (result) {
+      // Check for different possible properties that indicate updates
+      hasUpdate = !!(
+        result.updateInfo ||
+        result.versionInfo ||
+        result.downloadPromise ||
+        (result.cancellationToken && !result.cancellationToken.cancelled)
+      );
+
+      console.log("[IPC] Has update check:", hasUpdate);
+      console.log("[IPC] Result.updateInfo:", !!result.updateInfo);
+      console.log("[IPC] Result.versionInfo:", !!result.versionInfo);
+      console.log("[IPC] Result.downloadPromise:", !!result.downloadPromise);
+    }
+
+    // Return simple response for UI
+    if (hasUpdate) {
+      return "Update available";
+    } else {
+      return "No updates available";
+    }
   } catch (error) {
     console.error("[IPC] Update check error:", {
       message: error.message,
       code: error.code,
       stack: error.stack,
     });
-    throw error;
+    return "Error checking for updates";
   }
 });
-
 ipcMain.handle("download-update", async () => {
   try {
     console.log("[IPC] Download update requested");
@@ -736,9 +811,11 @@ ipcMain.handle("download-update", async () => {
   }
 });
 
-ipcMain.handle("install-update", () => {
+ipcMain.handle("install-update", async () => {
   try {
-    console.log("[IPC] Install update requested");
+    console.log("[IPC] 🔄 Install update requested");
+    console.log("[IPC] Environment:", isDev ? "development" : "production");
+    console.log("[IPC] Platform:", process.platform);
 
     if (isDev) {
       // In development mode, show a message that this would install in production
@@ -753,12 +830,49 @@ ipcMain.handle("install-update", () => {
       console.log("[IPC] Development mode: Update installation simulated");
       return { success: true, simulated: true };
     } else {
-      // In production, actually install the update
-      autoUpdater.quitAndInstall();
-      console.log("[IPC] Production mode: Update installation initiated");
+      // In production, actually install the update following Electron best practices
+      console.log("[IPC] 🚀 Preparing for update installation...");
+
+      // Check if autoUpdater is available
+      if (!autoUpdater) {
+        throw new Error("autoUpdater is not available");
+      }
+
+      // According to Electron docs, quitAndInstall() handles window closing and app.quit() automatically
+      // We don't need complex cleanup - just call quitAndInstall()
+      console.log(
+        "[IPC] 🚀 Calling autoUpdater.quitAndInstall() - Electron will handle the rest"
+      );
+
+      try {
+        autoUpdater.quitAndInstall();
+        console.log("[IPC] ✅ Update installation initiated successfully");
+        return { success: true, production: true };
+      } catch (quitError) {
+        console.error("[IPC] ❌ quitAndInstall failed:", quitError);
+
+        // If quitAndInstall fails, the update will still be applied on next app start
+        // according to Electron documentation
+        throw new Error(`Update installation failed: ${quitError.message}`);
+      }
     }
   } catch (error) {
-    console.error("[IPC] Install update error:", error);
+    console.error("[IPC] ❌ Install update error:", {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      name: error.name,
+    });
+
+    // Send detailed error to renderer
+    if (mainWindow) {
+      mainWindow.webContents.send("update-status", "error", {
+        message: error.message,
+        code: error.code,
+        type: "install-error",
+      });
+    }
+
     throw error;
   }
 });
