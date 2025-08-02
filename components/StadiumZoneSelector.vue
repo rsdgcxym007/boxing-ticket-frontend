@@ -15,7 +15,7 @@
       class="relative w-full max-w-4xl aspect-square shadow-2xl rounded-xl overflow-hidden"
     >
       <img
-        src="/images/stadiumlast.png"
+        :src="getImagePath('/images/stadiumlast.png')"
         alt="stadium background"
         class="absolute inset-0 w-full h-full object-contain z-0 pointer-events-none"
       />
@@ -73,6 +73,9 @@
 import { onMounted, onUnmounted, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { useImagePath } from "@/composables/useImagePath";
+
+const { getImagePath } = useImagePath();
 const router = useRouter();
 const pageData = reactive({
   selectedZone: "",

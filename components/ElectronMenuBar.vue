@@ -7,7 +7,11 @@
     <!-- App Title and Version -->
     <div class="flex items-center space-x-4">
       <div class="flex items-center space-x-2">
-        <img src="/images/logo/LOGOFC.svg" alt="Logo" class="w-6 h-6" />
+        <img
+          :src="getImagePath('/images/logo/LOGOFC.svg')"
+          alt="Logo"
+          class="w-6 h-6"
+        />
         <span class="font-semibold text-sm text-gray-800 dark:text-gray-200">
           Patong Boxing Ticket System
         </span>
@@ -91,9 +95,12 @@
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useElectron } from "../composables/useElectron";
+import { useImagePath } from "../composables/useImagePath";
 import { useAuthStore } from "../stores/auth";
 import ElectronWindowControls from "./ElectronWindowControls.vue";
 import { Icon } from "@iconify/vue";
+
+const { getImagePath } = useImagePath();
 const router = useRouter();
 const route = useRoute();
 

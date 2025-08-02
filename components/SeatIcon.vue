@@ -36,6 +36,8 @@
 </template>
 
 <script setup>
+const { getImagesBasePath } = useImagePath();
+
 const props = defineProps({
   seat: Object,
   selectedSeats: Array,
@@ -128,17 +130,8 @@ const isSelected = computed(() =>
 );
 
 function getSeatImage() {
-  // Detect Electron production
-  const isProd = process.env.NODE_ENV === "production";
-  let basePath = "/images/";
-  if (
-    isProd &&
-    typeof window !== "undefined" &&
-    window?.process?.type === "renderer"
-  ) {
-    // Electron production: use file protocol
-    basePath = `file://${__dirname}/../.output/public/images/`;
-  }
+  const basePath = getImagesBasePath();
+
   if (isBooked.value) return basePath + "seat-booked.png";
   if (isLocked.value) return basePath + "seat-booked.png";
   if (isSelected.value) return basePath + "seat-selected.png";

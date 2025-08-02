@@ -98,19 +98,29 @@
             class="flex justify-center flex-wrap gap-6 text-sm text-gray-600 font-medium"
           >
             <div class="flex items-center gap-2">
-              <img src="/images/armchair.png" class="w-4 h-4" /> ว่าง
+              <img
+                :src="getImagePath('/images/armchair.png')"
+                class="w-4 h-4"
+              />
+              <span>ว่าง</span>
             </div>
-            <div class="flex items-center gap-2 text-green-600 font-semibold">
-              <img src="/images/seat-selected.png" class="w-4 h-4" />
-              ที่คุณเลือก
+            <div class="flex items-center gap-2">
+              <img
+                :src="getImagePath('/images/seat-selected.png')"
+                class="w-4 h-4"
+              />
+              <span class="text-blue-600 font-semibold">เลือกแล้ว</span>
             </div>
-            <div class="flex items-center gap-2 text-orange-600 font-semibold">
+            <div class="flex items-center gap-2">
               <div class="w-4 h-4 bg-orange-400 rounded-sm"></div>
-              ถูกล็อก
+              <span class="text-orange-600 font-semibold">ถูกล็อก</span>
             </div>
-            <div class="flex items-center gap-2 text-gray-400 line-through">
-              <img src="/images/seat-booked.png" class="w-4 h-4 opacity-50" />
-              ไม่ว่าง
+            <div class="flex items-center gap-2">
+              <img
+                :src="getImagePath('/images/seat-booked.png')"
+                class="w-4 h-4 opacity-50"
+              />
+              <span class="text-gray-400 line-through">ไม่ว่าง</span>
             </div>
           </div>
 
@@ -204,6 +214,9 @@
 import dayjs from "dayjs";
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useSingleToast } from "@/composables/useSingleToast";
+import { useImagePath } from "@/composables/useImagePath";
+
+const { getImagePath } = useImagePath();
 const { showToast } = useSingleToast();
 import { useI18n } from "vue-i18n";
 import { SummaryModal } from "@/components";

@@ -6,7 +6,7 @@
       <!-- Logo -->
       <div class="flex items-center gap-3">
         <img
-          src="/images/logo/LOGOFC.svg"
+          :src="getImagePath('/images/logo/LOGOFC.svg')"
           alt="Patong Boxing Logo"
           class="w-8 h-8 md:w-10 md:h-10"
         />
@@ -274,8 +274,11 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth";
 import { useAdminMenu } from "@/composables/useAdminMenu";
+import { useImagePath } from "@/composables/useImagePath";
 import { useRouter } from "vue-router";
 import { useSwitchLocalePath } from "#imports";
+
+const { getImagePath } = useImagePath();
 const { locale, t } = useI18n();
 const router = useRouter();
 const switchLocalePath = useSwitchLocalePath();
