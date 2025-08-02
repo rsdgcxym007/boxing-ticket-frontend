@@ -7,7 +7,24 @@ const {
   dialog,
   shell,
 } = require("electron");
-const { autoUpdater } = require("electron-updater");
+
+// Import electron-updater with error handling
+let autoUpdater;
+try {
+  autoUpdater = require("electron-updater").autoUpdater;
+} catch (error) {
+  console.warn("electron-updater not available:", error.message);
+  // Fallback object for development
+  autoUpdater = {
+    autoDownload: false,
+    autoInstallOnAppQuit: true,
+    setFeedURL: () => {},
+    checkForUpdatesAndNotify: () => Promise.resolve(),
+    on: () => {},
+    emit: () => {},
+  };
+}
+
 // ...existing code...
 const fs = require("fs");
 if (process.env.NODE_ENV === "production") {
