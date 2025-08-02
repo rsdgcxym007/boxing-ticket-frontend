@@ -59,8 +59,6 @@
       }
     ],
     "icon": "build/icon.ico",
-    "certificateFile": null,
-    "certificatePassword": null,
     "verifyUpdateCodeSignature": false,
     "requestedExecutionLevel": "asInvoker"
   },
