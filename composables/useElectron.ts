@@ -123,7 +123,9 @@ export const useElectron = () => {
         throw error;
       }
     } else {
-      console.warn("[useElectron] installUpdate called but not in Electron context");
+      console.warn(
+        "[useElectron] installUpdate called but not in Electron context"
+      );
       throw new Error("Not in Electron context");
     }
   };
@@ -132,16 +134,18 @@ export const useElectron = () => {
     console.log("[useElectron] Setting up update listeners");
     if (isElectron.value && window.electronAPI) {
       console.log("[useElectron] electronAPI available, setting up listeners");
-      
-      window.electronAPI.onUpdateStatus((event: any, status: string, info?: any) => {
-        console.log("[useElectron] Update status received:", status, info);
-        updateStatus.value = status;
-        
-        // Store update info for later use
-        if (info) {
-          console.log("[useElectron] Update info received:", info);
+
+      window.electronAPI.onUpdateStatus(
+        (event: any, status: string, info?: any) => {
+          console.log("[useElectron] Update status received:", status, info);
+          updateStatus.value = status;
+
+          // Store update info for later use
+          if (info) {
+            console.log("[useElectron] Update info received:", info);
+          }
         }
-      });
+      );
 
       window.electronAPI.onUpdateProgress((event: any, progress: any) => {
         updateProgress.value = progress;
@@ -283,6 +287,9 @@ export const useElectron = () => {
 
   // Thermal Printing
   const printThermal = async (): Promise<void> => {
+    console.log("isElectron.value", isElectron.value);
+    console.log("window.electronAPI", window.electronAPI);
+
     if (isElectron.value && window.electronAPI?.printThermal) {
       try {
         await window.electronAPI.printThermal();
