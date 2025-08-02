@@ -163,15 +163,19 @@ function createWindow() {
     }
     mainWindow.show();
 
-    // Check for updates after app is ready (with delay for better UX)
+    // Check for updates after app is ready (with delay for better UX) - Always run regardless of environment
     setTimeout(() => {
       try {
-        console.log("[Electron] Checking for updates...");
+        console.log(
+          "[Electron] Checking for updates... (Running in all environments)"
+        );
         autoUpdater.checkForUpdatesAndNotify();
 
         // Set up periodic update checks (every 2 hours)
         updateCheckInterval = setInterval(() => {
-          console.log("[Electron] Periodic update check...");
+          console.log(
+            "[Electron] Periodic update check... (Running in all environments)"
+          );
           autoUpdater.checkForUpdatesAndNotify();
         }, 2 * 60 * 60 * 1000); // 2 hours
       } catch (err) {
@@ -518,6 +522,37 @@ ipcMain.handle("window-is-maximized", () => {
   return mainWindow ? mainWindow.isMaximized() : false;
 });
 
+// Thermal printing handler
+ipcMain.handle("print-thermal", async () => {
+  console.log("[IPC] Thermal print requested");
+  if (mainWindow) {
+    try {
+      // ส่งคำสั่งปริ้นไปยัง renderer process
+      await mainWindow.webContents.print({
+        silent: false, // แสดง print dialog
+        printBackground: true,
+        color: false, // สำหรับ thermal printer มักจะเป็น black & white
+        margins: {
+          marginType: "none", // ไม่มี margin สำหรับ thermal receipt
+        },
+        landscape: false,
+        scaleFactor: 100,
+        pagesPerSheet: 1,
+        collate: false,
+        copies: 1,
+        header: "",
+        footer: "",
+      });
+      console.log("[IPC] Thermal print command sent successfully");
+    } catch (error) {
+      console.error("[IPC] Error printing thermal receipt:", error);
+      throw error;
+    }
+  } else {
+    throw new Error("Main window not available");
+  }
+});
+
 // Prevent multiple instances
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -550,6 +585,18 @@ app.whenReady().then(async () => {
 
   // Create main window
   createWindow();
+
+  // Initial update check when app starts (Always run regardless of environment)
+  setTimeout(() => {
+    try {
+      console.log(
+        "[Electron] Initial update check on app startup... (Running in all environments)"
+      );
+      autoUpdater.checkForUpdatesAndNotify();
+    } catch (err) {
+      console.log("[Electron] Error in initial update check:", err.message);
+    }
+  }, 1000); // Check 1 second after app is ready
 
   // macOS specific: re-create window when dock icon is clicked
   app.on("activate", () => {

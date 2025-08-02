@@ -298,9 +298,12 @@
 <script setup>
 // นำเข้า utilities และ composables ที่จำเป็น
 import { useRoute } from "vue-router";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useOrder } from "~/composables/useOrder";
+import { useElectron } from "~/composables/useElectron";
+
 const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
+const { printThermal } = useElectron();
 // import TicketDisplay from "~/components/TicketDisplay.vue";
 
 // ตั้งค่า metadata สำหรับหน้า
@@ -330,13 +333,11 @@ const thermalPdfError = ref(false);
 const thermalIframe = ref(null);
 
 // ฟังก์ชัน auto print thermal receipt PDF เมื่อ iframe โหลดเสร็จ (Electron เท่านั้น)
-const onThermalIframeLoad = () => {
-  if (
-    typeof window !== "undefined" &&
-    (window?.electron || window?.process?.versions?.electron)
-  ) {
-    // เรียก IPC ไป main process เพื่อสั่ง print (ต้องมี preload expose window.electron.printThermal)
-    window.electron?.printThermal?.();
+const onThermalIframeLoad = async () => {
+  try {
+    await printThermal();
+  } catch (error) {
+    console.error("Error calling printThermal:", error);
   }
 };
 const handleDownloadThermal = async (orderId) => {
@@ -393,13 +394,6 @@ const onGenerateTickets = async () => {
     // เปิด preview thermal receipt PDF อัตโนมัติหลังสร้างตั๋ว
     if (generatedTickets.value.length > 0) {
       await handleDownloadThermal(generatedTickets.value[0].orderId);
-      // Auto print ทันทีหลังโหลด PDF (Electron เท่านั้น)
-      if (
-        typeof window !== "undefined" &&
-        (window?.electron || window?.process?.versions?.electron)
-      ) {
-        window.electron?.printThermal?.();
-      }
     }
   } catch (error) {
     console.error("ไม่สามารถสร้างตั๋วได้:", error);
@@ -415,18 +409,16 @@ const onGenerateTickets = async () => {
     // alert(`สร้างตั๋วเสร็จสิ้น! จำนวน ${tickets.length} ใบ (ใช้ข้อมูลตัวอย่าง)`);
     if (generatedTickets.value.length > 0) {
       await handleDownloadThermal(generatedTickets.value[0].orderId);
-      // Auto print ทันทีหลังโหลด PDF (Electron เท่านั้น)
-      if (
-        typeof window !== "undefined" &&
-        (window?.electron || window?.process?.versions?.electron)
-      ) {
-        window.electron?.printThermal?.();
-      }
     }
   } finally {
     isGeneratingTickets.value = false;
   }
 };
+
+// เรียก onGenerateTickets อัตโนมัติเมื่อหน้าเว็บโหลดเสร็จ
+onMounted(() => {
+  onGenerateTickets();
+});
 </script>
 
 <style scoped>

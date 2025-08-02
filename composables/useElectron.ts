@@ -1,5 +1,21 @@
 import { ref, computed, readonly, onMounted, onUnmounted } from "vue";
 
+// Extend Window interface to include Electron properties
+declare global {
+  interface Window {
+    electronAPI?: ElectronAPI;
+    nodeAPI?: NodeAPI;
+    process?: {
+      type?: string;
+      versions?: {
+        electron?: string;
+        node?: string;
+        chrome?: string;
+      };
+    };
+  }
+}
+
 export interface ElectronAPI {
   getAppVersion: () => Promise<string>;
   getPlatform: () => Promise<string>;
@@ -21,16 +37,12 @@ export interface ElectronAPI {
   onMenuAction: (callback: (event: any, action: string) => void) => void;
   onNavigateTo: (callback: (event: any, route: string) => void) => void;
   removeListener: (channel: string, callback: any) => void;
+  printThermal?: () => Promise<void>;
 }
 
 export interface NodeAPI {
   platform: string;
   env: string;
-}
-
-export interface CustomWindow extends Window {
-  electronAPI?: ElectronAPI;
-  nodeAPI?: NodeAPI;
 }
 
 export const useElectron = () => {
@@ -276,6 +288,21 @@ export const useElectron = () => {
     }
   };
 
+  // Thermal Printing
+  const printThermal = async (): Promise<void> => {
+    if (isElectron.value && window.electronAPI?.printThermal) {
+      try {
+        await window.electronAPI.printThermal();
+        console.log("Thermal print command sent successfully");
+      } catch (error) {
+        console.error("Error printing thermal receipt:", error);
+      }
+    } else {
+      console.log("Thermal printing not available - using regular print");
+      window.print();
+    }
+  };
+
   // Cleanup
   const cleanup = () => {
     if (isElectron.value && window.electronAPI) {
@@ -336,6 +363,7 @@ export const useElectron = () => {
     showOpenDialog,
     showSaveDialog,
     setupMenuListeners,
+    printThermal,
     cleanup,
   };
 };

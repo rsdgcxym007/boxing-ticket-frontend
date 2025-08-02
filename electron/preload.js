@@ -27,6 +27,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   closeWindow: () => ipcRenderer.invoke("window-close"),
   isMaximized: () => ipcRenderer.invoke("window-is-maximized"),
 
+  // Thermal printing
+  printThermal: () => ipcRenderer.invoke("print-thermal"),
+
   // Menu actions
   onMenuAction: (callback) => ipcRenderer.on("menu-action", callback),
   onNavigateTo: (callback) => ipcRenderer.on("navigate-to", callback),
