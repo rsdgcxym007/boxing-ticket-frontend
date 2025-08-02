@@ -291,13 +291,8 @@ const dataOrder = ref();
 const seatBookingSystem = useIntegratedSeatBooking();
 const { clearAllSelections } = seatBookingSystem;
 // 🎫 Payment & Order API - ใช้ฟังก์ชันใหม่
-const {
-  submitOrder,
-  cancelOrder, // 🆕 ใช้ API ใหม่สำหรับสร้างออเดอร์
-} = useOrder();
-const {
-  createStandingPayment, // 🆕 ใช้ API ใหม่สำหรับชำระเงิน
-} = usePayments();
+const { submitOrder, cancelOrder } = useOrder();
+const { createStandingPayment } = usePayments();
 
 // 📅 ตั้งค่าวันที่เริ่มต้น (วันปัจจุบัน)
 const today = new Date();
@@ -310,7 +305,7 @@ const pageData = ref({
   customerName: "", // ชื่อลูกค้า
   customerPhone: "", // เบอร์โทรลูกค้า
   customerEmail: "", // อีเมลลูกค้า
-  standingAdultQty: 0, // จำนวนตั๋วผู้ใหญ่
+  standingAdultQty: 1, // จำนวนตั๋วผู้ใหญ่
   standingChildQty: 0, // จำนวนตั๋วเด็ก
   referrerCode: "", // รหัสผู้แนะนำ
   paymentMethod: "CASH", // วิธีการชำระเงิน (เริ่มต้นเป็นเงินสด)
@@ -336,19 +331,6 @@ const bookStandingTicketNew = async () => {
     customerEmail,
     paymentMethod,
   } = pageData.value;
-
-  // ✅ ตรวจสอบข้อมูลก่อนส่ง
-  if (
-    !showDate ||
-    standingAdultQty + standingChildQty === 0 ||
-    !customerName.trim()
-  ) {
-    showToast(
-      "error",
-      "❌ กรุณากรอกข้อมูลให้ครบถ้วน (ชื่อลูกค้า,จำนวนตั๋ว, วันที่)"
-    );
-    return;
-  }
 
   isLoading.loading = true;
 

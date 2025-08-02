@@ -1,3 +1,9 @@
+declare global {
+  interface Window {
+    electronAPI?: any;
+    nodeAPI?: { platform?: string };
+  }
+}
 import { useRouter } from "vue-router";
 import { defineNuxtPlugin } from "nuxt/app";
 
