@@ -22,7 +22,7 @@
     "start": "concurrently \"nuxt dev\" \"electron .\"",
     "pack": "nuxt generate && electron-builder",
     "elbu": "electron-builder",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 http://localhost:3001 http://localhost:3002 && electron .\"",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:pack": "nuxt generate && electron-builder --dir",
     "electron:dist": "nuxt generate && electron-builder",
     "electron:dist:mac": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false nuxt generate && electron-builder --mac --publish=never",

@@ -60,14 +60,12 @@ autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
 
 // Configure GitHub releases for auto-updater
-if (!isDev) {
-  autoUpdater.setFeedURL({
-    provider: "github",
-    owner: "rsdgcxym007",
-    repo: "boxing-ticket-frontend",
-    private: false,
-  });
-}
+autoUpdater.setFeedURL({
+  provider: "github",
+  owner: "rsdgcxym007",
+  repo: "boxing-ticket-frontend",
+  private: false,
+});
 
 // Set the app user model ID for Windows
 if (process.platform === "win32") {
@@ -166,22 +164,20 @@ function createWindow() {
     mainWindow.show();
 
     // Check for updates after app is ready (with delay for better UX)
-    if (!isDev) {
-      setTimeout(() => {
-        try {
-          console.log("[Electron] Checking for updates...");
-          autoUpdater.checkForUpdatesAndNotify();
+    setTimeout(() => {
+      try {
+        console.log("[Electron] Checking for updates...");
+        autoUpdater.checkForUpdatesAndNotify();
 
-          // Set up periodic update checks (every 2 hours)
-          updateCheckInterval = setInterval(() => {
-            console.log("[Electron] Periodic update check...");
-            autoUpdater.checkForUpdatesAndNotify();
-          }, 2 * 60 * 60 * 1000); // 2 hours
-        } catch (err) {
-          console.log("[Electron] Error checking for updates:", err.message);
-        }
-      }, 3000); // Wait 3 seconds after app is ready
-    }
+        // Set up periodic update checks (every 2 hours)
+        updateCheckInterval = setInterval(() => {
+          console.log("[Electron] Periodic update check...");
+          autoUpdater.checkForUpdatesAndNotify();
+        }, 2 * 60 * 60 * 1000); // 2 hours
+      } catch (err) {
+        console.log("[Electron] Error checking for updates:", err.message);
+      }
+    }, 3000); // Wait 3 seconds after app is ready
   });
 
   // Open DevTools in development
@@ -317,25 +313,20 @@ function createMenu() {
         {
           label: "ตรวจสอบอัพเดท",
           click: async () => {
-            if (!isDev) {
-              try {
-                console.log("[Electron] Manual update check...");
-                const result = await autoUpdater.checkForUpdates();
-                console.log("[Electron] Update check result:", result);
-              } catch (err) {
-                console.log(
-                  "[Electron] Manual update check error:",
-                  err.message
-                );
-                if (mainWindow) {
-                  mainWindow.webContents.send("update-status", {
-                    type: "error",
-                    message: "ไม่สามารถตรวจสอบอัพเดทได้",
-                    error: {
-                      message: err.message,
-                    },
-                  });
-                }
+            try {
+              console.log("[Electron] Manual update check...");
+              const result = await autoUpdater.checkForUpdates();
+              console.log("[Electron] Update check result:", result);
+            } catch (err) {
+              console.log("[Electron] Manual update check error:", err.message);
+              if (mainWindow) {
+                mainWindow.webContents.send("update-status", {
+                  type: "error",
+                  message: "ไม่สามารถตรวจสอบอัพเดทได้",
+                  error: {
+                    message: err.message,
+                  },
+                });
               }
             }
           },
@@ -463,29 +454,22 @@ ipcMain.handle("get-platform", () => {
 });
 
 ipcMain.handle("check-for-updates", async () => {
-  if (!isDev) {
-    try {
-      console.log("[IPC] Manual update check requested");
-      const result = await autoUpdater.checkForUpdates();
-      return result;
-    } catch (error) {
-      console.error("[IPC] Update check error:", error);
-      throw error;
-    }
+  try {
+    console.log("[IPC] Manual update check requested");
+    const result = await autoUpdater.checkForUpdates();
+    return result;
+  } catch (error) {
+    console.error("[IPC] Update check error:", error);
+    throw error;
   }
-  return { message: "Update check not available in development mode" };
 });
 
 ipcMain.handle("download-update", () => {
-  if (!isDev) {
-    autoUpdater.downloadUpdate();
-  }
+  autoUpdater.downloadUpdate();
 });
 
 ipcMain.handle("install-update", () => {
-  if (!isDev) {
-    autoUpdater.quitAndInstall();
-  }
+  autoUpdater.quitAndInstall();
 });
 
 ipcMain.handle("show-save-dialog", async (event, options) => {

@@ -28,11 +28,9 @@ export interface NodeAPI {
   env: string;
 }
 
-declare global {
-  interface Window {
-    electronAPI?: ElectronAPI;
-    nodeAPI?: NodeAPI;
-  }
+export interface CustomWindow extends Window {
+  electronAPI?: ElectronAPI;
+  nodeAPI?: NodeAPI;
 }
 
 export const useElectron = () => {
@@ -63,7 +61,7 @@ export const useElectron = () => {
       try {
         console.log("Attempting to get app version...");
         const version = await window.electronAPI.getAppVersion();
-        console.log("App version received:", version);
+        console.log("App version received: ", version);
         appVersion.value = version;
         return version;
       } catch (error) {
