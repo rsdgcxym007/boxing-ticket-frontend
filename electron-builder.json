@@ -14,6 +14,7 @@
     "main": "electron/main.cjs"
   },
   "compression": "normal",
+  "artifactName": "Patong-Boxing-Ticket-System-${version}-${arch}-${os}.${ext}",
   "publish": {
     "provider": "github",
     "owner": "rsdgcxym007",
