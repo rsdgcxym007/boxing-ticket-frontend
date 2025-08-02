@@ -2,7 +2,7 @@
 
 ## ปัญหาที่แก้ไข ✅
 
-### 1. Code Signature Validation Error
+### 1. Code Signature Validation Errorddd
 **ปัญหา:** `Code signature did not pass validation: code has no resources but signature indicates they must be present`
 
 **การแก้ไข:**
