@@ -1,6 +1,6 @@
 {
   "name": "patong-boxing-ticket-system",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Patong Boxing Ticket Management System - Desktop Application",
   "author": {
     "name": "Patong Boxing",
@@ -15,7 +15,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev", 
+    "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -29,7 +29,7 @@
     "electron:dist:win": "nuxt generate && electron-builder --win --publish=never",
     "electron:dist:linux": "nuxt generate && electron-builder --linux --publish=never",
     "build:electron:mac": "nuxt generate && electron-builder --mac --publish=always",
-    "build:electron:win": "nuxt generate && electron-builder --win --publish=always", 
+    "build:electron:win": "nuxt generate && electron-builder --win --publish=always",
     "build:electron:linux": "nuxt generate && electron-builder --linux --publish=always",
     "build:mac:safe": "./scripts/build-mac.sh",
     "dist": "nuxt generate && electron-builder --publish=always",
