@@ -48,9 +48,12 @@ const isDev =
   /[\\/]electron-prebuilt[\\/]/.test(process.execPath) ||
   /[\\/]electron[\\/]/.test(process.execPath);
 
+console.log("isDevisDevisDev", isDev);
+
 // Keep a global reference of the window object
 let mainWindow;
 let splashWindow;
+let updateCheckInterval;
 
 // Auto updater configuration
 autoUpdater.autoDownload = false;
@@ -162,14 +165,22 @@ function createWindow() {
     }
     mainWindow.show();
 
-    // Check for updates after app is ready
+    // Check for updates after app is ready (with delay for better UX)
     if (!isDev) {
-      try {
-        console.log("[Electron] Checking for updates...");
-        autoUpdater.checkForUpdatesAndNotify();
-      } catch (err) {
-        console.log("[Electron] Error checking for updates:", err.message);
-      }
+      setTimeout(() => {
+        try {
+          console.log("[Electron] Checking for updates...");
+          autoUpdater.checkForUpdatesAndNotify();
+
+          // Set up periodic update checks (every 2 hours)
+          updateCheckInterval = setInterval(() => {
+            console.log("[Electron] Periodic update check...");
+            autoUpdater.checkForUpdatesAndNotify();
+          }, 2 * 60 * 60 * 1000); // 2 hours
+        } catch (err) {
+          console.log("[Electron] Error checking for updates:", err.message);
+        }
+      }, 3000); // Wait 3 seconds after app is ready
     }
   });
 
@@ -304,6 +315,33 @@ function createMenu() {
       role: "help",
       submenu: [
         {
+          label: "ตรวจสอบอัพเดท",
+          click: async () => {
+            if (!isDev) {
+              try {
+                console.log("[Electron] Manual update check...");
+                const result = await autoUpdater.checkForUpdates();
+                console.log("[Electron] Update check result:", result);
+              } catch (err) {
+                console.log(
+                  "[Electron] Manual update check error:",
+                  err.message
+                );
+                if (mainWindow) {
+                  mainWindow.webContents.send("update-status", {
+                    type: "error",
+                    message: "ไม่สามารถตรวจสอบอัพเดทได้",
+                    error: {
+                      message: err.message,
+                    },
+                  });
+                }
+              }
+            }
+          },
+        },
+        { type: "separator" },
+        {
           label: "About",
           click: async () => {
             const { shell } = require("electron");
@@ -350,6 +388,7 @@ autoUpdater.on("update-not-available", (info) => {
     mainWindow.webContents.send("update-status", {
       type: "not-available",
       message: "ใช้เวอร์ชันล่าสุดแล้ว",
+      version: info.version,
     });
   }
 });
@@ -425,9 +464,16 @@ ipcMain.handle("get-platform", () => {
 
 ipcMain.handle("check-for-updates", async () => {
   if (!isDev) {
-    return await autoUpdater.checkForUpdates();
+    try {
+      console.log("[IPC] Manual update check requested");
+      const result = await autoUpdater.checkForUpdates();
+      return result;
+    } catch (error) {
+      console.error("[IPC] Update check error:", error);
+      throw error;
+    }
   }
-  return null;
+  return { message: "Update check not available in development mode" };
 });
 
 ipcMain.handle("download-update", () => {
@@ -540,6 +586,11 @@ app.on("window-all-closed", () => {
 
 app.on("before-quit", (event) => {
   console.log("[Electron] Before quit");
+  // Clear update check interval
+  if (updateCheckInterval) {
+    clearInterval(updateCheckInterval);
+    updateCheckInterval = null;
+  }
 });
 
 app.on("will-quit", (event) => {

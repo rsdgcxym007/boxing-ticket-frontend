@@ -183,6 +183,15 @@
             </button>
 
             <button
+              v-if="updateStatus === 'not-available'"
+              @click="dismissUpdate"
+              class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+            >
+              <Icon name="mdi:check" class="w-4 h-4 mr-2" />
+              เรียบร้อย
+            </button>
+
+            <button
               v-if="['available', 'error'].includes(updateStatus)"
               @click="dismissUpdate"
               class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -230,7 +239,11 @@ watch(updateStatus, (newStatus) => {
   if (["available", "downloading", "downloaded", "error"].includes(newStatus)) {
     showUpdateNotification.value = true;
   } else if (newStatus === "not-available") {
-    showUpdateNotification.value = false;
+    // Show brief notification for no updates available
+    showUpdateNotification.value = true;
+    setTimeout(() => {
+      showUpdateNotification.value = false;
+    }, 3000); // Hide after 3 seconds
   }
 });
 
@@ -246,6 +259,8 @@ const getUpdateIcon = () => {
       return "mdi:check-circle";
     case "error":
       return "mdi:alert-circle";
+    case "not-available":
+      return "mdi:check-circle-outline";
     default:
       return "mdi:update";
   }
@@ -263,6 +278,8 @@ const getUpdateIconClass = () => {
       return "bg-green-100 text-green-600";
     case "error":
       return "bg-red-100 text-red-600";
+    case "not-available":
+      return "bg-green-100 text-green-600";
     default:
       return "bg-gray-100 text-gray-600";
   }
@@ -280,6 +297,8 @@ const getUpdateTitle = () => {
       return "อัพเดทพร้อมติดตั้ง";
     case "error":
       return "เกิดข้อผิดพลาด";
+    case "not-available":
+      return "ใช้เวอร์ชันล่าสุดแล้ว";
     default:
       return "อัพเดท";
   }
@@ -297,6 +316,8 @@ const getUpdateMessage = () => {
       return "ดาวน์โหลดอัพเดทเสร็จแล้ว พร้อมติดตั้ง";
     case "error":
       return "เกิดข้อผิดพลาดในการตรวจสอบหรือดาวน์โหลดอัพเดท";
+    case "not-available":
+      return "คุณใช้งานเวอร์ชั่นล่าสุดอยู่แล้ว";
     default:
       return "";
   }
