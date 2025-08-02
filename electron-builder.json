@@ -8,7 +8,10 @@
   "files": [
     ".output/public/**/*",
     "electron/**/*",
-    "package.json"
+    "package.json",
+    "!**/node_modules/**/*",
+    "!src/**/*",
+    "!electron/src/**/*"
   ],
   "extraMetadata": {
     "main": "electron/main.cjs"
@@ -28,13 +31,18 @@
     "gatekeeperAssess": false,
     "entitlements": "build/entitlements.mac.plist",
     "entitlementsInherit": "build/entitlements.mac.plist",
+    "notarize": false,
+    "identity": null,
+    "type": "distribution",
+    "minimumSystemVersion": "10.15",
+    "darkModeSupport": true,
     "target": [
       {
         "target": "dmg",
         "arch": ["x64", "arm64"]
       },
       {
-        "target": "zip",
+        "target": "zip", 
         "arch": ["x64", "arm64"]
       }
     ]
