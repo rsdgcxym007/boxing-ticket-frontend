@@ -108,7 +108,7 @@ jobs:
       with:
         name: windows-build
         path: |
-          dist-electron/*-x64-win.exe
+          dist-electron/*.exe
           dist-electron/latest.yml
         if-no-files-found: warn
 
@@ -150,7 +150,7 @@ jobs:
         name: Patong Boxing Ticket System ${{ steps.version.outputs.version }}
         files: |
           dist-electron/*-arm64-mac.dmg
-          dist-electron/*-x64-win.exe
+          dist-electron/*.exe
           dist-electron/latest-mac-arm64.yml
           dist-electron/latest-mac.yml
           dist-electron/latest.yml
