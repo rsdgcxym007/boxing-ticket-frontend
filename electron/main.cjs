@@ -19,7 +19,10 @@ try {
     autoDownload: false,
     autoInstallOnAppQuit: true,
     setFeedURL: () => {},
+    checkForUpdates: () => Promise.resolve(),
     checkForUpdatesAndNotify: () => Promise.resolve(),
+    downloadUpdate: () => Promise.resolve(),
+    quitAndInstall: () => {},
     on: () => {},
     emit: () => {},
   };
