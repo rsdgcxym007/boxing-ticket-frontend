@@ -7,7 +7,11 @@
     <!-- App Title and Version -->
     <div class="flex items-center space-x-4">
       <div class="flex items-center space-x-2">
-        <img src="/images/logo/LOGOFC.svg" alt="Logo" class="w-6 h-6" />
+        <img
+          :src="getImagePath('/images/logo/LOGOFC.svg')"
+          alt="Logo"
+          class="w-6 h-6"
+        />
         <span class="font-semibold text-sm text-gray-800 dark:text-gray-200">
           Patong Boxing Ticket System
         </span>
@@ -39,14 +43,48 @@
     <div class="flex items-center space-x-2">
       <!-- Update Status -->
       <div v-if="updateStatus" class="flex items-center space-x-1">
-        <Icon
-          :icon="getUpdateIcon()"
-          :class="getUpdateIconClass()"
-          class="w-4 h-4"
-        />
-        <span class="text-xs text-gray-600 dark:text-gray-300">
-          {{ getUpdateStatusText() }}
-        </span>
+        <button
+          v-if="updateStatus === 'available'"
+          @click="handleUpdateAction"
+          class="flex items-center space-x-1 action-btn bg-green-100 hover:bg-green-200 border border-green-300"
+          title="Click to download update"
+        >
+          <Icon
+            :icon="getUpdateIcon()"
+            :class="getUpdateIconClass()"
+            class="w-4 h-4"
+          />
+          <span class="text-xs text-green-700 font-medium">
+            {{ getUpdateStatusText() }}
+          </span>
+        </button>
+
+        <button
+          v-else-if="updateStatus === 'downloaded'"
+          @click="handleInstallUpdate"
+          class="flex items-center space-x-1 action-btn bg-blue-100 hover:bg-blue-200 border border-blue-300"
+          title="Click to install and restart"
+        >
+          <Icon
+            :icon="getUpdateIcon()"
+            :class="getUpdateIconClass()"
+            class="w-4 h-4"
+          />
+          <span class="text-xs text-blue-700 font-medium">
+            {{ getUpdateStatusText() }}
+          </span>
+        </button>
+
+        <div v-else class="flex items-center space-x-1">
+          <Icon
+            :icon="getUpdateIcon()"
+            :class="getUpdateIconClass()"
+            class="w-4 h-4"
+          />
+          <span class="text-xs text-gray-600 dark:text-gray-300">
+            {{ getUpdateStatusText() }}
+          </span>
+        </div>
       </div>
 
       <!-- Update Progress -->
@@ -64,11 +102,18 @@
 
       <!-- Quick Actions -->
       <button
-        @click="checkForUpdates"
+        @click="handleCheckForUpdates"
         class="action-btn"
         title="Check for Updates"
+        :disabled="
+          updateStatus === 'checking' || updateStatus === 'downloading'
+        "
       >
-        <Icon icon="mdi:update" class="w-4 h-4" />
+        <Icon
+          icon="mdi:update"
+          class="w-4 h-4"
+          :class="{ 'animate-spin': updateStatus === 'checking' }"
+        />
       </button>
 
       <!-- Logout Button -->
@@ -91,9 +136,12 @@
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useElectron } from "../composables/useElectron";
+import { useImagePath } from "../composables/useImagePath";
 import { useAuthStore } from "../stores/auth";
 import ElectronWindowControls from "./ElectronWindowControls.vue";
 import { Icon } from "@iconify/vue";
+
+const { getImagePath } = useImagePath();
 const router = useRouter();
 const route = useRoute();
 
@@ -113,8 +161,76 @@ const {
   updateStatus,
   updateProgress,
   checkForUpdates,
+  downloadUpdate,
+  installUpdate,
   setupMenuListeners,
+  showMessageBox,
 } = useElectron();
+
+// Update action handlers
+const handleCheckForUpdates = async () => {
+  try {
+    console.log("Manual check for updates triggered");
+    const result = await checkForUpdates();
+    console.log("Check for updates result:", result);
+
+    // Show notification for manual check
+    if (result === "No updates available") {
+      await showMessageBox({
+        type: "info",
+        title: "Updates",
+        message: "You are running the latest version!",
+      });
+    }
+  } catch (error) {
+    console.error("Error checking for updates:", error);
+    await showMessageBox({
+      type: "error",
+      title: "Update Error",
+      message: "Failed to check for updates. Please try again later.",
+    });
+  }
+};
+
+const handleUpdateAction = async () => {
+  try {
+    console.log("Download update triggered");
+    await downloadUpdate();
+  } catch (error) {
+    console.error("Error downloading update:", error);
+    await showMessageBox({
+      type: "error",
+      title: "Download Error",
+      message: "Failed to download update. Please try again.",
+    });
+  }
+};
+
+const handleInstallUpdate = async () => {
+  try {
+    const response = await showMessageBox({
+      type: "question",
+      title: "Install Update",
+      message:
+        "Do you want to install the update now? The application will restart.",
+      buttons: ["Install Now", "Later"],
+      defaultId: 0,
+      cancelId: 1,
+    });
+
+    if (response && response.response === 0) {
+      console.log("Install update triggered");
+      await installUpdate();
+    }
+  } catch (error) {
+    console.error("Error installing update:", error);
+    await showMessageBox({
+      type: "error",
+      title: "Install Error",
+      message: "Failed to install update. Please try again.",
+    });
+  }
+};
 
 const menuItems = ref([
   {
@@ -241,7 +357,7 @@ onMounted(() => {
   border-radius: 6px;
   transition: all 0.2s ease;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: #6b7280;
   display: flex;
   align-items: center;
@@ -252,6 +368,16 @@ onMounted(() => {
 .action-btn:hover {
   background: rgba(107, 114, 128, 0.1);
   color: #374151;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-btn:disabled:hover {
+  background: transparent;
+  color: #6b7280;
 }
 
 .nav-btn.active {
@@ -309,5 +435,8 @@ onMounted(() => {
 body.electron-app .navbar,
 body.electron-app nav.bg-gray-900 {
   display: none !important;
+}
+body.electron-app .main-content {
+  padding-top: 40px;
 }
 </style>

@@ -55,6 +55,7 @@
           placeholder="เลือกสถานะใหม่"
           required
           :error="errors.status"
+          className="w-full h-full rounded-lg"
         />
       </div>
 

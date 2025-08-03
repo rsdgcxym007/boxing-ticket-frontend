@@ -2,81 +2,74 @@
   "appId": "com.patongboxing.ticket.app",
   "productName": "Patong Boxing Ticket System",
   "directories": {
-    "output": "dist-electron"
+    "output": "dist-electron",
+    "buildResources": "build"
   },
   "files": [
-    "dist/**/*",
+    ".output/public/**/*",
     "electron/**/*",
-    "node_modules/**/*",
-    "package.json"
+    "package.json",
+    "node_modules/electron-updater/**/*",
+    "node_modules/dotenv/**/*",
+    "node_modules/semver/**/*",
+    "node_modules/builder-util-runtime/**/*",
+    "!node_modules/*/{test,__mocks__,example,examples}/**/*",
+    "!src/**/*",
+    "!electron/src/**/*"
   ],
   "extraMetadata": {
     "main": "electron/main.cjs"
   },
+  "compression": "maximum",
+  "artifactName": "Patong-Boxing-Ticket-System-${version}-${arch}-mac.${ext}",
   "publish": {
     "provider": "github",
     "owner": "rsdgcxym007",
     "repo": "boxing-ticket-frontend",
-    "private": true
+    "releaseType": "release"
   },
   "mac": {
     "category": "public.app-category.business",
     "icon": "build/icon.icns",
+    "hardenedRuntime": false,
+    "gatekeeperAssess": false,
     "entitlements": "build/entitlements.mac.plist",
     "entitlementsInherit": "build/entitlements.mac.plist",
-    "hardenedRuntime": true,
-    "gatekeeperAssess": false,
+    "notarize": false,
+    "identity": null,
+    "type": "distribution",
+    "minimumSystemVersion": "10.15",
+    "darkModeSupport": true,
     "target": [
       {
         "target": "dmg",
-        "arch": ["x64", "arm64"]
-      },
-      {
-        "target": "zip",
-        "arch": ["x64", "arm64"]
+        "arch": ["arm64"]
       }
     ]
   },
   "win": {
+    "icon": "build/icon.ico",
     "target": [
       {
         "target": "nsis",
-        "arch": ["x64", "ia32"]
-      },
-      {
-        "target": "portable",
-        "arch": ["x64", "ia32"]
-      }
-    ],
-    "icon": "build/icon.ico"
-  },
-  "linux": {
-    "target": [
-      {
-        "target": "AppImage",
         "arch": ["x64"]
       },
       {
-        "target": "deb",
+        "target": "zip",
         "arch": ["x64"]
       }
-    ],
-    "icon": "build/icon.png",
-    "category": "Office"
+    ]
   },
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
-    "installerIcon": "build/icon.ico",
-    "uninstallerIcon": "build/icon.ico",
-    "installerHeaderIcon": "build/icon.ico",
     "createDesktopShortcut": true,
-    "createStartMenuShortcut": true,
-    "shortcutName": "Patong Boxing Ticket System"
+    "createStartMenuShortcut": true
   },
   "dmg": {
     "icon": "build/icon.icns",
     "iconSize": 100,
+    "format": "UDZO",
     "contents": [
       {
         "x": 380,

@@ -1,8 +1,14 @@
+declare global {
+  interface Window {
+    electronAPI?: any;
+    nodeAPI?: { platform?: string };
+  }
+}
 import { useRouter } from "vue-router";
 import { defineNuxtPlugin } from "nuxt/app";
 
 export default defineNuxtPlugin(() => {
-  if (process.client) {
+  if (import.meta.client) {
     const router = useRouter();
     // Initialize Electron features when available
     if (window.electronAPI) {

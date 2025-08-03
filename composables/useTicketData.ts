@@ -2,6 +2,14 @@
 import { reactive } from "vue";
 
 export function useTicketData() {
+  // Helper function สำหรับ image paths ใน Electron
+  const getImagePath = (path: string) => {
+    if (typeof window !== "undefined" && window?.process?.type === "renderer") {
+      return `.${path}`;
+    }
+    return path;
+  };
+
   return reactive([
     {
       zone: "back-left",
@@ -13,7 +21,7 @@ export function useTicketData() {
         th: "RINGSIDE ด้านหลังซ้าย + เสื้อยืดพรีเมียม",
         en: "Back Left RINGSIDE + Premium T-Shirt",
       },
-      image: "/images/stage_back_left.png",
+      image: getImagePath("/images/stage_back_left.png"),
       benefits: {
         th: [
           "ที่นั่งติดขอบเวทีฝั่งซ้ายด้านหลัง",
@@ -44,7 +52,7 @@ export function useTicketData() {
         th: "RINGSIDE ด้านหลังขวา + เสื้อยืดพรีเมียม",
         en: "Back Right RINGSIDE + Premium T-Shirt",
       },
-      image: "/images/stage_back_right.png",
+      image: getImagePath("/images/stage_back_right.png"),
       benefits: {
         th: [
           "ที่นั่งขอบเวทีฝั่งขวาด้านหลัง",
@@ -75,7 +83,7 @@ export function useTicketData() {
         th: "RINGSIDE ฝั่งซ้าย + เสื้อยืดลิมิเต็ด",
         en: "Left RINGSIDE + Limited T-Shirt",
       },
-      image: "/images/stage_front_rear_left.png",
+      image: getImagePath("/images/stage_front_rear_left.png"),
       benefits: {
         th: [
           "ติดขอบเวทีฝั่งซ้าย มุมใกล้นักมวย",
@@ -106,7 +114,7 @@ export function useTicketData() {
         th: "RINGSIDE ฝั่งขวา + เสื้อยืดลิมิเต็ด",
         en: "Right RINGSIDE + Limited T-Shirt",
       },
-      image: "/images/stage_front_rear_right.png",
+      image: getImagePath("/images/stage_front_rear_right.png"),
       benefits: {
         th: [
           "ที่นั่งขอบเวทีฝั่งขวา ใกล้มุมมองนักมวย",
@@ -137,7 +145,7 @@ export function useTicketData() {
         th: "RINGSIDE ด้านหน้า VIP + ถ่ายภาพกับนักมวย",
         en: "Front RINGSIDE VIP + Photo with Fighter",
       },
-      image: "/images/stage_front_center.png",
+      image: getImagePath("/images/stage_front_center.png"),
       benefits: {
         th: [
           "ที่นั่ง VIP ใกล้เวทีที่สุด",

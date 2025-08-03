@@ -144,7 +144,7 @@ npm run electron:dist:win    # Windows
 npm run electron:dist:linux  # Linux
 ```
 
-### Auto-Update Release
+### Auto-Update Release test
 ```bash
 # Build และ publish ไป GitHub releases
 npm run dist
@@ -152,7 +152,7 @@ npm run dist
 
 ---
 
-## 📁 FILES CREATED/MODIFIED
+## 📁 FILES CREATED/MODIFIED test TEST UPdate
 
 ### New Electron Files
 - `electron/main.js` - Main Electron process

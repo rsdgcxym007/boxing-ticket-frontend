@@ -1,9 +1,27 @@
 import { ref, computed, readonly, onMounted, onUnmounted } from "vue";
 
+// Extend Window interface to include Electron properties
+declare global {
+  interface Window {
+    electronAPI?: ElectronAPI;
+    nodeAPI?: NodeAPI;
+    process?: {
+      type?: string;
+      versions?: {
+        electron?: string;
+        node?: string;
+        chrome?: string;
+      };
+    };
+  }
+}
+
 export interface ElectronAPI {
   getAppVersion: () => Promise<string>;
   getPlatform: () => Promise<string>;
   checkForUpdates: () => Promise<string>;
+  downloadUpdate: () => Promise<void>;
+  installUpdate: () => Promise<void>;
   onUpdateStatus: (
     callback: (event: any, status: string, info?: any) => void
   ) => void;
@@ -19,6 +37,7 @@ export interface ElectronAPI {
   onMenuAction: (callback: (event: any, action: string) => void) => void;
   onNavigateTo: (callback: (event: any, route: string) => void) => void;
   removeListener: (channel: string, callback: any) => void;
+  printThermal?: () => Promise<void>;
 }
 
 export interface NodeAPI {
@@ -26,25 +45,17 @@ export interface NodeAPI {
   env: string;
 }
 
-declare global {
-  interface Window {
-    electronAPI?: ElectronAPI;
-    nodeAPI?: NodeAPI;
-  }
-}
-
 export const useElectron = () => {
   const isElectron = computed(() => {
-    return process.client && !!window.electronAPI;
+    return typeof window !== "undefined" && !!window.electronAPI;
   });
 
   const platform = computed(() => {
-    if (process.client && window.nodeAPI) {
+    if (import.meta.client && window.nodeAPI) {
       return window.nodeAPI.platform;
     }
     return "web";
   });
-
   const appVersion = ref<string>("");
   const updateStatus = ref<string>("");
   const updateProgress = ref<any>(null);
@@ -54,14 +65,24 @@ export const useElectron = () => {
   const getAppVersion = async (): Promise<string> => {
     if (isElectron.value && window.electronAPI) {
       try {
+        console.log("Attempting to get app version...");
         const version = await window.electronAPI.getAppVersion();
+        console.log("App version received: ", version);
         appVersion.value = version;
         return version;
       } catch (error) {
         console.error("Error getting app version:", error);
+        // Try alternative method
+        try {
+          const version = await window.electronAPI.getPlatform();
+          console.log("Platform received:", version);
+        } catch (altError) {
+          console.error("Error getting platform:", altError);
+        }
         return "";
       }
     }
+    console.log("Not running in Electron or electronAPI not available");
     return "";
   };
 
@@ -78,14 +99,55 @@ export const useElectron = () => {
     return "Not available in web version";
   };
 
-  const setupUpdateListeners = () => {
+  const downloadUpdate = async (): Promise<void> => {
     if (isElectron.value && window.electronAPI) {
-      window.electronAPI.onUpdateStatus((event, status, info) => {
-        updateStatus.value = status;
-        console.log("Update status:", status, info);
-      });
+      try {
+        await window.electronAPI.downloadUpdate();
+      } catch (error) {
+        console.error("Error downloading update:", error);
+        throw error;
+      }
+    }
+  };
 
-      window.electronAPI.onUpdateProgress((event, progress) => {
+  const installUpdate = async (): Promise<void> => {
+    console.log("[useElectron] installUpdate called");
+    if (isElectron.value && window.electronAPI) {
+      try {
+        console.log("[useElectron] Calling window.electronAPI.installUpdate()");
+        const result = await window.electronAPI.installUpdate();
+        console.log("[useElectron] installUpdate result:", result);
+        return result;
+      } catch (error) {
+        console.error("[useElectron] Error installing update:", error);
+        throw error;
+      }
+    } else {
+      console.warn(
+        "[useElectron] installUpdate called but not in Electron context"
+      );
+      throw new Error("Not in Electron context");
+    }
+  };
+
+  const setupUpdateListeners = () => {
+    console.log("[useElectron] Setting up update listeners");
+    if (isElectron.value && window.electronAPI) {
+      console.log("[useElectron] electronAPI available, setting up listeners");
+
+      window.electronAPI.onUpdateStatus(
+        (event: any, status: string, info?: any) => {
+          console.log("[useElectron] Update status received:", status, info);
+          updateStatus.value = status;
+
+          // Store update info for later use
+          if (info) {
+            console.log("[useElectron] Update info received:", info);
+          }
+        }
+      );
+
+      window.electronAPI.onUpdateProgress((event: any, progress: any) => {
         updateProgress.value = progress;
         console.log("Update progress:", progress);
       });
@@ -127,9 +189,13 @@ export const useElectron = () => {
   const updateMaximizedState = async (): Promise<void> => {
     if (isElectron.value && window.electronAPI) {
       try {
+        console.log("Attempting to check maximized state...");
         isMaximized.value = await window.electronAPI.isMaximized();
+        console.log("Maximized state:", isMaximized.value);
       } catch (error) {
         console.error("Error checking maximized state:", error);
+        // Set a default value
+        isMaximized.value = false;
       }
     }
   };
@@ -219,6 +285,24 @@ export const useElectron = () => {
     }
   };
 
+  // Thermal Printing
+  const printThermal = async (): Promise<void> => {
+    console.log("isElectron.value", isElectron.value);
+    console.log("window.electronAPI", window.electronAPI);
+
+    if (isElectron.value && window.electronAPI?.printThermal) {
+      try {
+        await window.electronAPI.printThermal();
+        console.log("Thermal print command sent successfully");
+      } catch (error) {
+        console.error("Error printing thermal receipt:", error);
+      }
+    } else {
+      console.log("Thermal printing not available - using regular print");
+      window.print();
+    }
+  };
+
   // Cleanup
   const cleanup = () => {
     if (isElectron.value && window.electronAPI) {
@@ -230,11 +314,26 @@ export const useElectron = () => {
   };
 
   // Auto-initialize on client side
-  if (process.client) {
-    onMounted(() => {
-      setupUpdateListeners();
-      updateMaximizedState();
-      getAppVersion();
+  if (import.meta.client) {
+    onMounted(async () => {
+      console.log("useElectron mounted, isElectron:", isElectron.value);
+      console.log("window.electronAPI:", !!window.electronAPI);
+
+      if (isElectron.value && window.electronAPI) {
+        console.log("Setting up Electron listeners and state...");
+        setupUpdateListeners();
+
+        // Add delays to prevent rapid-fire calls
+        setTimeout(() => {
+          updateMaximizedState();
+        }, 100);
+
+        setTimeout(() => {
+          getAppVersion();
+        }, 200);
+      } else {
+        console.log("Not running in Electron environment");
+      }
     });
 
     onUnmounted(() => {
@@ -246,13 +345,15 @@ export const useElectron = () => {
     isElectron: readonly(isElectron),
     platform: readonly(platform),
     appVersion: readonly(appVersion),
-    updateStatus: readonly(updateStatus),
-    updateProgress: readonly(updateProgress),
+    updateStatus,
+    updateProgress,
     isMaximized: readonly(isMaximized),
 
     // Methods
     getAppVersion,
     checkForUpdates,
+    downloadUpdate,
+    installUpdate,
     setupUpdateListeners,
     minimizeWindow,
     maximizeWindow,
@@ -262,6 +363,7 @@ export const useElectron = () => {
     showOpenDialog,
     showSaveDialog,
     setupMenuListeners,
+    printThermal,
     cleanup,
   };
 };

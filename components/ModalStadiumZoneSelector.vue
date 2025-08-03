@@ -2,51 +2,168 @@
   <Teleport to="body">
     <div
       v-show="props.isOpen"
-      class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center"
+      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
       @click.self="onClose"
     >
       <div
-        class="w-full max-w-[95%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-6 flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden"
+        class="w-full max-w-[95%] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-6 flex flex-col bg-white/95 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden"
       >
         <!-- Sticky Header -->
-        <div class="sticky top-0 z-20 bg-white px-6 pt-6 pb-4 border-b">
+        <div
+          class="sticky top-0 z-20 bg-gradient-to-r from-white to-slate-50 px-6 pt-6 pb-4 border-b border-slate-200 shadow-sm"
+        >
           <button
-            class="absolute top-6 right-6 text-gray-400 hover:text-gray-700 text-xl"
+            class="absolute top-6 right-6 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full p-2 transition-all duration-300 group"
             @click="onClose"
           >
-            ✕
+            <i
+              class="mdi mdi-close text-xl group-hover:rotate-90 transition-transform"
+            ></i>
           </button>
-          <h2 class="text-xl font-bold text-center text-gray-800">
-            {{ t("selectSeats") }}
-          </h2>
-          <p class="text-center text-sm text-gray-500 mt-1">
-            {{ t("zone") }}:
-            <span class="font-semibold text-indigo-600">
-              {{ pageData.zoneKey.replace("-", " ").toUpperCase() }}
-            </span>
-          </p>
+          <div class="text-center">
+            <div class="flex items-center justify-center gap-3 mb-2">
+              <div
+                class="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg"
+              >
+                <i class="mdi mdi-seat-outline text-white text-2xl"></i>
+              </div>
+              <h2
+                class="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent"
+              >
+                {{ t("selectSeats") }}
+              </h2>
+            </div>
+            <div
+              class="inline-flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-full border border-indigo-200"
+            >
+              <i class="mdi mdi-map-marker text-indigo-600"></i>
+              <span class="text-sm text-slate-600">{{ t("zone") }}:</span>
+              <span class="font-bold text-indigo-700 uppercase tracking-wide">
+                {{ pageData.zoneKey.replace("-", " ") }}
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Scrollable Body -->
         <div class="flex-1 overflow-y-auto p-6 space-y-6">
           <!-- Zone and Date Selectors -->
-          <div class="flex justify-center px-6 pt-4">
-            <div class="w-full max-w-xs sm:max-w-sm md:max-w-md p-4">
-              <BaseSelect
-                v-model="pageData.zoneKey"
-                :options="pageData.zoneOptions"
-                label="ค้นหาโซน"
-                placeholder="เลือกโซน"
-                searchable
-                clearable
-                @update:modelValue="onZoneChange"
-              />
-              <div class="mt-4">
-                <DatePicker
-                  v-model="pageData.showDate"
-                  :placeholder="'\u0e40\u0e25\u0e37\u0e2d\u0e01\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48'"
-                  @update:modelValue="handleDateChange"
-                />
+
+          <div class="flex justify-center">
+            <div class="w-full max-w-2xl sm:max-w-3xl md:max-w-4xl">
+              <div
+                class="bg-white rounded-2xl p-3 border border-slate-200 shadow-xl"
+              >
+                <div class="space-y-6">
+                  <!-- Purchase Type -->
+                  <div
+                    class="flex flex-row flex-wrap items-center gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-6 w-full"
+                  >
+                    <label
+                      class="text-sm flex items-center gap-2 text-slate-700 font-semibold whitespace-nowrap"
+                    >
+                      <i class="mdi mdi-store-outline text-orange-500" />
+                      ประเภทการซื้อ
+                    </label>
+                    <div
+                      class="flex flex-row flex-wrap items-center gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-6 w-full"
+                    >
+                      <label
+                        v-for="option in purchaseTypeOptionsForForm.filter(
+                          (o) => o.value === OrderPurchaseType.ONSITE || o.value === OrderPurchaseType.BOOKING
+                        )"
+                        :key="option.value"
+                        class="flex items-center gap-[1px] cursor-pointer px-1 py-1 rounded-lg border-2 transition-all duration-300 shadow-sm text-xs min-w-[110px] max-w-[150px] sm:min-w-[120px] sm:max-w-[160px] md:min-w-[130px] md:max-w-[170px] lg:min-w-[140px] lg:max-w-[180px] xl:min-w-[150px] xl:max-w-[200px]"
+                        :class="
+                          pageData.purchaseType === option.value
+                            ? 'border-orange-400 bg-gradient-to-br from-orange-50 to-orange-100 shadow-md'
+                            : 'border-slate-300 bg-white hover:border-orange-300 hover:bg-orange-50/50 hover:shadow-md'
+                        "
+                        style="min-width: 120px; max-width: 160px"
+                      >
+                        <input
+                          type="radio"
+                          v-model="pageData.purchaseType"
+                          :value="option.value"
+                          class="accent-orange-500 w-4 h-4 mr-1"
+                        />
+                        <div
+                          class="flex items-center w-full justify-center gap-3"
+                        >
+                          <div
+                            class="p-0.5 gap-3 rounded-md transition-colors flex items-center justify-center"
+                            :class="
+                              pageData.purchaseType === option.value
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-slate-100 text-slate-600'
+                            "
+                            style="min-width: 16px; min-height: 16px"
+                          >
+                            <i :class="`mdi ${option.icon} text-xs`"></i>
+                          </div>
+                          <div class="flex flex-col justify-center">
+                            <p
+                              class="font-bold text-slate-800 text-xs leading-tight"
+                            >
+                              {{ option.label }}
+                            </p>
+                            <p class="text-[9px] text-slate-600 leading-tight">
+                              {{ option.description }}
+                            </p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                  <!-- Zone & Date Row -->
+                  <div
+                    class="flex flex-col sm:flex-row gap-4 items-center w-full"
+                  >
+                    <div class="flex-1 w-full">
+                      <label
+                        class="text-sm font-semibold text-slate-700 mb-2 block"
+                      >
+                        <i
+                          class="mdi mdi-map-marker-outline text-blue-500 mr-2"
+                        ></i>
+                        เลือกโซน
+                      </label>
+                      <BaseSelect
+                        v-model="pageData.zoneKey"
+                        :options="pageData.zoneOptions"
+                        placeholder="เลือกโซน"
+                        searchable
+                        clearable
+                        @update:modelValue="onZoneChange"
+                        class="w-full h-[40.5px]"
+                      />
+                    </div>
+                    <div class="flex-1 w-full">
+                      <label
+                        class="text-sm font-semibold text-slate-700 mb-2 block"
+                      >
+                        <i
+                          class="mdi mdi-calendar-outline text-green-500 mr-2"
+                        ></i>
+                        เลือกวันที่
+                      </label>
+                      <DatePicker
+                        v-model="pageData.showDate"
+                        placeholder="เลือกวันที่"
+                        @update:modelValue="handleDateChange"
+                        :inputClassName="'w-full text-black rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500'"
+                        :wrapperClassName="'w-full h-[40.5px]'"
+                        :inputStyle="{
+                          height: '40.5px',
+                          padding: '0 14px',
+                          minHeight: 0,
+                          maxHeight: 'none',
+                          boxSizing: 'border-box',
+                        }"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -54,24 +171,25 @@
           <!-- Seat Grid -->
           <div class="w-full">
             <div
-              class="max-h-[70vh] overflow-auto bg-white"
+              class="max-h-[70vh] overflow-auto bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border border-slate-200 shadow-inner p-6"
               style="margin: 0 auto"
             >
-              <div class="flex flex-col gap-2 items-center w-full">
+              <div class="flex flex-col gap-3 items-center w-full">
                 <div
                   v-for="(row, i) in pageData.currentZoneSeats"
                   :key="i"
                   class="w-full grid place-items-center"
                 >
                   <div
-                    class="grid"
+                    class="grid gap-2"
                     :style="{
-                      gridTemplateColumns: `repeat(${row.length}, minmax(2.10rem, auto))`,
+                      gridTemplateColumns: `repeat(${row.length}, minmax(2.2rem, auto))`,
                     }"
                   >
                     <div
                       v-for="seat in row"
                       :key="`${seat?.id}-${seatManager.lastUpdateTimestamp.value}`"
+                      class="flex flex-col items-center justify-center"
                     >
                       <SeatIcon
                         v-if="seat && seat.seatNumber"
@@ -84,7 +202,7 @@
                         :ownSeatIds="[
                           ...(props.orderData?.seats.map((b) => b.id) || []),
                         ]"
-                        class="w-8 sm:w-10 md:w-11 transition-transform hover:scale-105 cursor-pointer"
+                        class="w-8 sm:w-10 md:w-11 transition-all duration-300 hover:scale-105 cursor-pointer mb-3"
                       />
                     </div>
                   </div>
@@ -95,47 +213,88 @@
 
           <!-- Legend -->
           <div
-            class="flex justify-center flex-wrap gap-6 text-sm text-gray-600 font-medium"
+            class="flex justify-center flex-wrap gap-6 text-sm font-medium bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200"
           >
-            <div class="flex items-center gap-2">
-              <img src="/images/armchair.png" class="w-4 h-4" /> ว่าง
+            <div
+              class="flex items-center gap-3 px-3 py-2 bg-white rounded-lg shadow-sm border border-slate-200"
+            >
+              <div
+                class="w-6 h-6 bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-300 rounded-lg flex items-center justify-center"
+              >
+                <i class="mdi mdi-seat text-slate-600 text-sm"></i>
+              </div>
+              <span class="text-slate-700 font-semibold">ว่าง</span>
             </div>
-            <div class="flex items-center gap-2 text-green-600 font-semibold">
-              <img src="/images/seat-selected.png" class="w-4 h-4" />
-              ที่คุณเลือก
+
+            <div
+              class="flex items-center gap-3 px-3 py-2 bg-white rounded-lg shadow-sm border border-blue-200"
+            >
+              <div
+                class="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-blue-300 rounded-lg flex items-center justify-center"
+              >
+                <i class="mdi mdi-check-circle text-white text-sm"></i>
+              </div>
+              <span class="text-blue-600 font-semibold">เลือกแล้ว</span>
             </div>
-            <div class="flex items-center gap-2 text-orange-600 font-semibold">
-              <div class="w-4 h-4 bg-orange-400 rounded-sm"></div>
-              ถูกล็อก
+
+            <div
+              class="flex items-center gap-3 px-3 py-2 bg-white rounded-lg shadow-sm border border-amber-200"
+            >
+              <div
+                class="w-6 h-6 bg-gradient-to-br from-amber-100 to-orange-200 border-2 border-amber-400 rounded-lg flex items-center justify-center"
+              >
+                <i class="mdi mdi-lock text-amber-600 text-sm"></i>
+              </div>
+              <span class="text-amber-600 font-semibold">ถูกล็อก</span>
             </div>
-            <div class="flex items-center gap-2 text-gray-400 line-through">
-              <img src="/images/seat-booked.png" class="w-4 h-4 opacity-50" />
-              ไม่ว่าง
+
+            <div
+              class="flex items-center gap-3 px-3 py-2 bg-white rounded-lg shadow-sm border border-gray-200"
+            >
+              <div
+                class="w-6 h-6 bg-gray-200 border-2 border-gray-300 rounded-lg flex items-center justify-center"
+              >
+                <i class="mdi mdi-close-circle text-gray-400 text-sm"></i>
+              </div>
+              <span class="text-gray-500 font-semibold line-through"
+                >ไม่ว่าง</span
+              >
             </div>
           </div>
 
           <!-- Selected Seats Summary -->
-          <div
-            v-if="seatManager.selectedSeatCount.value > 0"
-            class="mt-4 border-t pt-6"
-          >
+          <div v-if="seatManager.selectedSeatCount.value > 0" class="mt-6">
             <div
-              class="w-full max-w-full sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto bg-white border border-gray-300 rounded-2xl shadow-2xl px-6 py-5"
+              class="w-full max-w-full sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl shadow-xl px-6 py-5"
             >
-              <div class="text-center space-y-3">
-                <p class="text-sm text-gray-600 tracking-wide font-medium">
-                  ที่นั่งที่เลือก
-                </p>
-                <p class="text-xl font-semibold text-blue-600 tracking-wider">
-                  {{ seatManager.getSeatsSummary().seatNumbers }}
-                </p>
-                <p class="text-lg sm:text-xl font-semibold tracking-wide">
-                  <span class="text-blue-600">ราคารวม:</span>
-                  <span class="text-cyan-500">
-                    {{ seatManager.totalPrice.value }}
-                  </span>
-                  <span class="ml-1 text-sm text-gray-500">บาท</span>
-                </p>
+              <div class="text-center space-y-4">
+                <div class="flex items-center justify-center gap-2 mb-2">
+                  <i class="mdi mdi-seat-outline text-blue-600 text-xl"></i>
+                  <p
+                    class="text-sm text-blue-700 tracking-wide font-bold uppercase"
+                  >
+                    ที่นั่งที่เลือก
+                  </p>
+                </div>
+
+                <div class="bg-white/60 rounded-xl p-3 border border-blue-200">
+                  <p class="text-xl font-bold text-blue-800 tracking-wider">
+                    {{ seatManager.getSeatsSummary().seatNumbers }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-center gap-2">
+                  <i class="mdi mdi-cash-multiple text-emerald-600 text-xl"></i>
+                  <p class="text-lg sm:text-xl font-bold tracking-wide">
+                    <span class="text-slate-700">ราคารวม:</span>
+                    <span class="text-emerald-600 ml-2">
+                      {{ seatManager.totalPrice.value.toLocaleString() }}
+                    </span>
+                    <span class="ml-1 text-sm text-slate-500 font-medium"
+                      >บาท</span
+                    >
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -144,39 +303,64 @@
         <!-- Sticky Footer -->
         <div
           v-if="seatManager.selectedSeatCount.value > 0"
-          class="sticky bottom-0 z-20 bg-white px-6 py-4 border-t"
+          class="sticky bottom-0 z-20 bg-gradient-to-r from-white to-slate-50 px-6 py-4 border-t border-slate-200 shadow-lg"
         >
-          <div class="flex justify-center gap-3 flex-wrap">
+          <div class="flex justify-center gap-4 flex-wrap">
             <button
               @click="onClose"
               :disabled="isBookingInProgress || isProcessing"
-              class="min-w-[90px] px-4 py-2 border border-blue-500 text-blue-600 text-sm font-semibold rounded-full shadow-sm hover:bg-blue-50 transition-all disabled:opacity-50"
+              class="group min-w-[100px] px-5 py-2.5 border-2 border-slate-300 text-slate-600 text-sm font-semibold rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
             >
+              <i
+                class="mdi mdi-arrow-left text-sm group-hover:translate-x-[-2px] transition-transform"
+              ></i>
               ย้อนกลับ
             </button>
+
             <button
               @click="onClear"
               :disabled="isBookingInProgress || isProcessing"
-              class="min-w-[90px] px-4 py-2 border border-red-400 text-red-500 text-sm font-semibold rounded-full shadow-sm hover:bg-red-50 transition-all disabled:opacity-50"
+              class="group min-w-[100px] px-5 py-2.5 border-2 border-red-300 text-red-600 text-sm font-semibold rounded-xl shadow-sm hover:bg-red-50 hover:border-red-400 transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
             >
+              <i
+                class="mdi mdi-close-circle text-sm group-hover:rotate-90 transition-transform"
+              ></i>
               ยกเลิกทั้งหมด
             </button>
+
+            <button
+              @click="handleMarkOrder"
+              :disabled="isBookingInProgress || isProcessing"
+              class="group min-w-[100px] px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
+            >
+              <i
+                class="mdi mdi-close-circle text-sm group-hover:rotate-90 transition-transform"
+              ></i>
+              จองตั๋ว
+            </button>
+
             <button
               @click="handleConfirm"
               :disabled="
                 isBookingInProgress || isProcessing || !canProceedToBooking
               "
-              class="min-w-[90px] px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-semibold rounded-full shadow-md hover:opacity-90 transition-all disabled:opacity-50"
+              class="group min-w-[100px] px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
             >
-              <span v-if="isBookingInProgress || isProcessing">
-                <i class="mdi mdi-loading mdi-spin mr-1"></i>
+              <span
+                v-if="isBookingInProgress || isProcessing"
+                class="flex items-center gap-2"
+              >
+                <i class="mdi mdi-loading mdi-spin text-sm"></i>
                 กำลังจอง...
               </span>
-              <span v-else>
+              <span v-else class="flex items-center gap-2">
+                <i
+                  class="mdi mdi-ticket-confirmation text-sm group-hover:scale-110 transition-transform"
+                ></i>
                 {{
-                  props.mode === "change" && props?.orderData?.status === "PAID"
+                  props.mode === "change" && props?.orderData?.status === OrderStatus.PAID
                     ? "ยืนยันเปลี่ยนที่นั่ง"
-                    : "ซิ้อตั๋ว"
+                    : "ซื้อตั๋ว"
                 }}
               </span>
             </button>
@@ -189,6 +373,7 @@
     <SummaryModal
       v-if="pageData.showSummaryModal"
       :visible="pageData.showSummaryModal"
+      :purchaseType="pageData.purchaseType"
       :selectedSeats="seatManager.mySelectedSeats.value"
       :zone="pageData.zoneKey"
       :total="seatManager.totalPrice.value"
@@ -204,6 +389,9 @@
 import dayjs from "dayjs";
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useSingleToast } from "@/composables/useSingleToast";
+import { useImagePath } from "@/composables/useImagePath";
+
+const { getImagePath } = useImagePath();
 const { showToast } = useSingleToast();
 import { useI18n } from "vue-i18n";
 import { SummaryModal } from "@/components";
@@ -214,7 +402,9 @@ import { useOrder } from "@/composables/useOrder";
 import { buildSeatLayoutFromCoordinates } from "@/utils/buildSeatLayout";
 import { useIntegratedSeatBooking } from "@/composables/useIntegratedSeatBooking";
 import { ref as vueRef } from "vue";
+import { purchaseTypeOptions } from "@/utils/orderOptions";
 
+import { OrderStatus, OrderPurchaseType } from "@/types/Enums";
 const { t } = useI18n();
 const pageData = usePageData();
 const { getSeatsByZoneId } = useSeatApi();
@@ -235,6 +425,23 @@ const {
   cleanup,
 } = seatBookingSystem;
 
+const purchaseTypeOptionsForForm = computed(() =>
+  purchaseTypeOptions.map((option) => ({
+    ...option,
+    icon:
+      option.value === OrderPurchaseType.WEBSITE
+        ? "mdi-web"
+        : option.value === OrderPurchaseType.BOOKING
+        ? "mdi-phone-in-talk"
+        : "mdi-store",
+    description:
+      option.value === OrderPurchaseType.WEBSITE
+        ? "ซื้อผ่านเว็บไซต์"
+        : option.value === OrderPurchaseType.BOOKING
+        ? "BOOKING"
+        : "ซื้อหน้างาน",
+  }))
+);
 // ===== Authentication =====
 if (!auth.user) auth.loadUser();
 
@@ -289,7 +496,7 @@ const fetchAndInitializeSeats = async () => {
         seatManager.allSeats.value
       );
       pageData.bookedSeats = seatManager.allSeats.value.filter(
-        (seat) => seatManager.getSeatStatus(seat) === "BOOKED"
+        (seat) => seatManager.getSeatStatus(seat) === OrderStatus.BOOKED
       );
     }
   } catch (error) {
@@ -343,8 +550,8 @@ const getSeatStatus = (seat) => {
 
     // ถ้า seat ถูกจองจริง ๆ ให้คืน "BOOKED"
     if (
-      seat.bookingStatus === "BOOKED" ||
-      seatManager.getSeatStatus(seat) === "BOOKED"
+      seat.bookingStatus === OrderStatus.BOOKED ||
+      seatManager.getSeatStatus(seat) === OrderStatus.BOOKED
     ) {
       return "BOOKED";
     }
@@ -378,6 +585,7 @@ const handleConfirm = async () => {
       paymentMethod: "CASH",
       source: "OTHER",
       status: "PENDING",
+      purchaseType: pageData.purchaseType,
     };
 
     const order = await createBooking(orderData);
@@ -412,6 +620,7 @@ const handleMarkOrder = async () => {
       paymentMethod: "CASH",
       source: "OTHER",
       status: "BOOKED",
+      purchaseType: pageData.purchaseType,
     };
 
     await createBooking(orderData);
@@ -520,7 +729,7 @@ watch(
       }));
       pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(freshSeats);
       pageData.bookedSeats = freshSeats.filter(
-        (seat) => seatManager.getSeatStatus(seat) === "BOOKED"
+        (seat) => seatManager.getSeatStatus(seat) === OrderStatus.BOOKED
       );
       pageData.loading = false;
     } catch (error) {
@@ -568,3 +777,17 @@ onBeforeUnmount(() => {
   cleanup();
 });
 </script>
+<style scoped>
+:deep(.dp__input_reg) {
+  height: 40.5px;
+  padding: 0 30px;
+  min-height: 0;
+  max-height: none;
+  box-sizing: border-box;
+  width: 100%;
+  color: #000;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+</style>

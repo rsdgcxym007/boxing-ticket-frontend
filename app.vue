@@ -3,4 +3,7 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+
+  <!-- Electron Update Notification -->
+  <ElectronUpdateNotification />
 </template>

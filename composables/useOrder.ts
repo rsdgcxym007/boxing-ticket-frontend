@@ -19,6 +19,9 @@ export const useOrder = () => {
     createdBy,
     showDate,
     paymentMethod,
+    purchaseType,
+    attendanceStatus,
+    referrerName,
   }: {
     page?: number;
     limit?: number;
@@ -30,6 +33,9 @@ export const useOrder = () => {
     createdBy?: string;
     showDate?: string;
     paymentMethod?: string;
+    purchaseType?: string;
+    attendanceStatus?: string;
+    referrerName?: string;
   }) => {
     try {
       const query: Record<string, any> = { page, limit };
@@ -43,6 +49,9 @@ export const useOrder = () => {
       if (createdBy) query.createdBy = createdBy;
       if (showDate) query.showDate = showDate;
       if (paymentMethod) query.paymentMethod = paymentMethod;
+      if (purchaseType) query.purchaseType = purchaseType;
+      if (attendanceStatus) query.attendanceStatus = attendanceStatus;
+      if (referrerName) query.referrerName = referrerName;
 
       const data = await get("/api/v1/orders", { query });
       return data.data;
@@ -89,6 +98,7 @@ export const useOrder = () => {
     standingAdultQty,
     standingChildQty,
     status,
+    purchaseType,
   }: {
     customerName: string;
     customerPhone: string;
@@ -104,6 +114,7 @@ export const useOrder = () => {
     standingAdultQty?: number;
     standingChildQty?: number;
     status?: string; // Optional status for the order
+    purchaseType?: string; // Optional purchase type for the order
   }) => {
     const payload = {
       customerName,
@@ -120,6 +131,7 @@ export const useOrder = () => {
       standingAdultQty,
       standingChildQty,
       status,
+      purchaseType,
     };
 
     try {
@@ -252,12 +264,6 @@ export const useOrder = () => {
 
       showToast("success", `เปลี่ยนที่นั่งออเดอร์ ${orderId} สำเร็จ`);
     } catch (err: any) {
-      showToast(
-        "error",
-        `เปลี่ยนที่นั่งล้มเหลว: ${
-          err.response?.data?.message || "Unknown error"
-        }`
-      );
       throw err;
     }
   };
@@ -331,6 +337,85 @@ export const useOrder = () => {
       throw err;
     }
   };
+  const getExportPdfOrder = async ({
+    page = 1,
+    limit = 10,
+    status,
+    zone,
+    search,
+    startDate,
+    endDate,
+    createdBy,
+    showDate,
+    paymentMethod,
+    purchaseType,
+    attendanceStatus,
+    referrerName,
+  }: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    zone?: string;
+    search?: string;
+    startDate?: string;
+    endDate?: string;
+    createdBy?: string;
+    showDate?: string;
+    paymentMethod?: string;
+    purchaseType?: string;
+    attendanceStatus?: string;
+    referrerName?: string;
+  }) => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (status) queryParams.append("status", status);
+      if (zone) queryParams.append("zone", zone);
+      if (search) queryParams.append("search", search);
+      if (startDate) queryParams.append("startDate", startDate);
+      if (endDate) queryParams.append("endDate", endDate);
+      if (createdBy) queryParams.append("createdBy", createdBy);
+      if (showDate) queryParams.append("showDate", showDate);
+      if (paymentMethod) queryParams.append("paymentMethod", paymentMethod);
+      if (purchaseType) queryParams.append("purchaseType", purchaseType);
+      if (referrerName) queryParams.append("referrerName", referrerName);
+      if (attendanceStatus)
+        queryParams.append("attendanceStatus", attendanceStatus);
+      queryParams.append("includeAllPages", "true");
+      queryParams.append("page", String(page));
+      queryParams.append("limit", String(limit));
+
+      const url = `${base}/api/v1/orders/export/pdf?${queryParams.toString()}`;
+      // ดึง token จาก localStorage หรือ cookie ตามที่ระบบ auth ใช้
+      let token = "";
+      if (typeof window !== "undefined") {
+        token = localStorage.getItem("token") || "";
+      }
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Accept: "application/pdf",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      return {
+        success: true,
+        url: blobUrl,
+        blob: blob,
+      };
+    } catch (err: any) {
+      console.error("Error fetching PDF:", err);
+      showToast(
+        "error",
+        `ไม่สามารถโหลด PDF ได้: ${err.message || "Unknown error"}`
+      );
+      throw err;
+    }
+  };
 
   return {
     getOrders,
@@ -345,9 +430,6 @@ export const useOrder = () => {
     generateTickets,
     downloadThermalReceipt,
     getMasterStaffAdmin,
+    getExportPdfOrder,
   };
 };
-
-/**
- * ดาวน์โหลด Thermal Receipt PDF สำหรับ orderId
- */

@@ -1,5 +1,5 @@
-import { defineStore } from "pinia";
 import { ref } from "vue";
+import { defineStore } from "pinia";
 
 export interface User {
   id: string;
@@ -13,13 +13,13 @@ export const useAuthStore = defineStore("auth", () => {
 
   const setUser = (newUser: User) => {
     user.value = newUser;
-    if (import.meta.client) {
+    if (process.client) {
       localStorage.setItem("user", JSON.stringify(newUser));
     }
   };
 
   const loadUser = () => {
-    if (import.meta.client) {
+    if (process.client) {
       const saved = localStorage.getItem("user");
       if (saved) {
         user.value = JSON.parse(saved);
@@ -30,7 +30,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const logout = () => {
     user.value = null;
-    if (import.meta.client) {
+    if (process.client) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
     }

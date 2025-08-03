@@ -120,6 +120,7 @@
             label="ค้นหา"
             placeholder="ค้นหาชื่อ, อีเมล, หรือรหัสพนักงาน"
             @input="debouncedSearch"
+            className="w-full h-[40px] rounded-lg"
           >
           </BaseInput>
         </div>
@@ -133,6 +134,7 @@
             searchable
             clearable
             @change="loadStaffList"
+            className="w-full h-[40px] rounded-lg"
           />
         </div>
 
@@ -145,6 +147,7 @@
             searchable
             clearable
             @change="loadStaffList"
+            className="w-full h-[40px] rounded-lg"
           />
         </div>
 
@@ -157,6 +160,7 @@
             searchable
             clearable
             @change="loadStaffList"
+            className="w-full h-[40px] rounded-lg"
           />
         </div>
       </div>
@@ -541,7 +545,8 @@ import {
 } from "../../../composables/useStaff";
 import { useDebounceFn } from "@vueuse/core";
 import dayjs from "dayjs";
-
+import { useRouter } from "vue-router";
+const router = useRouter();
 // Composables
 const { showToast } = useSingleToast();
 const {
@@ -721,9 +726,9 @@ const handlePageChange = (page: number) => {
 };
 
 // Staff Actions
+
 const viewStaff = (staff: Staff) => {
-  // Navigate to staff detail page
-  window.location.href = `/admin/staff/${staff.id}`;
+  router.push(`/admin/staff/${staff.id}`);
 };
 
 const editStaff = (staff: Staff) => {

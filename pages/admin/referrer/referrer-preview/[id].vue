@@ -145,7 +145,7 @@ const pdfCache = ref<Map<string, { url: string; blob: Blob }>>(new Map());
 // ตรวจว่าอุปกรณ์เป็นมือถือหรือแท็บเล็ต
 const isMobile = computed(() => {
   // ใช้ computed เพื่อให้ reactive และรองรับ SSR
-  if (process.client) {
+  if (typeof window !== "undefined") {
     return (
       /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent

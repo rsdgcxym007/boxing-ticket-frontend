@@ -2,22 +2,37 @@ import { ref } from "vue";
 import { useReferrer } from "./useReferrer";
 import { useOrder } from "./useOrder";
 
-const masterData = ref(null);
-const masterStaffAdmin = ref(null);
+const masterData = ref([]);
+const masterStaffAdmin = ref([]);
 const loading = ref(false);
 const error = ref(null);
 
 export function useReferrerMasterData() {
-  const masterData = ref(null);
-  const masterStaffAdmin = ref(null);
-  const loading = ref(false);
-  const error = ref(null);
-
+  // ยิง API พร้อมกันและอัพเดท state ทั้งสอง
+  const fetchAllMasterData = async () => {
+    loading.value = true;
+    try {
+      const [refData, staffData] = await Promise.all([
+        getReferrerMasterData(),
+        getMasterStaffAdmin(),
+      ]);
+      masterData.value = refData;
+      masterStaffAdmin.value = staffData;
+      return { refData, staffData };
+    } catch (err) {
+      error.value = err;
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
   const { getReferrerMasterData } = useReferrer();
   const { getMasterStaffAdmin } = useOrder();
 
   const fetchMasterData = async () => {
-    if (masterData.value) return masterData.value; // ใช้ cache
+    // ถ้า masterData มีข้อมูลแล้ว (length > 0) ให้ return cache
+    if (Array.isArray(masterData.value) && masterData.value.length > 0)
+      return masterData.value;
     loading.value = true;
     try {
       const data = await getReferrerMasterData();
@@ -53,5 +68,6 @@ export function useReferrerMasterData() {
     error,
     fetchMasterData,
     fetchMasterStaffAdmin,
+    fetchAllMasterData,
   };
 }

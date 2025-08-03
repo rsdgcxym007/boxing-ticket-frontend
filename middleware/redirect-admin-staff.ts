@@ -1,6 +1,6 @@
 import { defineNuxtRouteMiddleware, navigateTo } from "nuxt/app";
 
-export default defineNuxtRouteMiddleware(() => {
+export default defineNuxtRouteMiddleware((to) => {
   if (!process.client) return;
 
   const user = localStorage.getItem("user");
@@ -10,6 +10,9 @@ export default defineNuxtRouteMiddleware(() => {
   const notFor = ["admin", "staff"];
 
   if (notFor.includes(role)) {
-    return navigateTo("/dashboard");
+    // Extract locale from path and add to dashboard route
+    const localeMatch = to.path.match(/^\/(th|en)/);
+    const locale = localeMatch ? localeMatch[1] : "th";
+    return navigateTo(`/${locale}/dashboard`);
   }
 });

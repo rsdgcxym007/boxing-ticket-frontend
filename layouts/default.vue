@@ -4,7 +4,7 @@
     <ElectronMenuBar v-if="isElectron" />
 
     <Navbar />
-    <main class="flex-grow">
+    <main class="flex-grow main-content">
       <slot />
       <BaseLoading :visible="pageData.loading" />
     </main>
@@ -21,6 +21,7 @@ import BaseLoading from "@/components/BaseLoading.vue";
 import ElectronMenuBar from "@/components/ElectronMenuBar.vue";
 import ElectronUpdateNotification from "@/components/ElectronUpdateNotification.vue";
 import { useAuthStore } from "@/stores/auth";
+import { useElectron } from "@/composables/useElectron";
 
 const pageData = usePageData();
 const auth = useAuthStore();
