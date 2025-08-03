@@ -20,31 +20,35 @@
       <div v-if="isDesktop" class="flex items-center gap-8">
         <ul class="flex gap-8 text-sm md:text-base font-semibold tracking-wide">
           <li>
-            <router-link to="/" class="hover:text-green-400">{{
+            <NuxtLink to="/" class="hover:text-green-400">{{
               t("home")
-            }}</router-link>
+            }}</NuxtLink>
           </li>
           <li>
-            <router-link
-              to="/StandingTicketForm"
+            <NuxtLink
+              :to="localePath('/StandingTicketForm')"
               class="hover:text-green-400"
-              >{{ t("stadiumTicket") }}</router-link
+              >{{ t("stadiumTicket") }}</NuxtLink
             >
           </li>
           <li>
-            <router-link to="/ringside" class="hover:text-green-400">{{
-              t("ringsideTicket")
-            }}</router-link>
+            <NuxtLink
+              :to="localePath('/ringside')"
+              class="hover:text-green-400"
+              >{{ t("ringsideTicket") }}</NuxtLink
+            >
           </li>
           <li>
-            <router-link to="/contacts" class="hover:text-green-400">{{
-              t("contact")
-            }}</router-link>
+            <NuxtLink
+              :to="localePath('/contacts')"
+              class="hover:text-green-400"
+              >{{ t("contact") }}</NuxtLink
+            >
           </li>
           <li v-if="!auth?.user">
-            <router-link to="/login" class="hover:text-green-400">{{
+            <NuxtLink :to="localePath('/login')" class="hover:text-green-400">{{
               t("login") || "เข้าสู่ระบบ"
-            }}</router-link>
+            }}</NuxtLink>
           </li>
           <!-- Admin Dropdown -->
           <li
@@ -80,6 +84,8 @@
             <!-- Admin Dropdown Menu -->
             <div
               v-if="adminMenuHover || adminMenuOpen"
+              ref="adminDropdownMenuRef"
+              tabindex="-1"
               @touchstart="adminMenuHover = true"
               @mouseenter="adminMenuHover = true"
               @mouseleave="adminMenuHover = false"
@@ -90,8 +96,9 @@
                   (i) => !i.role || i.role.includes(auth?.user?.role)
                 )"
                 :key="item.to"
-                :to="item.to"
+                :to="localePath(item.to)"
                 class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeAdminMenu"
               >
                 <i :class="`mdi ${item.icon} text-lg text-white/80`"></i>
                 <span>{{ item.label }}</span>
@@ -121,18 +128,18 @@
       <!-- Mobile: Buttons + Hamburger -->
       <div v-if="!isDesktop" class="flex items-center gap-2 md:hidden">
         <!-- Stadium & Ringside Buttons -->
-        <a
-          href="/StandingTicketForm"
+        <NuxtLink
+          :to="localePath('/StandingTicketForm')"
           class="text-xs px-3 py-1 rounded-full border border-white/20 hover:bg-white hover:text-black transition"
         >
           ซื้อตั๋วยืน
-        </a>
-        <a
-          href="/ringside"
+        </NuxtLink>
+        <NuxtLink
+          :to="localePath('/ringside')"
           class="text-xs px-3 py-1 rounded-full border border-white/20 hover:bg-white hover:text-black transition"
         >
           ซื้อตั๋วริงไซด์
-        </a>
+        </NuxtLink>
 
         <!-- Hamburger Icon -->
         <button @click="isOpen = !isOpen">
@@ -176,26 +183,46 @@
       >
         <ul class="flex flex-col gap-3 text-base font-medium text-white">
           <li>
-            <router-link
-              to="/"
+            <NuxtLink
+              :to="localePath('/')"
               class="flex items-center gap-3 hover:text-blue-400"
-              ><i class="mdi mdi-home-outline text-xl"></i>หน้าหลัก</router-link
+              @click="isOpen = false"
+              ><i class="mdi mdi-home-outline text-xl"></i>หน้าหลัก</NuxtLink
             >
           </li>
           <li>
-            <router-link
-              to="/contacts"
+            <NuxtLink
+              :to="localePath('/StandingTicketForm')"
               class="flex items-center gap-3 hover:text-blue-400"
-              ><i class="mdi mdi-email-outline text-xl"></i
-              >ติดต่อเรา</router-link
+              @click="isOpen = false"
+              ><i class="mdi mdi-ticket-outline text-xl"></i
+              >ซื้อตั๋วยืน</NuxtLink
+            >
+          </li>
+          <li>
+            <NuxtLink
+              :to="localePath('/ringside')"
+              class="flex items-center gap-3 hover:text-blue-400"
+              @click="isOpen = false"
+              ><i class="mdi mdi-crown-outline text-xl"></i
+              >ซื้อตั๋วริงไซด์</NuxtLink
+            >
+          </li>
+          <li>
+            <NuxtLink
+              :to="localePath('/contacts')"
+              class="flex items-center gap-3 hover:text-blue-400"
+              @click="isOpen = false"
+              ><i class="mdi mdi-email-outline text-xl"></i>ติดต่อเรา</NuxtLink
             >
           </li>
           <li v-if="!auth?.user">
-            <router-link
-              to="/login"
+            <NuxtLink
+              :to="localePath('/login')"
               class="flex items-center gap-3 hover:text-blue-400"
+              @click="isOpen = false"
               ><i class="mdi mdi-login-variant text-xl"></i
-              >เข้าสู่ระบบ</router-link
+              >เข้าสู่ระบบ</NuxtLink
             >
           </li>
 
@@ -231,8 +258,12 @@
                   :key="item.to"
                 >
                   <router-link
-                    :to="item.to"
+                    :to="localePath(item.to)"
                     class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      adminSubOpen = false;
+                      isOpen = false;
+                    "
                   >
                     <i :class="`mdi ${item.icon}`"></i>
                     {{ item.label }}
@@ -250,13 +281,19 @@
         <div class="flex flex-col gap-3">
           <button
             v-if="auth?.user"
-            @click="logout"
+            @click="
+              logout;
+              isOpen = false;
+            "
             class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
           >
             <i class="mdi mdi-logout-variant text-xl"></i> ออกจากระบบ
           </button>
           <button
-            @click="toggleLang"
+            @click="
+              toggleLang;
+              isOpen = false;
+            "
             class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
           >
             <i class="mdi mdi-translate text-xl"></i>
@@ -270,18 +307,20 @@
 
 <script setup>
 import { RouterLink } from "vue-router";
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
+import { onClickOutside } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth";
 import { useAdminMenu } from "@/composables/useAdminMenu";
 import { useImagePath } from "@/composables/useImagePath";
 import { useRouter } from "vue-router";
-import { useSwitchLocalePath } from "#imports";
+import { useSwitchLocalePath, useLocalePath } from "#imports";
 
 const { getImagePath } = useImagePath();
 const { locale, t } = useI18n();
 const router = useRouter();
 const switchLocalePath = useSwitchLocalePath();
+const localePath = useLocalePath();
 const auth = useAuthStore();
 
 const isOpen = ref(false);
@@ -290,9 +329,28 @@ const adminMenu = useAdminMenu();
 const adminMenuOpen = ref(false);
 const adminMenuHover = ref(false);
 const adminSubOpen = ref(false);
+const adminDropdownMenuRef = ref(null);
+// ปิด dropdown เมื่อคลิกนอกเมนู
+onClickOutside(adminDropdownMenuRef, () => {
+  if (adminMenuOpen.value) adminMenuOpen.value = false;
+});
+
+// ปิด dropdown เมื่อเปลี่ยน route
+watch(
+  () => router.currentRoute.value.fullPath,
+  () => {
+    adminMenuOpen.value = false;
+    adminMenuHover.value = false;
+  }
+);
 
 const toggleAdminMenu = () => {
   adminMenuOpen.value = !adminMenuOpen.value;
+};
+
+const closeAdminMenu = () => {
+  adminMenuOpen.value = false;
+  adminMenuHover.value = false;
 };
 
 const toggleLang = () => {

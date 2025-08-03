@@ -12,8 +12,41 @@
         ออกตั๋วยืน
       </h2>
 
-      <!-- ชื่อผู้ซื้อ -->
+      <!-- Purchase Type -->
       <div>
+        <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+          <i class="mdi mdi-store-outline text-orange-400" />
+          ประเภทการซื้อ
+        </label>
+        <div class="flex gap-4">
+          <label
+            v-for="option in purchaseTypeOptionsForForm.filter(
+              (o) => o.value === 'ONSITE' || o.value === 'BOOKING'
+            )"
+            :key="option.value"
+            class="flex-1 flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-white/20 hover:border-orange-400 bg-white/5 hover:bg-orange-50/10 transition-all duration-300"
+          >
+            <input
+              type="radio"
+              v-model="pageData.purchaseType"
+              :value="option.value"
+              class="accent-orange-500 w-4 h-4"
+            />
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-orange-100/20 rounded-lg">
+                <i :class="`mdi ${option.icon} text-orange-400 text-lg`"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-white">{{ option.label }}</p>
+                <p class="text-xs text-gray-400">{{ option.description }}</p>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- ชื่อผู้ซื้อ -->
+      <div v-if="pageData.purchaseType !== 'ONSITE'">
         <label class="text-sm mb-1 flex items-center gap-2 text-blue-300">
           <i class="mdi mdi-account-outline text-lg" />
           ชื่อผู้ซื้อ
@@ -27,7 +60,7 @@
       </div>
 
       <!-- เบอร์โทรผู้ซื้อ -->
-      <div>
+      <div v-if="pageData.purchaseType !== 'ONSITE'">
         <label class="text-sm mb-1 flex items-center gap-2 text-green-300">
           <i class="mdi mdi-phone-outline text-lg" />
           เบอร์โทรผู้ซื้อ
@@ -55,7 +88,7 @@
       </div>
 
       <!-- อีเมลผู้ซื้อ -->
-      <div>
+      <div v-if="pageData.purchaseType !== 'ONSITE'">
         <label class="text-sm mb-1 flex items-center gap-2 text-red-300">
           <i class="mdi mdi-email-outline text-lg" />
           อีเมลผู้ซื้อ
@@ -155,7 +188,7 @@
           placeholder="กรอกรหัสผู้แนะนำ เช่น FRESHYTOUR"
           clearable
           searchable
-          className="w-full"
+          className="w-full h-[40.5px]"
         />
       </div>
 
@@ -250,6 +283,7 @@
   <SummaryModal
     v-if="showSummaryModal"
     :visible="showSummaryModal"
+    :purchaseType="pageData.purchaseType"
     :selectedSeats="[]"
     :zone="'Standing'"
     :total="calculateTotal()"
@@ -264,10 +298,32 @@
 import { onMounted, computed } from "vue";
 import { useReferrerMasterData } from "../composables/useReferrerMasterData";
 import BaseSelect from "../components/base/BaseSelect.vue";
+import { purchaseTypeOptions } from "../utils/orderOptions";
+
 // Referrer options from master data
 const { masterData, fetchMasterData } = useReferrerMasterData();
-onMounted(() => {
-  fetchMasterData();
+
+// Purchase type options for form with icons and descriptions
+const purchaseTypeOptionsForForm = computed(() =>
+  purchaseTypeOptions.map((option) => ({
+    ...option,
+    icon:
+      option.value === "WEBSITE"
+        ? "mdi-web"
+        : option.value === "BOOKING"
+        ? "mdi-phone-in-talk"
+        : "mdi-store",
+    description:
+      option.value === "WEBSITE"
+        ? "ซื้อผ่านเว็บไซต์"
+        : option.value === "BOOKING"
+        ? "BOOKING"
+        : "ซื้อหน้างาน",
+  }))
+);
+
+onMounted(async () => {
+  await fetchMasterData();
 });
 
 import { ref } from "vue";
@@ -310,6 +366,7 @@ const pageData = ref({
   referrerCode: "", // รหัสผู้แนะนำ
   paymentMethod: "CASH", // วิธีการชำระเงิน (เริ่มต้นเป็นเงินสด)
   showDate: `${yyyy}-${mm}-${dd}`, // วันที่แสดง
+  purchaseType: "ONSITE", // ประเภทการซื้อ (เริ่มต้นเป็นหน้างาน)
 });
 
 const orderId = ref<string | null>(null);
@@ -346,11 +403,11 @@ const bookStandingTicketNew = async () => {
       customerEmail: customerEmail.trim(),
       paymentMethod,
       referrerCode: pageData.value.referrerCode || undefined,
+      purchaseType: pageData.value.purchaseType,
     };
 
     const response = await submitOrder(bookingData);
     dataOrder.value = response;
-    console.log("dataOrder.value", dataOrder.value);
 
     showSummaryModal.value = true;
     // 🎉 แสดงผลลัพธ์การจอง
@@ -383,13 +440,12 @@ const confirmPaymentForOrder = async () => {
       amount: calculateTotal(),
       customerName: pageData.value.customerName.trim(),
       referrerCode: pageData.value.referrerCode || undefined,
+      purchaseType: pageData.value.purchaseType,
     };
 
     await createStandingPayment(paymentData as any);
 
     showToast("success", "🎉 ยืนยันการชำระเงินสำเร็จ!");
-    console.log("✅ ยืนยันการชำระเงินสำเร็จ");
-
     // 🆕 ล้างค่าฟอร์มเพื่อสร้างออเดอร์ใหม่
     pageData.value = {
       customerName: "",
@@ -400,6 +456,7 @@ const confirmPaymentForOrder = async () => {
       referrerCode: "",
       paymentMethod: "CASH",
       showDate: `${yyyy}-${mm}-${dd}`,
+      purchaseType: pageData.value.purchaseType,
     };
     orderId.value = null;
   } catch (error) {

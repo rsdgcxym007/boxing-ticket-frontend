@@ -1,42 +1,58 @@
 <template>
   <div
-    class="min-h-screen bg-gradient-to-br from-[#0f1f3c] via-[#1a2b4d] to-[#0f1f3c] text-white"
+    class="min-h-screen bg-gradient-to-b from-blue-50 via-blue-100 to-blue-200 text-blue-900"
   >
-    <div
-      class="p-4 md:p-6 lg:p-8 w-full mx-auto space-y-6 lg:space-y-8 max-w-7xl"
-    >
+    <div class="max-w-6xl mx-auto p-4 space-y-4">
       <!-- Header -->
       <div
-        class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6"
+        class="flex items-center justify-between bg-white/90 backdrop-blur-md rounded-xl shadow-md p-4 border border-blue-200"
       >
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
           <button
             @click="$router.go(-1)"
-            class="flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 text-sm md:text-base"
+            class="flex items-center gap-2 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium rounded-md transition-colors text-sm"
           >
-            <i class="mdi mdi-arrow-left text-lg"></i>
+            <i class="mdi mdi-arrow-left text-blue-500"></i>
             กลับ
           </button>
           <div>
-            <h1
-              class="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-1"
-            >
-              แก้ไขที่นั่ง
+            <h1 class="text-xl font-bold text-blue-900">
+              แก้ไขออเดอร์ {{ orderData?.orderNumber }}
             </h1>
-            <p class="text-sm md:text-base text-blue-300">
-              จัดการและแก้ไขข้อมูลการจองที่นั่ง
+            <p class="text-sm text-blue-700">
+              {{ getTicketTypeConfig(orderData?.ticketType).label }} •
+              {{ getPurchaseTypeConfig(orderData?.purchaseType).label }}
             </p>
           </div>
         </div>
-        <div
-          class="bg-[#1a2b4d] px-4 md:px-6 py-3 md:py-4 rounded-lg border border-blue-600 shadow-lg"
-        >
-          <div class="text-xs md:text-sm text-gray-400 mb-1">Order ID</div>
-          <div
-            class="text-sm md:text-base lg:text-lg font-mono text-blue-300 font-semibold"
+        <div class="flex items-center gap-2">
+          <!-- Use dynamic class and icon from config for each status -->
+          <span
+            :class="
+              'px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-2 shadow-sm ' +
+              getStatusConfig(orderData?.status).class
+            "
           >
-            {{ orderId }}
-          </div>
+            <i :class="'mdi ' + getStatusConfig(orderData?.status).icon"></i>
+            <span class="tracking-wide">{{
+              getStatusConfig(orderData?.status).label
+            }}</span>
+          </span>
+          <span
+            :class="
+              'px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-2 shadow-sm ' +
+              getPaymentStatusConfig(orderData?.paymentStatus).class
+            "
+          >
+            <i
+              :class="
+                'mdi ' + getPaymentStatusConfig(orderData?.paymentStatus).icon
+              "
+            ></i>
+            <span class="tracking-wide">{{
+              getPaymentStatusConfig(orderData?.paymentStatus).label
+            }}</span>
+          </span>
         </div>
       </div>
 
@@ -46,576 +62,406 @@
       </div>
 
       <!-- Order Details -->
-      <div v-else-if="orderData" class="space-y-6">
-        <!-- Order Information -->
-        <BaseCard
-          class="bg-gradient-to-br from-[#1a2b4d] to-[#0f1f3c] border-blue-600 shadow-2xl"
-        >
-          <template #header>
-            <div
-              class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-            >
-              <h2
-                class="text-xl md:text-2xl xl:text-3xl font-bold text-white flex items-center gap-2"
-              >
-                <i class="mdi mdi-ticket-confirmation text-blue-400"></i>
-                ข้อมูลออเดอร์
-              </h2>
-              <div class="flex items-center gap-2">
-                <span class="text-xs md:text-sm text-gray-400">Order:</span>
-                <span class="text-sm md:text-base font-mono text-blue-300">{{
-                  orderData.orderNumber
+      <div v-else-if="orderData" class="space-y-4">
+        <!-- Summary Cards Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Order Summary -->
+          <div
+            class="bg-white/90 rounded-xl shadow-md border border-blue-200 p-4"
+          >
+            <div class="flex items-center gap-2 mb-3">
+              <i
+                class="mdi mdi-ticket-confirmation-outline text-blue-500 text-lg"
+              ></i>
+              <h3 class="font-semibold text-blue-900">ข้อมูลออเดอร์</h3>
+            </div>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-blue-700">ประเภทตั๋ว:</span>
+                <span class="font-medium text-blue-900">{{
+                  getTicketTypeConfig(orderData.ticketType).label
+                }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-blue-700">จำนวน:</span>
+                <span class="font-medium text-blue-900"
+                  >{{ orderData.quantity }} ที่นั่ง</span
+                >
+              </div>
+              <div class="flex justify-between">
+                <span class="text-blue-700">ราคารวม:</span>
+                <span class="font-bold text-blue-700">{{
+                  formatCurrency(orderData.totalAmount)
                 }}</span>
               </div>
             </div>
-          </template>
+          </div>
 
-          <div class="space-y-6">
-            <!-- Status, Ticket Type, and Summary Row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <!-- Status Section -->
-              <div class="bg-[#0f1f3c] p-4 rounded-lg border border-blue-700">
-                <label class="block text-sm font-medium text-blue-300 mb-3">
-                  <i class="mdi mdi-flag-variant mr-2"></i>สถานะ
-                </label>
-                <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
-                  <span
-                    :class="getStatusClass(orderData.status)"
-                    class="px-3 py-1.5 rounded-full text-sm font-bold shadow-lg text-white text-center flex-1"
-                  >
-                    {{ getStatusLabel(orderData.status) }}
-                  </span>
-                  <span
-                    :class="getPaymentStatusClass(orderData.paymentStatus)"
-                    class="px-3 py-1.5 rounded-full text-sm font-bold shadow-lg text-white text-center flex-1"
-                  >
-                    {{ getPaymentStatusLabel(orderData.paymentStatus) }}
-                  </span>
-                </div>
+          <!-- Payment Info -->
+          <div
+            class="bg-white/90 rounded-xl shadow-md border border-blue-200 p-4"
+          >
+            <div class="flex items-center gap-2 mb-3">
+              <i class="mdi mdi-credit-card text-blue-500 text-lg"></i>
+              <h3 class="font-semibold text-blue-900">การชำระเงิน</h3>
+            </div>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-blue-700">วิธีชำระ:</span>
+                <span class="font-medium text-blue-900">{{
+                  orderData.paymentMethod
+                }}</span>
               </div>
-
-              <!-- Ticket Type -->
-              <div class="bg-[#0f1f3c] p-4 rounded-lg border border-blue-700">
-                <label class="block text-sm font-medium text-blue-300 mb-3">
-                  <i class="mdi mdi-ticket mr-2"></i>ประเภทตั๋ว
-                </label>
-                <p class="text-white text-lg font-semibold break-words">
-                  {{ orderData.ticketType }}
-                </p>
+              <div class="flex justify-between">
+                <span class="text-blue-700">รับชำระโดย:</span>
+                <span class="font-medium text-blue-900">{{
+                  orderData.paidByName || "ยังไม่ชำระ"
+                }}</span>
               </div>
-
-              <!-- Summary: Quantity and Total -->
-              <div
-                class="bg-gradient-to-br from-green-900 to-green-800 p-4 rounded-lg border border-green-600 md:col-span-2 lg:col-span-1"
-              >
-                <label class="block text-sm font-medium text-green-200 mb-3">
-                  <i class="mdi mdi-calculator mr-2"></i>สรุปออเดอร์
-                </label>
-                <div
-                  class="flex flex-col sm:flex-row justify-between items-center gap-4"
-                >
-                  <div class="text-center">
-                    <p class="text-green-200 text-xs mb-1">จำนวน</p>
-                    <p class="text-white text-xl font-bold">
-                      {{ orderData.quantity }}
-                    </p>
-                  </div>
-                  <div class="text-center">
-                    <p class="text-green-200 text-xs mb-1">ยอดรวม</p>
-                    <p
-                      class="text-white text-lg sm:text-xl font-bold break-words"
-                    >
-                      {{ formatCurrency(orderData.totalAmount) }}
-                    </p>
-                  </div>
-                </div>
+              <div class="flex justify-between">
+                <span class="text-blue-700">วันที่แสดง:</span>
+                <span class="font-medium text-blue-900">{{
+                  formatThaiDate(orderData.showDate)
+                }}</span>
               </div>
             </div>
+          </div>
 
-            <!-- Main Content Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <!-- Customer Information -->
-              <div class="space-y-4 lg:space-y-6">
-                <div class="bg-[#0f1f3c] p-4 rounded-lg border border-blue-700">
-                  <h3
-                    class="text-lg md:text-xl font-semibold text-blue-300 mb-4 flex items-center gap-2"
-                  >
-                    <i class="mdi mdi-account"></i>ข้อมูลลูกค้า
-                  </h3>
-                  <div class="grid sm:grid-cols-2 md:grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        ชื่อ
-                      </label>
-                      <p
-                        v-if="orderData.status === 'PAID'"
-                        class="text-white text-base md:text-lg font-semibold"
-                      >
-                        {{ orderData.customerName }}
-                      </p>
-                      <BaseInput
-                        v-else
-                        v-model="formData.newCustomerName"
-                        class="bg-white text-black"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        เบอร์โทร
-                      </label>
-                      <p
-                        v-if="orderData.status === 'PAID'"
-                        class="text-white text-base md:text-lg font-mono"
-                      >
-                        {{ orderData.customerPhone }}
-                      </p>
-                      <BaseInput
-                        v-else
-                        v-model="formData.newCustomerPhone"
-                        class="bg-white text-black"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        อีเมล
-                      </label>
-                      <p
-                        v-if="orderData.status === 'PAID'"
-                        class="text-white text-base md:text-lg font-mono break-all"
-                      >
-                        {{ orderData.email }}
-                      </p>
-                      <BaseInput
-                        v-else
-                        v-model="formData.newCustomerEmail"
-                        class="bg-white text-black"
-                      />
-                    </div>
-                  </div>
+          <!-- Timestamps -->
+          <div
+            class="bg-white/90 rounded-xl shadow-md border border-blue-200 p-4"
+          >
+            <div class="flex items-center gap-2 mb-3">
+              <i class="mdi mdi-clock-outline text-blue-500 text-lg"></i>
+              <h3 class="font-semibold text-blue-900">เวลาดำเนินการ</h3>
+            </div>
+            <div class="space-y-2 text-sm">
+              <div>
+                <span class="text-blue-700">สร้างเมื่อ:</span>
+                <div class="font-medium text-blue-900">
+                  {{ formatDateTime(orderData.createdAt) }}
                 </div>
-
-                <div class="bg-[#0f1f3c] p-4 rounded-lg border border-blue-700">
-                  <h3
-                    class="text-lg md:text-xl font-semibold text-blue-300 mb-4 flex items-center gap-2"
-                  >
-                    <i class="mdi mdi-handshake"></i>ข้อมูลการแนะนำ
-                  </h3>
-                  <div class="grid sm:grid-cols-2 md:grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        รหัสผู้แนะนำ
-                      </label>
-                      <p
-                        v-if="orderData.status === 'PAID'"
-                        class="text-white text-base md:text-lg font-semibold"
-                      >
-                        {{ orderData.referrer?.name || "ไม่มีข้อมูล" }}
-                      </p>
-                      <BaseInput
-                        v-else
-                        v-model="formData.newReferrerCode"
-                        class="bg-white text-black"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        ค่าคอมมิชชั่นผู้แนะนำ
-                      </label>
-                      <p
-                        v-if="orderData.status === 'PAID'"
-                        class="text-white text-base md:text-lg font-semibold"
-                      >
-                        {{
-                          orderData.ticketType === "RINGSIDE"
-                            ? orderData.referrerCommission
-                            : orderData.standingCommission || "ไม่มีข้อมูล"
-                        }}
-                      </p>
-                      <BaseInput
-                        v-else
-                        v-model="formData.newReferrerCode"
-                        class="bg-white text-black"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        แหล่งที่มา
-                      </label>
-                      <p
-                        v-if="orderData.status === 'PAID'"
-                        class="text-white text-base md:text-lg font-semibold"
-                      >
-                        {{ orderData.source }}
-                      </p>
-                      <BaseInput
-                        v-else
-                        v-model="formData.source"
-                        class="bg-white text-black"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div class="bg-[#0f1f3c] p-4 rounded-lg border border-blue-700">
-                  <h3
-                    class="text-lg md:text-xl font-semibold text-blue-300 mb-4 flex items-center gap-2"
-                  >
-                    <i class="mdi mdi-credit-card"></i>การชำระเงิน
-                  </h3>
-                  <div class="grid sm:grid-cols-2 md:grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        วิธีการชำระเงิน
-                      </label>
-                      <p class="text-white text-base md:text-lg font-semibold">
-                        {{ orderData.paymentMethod }}
-                      </p>
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        รับชำระเงินโดย
-                      </label>
-                      <p class="text-white text-base md:text-lg font-semibold">
-                        {{ orderData.paidByName }}
-                      </p>
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        วันที่แสดง
-                      </label>
-                      <p class="text-white text-base md:text-lg font-semibold">
-                        {{ orderData.showDate }}
-                      </p>
-                    </div>
-                  </div>
+                <div class="text-xs text-blue-700">
+                  โดย {{ orderData.createdByName }}
                 </div>
               </div>
-
-              <!-- Timestamps and Additional Info -->
-              <div class="grid sm:grid-cols-1 md:grid-cols-1 gap-6">
-                <!-- Timestamps Section -->
-                <div class="bg-[#0f1f3c] p-6 rounded-lg border border-blue-700">
-                  <h3
-                    class="text-lg md:text-xl font-semibold text-blue-300 mb-4 flex items-center gap-2"
-                  >
-                    <i class="mdi mdi-clock-outline"></i>เวลาและวันที่
-                  </h3>
-                  <div
-                    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
-                  >
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        สร้างเมื่อ
-                      </label>
-                      <p>
-                        {{ orderData.createdByName || "ไม่ทราบ" }}
-                      </p>
-                      <p class="text-white text-sm md:text-base font-mono">
-                        {{ formatDateTime(orderData.createdAt) }}
-                      </p>
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        อัปเดตล่าสุด
-                      </label>
-                      <p>
-                        {{ orderData.paidByName || "ไม่ทราบ" }}
-                      </p>
-                      <p class="text-white text-sm md:text-base font-mono">
-                        {{ formatDateTime(orderData.updatedAt) }}
-                      </p>
-                    </div>
-                    <div v-if="orderData.expiresAt">
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        หมดอายุ
-                      </label>
-                      <p class="text-white text-sm md:text-base font-mono">
-                        {{ formatDateTime(orderData.expiresAt) }}
-                      </p>
-                    </div>
-                  </div>
+              <div v-if="orderData.updatedAt !== orderData.createdAt">
+                <span class="text-blue-700">อัปเดตล่าสุด:</span>
+                <div class="font-medium text-blue-900">
+                  {{ formatDateTime(orderData.updatedAt) }}
                 </div>
-
-                <!-- Standing Tickets Section -->
-                <div
-                  v-if="
-                    orderData.standingAdultQty > 0 ||
-                    orderData.standingChildQty > 0
-                  "
-                  class="bg-[#0f1f3c] p-6 rounded-lg border border-blue-700"
-                >
-                  <h3
-                    class="text-lg md:text-xl font-semibold text-blue-300 mb-4 flex items-center gap-2"
-                  >
-                    <i class="mdi mdi-human-queue"></i>ตั๋วยืน
-                  </h3>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        ผู้ใหญ่
-                      </label>
-                      <p class="text-white text-base md:text-lg font-bold">
-                        {{ orderData.standingAdultQty }}
-                      </p>
-                    </div>
-                    <div>
-                      <label
-                        class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                      >
-                        เด็ก
-                      </label>
-                      <p class="text-white text-base md:text-lg font-bold">
-                        {{ orderData.standingChildQty }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="mt-4 pt-4 border-t border-blue-700">
-                    <label
-                      class="block text-sm md:text-base font-medium text-gray-300 mb-1"
-                    >
-                      ยอดรวมตั๋วยืน
-                    </label>
-                    <p class="text-white text-base md:text-lg font-bold">
-                      {{ formatCurrency(orderData.standingTotal) }}
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Notes Section -->
-                <div
-                  v-if="orderData.note"
-                  class="bg-[#0f1f3c] p-6 rounded-lg border border-blue-700"
-                >
-                  <h3
-                    class="text-lg md:text-xl font-semibold text-blue-300 mb-4 flex items-center gap-2"
-                  >
-                    <i class="mdi mdi-note-text"></i>หมายเหตุ
-                  </h3>
-                  <p class="text-white text-base md:text-lg">
-                    {{ orderData.note }}
-                  </p>
+                <div class="text-xs text-blue-700">
+                  โดย {{ orderData.lastUpdatedByName || orderData.paidByName }}
                 </div>
               </div>
             </div>
           </div>
-        </BaseCard>
+        </div>
 
-        <!-- Seats Information -->
-        <BaseCard
-          v-if="orderData.seats && orderData.seats.length > 0"
-          class="bg-gradient-to-br from-[#1a2b4d] to-[#0f1f3c] border-blue-600 shadow-2xl"
+        <!-- Customer Information (if not ONSITE) -->
+        <div
+          v-if="shouldShowCustomerSection(orderData)"
+          class="bg-white/90 rounded-xl shadow-md border border-blue-200 p-4"
         >
-          <template #header>
-            <h2
-              class="text-xl md:text-2xl xl:text-3xl font-bold text-white flex items-center gap-2"
-            >
-              <i class="mdi mdi-seat-passenger text-blue-400"></i>
-              ที่นั่งที่จอง
-              <span
-                class="text-sm md:text-base bg-blue-600 px-3 py-1 rounded-full"
+          <div class="flex items-center gap-2 mb-4">
+            <i class="mdi mdi-account text-blue-500 text-lg"></i>
+            <h3 class="font-semibold text-blue-900">ข้อมูลลูกค้า</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-1"
+                >ชื่อ</label
               >
-                {{ orderData.seats.length }} ที่นั่ง
-              </span>
-            </h2>
-          </template>
+              <div
+                v-if="!canEditField(orderData, 'newCustomerName')"
+                class="text-blue-900 py-2"
+              >
+                {{ orderData.customerName || "-" }}
+              </div>
+              <BaseInput
+                v-else
+                v-model="formData.newCustomerName"
+                placeholder="กรอกชื่อลูกค้า"
+                class="bg-blue-50 border-blue-200 text-blue-900"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-1"
+                >เบอร์โทร</label
+              >
+              <div
+                v-if="!canEditField(orderData, 'newCustomerPhone')"
+                class="text-blue-900 py-2 font-mono"
+              >
+                {{ orderData.customerPhone || "-" }}
+              </div>
+              <BaseInput
+                v-else
+                v-model="formData.newCustomerPhone"
+                placeholder="กรอกเบอร์โทร"
+                class="bg-blue-50 border-blue-200 text-blue-900"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-1"
+                >อีเมล</label
+              >
+              <div
+                v-if="!canEditField(orderData, 'newCustomerEmail')"
+                class="text-blue-900 py-2 font-mono text-sm break-all"
+              >
+                {{ orderData.email || "-" }}
+              </div>
+              <BaseInput
+                v-else
+                v-model="formData.newCustomerEmail"
+                placeholder="กรอกอีเมล"
+                type="email"
+                class="bg-blue-50 border-blue-200 text-blue-900"
+              />
+            </div>
+          </div>
+        </div>
 
+        <!-- Referrer Information -->
+        <div
+          class="bg-white/90 rounded-xl shadow-md border border-blue-200 p-4"
+        >
+          <div class="flex items-center gap-2 mb-4">
+            <i class="mdi mdi-handshake text-blue-500 text-lg"></i>
+            <h3 class="font-semibold text-blue-900">ข้อมูลการแนะนำ</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-1"
+                >รหัสผู้แนะนำ</label
+              >
+              <div
+                v-if="!canEditField(orderData, 'newReferrerCode')"
+                class="text-blue-900 py-2"
+              >
+                {{ orderData.referrer?.name || "ไม่มีข้อมูล" }}
+              </div>
+              <BaseInput
+                v-else
+                v-model="formData.newReferrerCode"
+                placeholder="กรอกรหัสผู้แนะนำ"
+                class="bg-blue-50 border-blue-200 text-blue-900"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-1"
+                >ค่าคอมมิชชั่น</label
+              >
+              <div class="text-blue-900 py-2">
+                {{
+                  orderData.ticketType === "RINGSIDE"
+                    ? orderData.referrerCommission
+                    : orderData.standingCommission || 0
+                }}
+                บาท
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-blue-700 mb-1"
+                >แหล่งที่มา</label
+              >
+              <div
+                v-if="!canEditField(orderData, 'newSource')"
+                class="text-blue-900 py-2"
+              >
+                {{ orderData.source }}
+              </div>
+              <BaseSelect
+                v-else
+                v-model="formData.newSource"
+                :options="sourceOptions"
+                class="bg-blue-50 border-blue-200 text-blue-900 w-full"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Seats Information (if not STANDING) -->
+        <div
+          v-if="shouldShowSeatsSection(orderData)"
+          class="bg-white/90 rounded-xl shadow-md border border-blue-200 p-4"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <i class="mdi mdi-seat-passenger text-blue-500 text-lg"></i>
+              <h3 class="font-semibold text-blue-900">ที่นั่งที่จอง</h3>
+              <span
+                class="bg-blue-200 text-blue-900 px-2 py-1 rounded-full text-xs font-medium"
+                >{{ orderData.seats.length }} ที่นั่ง</span
+              >
+            </div>
+          </div>
           <div
-            class="grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
+            class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2"
           >
             <div
               v-for="seat in orderData.seats"
               :key="seat.id"
-              class="bg-[#0f1f3c] p-4 rounded-lg border border-blue-700 hover:border-blue-500 transition-colors"
+              class="bg-blue-50 border border-blue-200 rounded-md p-2 text-center"
             >
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-white text-lg md:text-xl font-bold">
-                  {{ seat.seatNumber }}
-                </span>
-                <i class="mdi mdi-seat text-blue-400 text-xl"></i>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs md:text-sm text-gray-400">Zone:</span>
-                <span
-                  class="text-blue-300 text-sm md:text-base font-semibold capitalize"
-                >
-                  {{ seat.zone.name.replace("-", " ") }}
-                </span>
+              <div class="font-bold text-blue-900">{{ seat.seatNumber }}</div>
+              <div class="text-xs text-blue-700 capitalize">
+                {{ seat.zone.name.replace("-", " ") }}
               </div>
             </div>
-          </div>
-        </BaseCard>
-
-        <div v-if="orderData.ticketType !== 'STANDING'">
-          <!-- Seat Selection -->
-          <BaseCard
-            class="bg-gradient-to-br from-[#1a2b4d] to-[#0f1f3c] border-blue-600 shadow-2xl"
-          >
-            <template #header>
-              <h2
-                class="text-xl md:text-2xl xl:text-3xl font-bold text-white flex items-center gap-2"
-              >
-                <i class="mdi mdi-seat-outline text-blue-400"></i>
-                เลือกที่นั่งใหม่
-              </h2>
-            </template>
-
-            <div class="space-y-6">
-              <div
-                class="bg-[#0f1f3c] p-4 md:p-6 rounded-lg border border-blue-700"
-              >
-                <label
-                  class="text-base md:text-lg lg:text-xl font-medium text-blue-300 mb-4 flex items-center gap-2"
-                >
-                  <i class="mdi mdi-calendar"></i>
-                  วันที่แสดง
-                </label>
-                <DatePicker
-                  v-model="formData.newShowDate"
-                  :placeholder="'เลือกวันที่'"
-                  :minDate="new Date()"
-                  @update:modelValue="handleDateChange"
-                  class="w-full"
-                />
-              </div>
-
-              <div
-                class="bg-[#0f1f3c] p-4 md:p-6 rounded-lg border border-blue-700"
-              >
-                <!-- <button
-                  @click="isShowModal = true"
-                  class="px-6 md:px-8 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 mx-auto text-base md:text-lg"
-                >
-                  <i class="mdi mdi-refresh"></i>
-                  ลองใหม่
-                </button> -->
-                <label
-                  class="text-base md:text-lg lg:text-xl font-medium text-blue-300 mb-4 flex items-center gap-2"
-                >
-                  <i class="mdi mdi-seat"></i>
-                  ที่นั่งใหม่
-                </label>
-                <textarea
-                  v-model="seatIdsText"
-                  rows="4"
-                  class="w-full p-4 bg-gray-800 border border-gray-600 rounded-lg text-white text-base md:text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none"
-                  placeholder="ใส่รหัสที่นั่งคั่นด้วยเครื่องหมายจุลภาค เช่น 470, 471, 472, 473"
-                />
-                <p class="text-sm md:text-base text-gray-400 mt-1">
-                  เลขที่นั่งเดิม:
-                  {{
-                    orderData.seats.map((seat) => seat.seatNumber).join(", ")
-                  }}
-                </p>
-                <div
-                  class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-3"
-                >
-                  <p
-                    class="text-sm md:text-base text-blue-300 flex items-center gap-2"
-                  >
-                    <i class="mdi mdi-information-outline"></i>
-                    ที่นั่งที่เลือก:
-                    <span class="font-bold text-white">{{
-                      formData.seatIds.length
-                    }}</span>
-                    ที่นั่ง
-                  </p>
-                  <p class="text-xs md:text-sm text-gray-400">
-                    จำนวนเดิม: {{ orderData.quantity }} ที่นั่ง
-                  </p>
-                </div>
-              </div>
-
-              <div
-                v-if="validationErrors.length > 0"
-                class="bg-gradient-to-r from-red-900 to-red-800 border border-red-600 rounded-lg p-4 md:p-6 shadow-lg"
-              >
-                <h3
-                  class="text-red-200 font-bold mb-3 text-base md:text-lg flex items-center gap-2"
-                >
-                  <i class="mdi mdi-alert-circle-outline text-xl"></i>
-                  ข้อผิดพลาด
-                </h3>
-                <ul class="text-red-200 text-sm md:text-base space-y-2">
-                  <li
-                    v-for="error in validationErrors"
-                    :key="error"
-                    class="flex items-start gap-3 p-2 bg-red-800 bg-opacity-50 rounded"
-                  >
-                    <i
-                      class="mdi mdi-close-circle text-red-400 mt-0.5 flex-shrink-0"
-                    ></i>
-                    <span>{{ error }}</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </BaseCard>
-
-          <!-- Actions -->
-          <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6">
-            <button
-              @click="$router.go(-1)"
-              class="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 text-base md:text-lg"
-            >
-              <i class="mdi mdi-arrow-left"></i>
-              ยกเลิก
-            </button>
-            <button
-              @click="saveChanges"
-              :disabled="!canSave || saving"
-              class="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none flex items-center justify-center gap-2 shadow-lg text-base md:text-lg"
-            >
-              <i v-if="saving" class="mdi mdi-loading mdi-spin text-xl"></i>
-              <i v-else class="mdi mdi-content-save text-xl"></i>
-              {{ saving ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง" }}
-            </button>
           </div>
         </div>
-      </div>
 
+        <!-- Standing Tickets (if STANDING) -->
+        <div
+          v-if="shouldShowStandingSection(orderData)"
+          class="bg-white/90 rounded-xl shadow-md border border-blue-200 p-4"
+        >
+          <div class="flex items-center gap-2 mb-4">
+            <i class="mdi mdi-human-queue text-blue-500 text-lg"></i>
+            <h3 class="font-semibold text-blue-900">ตั๋วยืน</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center p-4 bg-blue-200 rounded-lg shadow-sm">
+              <div class="text-2xl font-bold text-blue-700">
+                {{ orderData.standingAdultQty }}
+              </div>
+              <div class="text-sm text-blue-700">ผู้ใหญ่</div>
+            </div>
+            <div class="text-center p-4 bg-blue-200 rounded-lg shadow-sm">
+              <div class="text-2xl font-bold text-blue-700">
+                {{ orderData.standingChildQty }}
+              </div>
+              <div class="text-sm text-blue-700">เด็ก</div>
+            </div>
+            <div class="text-center p-4 bg-blue-200 rounded-lg shadow-sm">
+              <div class="text-lg font-bold text-blue-700">
+                {{ formatCurrency(orderData.standingTotal) }}
+              </div>
+              <div class="text-sm text-blue-700">ยอดรวม</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Section -->
+        <div
+          v-if="canEditAnything"
+          class="bg-white/90 rounded-xl shadow-md border border-blue-200 p-4"
+        >
+          <div class="flex items-center gap-2 mb-4">
+            <i class="mdi mdi-pencil text-blue-500 text-lg"></i>
+            <h3 class="font-semibold text-blue-900">แก้ไขข้อมูล</h3>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Date Selection -->
+            <div v-if="canEditField(orderData, 'newShowDate')">
+              <label class="block text-sm font-medium text-blue-700 mb-2"
+                >วันที่แสดง</label
+              >
+              <DatePicker
+                v-model="formData.newShowDate"
+                placeholder="เลือกวันที่"
+                :minDate="new Date()"
+                @update:modelValue="handleDateChange"
+                class="w-full max-w-md bg-blue-50 border-blue-200 text-blue-900"
+              />
+            </div>
+
+            <!-- Seat Selection (only for RINGSIDE) -->
+            <div
+              v-if="
+                canEditField(orderData, 'seatIds') &&
+                shouldShowSeatsSection(orderData)
+              "
+            >
+              <label class="block text-sm font-medium text-blue-700 mb-2"
+                >ที่นั่งใหม่</label
+              >
+              <textarea
+                v-model="seatIdsText"
+                rows="3"
+                class="w-full p-3 border border-blue-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-blue-50 text-blue-900"
+                placeholder="ใส่หมายเลขที่นั่งคั่นด้วยเครื่องหมายจุลภาค เช่น 470, 471, 472"
+              />
+              <div
+                class="flex justify-between items-center mt-2 text-sm text-blue-700"
+              >
+                <span
+                  >ที่นั่งเดิม:
+                  {{
+                    orderData.seats.map((seat) => seat.seatNumber).join(", ")
+                  }}</span
+                >
+                <span
+                  >ที่นั่งที่เลือก: {{ formData.seatIds.length }} ที่นั่ง</span
+                >
+              </div>
+            </div>
+
+            <!-- Validation Errors -->
+            <div
+              v-if="validationErrors.length > 0"
+              class="bg-blue-50 border border-blue-200 rounded-xl p-3 shadow-sm"
+            >
+              <div
+                class="flex items-center gap-2 text-blue-900 font-medium mb-2"
+              >
+                <i class="mdi mdi-alert-circle-outline"></i>
+                ข้อผิดพลาด
+              </div>
+              <ul class="text-blue-700 text-sm space-y-1">
+                <li
+                  v-for="error in validationErrors"
+                  :key="error"
+                  class="flex items-start gap-2"
+                >
+                  <i
+                    class="mdi mdi-close-circle text-blue-700 mt-0.5 text-xs"
+                  ></i>
+                  {{ error }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-3 pt-4">
+          <button
+            @click="$router.go(-1)"
+            class="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium rounded-md transition-colors"
+          >
+            ยกเลิก
+          </button>
+          <button
+            v-if="canEditAnything"
+            @click="saveChanges"
+            :disabled="!canSave || saving"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-200 text-white font-medium rounded-md transition-colors flex items-center gap-2 shadow-md"
+          >
+            <i v-if="saving" class="mdi mdi-loading mdi-spin"></i>
+            <i v-else class="mdi mdi-content-save"></i>
+            {{ saving ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง" }}
+          </button>
+        </div>
+      </div>
       <!-- Error State -->
       <div v-else-if="error" class="text-center py-12">
         <div
-          class="bg-gradient-to-br from-red-900 to-red-800 border border-red-600 rounded-xl p-6 md:p-8 max-w-lg mx-auto shadow-2xl"
+          class="bg-white/90 rounded-xl shadow-md border border-blue-200 p-8 max-w-md mx-auto"
         >
           <i
-            class="mdi mdi-alert-circle-outline text-red-400 text-5xl md:text-6xl mb-6"
+            class="mdi mdi-alert-circle-outline text-blue-500 text-4xl mb-4"
           ></i>
-          <h3 class="text-red-200 font-bold mb-4 text-lg md:text-xl">
+          <h3 class="text-blue-700 font-bold mb-2 text-lg">
             ไม่สามารถโหลดข้อมูลออเดอร์ได้
           </h3>
-          <p class="text-red-300 text-base md:text-lg mb-6 leading-relaxed">
-            {{ error }}
-          </p>
+          <p class="text-blue-700 mb-4">{{ error }}</p>
           <button
             @click="loadOrder"
-            class="px-6 md:px-8 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 mx-auto text-base md:text-lg"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors inline-flex items-center gap-2"
           >
             <i class="mdi mdi-refresh"></i>
             ลองใหม่
@@ -624,22 +470,26 @@
       </div>
     </div>
   </div>
-  <ModalStadiumZoneSelector
-    v-if="isShowModal"
-    :zoneKey="orderData.seats[0].zone.name"
-    :isOpen="isShowModal"
-    mode="change"
-    @close="isShowModal = false"
-    :orderData="orderData"
-  />
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useOrder } from "@/composables/useOrder";
+import { usePayments } from "@/composables/usePayments";
 import { useSingleToast } from "@/composables/useSingleToast";
 import { formatCurrency } from "@/utils/formatCurrency";
+import {
+  getStatusConfig,
+  getPaymentStatusConfig,
+  getTicketTypeConfig,
+  getPurchaseTypeConfig,
+  canEditField,
+  shouldShowField,
+  shouldShowSeatsSection,
+  shouldShowCustomerSection,
+  shouldShowStandingSection,
+} from "@/utils/orderStatusUtils";
 import dayjs from "dayjs";
 const route = useRoute();
 const router = useRouter();
@@ -683,65 +533,39 @@ const canSave = computed(() => {
   return validationErrors.value.length === 0 && !saving.value;
 });
 
-// Status helpers
-const getStatusClass = (status) => {
-  switch (status) {
-    case "PENDING":
-      return "bg-yellow-500 text-yellow-900";
-    case "BOOKED":
-      return "bg-blue-500 text-blue-900";
-    case "PAID":
-      return "bg-green-500 text-green-900";
-    case "CANCELLED":
-      return "bg-red-500 text-red-900";
-    default:
-      return "bg-gray-500 text-gray-900";
-  }
-};
+// Computed to check if anything can be edited
+const canEditAnything = computed(() => {
+  if (!orderData.value) return false;
 
-const getStatusLabel = (status) => {
-  switch (status) {
-    case "PENDING":
-      return "รอดำเนินการ";
-    case "BOOKED":
-      return "จองแล้ว";
-    case "PAID":
-      return "ชำระแล้ว";
-    case "CANCELLED":
-      return "ยกเลิกแล้ว";
-    default:
-      return "ไม่ทราบสถานะ";
-  }
-};
+  // Check if any field can be edited
+  const editableFields = [
+    "seatIds",
+    "newShowDate",
+    "newReferrerCode",
+    "newCustomerName",
+    "newCustomerPhone",
+    "newCustomerEmail",
+    "newSource",
+  ];
 
-const getPaymentStatusClass = (status) => {
-  switch (status) {
-    case "PENDING":
-      return "bg-orange-500 text-orange-900";
-    case "PAID":
-      return "bg-green-500 text-green-900";
-    case "FAILED":
-      return "bg-red-500 text-red-900";
-    case "REFUNDED":
-      return "bg-purple-500 text-purple-900";
-    default:
-      return "bg-gray-500 text-gray-900";
-  }
-};
+  return editableFields.some((field) => canEditField(orderData.value, field));
+});
 
-const getPaymentStatusLabel = (status) => {
-  switch (status) {
-    case "PENDING":
-      return "รอการชำระ";
-    case "PAID":
-      return "ชำระแล้ว";
-    case "FAILED":
-      return "ชำระไม่สำเร็จ";
-    case "REFUNDED":
-      return "คืนเงินแล้ว";
-    default:
-      return "ไม่ทราบสถานะ";
-  }
+// Source options for select
+const sourceOptions = [
+  { value: "WEBSITE", label: "เว็บไซต์" },
+  { value: "FACEBOOK", label: "Facebook" },
+  { value: "LINE", label: "LINE" },
+  { value: "PHONE", label: "โทรศัพท์" },
+  { value: "WALK_IN", label: "Walk-in" },
+  { value: "OTHER", label: "อื่นๆ" },
+];
+
+// Format date to DD-MM-YYYY for Thai display
+const formatThaiDate = (dateString) => {
+  if (!dateString) return "ไม่มีข้อมูล";
+  const d = dayjs(dateString, ["YYYY-MM-DD", "DD/MM/YYYY", "DD-MM-YYYY"]);
+  return d.isValid() ? d.format("DD-MM-YYYY") : dateString;
 };
 
 const formatDate = (dateString) => {
@@ -779,30 +603,31 @@ const loadOrder = async () => {
     console.log("orderData", orderData.value);
 
     // Initialize form data
+    // Normalize showDate to YYYY-MM-DD for DatePicker (always)
+    let normalizedShowDate = "";
+    if (data.showDate) {
+      // Manual parse DD/MM/YYYY to YYYY-MM-DD
+      const ddmmyyyy = /^([0-9]{2})\/([0-9]{2})\/([0-9]{4})$/;
+      const match = data.showDate.match(ddmmyyyy);
+      if (match) {
+        // match[1]=day, match[2]=month, match[3]=year
+        normalizedShowDate = `${match[3]}-${match[2]}-${match[1]}`;
+      } else {
+        // fallback to dayjs
+        let d = dayjs(data.showDate, "YYYY-MM-DD", true);
+        if (!d.isValid()) {
+          d = dayjs(data.showDate);
+        }
+        normalizedShowDate = d.isValid() ? d.format("YYYY-MM-DD") : "";
+      }
+    }
     formData.value = {
       seatIds: data.seats.map((seat) => seat.id) || [],
       newReferrerCode: data.referrerCode || "",
       newCustomerName: data.customerName || "",
       newCustomerPhone: data.customerPhone || "",
       newCustomerEmail: data.email || "",
-      newShowDate: (() => {
-        if (!data.showDate) return "";
-        // Try ISO first
-        let d = dayjs(data.showDate, "YYYY-MM-DD", true);
-        if (d.isValid()) return d.format("YYYY-MM-DD");
-        // Try DD/MM/YYYY
-        d = dayjs(data.showDate, "DD/MM/YYYY", true);
-        if (d.isValid()) return d.format("YYYY-MM-DD");
-        // Try native parse (for Date objects or fallback)
-        d = dayjs(data.showDate);
-        if (d.isValid()) return d.format("YYYY-MM-DD");
-        // Fallback: manual split for dd/MM/yyyy
-        if (/^\d{2}\/\d{2}\/\d{4}$/.test(data.showDate)) {
-          const [day, month, year] = data.showDate.split("/");
-          return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-        }
-        return "";
-      })(),
+      newShowDate: normalizedShowDate,
       totalAmount: data.totalAmount || 0,
       newSource: data.source || "",
       status: data.status,
@@ -818,7 +643,9 @@ const loadOrder = async () => {
   }
 };
 const handleDateChange = async (newDate) => {
-  formData.newShowDate = newDate;
+  // Always convert to YYYY-MM-DD for both display and value
+  const d = dayjs(newDate);
+  formData.value.newShowDate = d.isValid() ? d.format("YYYY-MM-DD") : newDate;
 };
 // Save changes
 const saveChanges = async () => {
@@ -826,6 +653,13 @@ const saveChanges = async () => {
 
   try {
     saving.value = true;
+
+    // Always send newShowDate in YYYY-MM-DD format
+    let sendShowDate = formData.value.newShowDate;
+    if (sendShowDate) {
+      const d = dayjs(sendShowDate);
+      sendShowDate = d.isValid() ? d.format("YYYY-MM-DD") : sendShowDate;
+    }
 
     if (formData.value.status === "PAID") {
       await changeSeats(
@@ -835,7 +669,7 @@ const saveChanges = async () => {
         formData.value.newCustomerName,
         formData.value.newCustomerPhone,
         formData.value.newCustomerEmail,
-        formData.value.newShowDate,
+        sendShowDate,
         formData.value.newSource
       );
       router.push("/admin/orders");
@@ -847,7 +681,7 @@ const saveChanges = async () => {
         formData.value.newCustomerName,
         formData.value.newCustomerPhone,
         formData.value.newCustomerEmail,
-        formData.value.newShowDate,
+        sendShowDate,
         formData.value.newSource
       );
       await createSeatedPayment({
@@ -864,7 +698,7 @@ const saveChanges = async () => {
     showToast("success", "บันทึกการเปลี่ยนแปลงเรียบร้อย");
   } catch (err) {
     console.error("Error saving changes:", err);
-    showToast("error", "เกิดข้อผิดพลาดในการบันทึกการเปลี่ยนแปลง");
+    showToast("error", err.message);
   } finally {
     saving.value = false;
   }
@@ -891,38 +725,36 @@ const validationErrors = computed(() => {
     .map((s) => s.trim())
     .filter((s) => s);
 
-  if (!modifiedSeatNumbers.length) {
+  if (!modifiedSeatNumbers.length && canEditField(orderData.value, "seatIds")) {
     errors.push("กรุณาเลือกที่นั่งอย่างน้อย 1 ที่นั่ง");
   }
 
+  // For PAID orders that are not (RINGSIDE + non-ONSITE), seat count must match
   if (orderData.value?.status === "PAID") {
-    if (modifiedSeatNumbers.length !== originalSeatCount) {
+    const isRingsideNonOnsite =
+      orderData.value?.ticketType === "RINGSIDE" &&
+      orderData.value?.purchaseType !== "ONSITE";
+
+    if (
+      !isRingsideNonOnsite &&
+      modifiedSeatNumbers.length !== originalSeatCount
+    ) {
       errors.push("ออเดอร์ที่ชำระแล้วต้องมีจำนวนที่นั่งเท่าเดิม");
     }
   }
 
-  // Validate customer info only for non-paid orders
-  if (orderData.value?.status !== "PAID") {
-    if (!formData.value.newCustomerName.trim()) {
-      errors.push("กรุณากรอกชื่อลูกค้า");
-    }
-
-    // if (!formData.value.newCustomerPhone.trim()) {
-    //   errors.push("กรุณากรอกเบอร์โทร");
-    // } else if (!/^\d{10}$/.test(formData.value.newCustomerPhone)) {
-    //   errors.push("เบอร์โทรต้องเป็นตัวเลข 10 หลัก");
-    // }
-
-    // if (!formData.value.newCustomerEmail.trim()) {
-    //   errors.push("กรุณากรอกอีเมล");
-    // } else if (
-    //   !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.newCustomerEmail)
-    // ) {
-    //   errors.push("กรุณากรอกอีเมลที่ถูกต้อง");
-    // }
+  // Validate customer info only for editable fields
+  if (
+    canEditField(orderData.value, "newCustomerName") &&
+    !formData.value.newCustomerName.trim()
+  ) {
+    errors.push("กรุณากรอกชื่อลูกค้า");
   }
 
-  if (!formData.value.newShowDate) {
+  if (
+    canEditField(orderData.value, "newShowDate") &&
+    !formData.value.newShowDate
+  ) {
     errors.push("กรุณาเลือกวันที่แสดง");
   }
 

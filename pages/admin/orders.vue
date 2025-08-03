@@ -1,40 +1,61 @@
 <template>
-  <div class="grid grid-cols-1 px-1 py-1 min-h-screen bg-[#0f1f3c] text-white">
-    <div class="p-6 w-full mx-auto text-white space-y-6">
+  <div
+    class="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200"
+  >
+    <div class="max-w-7xl mx-auto p-4 space-y-6">
       <!-- หัวข้อหลัก -->
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-white">รายการออเดอร์</h1>
-        <div class="text-sm text-gray-300">
-          ทั้งหมด {{ pageData.totalCount }} รายการ
+      <div
+        class="bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-blue-200 p-6"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="bg-blue-500 p-3 rounded-lg shadow-md">
+              <i class="mdi mdi-clipboard-text-outline text-white text-xl"></i>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-blue-900">รายการออเดอร์</h1>
+              <p class="text-blue-700 text-sm">จัดการและติดตามออเดอร์ทั้งหมด</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-3xl font-bold text-blue-900">
+              {{ pageData.totalCount }}
+            </div>
+            <div class="text-sm text-blue-600">รายการทั้งหมด</div>
+          </div>
         </div>
       </div>
 
       <!-- ส่วนกรองข้อมูล -->
-      <BaseCard
-        class="bg-gradient-to-r from-[#0f1f3c] to-[#1a2b4d] border-[#3a6ea5] overflow-visible shadow-xl rounded-lg"
+      <div
+        class="bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-blue-200 p-6"
       >
-        <template #header>
-          <h2 class="text-lg font-semibold text-white">กรองข้อมูล</h2>
-        </template>
+        <div class="flex items-center gap-2 mb-6">
+          <i class="mdi mdi-filter-outline text-blue-500 text-lg"></i>
+          <h2 class="text-lg font-semibold text-blue-900">กรองข้อมูล</h2>
+        </div>
 
         <div
-          class="grid sm:grid-cols-3 md:grid-cols-3 gap-6 relative z-10 overflow-visible p-4"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
         >
-          <div>
-            <label class="block text-sm font-medium text-white mb-2 mt-[1.5px]"
-              >ค้นหา เลขที่ออเดอร์, ชื่อ, เบอร์โทร
+          <!-- ค้นหา -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              ค้นหาออเดอร์
             </label>
             <BaseInput
               v-model="pageData.filters.search"
               @input="onOrderIdChange"
-              placeholder="สามารถค้นหาได้จาก เลขที่ออเดอร์, ชื่อ, เบอร์โทร"
-              :className="'w-full bg-white text-black border shadow-md rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-blue-50 h-[40.5px]'"
+              placeholder="เลขที่ออเดอร์, ชื่อ, เบอร์โทร"
+              class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 placeholder-blue-500 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
             />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-white mb-2"
-              >วันที่แสดง (Show Date)</label
-            >
+
+          <!-- วันที่แสดง -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              วันที่แสดง
+            </label>
             <DatePicker
               v-model="pageData.filters.showDate"
               placeholder="เลือกวันที่แสดง"
@@ -51,23 +72,26 @@
               }"
             />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-white mb-2"
-              >สร้างโดย (Create By)</label
-            >
+
+          <!-- สร้างโดย -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              สร้างโดย
+            </label>
             <BaseSelect
               v-model="pageData.filters.createdBy"
-              :options="createByOptions"
+              :options="masterStaffAdmin"
               option-label="name"
               option-value="id"
               placeholder="เลือกผู้สร้างออเดอร์"
               @change="onCreateByChange"
-              :className="'w-full  h-[40.5px]'"
+              class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
             />
           </div>
-          <!-- Order Status Filter -->
-          <div class="flex-1 min-w-[180px]">
-            <label class="text-sm font-semibold text-white mb-1 block">
+
+          <!-- สถานะออเดอร์ -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
               สถานะออเดอร์
             </label>
             <BaseSelect
@@ -76,13 +100,13 @@
               placeholder="เลือกสถานะ"
               clearable
               @change="onOrderStatusChange"
-              className="w-full h-[40.5px]"
+              class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
             />
           </div>
 
-          <!-- Payment Method Filter -->
-          <div class="flex-1 min-w-[180px]">
-            <label class="text-sm font-semibold text-white mb-1 block">
+          <!-- วิธีชำระเงิน -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
               วิธีชำระเงิน
             </label>
             <BaseSelect
@@ -91,13 +115,61 @@
               placeholder="เลือกวิธีชำระเงิน"
               clearable
               @change="onPaymentMethodChange"
-              className="w-full h-[40.5px]"
+              class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
             />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-white mb-2"
-              >รายการต่อหน้า</label
-            >
+
+          <!-- ประเภทการซื้อ -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              ประเภทการซื้อ
+            </label>
+            <BaseSelect
+              v-model="pageData.filters.purchaseType"
+              :options="purchaseTypeOptions"
+              placeholder="เลือกประเภทการซื้อ"
+              clearable
+              @change="onPurchaseTypeChange"
+              class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
+            />
+          </div>
+
+          <!-- สถานะการเข้าร่วม -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              สถานะการเข้าร่วม
+            </label>
+            <BaseSelect
+              v-model="pageData.filters.attendanceStatus"
+              :options="attendanceStatusOptions"
+              placeholder="เลือกสถานะการเข้าร่วม"
+              clearable
+              @change="onAttendanceStatusChange"
+              class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
+            />
+          </div>
+
+          <!-- ชื่อผู้แนะนำ -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              ชื่อผู้แนะนำ
+            </label>
+            <BaseSelect
+              v-model="pageData.filters.referrerName"
+              :options="masterData"
+              placeholder="เลือกชื่อผู้แนะนำ"
+              clearable
+              searchable
+              @change="onReferrerNameChange"
+              class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
+            />
+          </div>
+
+          <!-- รายการต่อหน้า -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              รายการต่อหน้า
+            </label>
             <BaseSelect
               v-model="pageData.limit"
               :options="[10, 20, 40]"
@@ -105,18 +177,39 @@
               option-value="value"
               placeholder="เลือกรายการต่อหน้า"
               @change="fetchData"
-              :className="'w-full bg-white text-black border shadow-md rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-blue-50 h-[40.5px]'"
+              class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
             />
           </div>
+
+          <!-- ส่งออกข้อมูล -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              ส่งออกข้อมูล
+            </label>
+            <BaseButton
+              @click="handleExportPDF"
+              :disabled="pageData.loading || exportPdfLoading"
+              class="w-full h-[40px] bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium rounded-lg shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <i class="mdi mdi-file-pdf-box text-lg"></i>
+              <span v-if="!exportPdfLoading">ส่งออก PDF</span>
+              <span v-else>กำลังสร้าง PDF...</span>
+            </BaseButton>
+          </div>
         </div>
-      </BaseCard>
+      </div>
 
       <!-- ส่วนแสดงรายการออเดอร์ -->
       <div class="space-y-4">
         <!-- Loading State -->
-        <div v-if="pageData.loading" class="text-center py-8">
-          <BaseSpinner size="large" />
-          <p class="mt-4 text-gray-300">กำลังโหลดข้อมูล...</p>
+        <div
+          v-if="pageData.loading"
+          class="bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-blue-200 p-8"
+        >
+          <div class="text-center">
+            <BaseSpinner size="large" />
+            <p class="mt-4 text-blue-700 font-medium">กำลังโหลดข้อมูล...</p>
+          </div>
         </div>
 
         <!-- รายการออเดอร์ -->
@@ -142,33 +235,38 @@
   <!-- Modal สำหรับแสดง Thermal Receipt PDF -->
   <div
     v-if="showThermalModal"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
   >
     <div
-      class="bg-white rounded-lg shadow-2xl max-w-3xl w-full p-4 relative flex flex-col items-center"
-      style="z-index: 9999"
+      class="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl max-w-3xl w-full mx-4 p-6 relative border border-blue-200"
     >
       <button
         @click="closeThermalModal"
-        class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+        class="absolute top-4 right-4 w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full flex items-center justify-center transition-colors"
       >
-        ✕
+        <i class="mdi mdi-close text-lg"></i>
       </button>
-      <h3 class="text-lg font-bold mb-4 text-center">
-        Thermal Receipt PDF Preview
-      </h3>
+      <div class="flex items-center gap-3 mb-6">
+        <div class="bg-blue-500 p-2 rounded-lg">
+          <i class="mdi mdi-file-pdf-box text-white text-lg"></i>
+        </div>
+        <h3 class="text-xl font-bold text-blue-900">
+          Thermal Receipt PDF Preview
+        </h3>
+      </div>
       <div
         v-if="thermalPdfError"
-        class="text-red-600 text-center font-bold mb-4"
+        class="bg-red-50 border border-red-200 rounded-lg p-4 text-center"
       >
-        ไม่สามารถแสดงไฟล์ PDF ได้ หรือไฟล์ว่าง/ผิดรูปแบบ
+        <i class="mdi mdi-alert-circle text-red-500 text-2xl mb-2"></i>
+        <p class="text-red-700 font-medium">
+          ไม่สามารถแสดงไฟล์ PDF ได้ หรือไฟล์ว่าง/ผิดรูปแบบ
+        </p>
       </div>
       <iframe
         v-if="!thermalPdfError"
         :src="thermalPdfUrl"
-        width="100%"
-        height="600px"
-        style="border: none"
+        class="w-full h-[600px] rounded-lg border border-blue-200"
       ></iframe>
     </div>
   </div>
@@ -189,6 +287,56 @@
       }
     "
   />
+
+  <!-- Export PDF Modal -->
+  <div
+    v-if="exportPdfModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+  >
+    <div
+      class="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl max-w-3xl w-full mx-4 p-6 relative border border-blue-200"
+    >
+      <button
+        @click="
+          () => {
+            exportPdfModal = false;
+            if (exportPdfUrl) {
+              window.URL.revokeObjectURL(exportPdfUrl);
+              exportPdfUrl = '';
+            }
+          }
+        "
+        class="absolute top-4 right-4 w-8 h-8 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full flex items-center justify-center transition-colors"
+      >
+        <i class="mdi mdi-close text-lg"></i>
+      </button>
+      <div class="flex items-center gap-3 mb-6">
+        <div class="bg-blue-500 p-2 rounded-lg">
+          <i class="mdi mdi-file-pdf-box text-white text-lg"></i>
+        </div>
+        <h3 class="text-xl font-bold text-blue-900">PDF Preview</h3>
+      </div>
+      <div
+        v-if="exportPdfError"
+        class="bg-red-50 border border-red-200 rounded-lg p-4 text-center"
+      >
+        <i class="mdi mdi-alert-circle text-red-500 text-2xl mb-2"></i>
+        <p class="text-red-700 font-medium">{{ exportPdfError }}</p>
+      </div>
+      <div
+        v-else-if="exportPdfLoading"
+        class="flex flex-col items-center justify-center py-12"
+      >
+        <BaseSpinner size="large" />
+        <p class="mt-4 text-blue-700 font-medium">กำลังสร้าง PDF...</p>
+      </div>
+      <iframe
+        v-else-if="exportPdfUrl"
+        :src="exportPdfUrl"
+        class="w-full h-[600px] rounded-lg border border-blue-200"
+      ></iframe>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -197,12 +345,21 @@ import { useI18n } from "vue-i18n";
 import { reactive, onMounted, ref, onUnmounted, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import StandingTicketModal from "~/components/StandingTicketModal.vue";
+import BaseButton from "~/components/base/BaseButton.vue";
 import { ZONE_IDS_BY_NAME } from "~~/utils/zoneEnums";
 import { useOrder } from "~/composables/useOrder";
 import { usePageData } from "~/stores/pageData";
 import DatePicker from "~/components/DatePicker.vue";
 import { useReferrerMasterData } from "~/composables/useReferrerMasterData";
+import {
+  orderStatusOptions,
+  paymentMethodOptions,
+  purchaseTypeOptions,
+  attendanceStatusOptions,
+} from "~/utils/orderOptions";
+import { useSingleToast } from "~/composables/useSingleToast";
 import dayjs from "dayjs";
+import { navigateTo } from "nuxt/app";
 
 // ตั้งค่า metadata สำหรับหน้า
 definePageMeta({
@@ -216,12 +373,27 @@ const showModal = ref(false);
 const pageData = usePageData();
 const orderData = reactive({});
 const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
+const { showToast } = useSingleToast();
 const collapsed = ref(false);
 const showThermalModal = ref(false);
 const generatedTickets = ref([]);
 const isDownloadingThermal = ref(false);
 const thermalPdfUrl = ref("");
 const thermalPdfError = ref(false);
+
+const exportPdfModal = ref(false);
+const exportPdfUrl = ref("");
+const exportPdfLoading = ref(false);
+const exportPdfError = ref("");
+const {
+  masterData,
+  masterStaffAdmin,
+  fetchMasterData,
+  fetchMasterStaffAdmin,
+  fetchAllMasterData,
+} = useReferrerMasterData();
+
+const createByOptions = ref([]); // เพิ่มบรรทัดนี้เพื่อกำหนดค่าเริ่มต้นให้กับ createByOptions
 
 const getZoneLabel = (value) => {
   return (
@@ -252,6 +424,9 @@ const fetchData = async () => {
           pageData.filters.showDate ? pageData.filters.showDate : new Date()
         ).format("YYYY-MM-DD") || new Date(),
       paymentMethod: pageData.filters.paymentMethod || undefined,
+      purchaseType: pageData.filters.purchaseType || undefined,
+      attendanceStatus: pageData.filters.attendanceStatus || undefined,
+      referrerName: pageData.filters.referrerName || undefined,
     });
 
     pageData.orders = res.data;
@@ -264,34 +439,14 @@ const fetchData = async () => {
   }
 };
 
-const { fetchMasterStaffAdmin } = useReferrerMasterData();
-const createByOptions = ref([]);
-
-const loadCreateByOptions = async () => {
-  try {
-    const data = await fetchMasterStaffAdmin();
-    createByOptions.value = Array.isArray(data) ? data : [];
-  } catch (e) {
-    createByOptions.value = [];
-  }
-};
-
 const onCreateByChange = () => {
   pageData.page = 1;
   fetchData();
 };
 const onShowDateChange = () => {
-  console.log("321321321");
-
   pageData.page = 1;
   fetchData();
 };
-onMounted(() => {
-  handleResize();
-  fetchData();
-  loadCreateByOptions();
-  window.addEventListener("resize", handleResize);
-});
 
 const onChangeSeats = (order) => {
   Object.assign(orderData, order);
@@ -312,6 +467,46 @@ const onOrderStatusChange = () => {
 const onPaymentMethodChange = () => {
   pageData.page = 1;
   fetchData();
+};
+
+const onPurchaseTypeChange = () => {
+  pageData.page = 1;
+  fetchData();
+};
+
+const onAttendanceStatusChange = () => {
+  pageData.page = 1;
+  fetchData();
+};
+const onReferrerNameChange = () => {
+  pageData.page = 1;
+  fetchData();
+};
+
+const handleExportPDF = async () => {
+  try {
+    const query = {
+      status: pageData.filters.status || undefined,
+      search: pageData.filters.search || undefined,
+      createdBy: pageData.filters.createdBy || undefined,
+      showDate: pageData.filters.showDate
+        ? dayjs(pageData.filters.showDate).format("YYYY-MM-DD")
+        : dayjs(new Date()).format("YYYY-MM-DD"),
+      paymentMethod: pageData.filters.paymentMethod || undefined,
+      purchaseType: pageData.filters.purchaseType || undefined,
+      attendanceStatus: pageData.filters.attendanceStatus || undefined,
+      referrerName: pageData.filters.referrerName || undefined,
+    };
+    Object.keys(query).forEach(
+      (key) => query[key] === undefined && delete query[key]
+    );
+    await navigateTo({
+      path: "/admin/orders-export",
+      query,
+    });
+  } catch (error) {
+    showToast("error", "เกิดข้อผิดพลาดในการส่งออก PDF");
+  }
 };
 const onCancelOrder = async (order) => {
   try {
@@ -415,13 +610,13 @@ const handleResize = () => {
   collapsed.value = window.innerWidth < 768;
 };
 
-// เมื่อ component ถูกโหลด
-onMounted(() => {
+onMounted(async () => {
+  await fetchAllMasterData();
+
   handleResize();
-  fetchData();
+  await fetchData();
   window.addEventListener("resize", handleResize);
 });
-
 // เมื่อ component ถูกทำลาย
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
@@ -438,6 +633,7 @@ watch(orderData, (newValue) => {
 </script>
 
 <style scoped>
+/* Input และ Select customization */
 :deep(.dp__input_reg) {
   height: 40.5px;
   padding: 0 30px;
@@ -450,123 +646,149 @@ watch(orderData, (newValue) => {
   border: 1px solid #d1d5db;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
-/* BaseCard Styling */
-.BaseCard {
-  background: linear-gradient(135deg, #0f1f3c, #1a2b4d);
-  border: 1px solid #2a4a6e;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  overflow: visible;
+
+/* Loading animation */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
-/* Header Styling */
-.BaseCard h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #d1d5db;
-  margin-bottom: 1rem;
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Grid Styling */
-.grid {
-  display: grid;
-  gap: 1rem;
+/* Smooth transitions */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
 
-/* Listbox Styling */
-.ListboxButton {
-  background: #1a2b4d;
-  color: #d1d5db;
-  border: 1px solid #2a4a6e;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-.ListboxButton:hover {
-  background: #2a4a6e;
-  border-color: #3a6ea5;
-}
-.ListboxButton:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(58, 110, 165, 0.5);
+/* Backdrop blur for modals */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
 }
 
-/* Listbox Options Styling */
-.ListboxOptions {
-  background: #1a2b4d;
-  color: #d1d5db;
-  border-radius: 4px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-.ListboxOption {
-  padding: 0.5rem 1rem;
-  transition: background 0.3s ease;
-}
-.ListboxOption:hover {
-  background: #2a4a6e;
-}
-.ListboxOption.selected {
-  font-weight: 600;
-  color: #3a6ea5;
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
 }
 
-/* Input Styling */
-.BaseInput {
-  background: #1a2b4d;
-  color: #d1d5db;
-  border: 1px solid #2a4a6e;
-  border-radius: 4px;
-  padding: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-.BaseInput:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(58, 110, 165, 0.5);
-}
-
-/* Label Styling */
-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #d1d5db;
-  margin-bottom: 0.5rem;
-}
-
-/* CSS Animation สำหรับการเปลี่ยนแปลงที่นุ่มนวล */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* Custom scrollbar for better UX */
-.overflow-auto::-webkit-scrollbar {
+/* Custom scrollbar */
+::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
-.overflow-auto::-webkit-scrollbar-track {
-  background: #f1f1f1;
+::-webkit-scrollbar-track {
+  background: rgb(241, 245, 249);
   border-radius: 3px;
 }
 
-.overflow-auto::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+::-webkit-scrollbar-thumb {
+  background: rgb(148, 163, 184);
   border-radius: 3px;
 }
 
-.overflow-auto::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(100, 116, 139);
 }
 
-/* Debug styles for modal visibility */
-.StandingTicketModal {
-  z-index: 9999;
-  display: block !important;
+/* Responsive design enhancements */
+@media (max-width: 640px) {
+  .grid-cols-1 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 640px) {
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Enhanced button hover effects */
+.hover\:from-emerald-600:hover {
+  background-image: linear-gradient(
+    to right,
+    rgb(5, 150, 105),
+    var(--tw-gradient-to)
+  );
+}
+
+.hover\:to-emerald-700:hover {
+  --tw-gradient-to: rgb(4, 120, 87);
+}
+
+/* Card shadow effects */
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+/* Glass morphism effect */
+.bg-white\/90 {
+  background-color: rgb(255 255 255 / 0.9);
+}
+
+.bg-white\/95 {
+  background-color: rgb(255 255 255 / 0.95);
+}
+
+.bg-blue-50\/70 {
+  background-color: rgb(239 246 255 / 0.7);
+}
+
+/* Interactive states */
+.hover\:bg-blue-200:hover {
+  background-color: rgb(219, 234, 254);
+}
+
+.focus\:ring-blue-500:focus {
+  --tw-ring-color: rgb(59, 130, 246);
+}
+
+.focus\:border-blue-500:focus {
+  border-color: rgb(59, 130, 246);
+}
+
+/* Text colors */
+.text-blue-900 {
+  color: rgb(30, 58, 138);
+}
+
+.text-blue-700 {
+  color: rgb(29, 78, 216);
+}
+
+.text-blue-600 {
+  color: rgb(37, 99, 235);
+}
+
+.text-blue-500 {
+  color: rgb(59, 130, 246);
+}
+
+.placeholder-blue-500::placeholder {
+  color: rgb(59, 130, 246);
 }
 </style>

@@ -335,7 +335,7 @@ const thermalIframe = ref(null);
 // ฟังก์ชัน auto print thermal receipt PDF เมื่อ iframe โหลดเสร็จ (Electron เท่านั้น)
 const onThermalIframeLoad = async () => {
   try {
-    await printThermal();
+    // await printThermal();
   } catch (error) {
     console.error("Error calling printThermal:", error);
   }
@@ -345,8 +345,6 @@ const handleDownloadThermal = async (orderId) => {
   thermalPdfError.value = false;
   try {
     const blob = await downloadThermalReceipt(orderId);
-    console.log("Thermal PDF blob:", blob);
-    console.log("orderId:", orderId);
     if (!blob || blob.size < 1000) {
       thermalPdfError.value = true;
       thermalPdfUrl.value = "";

@@ -1,9 +1,10 @@
 <!-- BaseButton.vue -->
 <template>
   <button
-    :class="buttonClasses"
+    :class="[buttonClasses, $attrs.class]"
     :disabled="disabled"
     @click="$emit('click', $event)"
+    v-bind="$attrs"
   >
     <i v-if="icon" :class="icon" class="mr-2"></i>
     <slot />

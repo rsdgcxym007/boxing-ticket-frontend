@@ -1,0 +1,208 @@
+// Helper functions for order status and UI logic
+export const getStatusConfig = (status: string) => {
+  const configs = {
+    PENDING: {
+      class: "bg-white border border-yellow-400 text-yellow-900 font-bold",
+      label: "รอดำเนินการ",
+      icon: "mdi-clock-outline text-yellow-700 text-base",
+    },
+    BOOKED: {
+      class: "bg-white border border-blue-400 text-blue-900 font-bold",
+      label: "จองแล้ว",
+      icon: "mdi-bookmark text-blue-700 text-base",
+    },
+    PAID: {
+      class: "bg-white border border-green-400 text-green-900 font-bold",
+      label: "ชำระแล้ว",
+      icon: "mdi-ticket-confirmation-outline text-green-700 text-base",
+    },
+    CANCELLED: {
+      class: "bg-white border border-red-400 text-red-900 font-bold",
+      label: "ยกเลิกแล้ว",
+      icon: "mdi-cancel text-red-700 text-base",
+    },
+    CONFIRMED: {
+      class: "bg-white border border-emerald-400 text-emerald-900 font-bold",
+      label: "ยืนยันแล้ว",
+      icon: "mdi-check-all text-emerald-700 text-base",
+    },
+    EXPIRED: {
+      class: "bg-white border border-gray-400 text-gray-900 font-bold",
+      label: "หมดอายุ",
+      icon: "mdi-timer-off text-gray-700 text-base",
+    },
+  };
+  return (
+    configs[status] || {
+      class: "bg-white border border-gray-400 text-gray-900 font-bold",
+      label: "ไม่ทราบสถานะ",
+      icon: "mdi-help text-gray-700 text-base",
+    }
+  );
+};
+
+export const getPaymentStatusConfig = (status: string) => {
+  const configs = {
+    PENDING: {
+      class: "bg-white border border-orange-400 text-orange-900 font-bold",
+      label: "รอการชำระ",
+      icon: "mdi-clock-outline text-orange-700 text-base",
+    },
+    PAID: {
+      class: "bg-white border border-green-400 text-green-900 font-bold",
+      label: "ชำระแล้ว",
+      icon: "mdi-cash-check text-green-700 text-base",
+    },
+    FAILED: {
+      class: "bg-white border border-red-400 text-red-900 font-bold",
+      label: "ชำระไม่สำเร็จ",
+      icon: "mdi-close-circle text-red-700 text-base",
+    },
+    REFUNDED: {
+      class: "bg-white border border-purple-400 text-purple-900 font-bold",
+      label: "คืนเงินแล้ว",
+      icon: "mdi-cash-refund text-purple-700 text-base",
+    },
+  };
+  return (
+    configs[status] || {
+      class: "bg-white border border-gray-400 text-gray-900 font-bold",
+      label: "ไม่ทราบสถานะ",
+      icon: "mdi-help text-gray-700 text-base",
+    }
+  );
+};
+
+export const getTicketTypeConfig = (ticketType: string) => {
+  const configs = {
+    RINGSIDE: {
+      label: "ริงไซด์",
+      icon: "mdi-crown",
+      color: "text-yellow-400",
+    },
+    STADIUM: {
+      label: "สเตเดียม",
+      icon: "mdi-stadium",
+      color: "text-blue-400",
+    },
+    STANDING: {
+      label: "ตั๋วยืน",
+      icon: "mdi-human-queue",
+      color: "text-green-400",
+    },
+  };
+  return (
+    configs[ticketType] || {
+      label: ticketType,
+      icon: "mdi-ticket",
+      color: "text-gray-400",
+    }
+  );
+};
+
+export const getPurchaseTypeConfig = (purchaseType: string) => {
+  const configs = {
+    WEBSITE: {
+      label: "เว็บไซต์",
+      icon: "mdi-web",
+      color: "text-blue-400",
+    },
+    BOOKING: {
+      label: "จองล่วงหน้า",
+      icon: "mdi-calendar-check",
+      color: "text-purple-400",
+    },
+    ONSITE: {
+      label: "หน้างาน",
+      icon: "mdi-store",
+      color: "text-orange-400",
+    },
+  };
+  return (
+    configs[purchaseType] || {
+      label: purchaseType,
+      icon: "mdi mdi-help",
+      color: "text-gray-400",
+    }
+  );
+};
+
+// Logic to determine what fields can be edited
+export const canEditField = (orderData: any, fieldName: string): boolean => {
+  if (!orderData) return false;
+
+  const { status, ticketType, purchaseType } = orderData;
+
+  // If order is PAID
+  if (status === "PAID") {
+    // Only RINGSIDE with purchaseType != ONSITE can edit seats and showDate when PAID
+    if (ticketType === "RINGSIDE" && purchaseType !== "ONSITE") {
+      return ["seatIds", "newShowDate"].includes(fieldName);
+    }
+    // Other ticket types or ONSITE purchases cannot edit anything when PAID
+    return false;
+  }
+
+  // If order is not PAID
+  if (status !== "PAID") {
+    // ONSITE purchases don't show customer info fields
+    if (purchaseType === "ONSITE") {
+      return ![
+        "newCustomerName",
+        "newCustomerPhone",
+        "newCustomerEmail",
+      ].includes(fieldName);
+    }
+    // Other purchase types can edit everything
+    return true;
+  }
+
+  return false;
+};
+
+// Logic to determine what fields should be visible
+export const shouldShowField = (orderData: any, fieldName: string): boolean => {
+  if (!orderData) return false;
+
+  const { purchaseType, ticketType } = orderData;
+
+  // ONSITE purchases don't show customer info
+  if (purchaseType === "ONSITE") {
+    if (
+      [
+        "customerName",
+        "customerPhone",
+        "email",
+        "newCustomerName",
+        "newCustomerPhone",
+        "newCustomerEmail",
+      ].includes(fieldName)
+    ) {
+      return false;
+    }
+  }
+
+  // Standing tickets don't have seats
+  if (ticketType === "STANDING") {
+    if (["seats", "seatIds", "newSeatIds"].includes(fieldName)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+export const shouldShowSeatsSection = (orderData: any): boolean => {
+  return orderData?.ticketType !== "STANDING" && orderData?.seats?.length > 0;
+};
+
+export const shouldShowCustomerSection = (orderData: any): boolean => {
+  return orderData?.purchaseType !== "ONSITE";
+};
+
+export const shouldShowStandingSection = (orderData: any): boolean => {
+  return (
+    orderData?.ticketType === "STANDING" &&
+    (orderData?.standingAdultQty > 0 || orderData?.standingChildQty > 0)
+  );
+};

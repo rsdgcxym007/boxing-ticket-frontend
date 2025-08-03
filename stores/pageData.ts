@@ -35,6 +35,9 @@ export const usePageData = defineStore("pageData", {
       search: "",
       showDate: dayjs(new Date()).format("YYYY-MM-DD"),
       createdBy: "",
+      paymentMethod: "",
+      purchaseType: "",
+      attendanceStatus: "",
     },
     orders: [],
     hasNext: false,
@@ -54,6 +57,7 @@ export const usePageData = defineStore("pageData", {
       { label: "Right", value: "right" },
       { label: "Front Ringside", value: "front-ringside" },
     ],
+    purchaseType: "ONSITE",
     totalSales: "0",
     monthSales: "0",
     totalOrders: 0,
@@ -98,6 +102,7 @@ export const usePageData = defineStore("pageData", {
       this.referrerCode = "";
       this.total = 0;
       this.CheckLimitChatSeat = 0;
+      this.purchaseType = "ONSITE";
     },
   },
 });

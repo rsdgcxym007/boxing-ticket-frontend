@@ -1,5 +1,8 @@
 <template>
-  <div class="base-select" :class="wrapperClasses">
+  <div
+    class="base-select"
+    :class="[wrapperClasses, $attrs.class, $attrs.className]"
+  >
     <!-- Label -->
     <label
       v-if="label"
@@ -14,7 +17,7 @@
     <!-- Custom Dropdown Container -->
     <div
       class="relative"
-      :class="containerClasses"
+      :class="[containerClasses, $attrs.class, $attrs.className]"
       v-click-outside="closeDropdown"
     >
       <!-- Trigger Button -->
@@ -23,7 +26,7 @@
         :id="inputId"
         type="button"
         :disabled="disabled"
-        :class="triggerClasses"
+        :class="[triggerClasses, $attrs.class, $attrs.className]"
         @click="toggleDropdown"
         @keydown.enter.prevent="toggleDropdown"
         @keydown.space.prevent="toggleDropdown"
@@ -32,7 +35,7 @@
         @keydown.arrow-up.prevent="highlightPrevious"
       >
         <!-- Selected Value Display -->
-        <div class="flex items-center flex-1 min-w-0">
+        <div class="flex items-center min-w-0 h-full w-full">
           <span
             v-if="selectedDisplay"
             class="block truncate"
@@ -44,7 +47,7 @@
             {{ placeholder }}
           </span>
           <div
-            class="flex items-start justify-center space-x-2 flex-shrink-0 ml-auto"
+            class="flex items-center justify-center space-x-2 flex-shrink-0 ml-auto h-full"
           >
             <!-- Clear Button -->
             <button
@@ -410,7 +413,7 @@ const containerClasses = computed(() => ({
 
 const triggerClasses = computed(() => [
   // Base classes
-  "relative w-full rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 text-left",
+  "relative border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 text-left",
 
   // Size classes
   sizeClasses.value,

@@ -23,12 +23,12 @@ export const useAdminMenu = () => {
       to: "/admin/staff",
       role: ["admin"],
     },
-    {
-      icon: "mdi-update",
-      label: "ทดสอบอัพเดท",
-      to: "/update-test",
-      role: ["admin"],
-    },
+    // {
+    //   icon: "mdi-update",
+    //   label: "ทดสอบอัพเดท",
+    //   to: "/update-test",
+    //   role: ["admin"],
+    // },
     // {
     //   icon: "mdi-account-group",
     //   label: "ระบบตรวจสอบ",
