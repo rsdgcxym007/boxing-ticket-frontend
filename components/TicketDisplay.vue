@@ -204,6 +204,7 @@
 <script setup>
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
+import { TicketType } from "@/types/Enums";
 
 const props = defineProps({
   tickets: {
@@ -297,7 +298,7 @@ const downloadTickets = async () => {
         gradientColors = ["#ef4444", "#dc2626", "#b91c1c"]; // red gradient to match from-red-500 via-red-600 to-red-700
         ticketTypeName = "ที่นั่ง";
       } else if (
-        ticket.type === "STANDING" ||
+        ticket.type === TicketType.STANDING ||
         ticket.type === "STANDING_ADULT" ||
         ticket.type === "STANDING_CHILD"
       ) {

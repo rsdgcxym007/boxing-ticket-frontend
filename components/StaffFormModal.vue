@@ -56,6 +56,7 @@
             inputmode="numeric"
             pattern="[0-9]*"
             @input="validatePhone()"
+            className="w-full  rounded-lg"
           />
         </div>
       </div>
@@ -73,6 +74,7 @@
             required
             :error="errors.role"
             @update:modelValue="validateRole()"
+            className="w-full  rounded-lg"
           />
         </div>
         <!-- <div>
@@ -95,6 +97,7 @@
           label="ตำแหน่งงาน"
           placeholder="กรอกตำแหน่งงาน"
           :error="errors.position"
+          className="w-full h-full rounded-lg"
         />
         <p class="text-red-500 text-xs mt-1 min-h-[1.25em]">
           {{ errors.position }}

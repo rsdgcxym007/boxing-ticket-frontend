@@ -21,7 +21,7 @@
         <div class="flex gap-4">
           <label
             v-for="option in purchaseTypeOptionsForForm.filter(
-              (o) => o.value === 'ONSITE' || o.value === 'BOOKING'
+              (o) => o.value === OrderPurchaseType.ONSITE || o.value === OrderPurchaseType.BOOKING
             )"
             :key="option.value"
             class="flex-1 flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-white/20 hover:border-orange-400 bg-white/5 hover:bg-orange-50/10 transition-all duration-300"
@@ -46,7 +46,7 @@
       </div>
 
       <!-- ชื่อผู้ซื้อ -->
-      <div v-if="pageData.purchaseType !== 'ONSITE'">
+      <div v-if="pageData.purchaseType !== OrderPurchaseType.ONSITE">
         <label class="text-sm mb-1 flex items-center gap-2 text-blue-300">
           <i class="mdi mdi-account-outline text-lg" />
           ชื่อผู้ซื้อ
@@ -60,7 +60,7 @@
       </div>
 
       <!-- เบอร์โทรผู้ซื้อ -->
-      <div v-if="pageData.purchaseType !== 'ONSITE'">
+      <div v-if="pageData.purchaseType !== OrderPurchaseType.ONSITE">
         <label class="text-sm mb-1 flex items-center gap-2 text-green-300">
           <i class="mdi mdi-phone-outline text-lg" />
           เบอร์โทรผู้ซื้อ
@@ -88,7 +88,7 @@
       </div>
 
       <!-- อีเมลผู้ซื้อ -->
-      <div v-if="pageData.purchaseType !== 'ONSITE'">
+      <div v-if="pageData.purchaseType !== OrderPurchaseType.ONSITE">
         <label class="text-sm mb-1 flex items-center gap-2 text-red-300">
           <i class="mdi mdi-email-outline text-lg" />
           อีเมลผู้ซื้อ
@@ -308,15 +308,15 @@ const purchaseTypeOptionsForForm = computed(() =>
   purchaseTypeOptions.map((option) => ({
     ...option,
     icon:
-      option.value === "WEBSITE"
+      option.value === OrderPurchaseType.WEBSITE
         ? "mdi-web"
-        : option.value === "BOOKING"
+        : option.value === OrderPurchaseType.BOOKING
         ? "mdi-phone-in-talk"
         : "mdi-store",
     description:
-      option.value === "WEBSITE"
+      option.value === OrderPurchaseType.WEBSITE
         ? "ซื้อผ่านเว็บไซต์"
-        : option.value === "BOOKING"
+        : option.value === OrderPurchaseType.BOOKING
         ? "BOOKING"
         : "ซื้อหน้างาน",
   }))
@@ -338,6 +338,7 @@ import { useAuthStore } from "../stores/auth";
 import { usePageData } from "../stores/pageData";
 import { useIntegratedSeatBooking } from "../composables/useIntegratedSeatBooking";
 
+import { OrderPurchaseType } from "@/types/Enums";
 // 📱 การตั้งค่าเริ่มต้น
 const auth = useAuthStore();
 const isLoading = usePageData();

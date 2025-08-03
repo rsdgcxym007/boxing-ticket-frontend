@@ -70,7 +70,7 @@
                     >
                       <label
                         v-for="option in purchaseTypeOptionsForForm.filter(
-                          (o) => o.value === 'ONSITE' || o.value === 'BOOKING'
+                          (o) => o.value === OrderPurchaseType.ONSITE || o.value === OrderPurchaseType.BOOKING
                         )"
                         :key="option.value"
                         class="flex items-center gap-[1px] cursor-pointer px-1 py-1 rounded-lg border-2 transition-all duration-300 shadow-sm text-xs min-w-[110px] max-w-[150px] sm:min-w-[120px] sm:max-w-[160px] md:min-w-[130px] md:max-w-[170px] lg:min-w-[140px] lg:max-w-[180px] xl:min-w-[150px] xl:max-w-[200px]"
@@ -358,7 +358,7 @@
                   class="mdi mdi-ticket-confirmation text-sm group-hover:scale-110 transition-transform"
                 ></i>
                 {{
-                  props.mode === "change" && props?.orderData?.status === "PAID"
+                  props.mode === "change" && props?.orderData?.status === OrderStatus.PAID
                     ? "ยืนยันเปลี่ยนที่นั่ง"
                     : "ซื้อตั๋ว"
                 }}
@@ -404,6 +404,7 @@ import { useIntegratedSeatBooking } from "@/composables/useIntegratedSeatBooking
 import { ref as vueRef } from "vue";
 import { purchaseTypeOptions } from "@/utils/orderOptions";
 
+import { OrderStatus, OrderPurchaseType } from "@/types/Enums";
 const { t } = useI18n();
 const pageData = usePageData();
 const { getSeatsByZoneId } = useSeatApi();
@@ -428,15 +429,15 @@ const purchaseTypeOptionsForForm = computed(() =>
   purchaseTypeOptions.map((option) => ({
     ...option,
     icon:
-      option.value === "WEBSITE"
+      option.value === OrderPurchaseType.WEBSITE
         ? "mdi-web"
-        : option.value === "BOOKING"
+        : option.value === OrderPurchaseType.BOOKING
         ? "mdi-phone-in-talk"
         : "mdi-store",
     description:
-      option.value === "WEBSITE"
+      option.value === OrderPurchaseType.WEBSITE
         ? "ซื้อผ่านเว็บไซต์"
-        : option.value === "BOOKING"
+        : option.value === OrderPurchaseType.BOOKING
         ? "BOOKING"
         : "ซื้อหน้างาน",
   }))
@@ -495,7 +496,7 @@ const fetchAndInitializeSeats = async () => {
         seatManager.allSeats.value
       );
       pageData.bookedSeats = seatManager.allSeats.value.filter(
-        (seat) => seatManager.getSeatStatus(seat) === "BOOKED"
+        (seat) => seatManager.getSeatStatus(seat) === OrderStatus.BOOKED
       );
     }
   } catch (error) {
@@ -549,8 +550,8 @@ const getSeatStatus = (seat) => {
 
     // ถ้า seat ถูกจองจริง ๆ ให้คืน "BOOKED"
     if (
-      seat.bookingStatus === "BOOKED" ||
-      seatManager.getSeatStatus(seat) === "BOOKED"
+      seat.bookingStatus === OrderStatus.BOOKED ||
+      seatManager.getSeatStatus(seat) === OrderStatus.BOOKED
     ) {
       return "BOOKED";
     }
@@ -728,7 +729,7 @@ watch(
       }));
       pageData.currentZoneSeats = buildSeatLayoutFromCoordinates(freshSeats);
       pageData.bookedSeats = freshSeats.filter(
-        (seat) => seatManager.getSeatStatus(seat) === "BOOKED"
+        (seat) => seatManager.getSeatStatus(seat) === OrderStatus.BOOKED
       );
       pageData.loading = false;
     } catch (error) {

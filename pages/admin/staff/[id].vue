@@ -2,7 +2,7 @@
   <div class="staff-detail-page">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center items-center min-h-[400px]">
-      <BaseSpinner size="lg" />
+      <BaseSpinner :visible="loading" size="lg" />
     </div>
 
     <!-- Error State -->
@@ -265,7 +265,7 @@
     />
 
     <!-- Delete Confirmation Modal -->
-    <BaseModal v-model="showDeleteModal" title="ยืนยันการลบ">
+    <BaseModal :isOpen="showDeleteModal" title="ยืนยันการลบ">
       <div class="text-center">
         <i class="mdi mdi-alert-circle text-red-500 text-6xl mb-4"></i>
         <h3 class="text-lg font-medium text-gray-900 mb-2">
@@ -300,6 +300,10 @@ import { useRoute, useRouter } from "vue-router";
 import { useSingleToast } from "../../../composables/useSingleToast";
 import { useStaff, type Staff } from "../../../composables/useStaff";
 import dayjs from "dayjs";
+import BaseSpinner from "@/components/BaseLoading.vue";
+import StaffFormModal from "@/components/StaffFormModal.vue";
+import StaffStatusModal from "@/components/StaffStatusModal.vue";
+import BaseModal from "@/components/base/BaseModal.vue";
 
 const route = useRoute();
 const router = useRouter();

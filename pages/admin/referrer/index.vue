@@ -96,6 +96,7 @@
               v-model="pageData.filters.keyword"
               label="ค้นหา"
               placeholder="ค้นหาชื่อหรือโค้ด Referrer"
+              className="w-full h-full rounded-lg"
             />
           </div>
 
@@ -430,6 +431,7 @@
             <BaseInput
               v-model="pageData.newRef.name"
               placeholder="กรอกชื่อผู้แนะนำ"
+              className="w-full h-full rounded-lg"
             />
           </div>
 
@@ -441,6 +443,7 @@
             <BaseInput
               v-model="pageData.newRef.code"
               placeholder="กรอกรหัสผู้แนะนำ"
+              className="w-full h-full rounded-lg"
             />
           </div>
 
@@ -452,6 +455,7 @@
             <BaseInput
               v-model="pageData.newRef.phone"
               placeholder="กรอกหมายเลขโทรศัพท์"
+              className="w-full h-full rounded-lg"
             />
           </div>
 

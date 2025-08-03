@@ -1,4 +1,6 @@
 // Helper functions for order status and UI logic
+import { OrderStatus, TicketType, OrderPurchaseType } from "@/types/Enums";
+
 export const getStatusConfig = (status: string) => {
   const configs = {
     PENDING: {
@@ -128,36 +130,24 @@ export const getPurchaseTypeConfig = (purchaseType: string) => {
 };
 
 // Logic to determine what fields can be edited
-export const canEditField = (orderData: any, fieldName: string): boolean => {
+export const canEditField = (orderData: any, field: string): boolean => {
   if (!orderData) return false;
 
-  const { status, ticketType, purchaseType } = orderData;
-
-  // If order is PAID
-  if (status === "PAID") {
-    // Only RINGSIDE with purchaseType != ONSITE can edit seats and showDate when PAID
-    if (ticketType === "RINGSIDE" && purchaseType !== "ONSITE") {
-      return ["seatIds", "newShowDate"].includes(fieldName);
+  if (orderData.status === OrderStatus.PAID) {
+    // PAID orders can only edit certain fields
+    if (
+      orderData.ticketType === TicketType.RINGSIDE &&
+      orderData.purchaseType !== OrderPurchaseType.ONSITE
+    ) {
+      // Can edit seats for RINGSIDE non-ONSITE orders
+      return ["seatIds", "newSeatIds"].includes(field);
     }
-    // Other ticket types or ONSITE purchases cannot edit anything when PAID
+    // Other PAID orders cannot edit anything
     return false;
   }
 
-  // If order is not PAID
-  if (status !== "PAID") {
-    // ONSITE purchases don't show customer info fields
-    if (purchaseType === "ONSITE") {
-      return ![
-        "newCustomerName",
-        "newCustomerPhone",
-        "newCustomerEmail",
-      ].includes(fieldName);
-    }
-    // Other purchase types can edit everything
-    return true;
-  }
-
-  return false;
+  // Non-PAID orders can edit most things
+  return true;
 };
 
 // Logic to determine what fields should be visible
@@ -167,7 +157,7 @@ export const shouldShowField = (orderData: any, fieldName: string): boolean => {
   const { purchaseType, ticketType } = orderData;
 
   // ONSITE purchases don't show customer info
-  if (purchaseType === "ONSITE") {
+  if (purchaseType === OrderPurchaseType.ONSITE) {
     if (
       [
         "customerName",
@@ -183,7 +173,7 @@ export const shouldShowField = (orderData: any, fieldName: string): boolean => {
   }
 
   // Standing tickets don't have seats
-  if (ticketType === "STANDING") {
+  if (ticketType === TicketType.STANDING) {
     if (["seats", "seatIds", "newSeatIds"].includes(fieldName)) {
       return false;
     }
@@ -193,16 +183,19 @@ export const shouldShowField = (orderData: any, fieldName: string): boolean => {
 };
 
 export const shouldShowSeatsSection = (orderData: any): boolean => {
-  return orderData?.ticketType !== "STANDING" && orderData?.seats?.length > 0;
+  return (
+    orderData?.ticketType !== TicketType.STANDING &&
+    orderData?.seats?.length > 0
+  );
 };
 
 export const shouldShowCustomerSection = (orderData: any): boolean => {
-  return orderData?.purchaseType !== "ONSITE";
+  return orderData?.purchaseType !== OrderPurchaseType.ONSITE;
 };
 
 export const shouldShowStandingSection = (orderData: any): boolean => {
   return (
-    orderData?.ticketType === "STANDING" &&
+    orderData?.ticketType === TicketType.STANDING &&
     (orderData?.standingAdultQty > 0 || orderData?.standingChildQty > 0)
   );
 };

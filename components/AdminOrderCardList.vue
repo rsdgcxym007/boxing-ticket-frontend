@@ -266,7 +266,10 @@
               <span>แก้ไข</span>
             </button>
             <button
-              v-if="order.status === 'PAID' && order.paymentStatus === 'PAID'"
+              v-if="
+                order.status === OrderStatus.PAID &&
+                order.paymentStatus === PaymentStatus.PAID
+              "
               @click="$emit('generate-tickets', order)"
               class="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium transition-colors"
             >
@@ -274,7 +277,7 @@
               <span>ออกตั๋ว</span>
             </button>
             <button
-              v-if="order.status !== 'CANCELLED'"
+              v-if="order.status !== OrderStatus.CANCELLED"
               @click="$emit('cancel-order', order)"
               class="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium transition-colors"
             >
@@ -342,17 +345,23 @@
   </nav>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from "vue";
+import {
+  getStatusConfig,
+  getPaymentStatusConfig,
+} from "../utils/orderStatusUtils";
+import { formatCurrency as currencyFormatter } from "../utils/formatCurrency";
+import { OrderStatus, PaymentStatus, TicketType } from "../types/Enums";
 import dayjs from "dayjs";
 
-const props = defineProps({
-  orders: Array,
-  page: Number,
-  hasNext: Boolean,
-  total: Number,
-  perPage: Number,
-});
+const props = defineProps<{
+  orders: any[];
+  page: number;
+  hasNext: boolean;
+  total: number;
+  perPage: number;
+}>();
 
 const emit = defineEmits([
   "update:page",
@@ -383,9 +392,9 @@ const totalPages = computed(() =>
 );
 
 const paginationNumbers = computed(() => {
-  const current = props.page;
-  const total = totalPages.value;
-  const pages = [];
+  const current: number = typeof props.page === "number" ? props.page : 1;
+  const total: number = totalPages.value;
+  const pages: Array<number | string> = [];
 
   if (total <= 5) {
     for (let i = 1; i <= total; i++) pages.push(i);
@@ -403,10 +412,14 @@ const paginationNumbers = computed(() => {
 });
 
 // Helper functions
-const getCommission = (order) => {
-  return order.ticketType === "RINGSIDE"
-    ? order.referrerCommission || 0
-    : order.standingCommission || 0;
+const isRingsideOrder = (order: any) => {
+  return order.ticketType === TicketType.RINGSIDE
+    ? order.seats?.map((seat: any) => seat.seatNumber).join(", ") ||
+        "ไม่มีที่นั่ง"
+    : order.ticketType === TicketType.STADIUM
+    ? order.seats?.map((seat: any) => seat.seatNumber).join(", ") ||
+      "ไม่มีที่นั่ง"
+    : "ตั๋วยืน";
 };
 
 const getTicketTypeLabel = (type) => {
@@ -659,5 +672,14 @@ const formatTime = (dateStr) => {
 const formatDateTime = (dateStr) => {
   if (!dateStr) return "ไม่ระบุ";
   return dayjs(dateStr).format("DD/MM/YYYY HH:mm");
+};
+
+const getCommission = (order) => {
+  if (order.ticketType === TicketType.RINGSIDE) {
+    return order.referrerCommission || 0;
+  } else if (order.ticketType === TicketType.STANDING) {
+    return order.standingCommission || 0;
+  }
+  return 0;
 };
 </script>

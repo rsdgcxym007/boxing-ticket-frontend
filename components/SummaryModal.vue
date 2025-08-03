@@ -196,7 +196,7 @@
               </div>
 
               <!-- Customer Information - Only show if not ONSITE -->
-              <div v-if="props.purchaseType !== 'ONSITE'">
+              <div v-if="props.purchaseType !== OrderPurchaseType.ONSITE">
                 <h4
                   class="flex items-center gap-2 text-lg font-bold text-slate-800 mb-4"
                 >
@@ -368,6 +368,7 @@ import { useOrder } from "@/composables/useOrder";
 import { usePayments } from "@/composables/usePayments";
 import { useTicketBookingManager } from "@/composables/useTicketBookingManager";
 import { useReferrerMasterData } from "../composables/useReferrerMasterData";
+import { OrderPurchaseType } from "@/types/Enums";
 import BaseSelect from "../components/base/BaseSelect.vue";
 
 // ==================== STORES & COMPOSABLES ====================
@@ -425,7 +426,7 @@ const isValidPhone = computed(() => {
 
 const isValid = computed(() => {
   // If purchase type is ONSITE, no customer info required
-  if (props.purchaseType === "ONSITE") {
+  if (props.purchaseType === OrderPurchaseType.ONSITE) {
     return true;
   }
 
@@ -508,7 +509,10 @@ const onCancel = async () => {
 
 const submitOrders = async () => {
   // Validate required fields
-  if (props.purchaseType !== "ONSITE" && !pageData.customerName?.trim()) {
+  if (
+    props.purchaseType !== OrderPurchaseType.ONSITE &&
+    !pageData.customerName?.trim()
+  ) {
     showToast("warning", "กรุณากรอกชื่อลูกค้าก่อนดำเนินการ");
     return;
   }

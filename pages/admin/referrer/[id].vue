@@ -87,7 +87,7 @@
               :options="orderStatusOptions"
               placeholder="เลือกสถานะ"
               clearable
-              className="w-full"
+              className="w-full h-[40.5px]"
             />
           </div>
 
@@ -101,7 +101,7 @@
               :options="paymentMethodOptions"
               placeholder="เลือกวิธีชำระเงิน"
               clearable
-              className="w-full"
+              className="w-full h-[40.5px]"
             />
           </div>
 
@@ -203,17 +203,17 @@
               <span
                 :class="[
                   'font-semibold',
-                  order.status === 'PAID'
+                  order.status === OrderStatus.PAID
                     ? 'text-green-400'
-                    : order.status === 'CANCELLED'
+                    : order.status === OrderStatus.CANCELLED
                     ? 'text-yellow-400'
                     : 'text-red-400',
                 ]"
               >
                 {{
-                  order.status === "PAID"
+                  order.status === OrderStatus.PAID
                     ? "ชำระแล้ว"
-                    : order.status === "CANCELLED"
+                    : order.status === OrderStatus.CANCELLED
                     ? "ถูกยกเลิก"
                     : "ยังไม่ชำระ"
                 }}
@@ -223,9 +223,9 @@
               <i class="mdi mdi-credit-card-outline text-gray-400"></i>
               <span class="text-gray-400">วิธีชำระ:</span>
               <span class="text-white font-semibold">{{
-                order.payment?.method === "CREDIT_CARD"
+                order.payment?.method === PaymentMethod.CREDIT_CARD
                   ? "บัตรเครดิต"
-                  : order.payment?.method === "CASH"
+                  : order.payment?.method === PaymentMethod.CASH
                   ? "เงินสด"
                   : "อื่นๆ"
               }}</span>
@@ -322,12 +322,13 @@ import { ref, onMounted, computed } from "vue";
 import { useReferrer } from "../../../composables/useReferrer";
 import { useRoute } from "vue-router";
 import dayjs from "dayjs";
-import type { Order } from "../../../types/Order";
 import { usePageData } from "../../../stores/pageData";
+import { OrderStatus, PaymentStatus, PaymentMethod } from "@/types/Enums";
 import {
   orderStatusOptions,
   paymentMethodOptions,
 } from "../../../utils/orderOptions";
+import { Order } from "@/types/order";
 const loading = usePageData();
 const orders = ref<Order[]>([]);
 
@@ -369,7 +370,7 @@ const fetchOrders = async () => {
     const data = await getReferrerOrders(referrerId, query);
 
     orders.value = data;
-    const paid = data.find((o: Order) => o.status === "PAID");
+    const paid = data.find((o: Order) => o.status === OrderStatus.PAID);
     if (paid) {
       referrerName.value = paid.referrer?.name || "";
     }
@@ -408,7 +409,7 @@ const formatPrice = (val: number | string) =>
   Number(val).toLocaleString("th-TH");
 
 const paidOrdersOnly = computed(() =>
-  orders.value.filter((o) => o.status === "PAID")
+  orders.value.filter((o) => o.status === OrderStatus.PAID)
 );
 
 const totalAmount = computed(() =>

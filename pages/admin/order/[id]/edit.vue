@@ -255,7 +255,7 @@
               >
               <div class="text-blue-900 py-2">
                 {{
-                  orderData.ticketType === "RINGSIDE"
+                  orderData.ticketType === TicketType.RINGSIDE
                     ? orderData.referrerCommission
                     : orderData.standingCommission || 0
                 }}
@@ -490,6 +490,7 @@ import {
   shouldShowCustomerSection,
   shouldShowStandingSection,
 } from "@/utils/orderStatusUtils";
+import { OrderStatus, TicketType, OrderPurchaseType } from "@/types/Enums";
 import dayjs from "dayjs";
 const route = useRoute();
 const router = useRouter();
@@ -661,7 +662,7 @@ const saveChanges = async () => {
       sendShowDate = d.isValid() ? d.format("YYYY-MM-DD") : sendShowDate;
     }
 
-    if (formData.value.status === "PAID") {
+    if (formData.value.status === OrderStatus.PAID) {
       await changeSeats(
         orderId,
         formData.value.seatIds,
@@ -730,10 +731,10 @@ const validationErrors = computed(() => {
   }
 
   // For PAID orders that are not (RINGSIDE + non-ONSITE), seat count must match
-  if (orderData.value?.status === "PAID") {
+  if (orderData.value?.status === OrderStatus.PAID) {
     const isRingsideNonOnsite =
-      orderData.value?.ticketType === "RINGSIDE" &&
-      orderData.value?.purchaseType !== "ONSITE";
+      orderData.value?.ticketType === TicketType.RINGSIDE &&
+      orderData.value?.purchaseType !== OrderPurchaseType.ONSITE;
 
     if (
       !isRingsideNonOnsite &&

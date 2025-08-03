@@ -1,8 +1,28 @@
 {
   // https://nuxt.com/docs/guide/concepts/typescript
   "compilerOptions": {
-    "types": ["@types/node", "@nuxt/types"]
+    "types": ["@types/node", "@nuxt/types"],
+    "baseUrl": ".", // ✅ ตั้งให้ root คือ project base
+    "paths": {
+      "@/*": ["./*"], // ✅ ใช้ @/... จาก root
+      "~/*": ["./*"]  // ✅ ใช้ ~/... จาก root
+    },
+     "module": "esnext",  
+     "moduleResolution": "node",
+    "esModuleInterop": true,                 // ✅ แก้ปัญหา default import เช่น dayjs
+    "allowSyntheticDefaultImports": true     // ✅ ให้ใช้ default import กับ commonjs ได้
   },
-  "extends": "./.nuxt/tsconfig.json",
-  "include": ["@types/node", "./types/i18n.d.ts", "nuxt.config.ts", "types"]
+  "include": [
+    "types",                 // ✅ โฟลเดอร์ custom types เช่น Enums
+    "utils",                 // ✅ ฟังก์ชัน utils ต่าง ๆ
+    "composables",           // ✅ ถ้ามี useXxx() ต่าง ๆ
+    "middleware",            // ✅ กรณีใช้ route middleware
+    "plugins",               // ✅ สำหรับ auto-imported plugins
+    "server",                // ✅ Nuxt server directory (Nitro)
+    "pages",                 // ✅ ทุกหน้าในระบบ
+    "layouts",               // ✅ layout ต่าง ๆ
+    "app.vue",               // ✅ entry file หลัก
+    "nuxt.config.ts",        // ✅ Nuxt config
+    "./types/i18n.d.ts"      // ✅ i18n types
+  ]
 }
