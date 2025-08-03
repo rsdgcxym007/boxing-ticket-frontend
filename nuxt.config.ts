@@ -10,11 +10,7 @@ export default defineNuxtConfig({
   modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@pinia/nuxt"],
 
   devtools: { enabled: false },
-  ssr: false,
-
-  nitro: {
-    preset: "static",
-  },
+  ssr: true,
   i18n: {
     locales: [
       { code: "th", file: "th.json" },
@@ -71,11 +67,14 @@ export default defineNuxtConfig({
     payloadExtraction: false, // ป้องกันปัญหา payload ใน static build
   },
 
-  router: {
-    options: {
-      hashMode: true, // ใช้ Hash mode สำหรับ Electron
-    },
-  },
+  // ถ้าต้องการใช้ hashMode เฉพาะ Electron ให้ใช้ process.env.IS_ELECTRON
+  router: process.env.IS_ELECTRON
+    ? {
+        options: {
+          hashMode: true,
+        },
+      }
+    : {},
 
   runtimeConfig: {
     public: {
