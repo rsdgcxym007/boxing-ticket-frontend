@@ -20,5 +20,17 @@ export default defineEventHandler(async (event) => {
   } else if (url.endsWith(".ico")) {
     setHeader(event, "content-type", "image/x-icon");
     setHeader(event, "cache-control", "max-age=31536000");
+  } else if (url.endsWith(".woff2")) {
+    setHeader(event, "content-type", "font/woff2");
+    setHeader(event, "cache-control", "max-age=31536000");
+  } else if (url.endsWith(".woff")) {
+    setHeader(event, "content-type", "font/woff");
+    setHeader(event, "cache-control", "max-age=31536000");
+  } else if (url.endsWith(".ttf")) {
+    setHeader(event, "content-type", "font/ttf");
+    setHeader(event, "cache-control", "max-age=31536000");
+  } else if (url.endsWith(".otf")) {
+    setHeader(event, "content-type", "font/otf");
+    setHeader(event, "cache-control", "max-age=31536000");
   }
 });
