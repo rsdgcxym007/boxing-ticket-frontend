@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   if (url.endsWith(".css")) {
     setHeader(event, "content-type", "text/css; charset=utf-8");
     setHeader(event, "cache-control", "max-age=31536000");
-  } else if (url.endsWith(".js")) {
+  } else if (url.endsWith(".js") || url.endsWith(".mjs")) {
     setHeader(event, "content-type", "application/javascript; charset=utf-8");
     setHeader(event, "cache-control", "max-age=31536000");
   } else if (url.endsWith(".svg")) {
@@ -20,13 +20,13 @@ export default defineEventHandler(async (event) => {
   } else if (url.endsWith(".ico")) {
     setHeader(event, "content-type", "image/x-icon");
     setHeader(event, "cache-control", "max-age=31536000");
-  } else if (url.endsWith(".woff2")) {
+  } else if (url.endsWith(".woff2") || url.includes(".woff2.")) {
     setHeader(event, "content-type", "font/woff2");
     setHeader(event, "cache-control", "max-age=31536000");
   } else if (url.endsWith(".woff")) {
     setHeader(event, "content-type", "font/woff");
     setHeader(event, "cache-control", "max-age=31536000");
-  } else if (url.endsWith(".ttf")) {
+  } else if (url.endsWith(".ttf") || url.includes(".woff2.ttf")) {
     setHeader(event, "content-type", "font/ttf");
     setHeader(event, "cache-control", "max-age=31536000");
   } else if (url.endsWith(".otf")) {

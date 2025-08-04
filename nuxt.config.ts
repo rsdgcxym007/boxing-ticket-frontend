@@ -69,7 +69,7 @@ export default defineNuxtConfig({
   },
 
   app: {
-    baseURL: "/th/",
+    baseURL: "/",
     head: {
       meta: [
         { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -120,9 +120,33 @@ export default defineNuxtConfig({
           "cache-control": "max-age=31536000",
         },
       },
+      "/**/*.mjs": {
+        headers: {
+          "content-type": "application/javascript; charset=utf-8",
+          "cache-control": "max-age=31536000",
+        },
+      },
       "/**/*.svg": {
         headers: {
           "content-type": "image/svg+xml",
+          "cache-control": "max-age=31536000",
+        },
+      },
+      "/**/*.woff2": {
+        headers: {
+          "content-type": "font/woff2",
+          "cache-control": "max-age=31536000",
+        },
+      },
+      "/**/*.woff": {
+        headers: {
+          "content-type": "font/woff",
+          "cache-control": "max-age=31536000",
+        },
+      },
+      "/**/*.ttf": {
+        headers: {
+          "content-type": "font/ttf",
           "cache-control": "max-age=31536000",
         },
       },
