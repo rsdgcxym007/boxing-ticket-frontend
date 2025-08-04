@@ -1,6 +1,11 @@
 # Ignore environment files
+# Ignore all environment files except example/production
 .env
 .env.*
+.env.local
+.env.*.local
+!.env.example
+!.env.production
 # Nuxt dev/build outputs
 .output
 .data
