@@ -72,14 +72,14 @@ export default defineNuxtConfig({
     head: {
       meta: [
         { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { charset: "utf-8" },
       ],
-      charset: "utf-8",
       title: "PATONG BOXING",
       link: [
         {
           rel: "icon",
-          type: "image/svg+xml",
-          href: "/images/logo/LOGOFC.svg",
+          type: "image/x-icon",
+          href: "/favicon.ico",
         },
         {
           rel: "stylesheet",
@@ -99,6 +99,33 @@ export default defineNuxtConfig({
     experimental: {
       wasm: true,
     },
+    compressPublicAssets: true,
+    routeRules: {
+      // Static asset caching
+      "/_nuxt/**": { headers: { "cache-control": "max-age=31536000" } },
+      "/images/**": { headers: { "cache-control": "max-age=31536000" } },
+      "/videos/**": { headers: { "cache-control": "max-age=31536000" } },
+      "/fonts/**": { headers: { "cache-control": "max-age=31536000" } },
+      // CSS and JS files with proper MIME types
+      "/**/*.css": {
+        headers: {
+          "content-type": "text/css; charset=utf-8",
+          "cache-control": "max-age=31536000",
+        },
+      },
+      "/**/*.js": {
+        headers: {
+          "content-type": "application/javascript; charset=utf-8",
+          "cache-control": "max-age=31536000",
+        },
+      },
+      "/**/*.svg": {
+        headers: {
+          "content-type": "image/svg+xml",
+          "cache-control": "max-age=31536000",
+        },
+      },
+    },
   },
 
   // การตั้งค่าสำหรับ VPS deployment
@@ -113,5 +140,10 @@ export default defineNuxtConfig({
       apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:4000/api",
       socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
     },
+  },
+
+  // Build optimization for production
+  build: {
+    transpile: [],
   },
 });

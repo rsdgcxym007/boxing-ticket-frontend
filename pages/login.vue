@@ -555,11 +555,13 @@
 
 <script setup lang="ts">
 // นำเข้า composables และ utilities ที่จำเป็น
-import { reactive } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { useSingleToast } from "../composables/useSingleToast";
 import { useApi } from "../composables/useApi";
 import { useRouter } from "vue-router";
 import { useRuntimeConfig } from "nuxt/app";
+import { useAuthStore } from "~/stores/auth";
+import { authDebug } from "@/utils/authDebug";
 
 // ตั้งค่าการเชื่อมต่อ API
 const config = useRuntimeConfig();
@@ -573,7 +575,6 @@ const pageData = reactive({
 });
 
 // State สำหรับ modal เปลี่ยนรหัสผ่าน
-import { ref } from "vue";
 const showChangePassword = ref(false);
 const changePasswordData = reactive({
   email: "",
@@ -586,6 +587,37 @@ const changePasswordData = reactive({
 const { showToast } = useSingleToast();
 const router = useRouter();
 const { post } = useApi();
+
+// ===== Authentication State Cleanup =====
+// Ensure clean authentication state when accessing login page
+const cleanupAuthState = () => {
+  if (process.client) {
+    console.log("🧹 Starting auth state cleanup on login page...");
+
+    // Log current state before cleanup
+    authDebug.logAuthState();
+
+    // Clear any existing authentication data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_user");
+
+    // Clear any cached authentication in auth store
+    const auth = useAuthStore();
+    auth.logout();
+
+    console.log("✅ Auth state cleanup completed");
+
+    // Log state after cleanup
+    authDebug.logAuthState();
+  }
+};
+
+// Run cleanup when login page is accessed
+onMounted(() => {
+  cleanupAuthState();
+});
 
 /**
  * ฟังก์ชันเปลี่ยนรหัสผ่าน (ต้องอยู่นอก login)
