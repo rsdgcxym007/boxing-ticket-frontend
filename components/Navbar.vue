@@ -383,7 +383,6 @@ const logout = async () => {
   // Force reload to ensure clean state
   await nextTick();
   console.log("🔄 Reloading page for clean state");
-  window.location.reload();
 };
 
 const updateScreen = () => {

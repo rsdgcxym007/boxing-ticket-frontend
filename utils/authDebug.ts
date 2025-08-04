@@ -7,7 +7,6 @@ export const authDebug = {
   logAuthState() {
     if (process.client) {
       console.group("🔐 Auth Debug State");
-      console.log("Current URL:", window.location.href);
       console.log("Auth Token:", localStorage.getItem("auth_token"));
       console.log("Auth User:", localStorage.getItem("auth_user"));
       console.log("All localStorage keys:", Object.keys(localStorage));
@@ -52,7 +51,6 @@ export const authDebug = {
       this.logAuthState();
 
       // Test navigation
-      console.log("Current route:", window.location.pathname);
 
       console.groupEnd();
     }

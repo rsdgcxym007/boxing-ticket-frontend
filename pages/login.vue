@@ -122,7 +122,7 @@
                   />
                 </svg>
               </div>
-              EMAIL AUTHENTICATION
+              EMAIL AUTHENTICATION xxxxxaas
             </label>
             <div class="relative group">
               <input
