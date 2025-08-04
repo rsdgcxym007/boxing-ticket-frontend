@@ -70,7 +70,9 @@
                     >
                       <label
                         v-for="option in purchaseTypeOptionsForForm.filter(
-                          (o) => o.value === OrderPurchaseType.ONSITE || o.value === OrderPurchaseType.BOOKING
+                          (o) =>
+                            o.value === OrderPurchaseType.ONSITE ||
+                            o.value === OrderPurchaseType.BOOKING
                         )"
                         :key="option.value"
                         class="flex items-center gap-[1px] cursor-pointer px-1 py-1 rounded-lg border-2 transition-all duration-300 shadow-sm text-xs min-w-[110px] max-w-[150px] sm:min-w-[120px] sm:max-w-[160px] md:min-w-[130px] md:max-w-[170px] lg:min-w-[140px] lg:max-w-[180px] xl:min-w-[150px] xl:max-w-[200px]"
@@ -358,7 +360,8 @@
                   class="mdi mdi-ticket-confirmation text-sm group-hover:scale-110 transition-transform"
                 ></i>
                 {{
-                  props.mode === "change" && props?.orderData?.status === OrderStatus.PAID
+                  props.mode === "change" &&
+                  props?.orderData?.status === OrderStatus.PAID
                     ? "ยืนยันเปลี่ยนที่นั่ง"
                     : "ซื้อตั๋ว"
                 }}
@@ -394,7 +397,7 @@ import { useImagePath } from "@/composables/useImagePath";
 const { getImagePath } = useImagePath();
 const { showToast } = useSingleToast();
 import { useI18n } from "vue-i18n";
-import { SummaryModal } from "@/components";
+// SummaryModal will be auto-imported
 import { usePageData } from "@/stores/pageData";
 import { useAuthStore } from "@/stores/auth";
 import { useSeatApi } from "@/composables/useSeatApi";

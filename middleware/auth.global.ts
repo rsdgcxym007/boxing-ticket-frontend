@@ -9,7 +9,10 @@ export default defineNuxtRouteMiddleware((to) => {
 
   if (isPublic) return;
 
-  const token = localStorage.getItem("token");
+  let token = null;
+  if (process.client) {
+    token = localStorage.getItem("token");
+  }
   if (!token) {
     // Extract locale from path and add to login route
     const localeMatch = to.path.match(/^\/(th|en)/);

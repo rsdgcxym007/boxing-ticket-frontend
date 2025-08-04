@@ -1,6 +1,7 @@
 import { defineNuxtConfig } from "nuxt/config";
 
 export default defineNuxtConfig({
+  compatibilityDate: "2025-08-04",
   css: [
     "@/assets/css/fonts.css",
     "@/assets/css/main.css",
@@ -8,6 +9,29 @@ export default defineNuxtConfig({
     "@mdi/font/css/materialdesignicons.min.css",
   ],
   modules: ["@nuxtjs/i18n", "@nuxtjs/tailwindcss", "@pinia/nuxt"],
+
+  // Auto import configuration
+  components: [
+    {
+      path: "~/components",
+      pathPrefix: false,
+    },
+    {
+      path: "~/components/base",
+      prefix: "Base",
+      pathPrefix: false,
+    },
+    {
+      path: "~/components/charts",
+      prefix: "Chart",
+      pathPrefix: false,
+    },
+    {
+      path: "~/components/dashboard",
+      prefix: "Dashboard",
+      pathPrefix: false,
+    },
+  ],
 
   devtools: { enabled: false },
   ssr: true,
@@ -21,6 +45,9 @@ export default defineNuxtConfig({
     langDir: "locales/",
     detectBrowserLanguage: false,
     lazy: true,
+    bundle: {
+      optimizeTranslationDirective: false, // แก้ warning
+    },
   },
   vite: {
     build: {
@@ -36,12 +63,12 @@ export default defineNuxtConfig({
         },
       },
     },
+    optimizeDeps: {
+      exclude: ["jspdf"], // ป้องกัน jspdf จากการ pre-bundle ใน dev mode
+    },
   },
 
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || "./", // ใช้ relative path สำหรับ Electron
-    buildAssetsDir: "_nuxt/", // โฟลเดอร์ asset ตามค่าเริ่มต้น
-    cdnURL: process.env.NUXT_APP_BASE_URL || "./", // สำคัญ: ทำให้ assets เป็น relative
     head: {
       meta: [
         { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -52,9 +79,8 @@ export default defineNuxtConfig({
         {
           rel: "icon",
           type: "image/svg+xml",
-          href: "./images/logo/LOGOFC.svg", // Fixed for Electron
+          href: "/images/logo/LOGOFC.svg",
         },
-
         {
           rel: "stylesheet",
           href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
@@ -64,17 +90,23 @@ export default defineNuxtConfig({
   },
 
   experimental: {
-    payloadExtraction: false, // ป้องกันปัญหา payload ใน static build
+    payloadExtraction: false,
   },
 
-  // ถ้าต้องการใช้ hashMode เฉพาะ Electron ให้ใช้ process.env.IS_ELECTRON
-  router: process.env.IS_ELECTRON
-    ? {
-        options: {
-          hashMode: true,
-        },
-      }
-    : {},
+  // การตั้งค่าสำหรับ production deployment
+  nitro: {
+    preset: "node-server",
+    experimental: {
+      wasm: true,
+    },
+  },
+
+  // การตั้งค่าสำหรับ VPS deployment
+  router: {
+    options: {
+      hashMode: false, // ใช้ history mode สำหรับ clean URLs
+    },
+  },
 
   runtimeConfig: {
     public: {

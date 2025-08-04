@@ -95,7 +95,9 @@
 </template>
 
 <script>
-import { BaseSelect, BaseCheckbox, BaseRadioGroup } from "@/components";
+import BaseSelect from "@/components/base/BaseSelect.vue";
+import BaseCheckbox from "@/components/base/BaseCheckbox.vue";
+import BaseRadioGroup from "@/components/base/BaseRadioGroup.vue";
 
 export default {
   components: {

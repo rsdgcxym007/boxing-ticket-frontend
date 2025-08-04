@@ -1,7 +1,7 @@
 {
   "name": "patong-boxing-ticket-system",
   "version": "1.0.31",
-  "description": "Patong Boxing Ticket Management System - Desktop Application",
+  "description": "Patong Boxing Ticket Management System - Web Application",
   "author": {
     "name": "Patong Boxing",
     "email": "info@patongboxing.com"
@@ -14,32 +14,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build && nuxt prepare",
-    "start:ssr": "nuxt start",
+    "build": "nuxt build",
+    "start": "nuxt start",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "start": "concurrently \"nuxt dev\" \"electron .\"",
-    "pack": "nuxt generate && electron-builder",
-    "elbu": "electron-builder",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:pack": "nuxt generate && electron-builder --dir",
-    "electron:dist": "nuxt generate && electron-builder",
-    "electron:dist:mac": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false nuxt generate && electron-builder --mac --publish=never",
-    "electron:dist:win": "nuxt generate && electron-builder --win --publish=never",
-    "electron:dist:linux": "nuxt generate && electron-builder --linux --publish=never",
-    "build:electron:mac": "nuxt generate && electron-builder --mac --publish=always",
-    "build:electron:win": "nuxt generate && electron-builder --win --publish=always",
-    "build:electron:linux": "nuxt generate && electron-builder --linux --publish=always",
-    "build:mac:safe": "./scripts/build-mac.sh",
-    "dist": "nuxt generate && electron-builder --publish=always",
-    "release": "nuxt generate && electron-builder --publish=always",
-    "version:patch": "npm version patch",
-    "version:minor": "npm version minor",
-    "version:major": "npm version major"
+    "postinstall": "nuxt prepare"
   },
-  "main": "electron/main.cjs",
   "dependencies": {
     "@fontsource/prompt": "^5.2.6",
     "@fortawesome/fontawesome-free": "^6.7.2",
@@ -54,10 +35,6 @@
     "chart.js": "^4.5.0",
     "dayjs": "^1.11.13",
     "dom-to-image-more": "^3.6.0",
-    "dotenv": "^17.2.1",
-    "electron-is-dev": "^3.0.1",
-    "electron-serve": "^2.1.1",
-    "electron-updater": "^6.6.2",
     "html2canvas": "^1.4.1",
     "html2canvas-pro": "^1.5.11",
     "html2pdf.js": "^0.10.3",
@@ -80,14 +57,8 @@
     "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/postcss": "^4.1.8",
     "autoprefixer": "^10.4.21",
-    "concurrently": "^9.2.0",
-    "cross-env": "^7.0.3",
-    "electron": "^37.2.5",
-    "electron-builder": "^26.0.12",
-    "electron-devtools-installer": "^4.0.0",
     "postcss": "^8.5.4",
     "sass-embedded": "^1.89.2",
-    "tailwindcss": "^4.1.8",
-    "wait-on": "^8.0.4"
+    "tailwindcss": "^4.1.8"
   }
 }
