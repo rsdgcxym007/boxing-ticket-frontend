@@ -318,6 +318,11 @@
 </template>
 
 <script setup lang="ts">
+// เพิ่ม middleware
+definePageMeta({
+  middleware: ["only-admin-staff"],
+});
+
 import { ref, onMounted, computed } from "vue";
 import { useReferrer } from "../../../composables/useReferrer";
 import { useRoute } from "vue-router";

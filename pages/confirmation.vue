@@ -25,20 +25,7 @@
           <div
             class="relative bg-blue-600 text-white text-7xl w-24 h-24 rounded-full flex items-center justify-center shadow-xl animate-glow border-4 border-white"
           >
-            <svg
-              width="48"
-              height="48"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+            <i class="mdi mdi-check text-white text-5xl"></i>
           </div>
         </div>
         <h1 class="text-3xl font-bold text-blue-900 mt-6 mb-2 animate-slide-up">
@@ -59,22 +46,10 @@
       >
         <!-- Header with gradient -->
         <div class="bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-5">
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <svg
-              width="24"
-              height="24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <rect x="4" y="4" width="16" height="16" rx="4" />
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M8 10h8M8 14h5"
-              />
-            </svg>
+          <h2
+            class="text-xl font-bold text-blue-900 mb-4 flex items-center gap-3"
+          >
+            <i class="mdi mdi-receipt text-2xl text-blue-600"></i>
             รายละเอียดการจอง
           </h2>
         </div>
@@ -151,20 +126,10 @@
                 v-if="isGeneratingTickets"
                 class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"
               ></div>
-              <svg
+              <i
                 v-else
-                class="w-6 h-6 group-hover:rotate-12 transition-transform duration-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
-                />
-              </svg>
+                class="mdi mdi-ticket text-2xl group-hover:rotate-12 transition-transform duration-300"
+              ></i>
               <span class="text-lg">
                 {{
                   isGeneratingTickets
@@ -180,21 +145,11 @@
         <div class="text-center animate-slide-up" style="animation-delay: 0.8s">
           <router-link
             to="/"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-sm text-gray-700 hover:text-blue-600 font-medium rounded-xl border border-gray-200 hover:border-blue-300 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-300 group"
+            class="inline-flex items-center gap-3 px-8 py-4 font-semibold text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 group shadow-sm"
           >
-            <svg
-              class="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
+            <i
+              class="mdi mdi-arrow-left text-xl group-hover:-translate-x-1 transition-transform duration-300"
+            ></i>
             <span
               class="group-hover:translate-x-0.5 transition-transform duration-300"
               >กลับหน้าแรก</span
@@ -308,6 +263,7 @@ const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
 definePageMeta({
   layout: "default",
   title: "ยืนยันการจอง",
+  // ต้องการ authentication เพื่อดูการจอง
 });
 
 // ใช้ composables

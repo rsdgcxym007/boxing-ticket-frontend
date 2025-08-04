@@ -473,6 +473,11 @@
 </template>
 
 <script setup>
+// เพิ่ม middleware
+definePageMeta({
+  middleware: ["only-admin-staff"],
+});
+
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useOrder } from "@/composables/useOrder";

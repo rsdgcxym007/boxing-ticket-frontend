@@ -12,19 +12,7 @@
         class="absolute left-0 top-[50%] -translate-y-1/2 z-10 bg-slate-700/70 hover:bg-slate-600 text-white p-2 rounded-full shadow-md"
         v-show="pageData.showNavButtons"
       >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
+        <Icon icon="mdi:chevron-left" class="text-xl" />
       </button>
 
       <!-- ปุ่มขวา -->
@@ -33,19 +21,7 @@
         class="absolute right-0 top-[50%] -translate-y-1/2 z-10 bg-slate-700/70 hover:bg-slate-600 text-white p-2 rounded-full shadow-md"
         v-show="pageData.showNavButtons"
       >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
+        <Icon icon="mdi:chevron-right" class="text-xl" />
       </button>
 
       <!-- ตัวเลื่อนแนวนอน -->
@@ -75,19 +51,7 @@
                   :key="i"
                   class="flex items-start gap-2"
                 >
-                  <svg
-                    class="w-4 h-4 text-sky-500 mt-0.5"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                  <Icon icon="mdi:check" class="w-4 h-4 text-sky-500 mt-0.5" />
                   <span>{{ benefit }}</span>
                 </li>
               </ul>
@@ -134,6 +98,7 @@
 </template>
 
 <script setup>
+import { Icon } from "@iconify/vue";
 import { reactive, ref, onMounted, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";

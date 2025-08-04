@@ -2,12 +2,30 @@
 import { reactive } from "vue";
 
 export function useTicketData() {
-  // Helper function สำหรับ image paths ใน Electron
-  const getImagePath = (path: string) => {
-    if (typeof window !== "undefined" && window?.process?.type === "renderer") {
-      return `.${path}`;
+  // Helper function สำหรับ image paths ในทุก environment
+  const getImagePath = (imagePath: string) => {
+    const cleanPath = imagePath.startsWith("/")
+      ? imagePath.slice(1)
+      : imagePath;
+    const isElectron =
+      typeof window !== "undefined" &&
+      ((window as any)?.process?.type === "renderer" ||
+        (window as any)?.require !== undefined ||
+        navigator?.userAgent?.includes("Electron"));
+    if (isElectron) {
+      return `./${cleanPath}`;
     }
-    return path;
+    let baseUrl = "/";
+    if (typeof window !== "undefined") {
+      try {
+        baseUrl = (window as any).nuxtApp?.$config?.app?.baseURL || "/";
+      } catch {}
+    }
+    const normalizedBase =
+      baseUrl.endsWith("/") && baseUrl !== "/" ? baseUrl.slice(0, -1) : baseUrl;
+    return normalizedBase === "/"
+      ? `/${cleanPath}`
+      : `${normalizedBase}/${cleanPath}`;
   };
 
   return reactive([

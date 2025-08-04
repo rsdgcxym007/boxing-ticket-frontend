@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 
 export interface User {
@@ -9,7 +9,7 @@ export interface User {
 }
 
 export const useAuthStore = defineStore("auth", () => {
-  const user = ref<User | null>(null); // ✅ แก้ตรงนี้
+  const user = ref<User | null>(null);
 
   const setUser = (newUser: User) => {
     user.value = newUser;
@@ -26,6 +26,32 @@ export const useAuthStore = defineStore("auth", () => {
       }
     }
     return user.value;
+  };
+
+  // Computed สำหรับตรวจสอบว่า login แล้วหรือยัง
+  const isAuthenticated = computed(() => {
+    const token = process.client ? localStorage.getItem("token") : null;
+    const hasUser = !!user.value;
+    const hasToken = !!token;
+
+    const result = hasToken && hasUser;
+
+    console.log("🔍 Auth Store isAuthenticated:", {
+      hasToken,
+      hasUser,
+      user: user.value,
+      token: token ? "***" + token.slice(-8) : null,
+      result,
+    });
+
+    return result;
+  });
+
+  // เพิ่ม function initialize เพื่อ load ข้อมูลเมื่อเริ่มต้น
+  const initialize = () => {
+    if (process.client) {
+      loadUser();
+    }
   };
 
   const logout = () => {
@@ -62,5 +88,5 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
-  return { user, setUser, loadUser, logout };
+  return { user, setUser, loadUser, logout, isAuthenticated, initialize };
 });

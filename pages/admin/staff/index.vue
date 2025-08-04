@@ -318,7 +318,7 @@
               </td>
               <td class="px-6 py-5 whitespace-nowrap">
                 <div class="flex items-center gap-2">
-                  <i :class="getRoleIcon(staff.role)" class="text-lg"></i>
+                  <Icon :icon="getRoleIcon(staff.role)" class="text-lg" />
                   <span
                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
                     :class="getRoleBadgeClass(staff.role)"
@@ -337,7 +337,7 @@
               </td>
               <td class="px-6 py-5 whitespace-nowrap">
                 <div class="flex items-center gap-2">
-                  <i :class="getStatusIcon(staff.status)" class="text-lg"></i>
+                  <Icon :icon="getStatusIcon(staff.status)" class="text-lg" />
                   <span
                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
                     :class="getStatusBadgeClass(staff.status)"
@@ -536,6 +536,7 @@
 </template>
 
 <script setup lang="ts">
+import { Icon } from "@iconify/vue";
 import { ref, onMounted, computed } from "vue";
 import { useSingleToast } from "../../../composables/useSingleToast";
 import {
@@ -897,10 +898,10 @@ onMounted(async () => {
 });
 
 // Meta
-// definePageMeta({
-//   layout: 'default',
-//   middleware: 'only-admin-staff'
-// })
+definePageMeta({
+  layout: "default",
+  middleware: "only-admin-staff",
+});
 </script>
 
 <style scoped>

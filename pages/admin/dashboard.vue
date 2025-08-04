@@ -511,6 +511,11 @@
 </template>
 
 <script setup>
+// เพิ่ม middleware สำหรับ admin/staff
+definePageMeta({
+  middleware: ["only-admin-staff"],
+});
+
 import { ref, reactive, onMounted, onUnmounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";

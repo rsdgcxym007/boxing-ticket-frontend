@@ -118,6 +118,11 @@
 </template>
 
 <script setup lang="ts">
+// เพิ่ม middleware
+definePageMeta({
+  middleware: ["only-admin-staff"],
+});
+
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import dayjs from "dayjs";

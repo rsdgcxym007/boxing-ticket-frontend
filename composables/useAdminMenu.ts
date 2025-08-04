@@ -4,6 +4,7 @@ export const useAdminMenu = () => {
       icon: "mdi-view-dashboard",
       label: "แดชบอร์ด",
       to: "/admin/dashboard",
+      role: ["admin", "staff"],
     },
     {
       icon: "mdi-clipboard-text",
