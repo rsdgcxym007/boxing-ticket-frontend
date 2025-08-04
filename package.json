@@ -19,7 +19,13 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "deploy": "./deploy.sh",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop boxing-ticket-frontend",
+    "pm2:restart": "pm2 restart boxing-ticket-frontend",
+    "pm2:logs": "pm2 logs boxing-ticket-frontend",
+    "pm2:status": "pm2 status"
   },
   "dependencies": {
     "@fontsource/prompt": "^5.2.6",

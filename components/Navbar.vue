@@ -307,7 +307,7 @@
 
 <script setup>
 import { RouterLink } from "vue-router";
-import { ref, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth";
@@ -315,6 +315,7 @@ import { useAdminMenu } from "@/composables/useAdminMenu";
 import { useImagePath } from "@/composables/useImagePath";
 import { useRouter } from "vue-router";
 import { useSwitchLocalePath, useLocalePath } from "#imports";
+import { authDebug } from "@/utils/authDebug";
 
 const { getImagePath } = useImagePath();
 const { locale, t } = useI18n();
@@ -358,11 +359,31 @@ const toggleLang = () => {
   const path = switchLocalePath(newLocale);
   router.push(path);
 };
-const logout = () => {
+const logout = async () => {
+  console.log("🚪 Starting logout process...");
+  authDebug.logAuthState();
+
+  // Clear authentication data
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-  auth.logout(); // สมมุติคุณมีฟังก์ชันนี้ใน store
-  window.location.href = "/login";
+  auth.logout();
+
+  console.log("🧹 After logout call, auth data cleared");
+  authDebug.logAuthState();
+
+  // Get current locale for proper routing
+  const localeMatch = router.currentRoute.value.path.match(/^\/(th|en)/);
+  const currentLocale = localeMatch ? localeMatch[1] : "th";
+
+  console.log(`🌐 Navigating to /${currentLocale}/login`);
+
+  // Navigate to login with proper locale
+  await router.push(`/${currentLocale}/login`);
+
+  // Force reload to ensure clean state
+  await nextTick();
+  console.log("🔄 Reloading page for clean state");
+  window.location.reload();
 };
 
 const updateScreen = () => {
