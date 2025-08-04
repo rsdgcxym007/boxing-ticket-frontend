@@ -101,7 +101,10 @@
                             "
                             style="min-width: 16px; min-height: 16px"
                           >
-                            <i :class="`mdi ${option.icon} text-xs`"></i>
+                            <Icon
+                              :icon="getMdiIcon(option.icon)"
+                              class="text-xs"
+                            />
                           </div>
                           <div class="flex flex-col justify-center">
                             <p
@@ -313,9 +316,10 @@
               :disabled="isBookingInProgress || isProcessing"
               class="group min-w-[100px] px-5 py-2.5 border-2 border-slate-300 text-slate-600 text-sm font-semibold rounded-xl shadow-sm hover:bg-slate-50 hover:border-slate-400 transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
             >
-              <i
-                class="mdi mdi-arrow-left text-sm group-hover:translate-x-[-2px] transition-transform"
-              ></i>
+              <Icon
+                icon="mdi:arrow-left"
+                class="text-sm group-hover:translate-x-[-2px] transition-transform"
+              />
               ย้อนกลับ
             </button>
 
@@ -324,9 +328,10 @@
               :disabled="isBookingInProgress || isProcessing"
               class="group min-w-[100px] px-5 py-2.5 border-2 border-red-300 text-red-600 text-sm font-semibold rounded-xl shadow-sm hover:bg-red-50 hover:border-red-400 transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
             >
-              <i
-                class="mdi mdi-close-circle text-sm group-hover:rotate-90 transition-transform"
-              ></i>
+              <Icon
+                icon="mdi:close-circle"
+                class="text-sm group-hover:rotate-90 transition-transform"
+              />
               ยกเลิกทั้งหมด
             </button>
 
@@ -335,9 +340,10 @@
               :disabled="isBookingInProgress || isProcessing"
               class="group min-w-[100px] px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 flex items-center gap-2"
             >
-              <i
-                class="mdi mdi-close-circle text-sm group-hover:rotate-90 transition-transform"
-              ></i>
+              <Icon
+                icon="mdi:close-circle"
+                class="text-sm group-hover:rotate-90 transition-transform"
+              />
               จองตั๋ว
             </button>
 
@@ -352,13 +358,14 @@
                 v-if="isBookingInProgress || isProcessing"
                 class="flex items-center gap-2"
               >
-                <i class="mdi mdi-loading mdi-spin text-sm"></i>
+                <Icon icon="mdi:loading" class="mdi-spin text-sm" />
                 กำลังจอง...
               </span>
               <span v-else class="flex items-center gap-2">
-                <i
-                  class="mdi mdi-ticket-confirmation text-sm group-hover:scale-110 transition-transform"
-                ></i>
+                <Icon
+                  icon="mdi:ticket-confirmation"
+                  class="text-sm group-hover:scale-110 transition-transform"
+                />
                 {{
                   props.mode === "change" &&
                   props?.orderData?.status === OrderStatus.PAID
@@ -389,15 +396,12 @@
 </template>
 
 <script setup>
+import { Icon } from "@iconify/vue";
 import dayjs from "dayjs";
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useSingleToast } from "@/composables/useSingleToast";
 import { useImagePath } from "@/composables/useImagePath";
-
-const { getImagePath } = useImagePath();
-const { showToast } = useSingleToast();
 import { useI18n } from "vue-i18n";
-// SummaryModal will be auto-imported
 import { usePageData } from "@/stores/pageData";
 import { useAuthStore } from "@/stores/auth";
 import { useSeatApi } from "@/composables/useSeatApi";
@@ -408,6 +412,8 @@ import { ref as vueRef } from "vue";
 import { purchaseTypeOptions } from "@/utils/orderOptions";
 
 import { OrderStatus, OrderPurchaseType } from "@/types/Enums";
+const { getImagePath } = useImagePath();
+const { showToast } = useSingleToast();
 const { t } = useI18n();
 const pageData = usePageData();
 const { getSeatsByZoneId } = useSeatApi();
@@ -446,9 +452,13 @@ const purchaseTypeOptionsForForm = computed(() =>
   }))
 );
 // ===== Authentication =====
-if (!auth.user) auth.loadUser();
 
 // ====================
+// Helper for Iconify mdi binding
+function getMdiIcon(icon) {
+  if (!icon) return "";
+  return icon.startsWith("mdi-") ? icon.replace("mdi-", "mdi:") : icon;
+}
 // Props และ Emits
 // ====================
 const props = defineProps({

@@ -1,22 +1,65 @@
 import { defineNuxtRouteMiddleware, navigateTo } from "nuxt/app";
+import { useAuthStore } from "@/stores/auth";
 
+/**
+ * Global Authentication Middleware
+ * ตรวจสอบการ authentication ทุกหน้า ยกเว้นหน้า public
+ */
 export default defineNuxtRouteMiddleware((to) => {
-  const publicPages = ["/", "/login", "/register", "/about"];
+  // หน้าที่ไม่ต้อง login
+  const publicPages = [
+    "/",
+    "/login",
+    "/register",
+    "/about",
+    "/contacts",
+    "/ringside",
+    "/components-demo",
+  ];
 
-  // Remove locale prefix for checking
+  // ลบ locale prefix สำหรับการตรวจสอบ
   const cleanPath = to.path.replace(/^\/(th|en)/, "") || "/";
-  const isPublic = publicPages.includes(cleanPath);
+  const isPublicPage = publicPages.includes(cleanPath);
 
-  if (isPublic) return;
+  console.log("🔍 Auth Global Debug:", {
+    originalPath: to.path,
+    cleanPath,
+    isPublicPage,
+    publicPages,
+  });
 
-  let token = null;
-  if (process.client) {
-    token = localStorage.getItem("token");
+  // ถ้าเป็นหน้า public ให้ผ่านไปได้
+  if (isPublicPage) {
+    console.log("✅ Public page - allowing access");
+    return;
   }
-  if (!token) {
-    // Extract locale from path and add to login route
-    const localeMatch = to.path.match(/^\/(th|en)/);
-    const locale = localeMatch ? localeMatch[1] : "th";
-    return navigateTo(`/${locale}/login`);
+
+  // ตรวจสอบ authentication ใน client side เท่านั้น
+  if (process.client) {
+    const authStore = useAuthStore();
+
+    // initialize auth store เพื่อ load user จาก localStorage
+    authStore.initialize();
+
+    const token = localStorage.getItem("token");
+    console.log("🔍 Auth Check:", {
+      hasToken: !!token,
+      hasUser: !!authStore.user,
+      isAuthenticated: authStore.isAuthenticated,
+      user: authStore.user,
+    });
+
+    // ถ้าไม่ได้ login
+    if (!authStore.isAuthenticated) {
+      console.log("❌ Not authenticated - redirecting to login");
+      // Extract locale จาก path
+      const localeMatch = to.path.match(/^\/(th|en)/);
+      const locale = localeMatch ? localeMatch[1] : "th";
+
+      // redirect ไปหน้า login พร้อม locale
+      return navigateTo(`/${locale}/login`);
+    } else {
+      console.log("✅ Authenticated - allowing access");
+    }
   }
 });

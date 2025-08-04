@@ -509,10 +509,10 @@ import { useReferrerMasterData } from "@/composables/useReferrerMasterData";
 const { fetchMasterData } = useReferrerMasterData();
 
 // Define page meta
-// definePageMeta({
-//   middleware: ["role", "only-admin-staff"],
-//   layout: "admin",
-// });
+definePageMeta({
+  middleware: ["only-admin-staff"],
+  layout: "default",
+});
 
 // Composables
 const { getReferrers, createReferrer, updateReferrer } = useReferrer();

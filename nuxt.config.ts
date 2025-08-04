@@ -49,24 +49,6 @@ export default defineNuxtConfig({
       optimizeTranslationDirective: false, // แก้ warning
     },
   },
-  vite: {
-    build: {
-      chunkSizeWarningLimit: 1000, // เพิ่มขีดจำกัดคำเตือนเป็น 1MB
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            "vendor-vue": ["vue", "vue-router"],
-            "vendor-ui": ["@headlessui/vue", "lucide-vue-next"],
-            "vendor-utils": ["date-fns", "lodash"],
-            "vendor-chart": ["chart.js"],
-          },
-        },
-      },
-    },
-    optimizeDeps: {
-      exclude: ["jspdf"], // ป้องกัน jspdf จากการ pre-bundle ใน dev mode
-    },
-  },
 
   app: {
     baseURL: "/",

@@ -62,23 +62,13 @@
               @mouseleave="adminMenuHover = false"
               class="hover:text-green-400 flex items-center gap-1"
             >
-              <i class="mdi mdi-shield-account-outline text-lg"></i>
+              <Icon icon="mdi:shield-account-outline" class="text-lg" />
               {{
                 ["admin"].includes(auth?.user?.role)
                   ? "หน้าแอดมิน"
                   : "หน้าเจ้าหน้าที่"
               }}
-              <svg
-                class="w-4 h-4 mt-0.5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.587l3.71-4.356a.75.75 0 111.14.976l-4.25 5a.75.75 0 01-1.14 0l-4.25-5a.75.75 0 01.02-1.06z"
-                  clip-rule="evenodd"
-                />
-              </svg>
+              <Icon icon="mdi:chevron-down" class="w-4 h-4 mt-0.5" />
             </button>
 
             <!-- Admin Dropdown Menu -->
@@ -100,7 +90,10 @@
                 class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
                 @click="closeAdminMenu"
               >
-                <i :class="`mdi ${item.icon} text-lg text-white/80`"></i>
+                <Icon
+                  :icon="item.icon.replace('mdi-', 'mdi:')"
+                  class="text-lg text-white/80"
+                />
                 <span>{{ item.label }}</span>
               </router-link>
             </div>
@@ -143,34 +136,8 @@
 
         <!-- Hamburger Icon -->
         <button @click="isOpen = !isOpen">
-          <svg
-            v-if="!isOpen"
-            class="w-6 h-6 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-          <svg
-            v-else
-            class="w-6 h-6 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <Icon v-if="!isOpen" icon="mdi:menu" class="w-6 h-6 text-white" />
+          <Icon v-else icon="mdi:close" class="w-6 h-6 text-white" />
         </button>
       </div>
     </div>
@@ -187,7 +154,10 @@
               :to="localePath('/')"
               class="flex items-center gap-3 hover:text-blue-400"
               @click="isOpen = false"
-              ><i class="mdi mdi-home-outline text-xl"></i>หน้าหลัก</NuxtLink
+              ><Icon
+                icon="mdi:home-outline"
+                class="text-xl"
+              />หน้าหลัก</NuxtLink
             >
           </li>
           <li>
@@ -195,7 +165,7 @@
               :to="localePath('/StandingTicketForm')"
               class="flex items-center gap-3 hover:text-blue-400"
               @click="isOpen = false"
-              ><i class="mdi mdi-ticket-outline text-xl"></i
+              ><Icon icon="mdi:ticket-outline" class="text-xl" />
               >ซื้อตั๋วยืน</NuxtLink
             >
           </li>
@@ -204,7 +174,7 @@
               :to="localePath('/ringside')"
               class="flex items-center gap-3 hover:text-blue-400"
               @click="isOpen = false"
-              ><i class="mdi mdi-crown-outline text-xl"></i
+              ><Icon icon="mdi:crown-outline" class="text-xl" />
               >ซื้อตั๋วริงไซด์</NuxtLink
             >
           </li>
@@ -213,7 +183,10 @@
               :to="localePath('/contacts')"
               class="flex items-center gap-3 hover:text-blue-400"
               @click="isOpen = false"
-              ><i class="mdi mdi-email-outline text-xl"></i>ติดต่อเรา</NuxtLink
+              ><Icon
+                icon="mdi:email-outline"
+                class="text-xl"
+              />ติดต่อเรา</NuxtLink
             >
           </li>
           <li v-if="!auth?.user">
@@ -221,7 +194,7 @@
               :to="localePath('/login')"
               class="flex items-center gap-3 hover:text-blue-400"
               @click="isOpen = false"
-              ><i class="mdi mdi-login-variant text-xl"></i
+              ><Icon icon="mdi:login-variant" class="text-xl" />
               >เข้าสู่ระบบ</NuxtLink
             >
           </li>
@@ -235,16 +208,15 @@
               @click="adminSubOpen = !adminSubOpen"
               class="flex items-center gap-3 w-full text-left hover:text-blue-400"
             >
-              <i class="mdi mdi-shield-account-outline text-xl"></i>
+              <Icon icon="mdi:shield-account-outline" class="text-xl" />
               {{
                 ["admin"].includes(auth?.user?.role)
                   ? "หน้าแอดมิน"
                   : "หน้าเจ้าหน้าที่"
               }}
-              <i
-                class="mdi"
-                :class="adminSubOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-              ></i>
+              <Icon
+                :icon="adminSubOpen ? 'mdi:chevron-up' : 'mdi:chevron-down'"
+              />
             </button>
             <transition name="slide-fade">
               <ul
@@ -265,7 +237,7 @@
                       isOpen = false;
                     "
                   >
-                    <i :class="`mdi ${item.icon}`"></i>
+                    <Icon :icon="item.icon.replace('mdi-', 'mdi:')" />
                     {{ item.label }}
                   </router-link>
                 </li>
@@ -287,7 +259,7 @@
             "
             class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
           >
-            <i class="mdi mdi-logout-variant text-xl"></i> ออกจากระบบ
+            <Icon icon="mdi:logout-variant" class="text-xl" /> ออกจากระบบ
           </button>
           <button
             @click="
@@ -296,7 +268,7 @@
             "
             class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
           >
-            <i class="mdi mdi-translate text-xl"></i>
+            <Icon icon="mdi:translate" class="text-xl" />
             {{ locale === "th" ? "English" : "ไทย" }}
           </button>
         </div>
@@ -306,6 +278,7 @@
 </template>
 
 <script setup>
+import { Icon } from "@iconify/vue";
 import { RouterLink } from "vue-router";
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
 import { onClickOutside } from "@vueuse/core";
@@ -371,14 +344,8 @@ const logout = async () => {
   console.log("🧹 After logout call, auth data cleared");
   authDebug.logAuthState();
 
-  // Get current locale for proper routing
-  const localeMatch = router.currentRoute.value.path.match(/^\/(th|en)/);
-  const currentLocale = localeMatch ? localeMatch[1] : "th";
-
-  console.log(`🌐 Navigating to /${currentLocale}/login`);
-
   // Navigate to login with proper locale
-  await router.push(`/${currentLocale}/login`);
+  await router.push(localePath("/login"));
 
   // Force reload to ensure clean state
   await nextTick();

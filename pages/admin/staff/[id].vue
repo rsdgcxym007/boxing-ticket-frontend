@@ -7,7 +7,7 @@
 
     <!-- Error State -->
     <div v-else-if="error" class="text-center py-12">
-      <i class="mdi mdi-alert-circle text-red-500 text-6xl mb-4"></i>
+      <Icon icon="mdi:alert-circle" class="text-red-500 text-6xl mb-4" />
       <h3 class="text-lg font-medium text-gray-900 mb-2">เกิดข้อผิดพลาด</h3>
       <p class="text-gray-600 mb-6">{{ error }}</p>
       <BaseButton @click="$router.push('/admin/staff')" color="blue">
@@ -26,7 +26,7 @@
             color="gray"
             size="sm"
           >
-            <i class="mdi mdi-arrow-left"></i>
+            <Icon icon="mdi:arrow-left" />
           </BaseButton>
           <div>
             <h1 class="text-3xl font-bold text-gray-900">
@@ -38,11 +38,11 @@
 
         <div class="flex space-x-3">
           <BaseButton @click="editStaff" color="green" size="lg">
-            <i class="mdi mdi-pencil mr-2"></i>
+            <Icon icon="mdi:pencil" class="mr-2" />
             แก้ไขข้อมูล
           </BaseButton>
           <BaseButton @click="changeStatus" color="yellow" size="lg">
-            <i class="mdi mdi-account-cog mr-2"></i>
+            <Icon icon="mdi:account-cog" class="mr-2" />
             เปลี่ยนสถานะ
           </BaseButton>
         </div>
@@ -55,7 +55,7 @@
         :class="getStatusBannerClass(staff.status)"
       >
         <div class="flex items-center">
-          <i :class="getStatusIcon(staff.status)" class="text-xl mr-3"></i>
+          <Icon :icon="getStatusIcon(staff.status)" class="text-xl mr-3" />
           <div>
             <h4 class="font-medium">{{ getStatusLabel(staff.status) }}</h4>
             <p class="text-sm mt-1">{{ getStatusDescription(staff.status) }}</p>
@@ -85,7 +85,7 @@
                     v-else
                     class="h-16 w-16 rounded-full bg-gray-300 flex items-center justify-center"
                   >
-                    <i class="mdi mdi-account text-gray-600 text-2xl"></i>
+                    <Icon icon="mdi:account" class="text-gray-600 text-2xl" />
                   </div>
                 </div>
                 <div>
@@ -157,7 +157,7 @@
                 :key="permission"
                 class="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg"
               >
-                <i class="mdi mdi-check-circle text-green-600"></i>
+                <Icon icon="mdi:check-circle" class="text-green-600" />
                 <div>
                   <div class="font-medium text-sm text-gray-900">
                     {{ getPermissionLabel(permission) }}
@@ -169,7 +169,7 @@
               </div>
             </div>
             <div v-else class="text-center py-8 text-gray-500">
-              <i class="mdi mdi-lock text-4xl mb-2"></i>
+              <Icon icon="mdi:lock" class="text-4xl mb-2" />
               <p>ไม่มีสิทธิ์การใช้งานเฉพาะ</p>
             </div>
           </BaseCard>
@@ -267,7 +267,7 @@
     <!-- Delete Confirmation Modal -->
     <BaseModal :isOpen="showDeleteModal" title="ยืนยันการลบ">
       <div class="text-center">
-        <i class="mdi mdi-alert-circle text-red-500 text-6xl mb-4"></i>
+        <Icon icon="mdi:alert-circle" class="text-red-500 text-6xl mb-4" />
         <h3 class="text-lg font-medium text-gray-900 mb-2">
           ยืนยันการลบพนักงาน
         </h3>
@@ -295,6 +295,7 @@
 </template>
 
 <script setup lang="ts">
+import { Icon } from "@iconify/vue";
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useSingleToast } from "../../../composables/useSingleToast";
@@ -502,10 +503,10 @@ onMounted(async () => {
 });
 
 // Meta
-// definePageMeta({
-//   layout: 'default',
-//   middleware: 'only-admin-staff'
-// })
+definePageMeta({
+  layout: "default",
+  middleware: "only-admin-staff",
+});
 </script>
 
 <style scoped>

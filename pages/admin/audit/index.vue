@@ -481,10 +481,11 @@ import { useDebounceFn } from "@vueuse/core";
 import dayjs from "dayjs";
 
 // Define page meta
-// definePageMeta({
-//   title: "Audit Management",
-//   layout: "default",
-// });
+definePageMeta({
+  title: "Audit Management",
+  layout: "default",
+  middleware: "only-admin-staff",
+});
 
 // Composables
 const {

@@ -1,4 +1,5 @@
 <template>
+  <!-- ใช้ Iconify mdi icons แทน SVG -->
   <div
     class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-6 py-12 relative overflow-hidden"
   >
@@ -58,19 +59,7 @@
             <div
               class="relative bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 rounded-3xl p-5 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform duration-500"
             >
-              <svg
-                class="w-14 h-14 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                />
-              </svg>
+              <Icon icon="mdi:check-circle" class="w-14 h-14 text-white" />
             </div>
           </div>
 
@@ -79,7 +68,7 @@
             <h1
               class="text-4xl font-black bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent animate-pulse"
             >
-              QUANTUM ACCESS xxxxx
+              QUANTUM ACCESS
             </h1>
             <div class="flex items-center justify-center gap-3">
               <div
@@ -108,21 +97,9 @@
               <div
                 class="w-6 h-6 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center"
               >
-                <svg
-                  class="w-4 h-4 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-                  />
-                </svg>
+                <Icon icon="mdi:eye" class="w-4 h-4 text-white" />
               </div>
-              EMAIL AUTHENTICATION xxxxxaas
+              EMAIL AUTHENTICATION
             </label>
             <div class="relative group">
               <input
@@ -146,19 +123,7 @@
               <div
                 class="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center"
               >
-                <svg
-                  class="w-4 h-4 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
+                <Icon icon="mdi:lock" class="w-4 h-4 text-white" />
               </div>
               BIOMETRIC PASSKEY
             </label>
@@ -194,26 +159,18 @@
               class="relative bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-500 hover:via-purple-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-800 text-white font-black py-5 px-8 rounded-2xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4"
             >
               <!-- Loading Animation -->
-              <div
+              <Icon
                 v-if="pageData.loading"
-                class="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"
-              ></div>
+                icon="mdi:loading"
+                class="w-6 h-6 animate-spin text-white"
+              />
 
               <!-- Access Icon -->
-              <svg
+              <Icon
                 v-else
+                icon="mdi:arrow-right"
                 class="w-6 h-6 group-hover:rotate-180 transition-transform duration-700"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-                />
-              </svg>
+              />
 
               <!-- Button Text -->
               <span class="text-lg tracking-wider">
@@ -239,19 +196,10 @@
             <div
               class="relative bg-white/10 hover:bg-white/20 border border-white/20 hover:border-cyan-400/50 text-blue-200 hover:text-white font-bold py-4 px-6 rounded-2xl transition-all duration-500 flex items-center justify-center gap-3 backdrop-blur-sm group-hover:backdrop-blur-md"
             >
-              <svg
+              <Icon
+                icon="mdi:minus"
                 class="w-5 h-5 group-hover:rotate-12 transition-transform duration-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z"
-                />
-              </svg>
+              />
               <span class="tracking-wide">MODIFY CREDENTIALS</span>
             </div>
           </button>
@@ -269,19 +217,7 @@
           <div
             class="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center"
           >
-            <svg
-              class="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <Icon icon="mdi:account" class="w-5 h-5 text-white" />
           </div>
           <span class="text-amber-200 font-bold text-sm tracking-wider"
             >ADMIN ACCESS</span
@@ -301,19 +237,7 @@
           <div
             class="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center"
           >
-            <svg
-              class="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
+            <Icon icon="mdi:account-group" class="w-5 h-5 text-white" />
           </div>
           <span class="text-blue-200 font-bold text-sm tracking-wider"
             >STAFF ACCESS</span
@@ -356,19 +280,7 @@
           <div
             class="mx-auto w-20 h-20 bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 rounded-3xl p-4 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform duration-500"
           >
-            <svg
-              class="w-12 h-12 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-              />
-            </svg>
+            <Icon icon="mdi:shield-key" class="w-12 h-12 text-white" />
           </div>
 
           <div class="space-y-2">
@@ -393,19 +305,7 @@
               <div
                 class="w-5 h-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center"
               >
-                <svg
-                  class="w-3 h-3 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-                  />
-                </svg>
+                <Icon icon="mdi:email" class="w-3 h-3 text-white" />
               </div>
               EMAIL ID
             </label>
@@ -426,19 +326,7 @@
               <div
                 class="w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center"
               >
-                <svg
-                  class="w-3 h-3 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
+                <Icon icon="mdi:lock" class="w-3 h-3 text-white" />
               </div>
               CURRENT PASSKEY
             </label>
@@ -459,19 +347,7 @@
               <div
                 class="w-5 h-5 bg-gradient-to-r from-green-500 to-cyan-500 rounded-lg flex items-center justify-center"
               >
-                <svg
-                  class="w-3 h-3 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <Icon icon="mdi:key" class="w-3 h-3 text-white" />
               </div>
               NEW PASSKEY
             </label>
@@ -495,19 +371,7 @@
             <div
               class="relative bg-white/10 hover:bg-white/20 border border-white/20 hover:border-red-400/50 text-red-200 hover:text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-sm"
             >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <Icon icon="mdi:close" class="w-5 h-5" />
               <span>CANCEL</span>
             </div>
           </button>
@@ -524,24 +388,12 @@
             <div
               class="relative bg-gradient-to-r from-green-600 via-cyan-600 to-blue-600 hover:from-green-500 hover:via-cyan-500 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-3"
             >
-              <div
+              <Icon
                 v-if="changePasswordData.loading"
-                class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
-              ></div>
-              <svg
-                v-else
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+                icon="mdi:loading"
+                class="w-5 h-5 animate-spin text-white"
+              />
+              <Icon v-else icon="mdi:check" class="w-5 h-5" />
               <span>{{
                 changePasswordData.loading ? "UPDATING..." : "UPDATE"
               }}</span>
@@ -554,6 +406,7 @@
 </template>
 
 <script setup lang="ts">
+import { Icon } from "@iconify/vue";
 // นำเข้า composables และ utilities ที่จำเป็น
 import { reactive, ref, onMounted } from "vue";
 import { useSingleToast } from "../composables/useSingleToast";
@@ -562,6 +415,11 @@ import { useRouter } from "vue-router";
 import { useRuntimeConfig } from "nuxt/app";
 import { useAuthStore } from "~/stores/auth";
 import { authDebug } from "@/utils/authDebug";
+
+// เพิ่ม middleware สำหรับหน้า login
+definePageMeta({
+  middleware: ["guest-only"],
+});
 
 // ตั้งค่าการเชื่อมต่อ API
 const config = useRuntimeConfig();
@@ -750,11 +608,14 @@ const login = async () => {
 
     // บันทึกข้อมูลการเข้าสู่ระบบ
     const token = data.data.access_token || data.data.token;
+    const userData = data.data.user || data.data?.user || {};
+
     localStorage.setItem("token", token);
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data.data.user || data.data?.user || {})
-    );
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    // อัพเดท auth store
+    const authStore = useAuthStore();
+    authStore.setUser(userData);
 
     showToast("success", "🎉 เข้าสู่ระบบสำเร็จ");
     console.log("🏠 กำลังเปลี่ยนเส้นทางไปหน้าแรก...");

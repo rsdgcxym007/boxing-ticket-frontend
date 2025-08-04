@@ -2,14 +2,8 @@ import { defineNuxtRouteMiddleware, navigateTo } from "nuxt/app";
 import { useAuthStore } from "@/stores/auth";
 
 /**
- * Dynamic Role-based Middleware
- * ตรวจสอบ role ตาม meta.role ที่กำหนดในแต่ละหน้า
- *
- * การใช้งาน:
- * definePageMeta({
- *   middleware: ["role"],
- *   role: "admin" // หรือ "staff", "user"
- * })
+ * Admin Only Middleware
+ * อนุญาตให้เฉพาะ admin เข้าถึงหน้านี้เท่านั้น
  */
 export default defineNuxtRouteMiddleware((to) => {
   // ทำงานใน client side เท่านั้น
@@ -28,28 +22,19 @@ export default defineNuxtRouteMiddleware((to) => {
     return navigateTo(`/${locale}/login`);
   }
 
-  // ดึง required role จาก page meta
-  const requiredRole = to.meta.role as string | string[] | undefined;
+  // ตรวจสอบ role - เฉพาะ admin เท่านั้น
   const userRole = authStore.user!.role;
 
-  // ถ้าไม่ได้กำหนด role ให้ผ่านไป
-  if (!requiredRole) return;
-
-  // ตรวจสอบ role (รองรับ string หรือ array)
-  const allowedRoles = Array.isArray(requiredRole)
-    ? requiredRole
-    : [requiredRole];
-
-  if (!allowedRoles.includes(userRole)) {
+  if (userRole !== "admin") {
     // Extract locale จาก path
     const localeMatch = to.path.match(/^\/(th|en)/);
     const locale = localeMatch ? localeMatch[1] : "th";
 
     // redirect ตาม role
-    if (userRole === "admin" || userRole === "staff") {
-      return navigateTo(`/${locale}/admin`);
+    if (userRole === "staff") {
+      return navigateTo(`/${locale}/admin`); // staff ไป admin หน้าทั่วไป
     } else {
-      return navigateTo(`/${locale}/unauthorized`);
+      return navigateTo(`/${locale}/unauthorized`); // user ไป unauthorized
     }
   }
 });

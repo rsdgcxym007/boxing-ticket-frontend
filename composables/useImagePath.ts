@@ -16,9 +16,8 @@ export const useImagePath = () => {
     // ตรวจสอบว่าเป็น Electron หรือไม่ - ใช้หลายวิธีตรวจสอบ
     const isElectron =
       typeof window !== "undefined" &&
-      (window?.process?.type === "renderer" ||
-        window?.require !== undefined ||
-        window?.electronAPI !== undefined ||
+      ((window as any)?.process?.type === "renderer" ||
+        (window as any)?.require !== undefined ||
         navigator?.userAgent?.includes("Electron"));
 
     if (isElectron) {
@@ -26,8 +25,19 @@ export const useImagePath = () => {
       return `./${cleanPath}`;
     }
 
-    // สำหรับ web ใช้ absolute path
-    return `/${cleanPath}`;
+    // สำหรับ web: รองรับ baseURL/i18n prefix
+    // ดึง baseURL จาก Nuxt config (ถ้าใช้ใน client)
+    let baseUrl = "/";
+    if (typeof window !== "undefined") {
+      try {
+        baseUrl = (window as any).nuxtApp?.$config?.app?.baseURL || "/";
+      } catch {}
+    }
+    const normalizedBase =
+      baseUrl.endsWith("/") && baseUrl !== "/" ? baseUrl.slice(0, -1) : baseUrl;
+    return normalizedBase === "/"
+      ? `/${cleanPath}`
+      : `${normalizedBase}/${cleanPath}`;
   };
 
   /**
@@ -38,15 +48,23 @@ export const useImagePath = () => {
     // ตรวจสอบว่าเป็น Electron หรือไม่ - ใช้หลายวิธีตรวจสอบ
     const isElectron =
       typeof window !== "undefined" &&
-      (window?.process?.type === "renderer" ||
-        window?.require !== undefined ||
-        window?.electronAPI !== undefined ||
+      ((window as any)?.process?.type === "renderer" ||
+        (window as any)?.require !== undefined ||
         navigator?.userAgent?.includes("Electron"));
 
     if (isElectron) {
       return "./images/";
     }
-    return "/images/";
+    // สำหรับ web: รองรับ baseURL/i18n prefix
+    let baseUrl = "/";
+    if (typeof window !== "undefined") {
+      try {
+        baseUrl = (window as any).nuxtApp?.$config?.app?.baseURL || "/";
+      } catch {}
+    }
+    const normalizedBase =
+      baseUrl.endsWith("/") && baseUrl !== "/" ? baseUrl.slice(0, -1) : baseUrl;
+    return normalizedBase === "/" ? "/images/" : `${normalizedBase}/images/`;
   };
 
   return {
