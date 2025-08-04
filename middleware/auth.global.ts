@@ -15,10 +15,17 @@ export default defineNuxtRouteMiddleware((to) => {
     "/contacts",
     "/ringside",
     "/components-demo",
+    "/StandingTicketForm",
   ];
 
-  // ลบ locale prefix สำหรับการตรวจสอบ
-  const cleanPath = to.path.replace(/^\/(th|en)/, "") || "/";
+  // ลบ locale prefix สำหรับการตรวจสอบ (รองรับ prefix_except_default)
+  let cleanPath = to.path;
+
+  // ถ้าขึ้นต้นด้วย /en (เพราะ th เป็น default ไม่มี prefix)
+  if (cleanPath.startsWith("/en/")) {
+    cleanPath = cleanPath.replace(/^\/en/, "") || "/";
+  }
+
   const isPublicPage = publicPages.includes(cleanPath);
 
   console.log("🔍 Auth Global Debug:", {
@@ -52,12 +59,13 @@ export default defineNuxtRouteMiddleware((to) => {
     // ถ้าไม่ได้ login
     if (!authStore.isAuthenticated) {
       console.log("❌ Not authenticated - redirecting to login");
-      // Extract locale จาก path
-      const localeMatch = to.path.match(/^\/(th|en)/);
-      const locale = localeMatch ? localeMatch[1] : "th";
 
-      // redirect ไปหน้า login พร้อม locale
-      return navigateTo(`/${locale}/login`);
+      // สำหรับ prefix_except_default: th ไม่มี prefix, en มี /en/
+      const currentLocale = to.path.startsWith("/en/") ? "en" : "th";
+      const loginPath = currentLocale === "en" ? "/en/login" : "/login";
+
+      // redirect ไปหน้า login
+      return navigateTo(loginPath);
     } else {
       console.log("✅ Authenticated - allowing access");
     }
