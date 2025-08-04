@@ -79,7 +79,7 @@
             <h1
               class="text-4xl font-black bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent animate-pulse"
             >
-              QUANTUM ACCESS
+              QUANTUM ACCESS xxxxx
             </h1>
             <div class="flex items-center justify-center gap-3">
               <div
@@ -122,7 +122,7 @@
                   />
                 </svg>
               </div>
-              EMAIL AUTHENTICATION
+              EMAIL AUTHENTICATION xxxxxaas
             </label>
             <div class="relative group">
               <input
