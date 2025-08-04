@@ -5,5 +5,4 @@
   </NuxtLayout>
 
   <!-- Electron Update Notification -->
-  <ElectronUpdateNotification />
 </template>

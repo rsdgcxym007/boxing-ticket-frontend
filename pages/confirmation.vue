@@ -300,10 +300,8 @@
 import { useRoute } from "vue-router";
 import { ref, onMounted } from "vue";
 import { useOrder } from "~/composables/useOrder";
-import { useElectron } from "~/composables/useElectron";
 
 const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
-const { printThermal } = useElectron();
 // import TicketDisplay from "~/components/TicketDisplay.vue";
 
 // ตั้งค่า metadata สำหรับหน้า
@@ -332,12 +330,13 @@ const thermalPdfError = ref(false);
 // ฟังก์ชันสำหรับดาวน์โหลด thermal receipt จาก TicketDisplay
 const thermalIframe = ref(null);
 
-// ฟังก์ชัน auto print thermal receipt PDF เมื่อ iframe โหลดเสร็จ (Electron เท่านั้น)
+// ฟังก์ชัน auto print thermal receipt PDF เมื่อ iframe โหลดเสร็จ
 const onThermalIframeLoad = async () => {
   try {
-    // await printThermal();
+    // ใช้ window.print() สำหรับ web browser
+    console.log("Thermal receipt loaded");
   } catch (error) {
-    console.error("Error calling printThermal:", error);
+    console.error("Error loading thermal receipt:", error);
   }
 };
 const handleDownloadThermal = async (orderId) => {

@@ -1,8 +1,0 @@
-provider: github
-owner: rsdgcxym007
-repo: boxing-ticket-frontend
-private: false
-releaseType: release
-updaterCacheDirName: patong-boxing-ticket-system-updater
-url: "https://api.github.com/repos/rsdgcxym007/boxing-ticket-frontend/releases/latest"
-channel: latest

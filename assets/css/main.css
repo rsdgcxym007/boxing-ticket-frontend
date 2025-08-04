@@ -1,3 +1,5 @@
+@import "./fonts.css"; /* ✅ ต้อง import font ก่อน */
+
 .custom-toast {
   display: flex !important;
   align-items: center !important;
@@ -24,7 +26,6 @@
   }
 }
 
-@import "./fonts.css"; /* ✅ ต้อง import font ก่อน */
 @layer base {
   *,
   ::before,

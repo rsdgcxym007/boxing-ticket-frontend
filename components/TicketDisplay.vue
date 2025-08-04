@@ -203,7 +203,6 @@
 
 <script setup>
 import html2canvas from "html2canvas-pro";
-import jsPDF from "jspdf";
 import { TicketType } from "@/types/Enums";
 
 const props = defineProps({
@@ -273,9 +272,14 @@ const printTickets = () => {
 };
 
 const downloadTickets = async () => {
+  if (process.server) return; // Skip during SSR
+
   isGeneratingPDF.value = true;
 
   try {
+    // Dynamic import for client-side only
+    const { default: jsPDF } = await import("jspdf");
+
     const tickets = props.tickets;
     const pdf = new jsPDF({
       orientation: "portrait",
