@@ -28,16 +28,8 @@ export default defineNuxtRouteMiddleware((to) => {
 
   const isPublicPage = publicPages.includes(cleanPath);
 
-  console.log("🔍 Auth Global Debug:", {
-    originalPath: to.path,
-    cleanPath,
-    isPublicPage,
-    publicPages,
-  });
-
   // ถ้าเป็นหน้า public ให้ผ่านไปได้
   if (isPublicPage) {
-    console.log("✅ Public page - allowing access");
     return;
   }
 
@@ -49,17 +41,9 @@ export default defineNuxtRouteMiddleware((to) => {
     authStore.initialize();
 
     const token = localStorage.getItem("token");
-    console.log("🔍 Auth Check:", {
-      hasToken: !!token,
-      hasUser: !!authStore.user,
-      isAuthenticated: authStore.isAuthenticated,
-      user: authStore.user,
-    });
 
     // ถ้าไม่ได้ login
     if (!authStore.isAuthenticated) {
-      console.log("❌ Not authenticated - redirecting to login");
-
       // สำหรับ prefix_except_default: th ไม่มี prefix, en มี /en/
       const currentLocale = to.path.startsWith("/en/") ? "en" : "th";
       const loginPath = currentLocale === "en" ? "/en/login" : "/login";

@@ -2,9 +2,9 @@
   <div>
     <BoxingIntroVideo />
 
-    <AnimatedSection>
+    <!-- <AnimatedSection>
       <HeroBanner />
-    </AnimatedSection>
+    </AnimatedSection> -->
 
     <AnimatedSection>
       <div
