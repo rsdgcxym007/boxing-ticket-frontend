@@ -62,7 +62,7 @@ export default defineNuxtConfig({
         {
           rel: "icon",
           type: "image/x-icon",
-          href: "/favicon.ico",
+          href: "/images/logo/LOGOFC.svg",
         },
         {
           rel: "stylesheet",
