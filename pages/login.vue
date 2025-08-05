@@ -1,12 +1,12 @@
 <template>
   <!-- ใช้ Iconify mdi icons แทน SVG -->
   <div
-    class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-6 py-12 relative overflow-hidden"
+    class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-3 sm:px-6 py-6 sm:py-12 relative overflow-hidden"
   >
     <!-- Animated Background Elements -->
     <div class="absolute inset-0 overflow-hidden">
       <!-- Dynamic Tech Grid Pattern -->
-      <div class="absolute inset-0 opacity-30">
+      <div class="absolute inset-0 opacity-20 sm:opacity-30">
         <div
           class="h-full w-full animate-pulse"
           style="
@@ -15,34 +15,34 @@
         ></div>
       </div>
 
-      <!-- Floating Geometric Shapes -->
+      <!-- Floating Geometric Shapes - Hidden on Mobile -->
       <div
-        class="absolute top-20 left-20 w-72 h-72 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse floating-orb-1"
+        class="hidden sm:block absolute top-20 left-20 w-48 sm:w-72 h-48 sm:h-72 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse floating-orb-1"
       ></div>
       <div
-        class="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse floating-orb-2"
+        class="hidden sm:block absolute bottom-20 right-20 w-64 sm:w-96 h-64 sm:h-96 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse floating-orb-2"
       ></div>
       <div
-        class="absolute top-1/2 left-1/3 w-60 h-60 bg-gradient-to-br from-cyan-500/15 to-blue-500/15 rounded-full blur-3xl animate-pulse floating-orb-3"
+        class="hidden md:block absolute top-1/2 left-1/3 w-40 sm:w-60 h-40 sm:h-60 bg-gradient-to-br from-cyan-500/15 to-blue-500/15 rounded-full blur-3xl animate-pulse floating-orb-3"
       ></div>
 
-      <!-- Animated Lines -->
+      <!-- Animated Lines - Hidden on Mobile -->
       <div
-        class="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-blue-500/50 to-transparent animate-pulse"
+        class="hidden sm:block absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-blue-500/50 to-transparent animate-pulse"
       ></div>
       <div
-        class="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-purple-500/50 to-transparent animate-pulse"
+        class="hidden sm:block absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-purple-500/50 to-transparent animate-pulse"
         style="animation-delay: 1s"
       ></div>
     </div>
 
     <!-- Main Login Container -->
     <div
-      class="relative z-10 w-full max-w-md transform transition-all duration-700 hover:scale-105"
+      class="relative z-10 w-full max-w-sm sm:max-w-md transform transition-all duration-700 hover:scale-105"
     >
       <!-- Futuristic Login Card -->
       <div
-        class="backdrop-blur-2xl bg-white/5 border border-white/20 rounded-3xl shadow-2xl p-8 space-y-8 relative overflow-hidden group"
+        class="backdrop-blur-2xl bg-white/5 border border-white/20 rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8 space-y-4 sm:space-y-8 relative overflow-hidden group"
       >
         <!-- Dynamic Border Glow -->
         <div
@@ -50,54 +50,58 @@
         ></div>
 
         <!-- Header Section with Animation -->
-        <div class="text-center space-y-6">
+        <div class="text-center space-y-4 sm:space-y-6">
           <!-- Cyberpunk Logo -->
-          <div class="relative mx-auto w-24 h-24 mb-8">
+          <div class="relative mx-auto w-16 h-16 sm:w-24 sm:h-24 mb-4 sm:mb-8">
             <div
-              class="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-3xl blur-xl opacity-70 animate-pulse"
+              class="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl sm:rounded-3xl blur-xl opacity-70 animate-pulse"
             ></div>
             <div
-              class="relative bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 rounded-3xl p-5 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform duration-500"
+              class="relative bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform duration-500"
             >
-              <Icon icon="mdi:check-circle" class="w-14 h-14 text-white" />
+              <Icon
+                icon="mdi:check-circle"
+                class="w-10 h-10 sm:w-14 sm:h-14 text-white"
+              />
             </div>
           </div>
 
           <!-- Animated Title -->
-          <div class="space-y-3">
+          <div class="space-y-2 sm:space-y-3">
             <h1
-              class="text-4xl font-black bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent animate-pulse"
+              class="text-2xl sm:text-4xl font-black bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent animate-pulse"
             >
               QUANTUM ACCESS
             </h1>
-            <div class="flex items-center justify-center gap-3">
+            <div class="flex items-center justify-center gap-2 sm:gap-3">
               <div
                 class="h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent flex-1"
               ></div>
-              <span class="text-blue-300/80 text-sm font-medium tracking-wider"
+              <span
+                class="text-blue-300/80 text-xs sm:text-sm font-medium tracking-wider"
                 >SECURE PORTAL</span
               >
               <div
                 class="h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent flex-1"
               ></div>
             </div>
-            <p class="text-blue-200/70 text-sm">
+            <p class="text-blue-200/70 text-xs sm:text-sm">
               Boxing Ticket Management System
             </p>
           </div>
         </div>
 
         <!-- Enhanced Form Section -->
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6">
           <!-- Email Field with Advanced Styling -->
-          <div class="space-y-3">
+          <div class="space-y-2 sm:space-y-3">
             <label
-              class="text-sm font-bold text-blue-200 flex items-center gap-3 tracking-wide"
+              class="text-xs sm:text-sm font-bold text-blue-200 flex items-center gap-2 sm:gap-3 tracking-wide"
             >
               <div
-                class="w-6 h-6 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center"
+                class="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center"
               >
-                <Icon icon="mdi:eye" class="w-4 h-4 text-white" />
+                <Icon icon="mdi:eye" class="w-3 h-3 sm:w-4 sm:h-4 text-white" />
               </div>
               EMAIL AUTHENTICATION
             </label>
@@ -106,24 +110,27 @@
                 v-model="pageData.email"
                 type="email"
                 placeholder="Enter your quantum ID"
-                class="w-full px-5 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-blue-200/50 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/30 transition-all duration-500 backdrop-blur-sm font-medium group-hover:bg-white/15"
+                class="w-full px-3 py-3 sm:px-5 sm:py-4 bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder-blue-200/50 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-400/30 transition-all duration-500 backdrop-blur-sm font-medium group-hover:bg-white/15 text-sm sm:text-base"
                 required
               />
               <div
-                class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 via-cyan-500/10 to-purple-500/0 pointer-events-none group-focus-within:opacity-100 opacity-0 transition-opacity duration-300"
+                class="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-500/0 via-cyan-500/10 to-purple-500/0 pointer-events-none group-focus-within:opacity-100 opacity-0 transition-opacity duration-300"
               ></div>
             </div>
           </div>
 
           <!-- Password Field with Advanced Styling -->
-          <div class="space-y-3">
+          <div class="space-y-2 sm:space-y-3">
             <label
-              class="text-sm font-bold text-blue-200 flex items-center gap-3 tracking-wide"
+              class="text-xs sm:text-sm font-bold text-blue-200 flex items-center gap-2 sm:gap-3 tracking-wide"
             >
               <div
-                class="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center"
+                class="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center"
               >
-                <Icon icon="mdi:lock" class="w-4 h-4 text-white" />
+                <Icon
+                  icon="mdi:lock"
+                  class="w-3 h-3 sm:w-4 sm:h-4 text-white"
+                />
               </div>
               BIOMETRIC PASSKEY
             </label>
@@ -132,11 +139,11 @@
                 v-model="pageData.password"
                 type="password"
                 placeholder="Enter neural security code"
-                class="w-full px-5 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-blue-200/50 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/30 transition-all duration-500 backdrop-blur-sm font-medium group-hover:bg-white/15"
+                class="w-full px-3 py-3 sm:px-5 sm:py-4 bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl text-white placeholder-blue-200/50 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/30 transition-all duration-500 backdrop-blur-sm font-medium group-hover:bg-white/15 text-sm sm:text-base"
                 required
               />
               <div
-                class="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/0 via-pink-500/10 to-cyan-500/0 pointer-events-none group-focus-within:opacity-100 opacity-0 transition-opacity duration-300"
+                class="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-r from-purple-500/0 via-pink-500/10 to-cyan-500/0 pointer-events-none group-focus-within:opacity-100 opacity-0 transition-opacity duration-300"
               ></div>
             </div>
           </div>
@@ -147,40 +154,40 @@
             :disabled="
               !pageData.email || !pageData.password || pageData.loading
             "
-            class="w-full relative group mt-8"
+            class="w-full relative group mt-6 sm:mt-8"
           >
             <!-- Glowing Background -->
             <div
-              class="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 rounded-2xl blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+              class="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 rounded-xl sm:rounded-2xl blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
             ></div>
 
             <!-- Button Content -->
             <div
-              class="relative bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-500 hover:via-purple-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-800 text-white font-black py-5 px-8 rounded-2xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-4"
+              class="relative bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 hover:from-blue-500 hover:via-purple-500 hover:to-cyan-500 disabled:from-gray-600 disabled:to-gray-800 text-white font-black py-3 px-6 sm:py-5 sm:px-8 rounded-xl sm:rounded-2xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 sm:gap-4"
             >
               <!-- Loading Animation -->
               <Icon
                 v-if="pageData.loading"
                 icon="mdi:loading"
-                class="w-6 h-6 animate-spin text-white"
+                class="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-white"
               />
 
               <!-- Access Icon -->
               <Icon
                 v-else
                 icon="mdi:arrow-right"
-                class="w-6 h-6 group-hover:rotate-180 transition-transform duration-700"
+                class="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-180 transition-transform duration-700"
               />
 
               <!-- Button Text -->
-              <span class="text-lg tracking-wider">
+              <span class="text-sm sm:text-lg tracking-wider">
                 {{ pageData.loading ? "AUTHENTICATING..." : "INITIATE ACCESS" }}
               </span>
             </div>
 
             <!-- Ripple Effect -->
             <div
-              class="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none"
+              class="absolute inset-0 rounded-xl sm:rounded-2xl overflow-hidden pointer-events-none"
             >
               <div
                 class="absolute inset-0 bg-white/20 scale-0 group-active:scale-100 transition-transform duration-300 rounded-full"
@@ -191,16 +198,18 @@
           <!-- Password Change Button -->
           <button
             @click="showChangePassword = true"
-            class="w-full relative group mt-4"
+            class="w-full relative group mt-3 sm:mt-4"
           >
             <div
-              class="relative bg-white/10 hover:bg-white/20 border border-white/20 hover:border-cyan-400/50 text-blue-200 hover:text-white font-bold py-4 px-6 rounded-2xl transition-all duration-500 flex items-center justify-center gap-3 backdrop-blur-sm group-hover:backdrop-blur-md"
+              class="relative bg-white/10 hover:bg-white/20 border border-white/20 hover:border-cyan-400/50 text-blue-200 hover:text-white font-bold py-3 px-4 sm:py-4 sm:px-6 rounded-xl sm:rounded-2xl transition-all duration-500 flex items-center justify-center gap-2 sm:gap-3 backdrop-blur-sm group-hover:backdrop-blur-md"
             >
               <Icon
                 icon="mdi:minus"
-                class="w-5 h-5 group-hover:rotate-12 transition-transform duration-300"
+                class="w-4 h-4 sm:w-5 sm:h-5 group-hover:rotate-12 transition-transform duration-300"
               />
-              <span class="tracking-wide">MODIFY CREDENTIALS</span>
+              <span class="tracking-wide text-sm sm:text-base"
+                >MODIFY CREDENTIALS</span
+              >
             </div>
           </button>
         </div>
@@ -208,22 +217,25 @@
     </div>
 
     <!-- Futuristic Test Data Section -->
-    <div class="mt-8 space-y-4">
+    <div
+      class="mt-4 sm:mt-8 space-y-3 sm:space-y-4 w-full max-w-sm sm:max-w-md flex flex-col-reverse sm:flex-col"
+    >
       <!-- Admin Account -->
       <div
-        class="backdrop-blur-md bg-amber-500/10 border border-amber-400/30 rounded-2xl p-4 space-y-2"
+        class="backdrop-blur-md bg-amber-500/10 border border-amber-400/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 space-y-2"
       >
-        <div class="flex items-center gap-3 mb-3">
+        <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
           <div
-            class="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center"
+            class="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg sm:rounded-xl flex items-center justify-center"
           >
-            <Icon icon="mdi:account" class="w-5 h-5 text-white" />
+            <Icon icon="mdi:account" class="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
-          <span class="text-amber-200 font-bold text-sm tracking-wider"
+          <span
+            class="text-amber-200 font-bold text-xs sm:text-sm tracking-wider"
             >ADMIN ACCESS</span
           >
         </div>
-        <div class="text-amber-100 text-sm space-y-1">
+        <div class="text-amber-100 text-xs sm:text-sm space-y-1">
           <p>Email: admin@example.com</p>
           <p>Password: admin1234</p>
         </div>
@@ -231,19 +243,23 @@
 
       <!-- Staff Account -->
       <div
-        class="backdrop-blur-md bg-blue-500/10 border border-blue-400/30 rounded-2xl p-4 space-y-2"
+        class="backdrop-blur-md bg-blue-500/10 border border-blue-400/30 rounded-xl sm:rounded-2xl p-3 sm:p-4 space-y-2"
       >
-        <div class="flex items-center gap-3 mb-3">
+        <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
           <div
-            class="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center"
+            class="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg sm:rounded-xl flex items-center justify-center"
           >
-            <Icon icon="mdi:account-group" class="w-5 h-5 text-white" />
+            <Icon
+              icon="mdi:account-group"
+              class="w-4 h-4 sm:w-5 sm:h-5 text-white"
+            />
           </div>
-          <span class="text-blue-200 font-bold text-sm tracking-wider"
+          <span
+            class="text-blue-200 font-bold text-xs sm:text-sm tracking-wider"
             >STAFF ACCESS</span
           >
         </div>
-        <div class="text-blue-100 text-sm space-y-1">
+        <div class="text-blue-100 text-xs sm:text-sm space-y-1">
           <p>Email: staff01@example.com</p>
           <p>Password: password123</p>
         </div>
@@ -254,7 +270,7 @@
   <!-- Ultra Modern Password Change Modal -->
   <div
     v-if="showChangePassword"
-    class="fixed inset-0 z-50 flex items-center justify-center px-6 py-12"
+    class="fixed inset-0 z-50 flex items-center justify-center px-3 sm:px-6 py-6 sm:py-12"
   >
     <!-- Dynamic Backdrop -->
     <div
@@ -264,10 +280,10 @@
 
     <!-- Modal Content -->
     <div
-      class="relative z-10 w-full max-w-lg transform transition-all duration-700 scale-110"
+      class="relative z-10 w-full max-w-sm sm:max-w-lg transform transition-all duration-700 scale-110"
     >
       <div
-        class="backdrop-blur-3xl bg-white/5 border border-white/20 rounded-3xl shadow-2xl p-8 space-y-8 relative overflow-hidden"
+        class="backdrop-blur-3xl bg-white/5 border border-white/20 rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8 space-y-4 sm:space-y-8 relative overflow-hidden"
       >
         <!-- Dynamic Border Animation -->
         <div
@@ -275,37 +291,43 @@
         ></div>
 
         <!-- Modal Header -->
-        <div class="relative text-center space-y-6">
+        <div class="relative text-center space-y-4 sm:space-y-6">
           <!-- Security Icon -->
           <div
-            class="mx-auto w-20 h-20 bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 rounded-3xl p-4 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform duration-500"
+            class="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform duration-500"
           >
-            <Icon icon="mdi:shield-key" class="w-12 h-12 text-white" />
+            <Icon
+              icon="mdi:shield-key"
+              class="w-10 h-10 sm:w-12 sm:h-12 text-white"
+            />
           </div>
 
-          <div class="space-y-2">
+          <div class="space-y-1 sm:space-y-2">
             <h2
-              class="text-3xl font-black bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
+              class="text-2xl sm:text-3xl font-black bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
             >
               SECURITY OVERRIDE
             </h2>
-            <p class="text-purple-200/80 text-sm">
+            <p class="text-purple-200/80 text-xs sm:text-sm">
               Modify Authentication Credentials
             </p>
           </div>
         </div>
 
         <!-- Form Fields -->
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6">
           <!-- Email Field -->
-          <div class="space-y-3">
+          <div class="space-y-2 sm:space-y-3">
             <label
-              class="text-sm font-bold text-purple-200 flex items-center gap-2 tracking-wide"
+              class="text-xs sm:text-sm font-bold text-purple-200 flex items-center gap-2 tracking-wide"
             >
               <div
-                class="w-5 h-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center"
+                class="w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-md sm:rounded-lg flex items-center justify-center"
               >
-                <Icon icon="mdi:email" class="w-3 h-3 text-white" />
+                <Icon
+                  icon="mdi:email"
+                  class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white"
+                />
               </div>
               EMAIL ID
             </label>
@@ -313,20 +335,23 @@
               v-model="changePasswordData.email"
               type="email"
               placeholder="Enter registered email"
-              class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200/50 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/30 transition-all duration-300 backdrop-blur-sm"
+              class="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-white/10 border border-white/20 rounded-lg sm:rounded-xl text-white placeholder-purple-200/50 focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-400/30 transition-all duration-300 backdrop-blur-sm text-sm sm:text-base"
               required
             />
           </div>
 
           <!-- Current Password -->
-          <div class="space-y-3">
+          <div class="space-y-2 sm:space-y-3">
             <label
-              class="text-sm font-bold text-purple-200 flex items-center gap-2 tracking-wide"
+              class="text-xs sm:text-sm font-bold text-purple-200 flex items-center gap-2 tracking-wide"
             >
               <div
-                class="w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center"
+                class="w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-md sm:rounded-lg flex items-center justify-center"
               >
-                <Icon icon="mdi:lock" class="w-3 h-3 text-white" />
+                <Icon
+                  icon="mdi:lock"
+                  class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white"
+                />
               </div>
               CURRENT PASSKEY
             </label>
@@ -334,20 +359,23 @@
               v-model="changePasswordData.oldPassword"
               type="password"
               placeholder="Enter current password"
-              class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200/50 focus:outline-none focus:border-red-400 focus:ring-4 focus:ring-red-400/30 transition-all duration-300 backdrop-blur-sm"
+              class="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-white/10 border border-white/20 rounded-lg sm:rounded-xl text-white placeholder-purple-200/50 focus:outline-none focus:border-red-400 focus:ring-4 focus:ring-red-400/30 transition-all duration-300 backdrop-blur-sm text-sm sm:text-base"
               required
             />
           </div>
 
           <!-- New Password -->
-          <div class="space-y-3">
+          <div class="space-y-2 sm:space-y-3">
             <label
-              class="text-sm font-bold text-purple-200 flex items-center gap-2 tracking-wide"
+              class="text-xs sm:text-sm font-bold text-purple-200 flex items-center gap-2 tracking-wide"
             >
               <div
-                class="w-5 h-5 bg-gradient-to-r from-green-500 to-cyan-500 rounded-lg flex items-center justify-center"
+                class="w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-r from-green-500 to-cyan-500 rounded-md sm:rounded-lg flex items-center justify-center"
               >
-                <Icon icon="mdi:key" class="w-3 h-3 text-white" />
+                <Icon
+                  icon="mdi:key"
+                  class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white"
+                />
               </div>
               NEW PASSKEY
             </label>
@@ -355,24 +383,24 @@
               v-model="changePasswordData.newPassword"
               type="password"
               placeholder="Enter new secure password"
-              class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-200/50 focus:outline-none focus:border-green-400 focus:ring-4 focus:ring-green-400/30 transition-all duration-300 backdrop-blur-sm"
+              class="w-full px-3 py-2.5 sm:px-4 sm:py-3 bg-white/10 border border-white/20 rounded-lg sm:rounded-xl text-white placeholder-purple-200/50 focus:outline-none focus:border-green-400 focus:ring-4 focus:ring-green-400/30 transition-all duration-300 backdrop-blur-sm text-sm sm:text-base"
               required
             />
           </div>
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex gap-4 pt-6">
+        <div class="flex gap-3 sm:gap-4 pt-4 sm:pt-6">
           <!-- Cancel Button -->
           <button
             @click="showChangePassword = false"
             class="flex-1 relative group"
           >
             <div
-              class="relative bg-white/10 hover:bg-white/20 border border-white/20 hover:border-red-400/50 text-red-200 hover:text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-sm"
+              class="relative bg-white/10 hover:bg-white/20 border border-white/20 hover:border-red-400/50 text-red-200 hover:text-white font-bold py-3 px-4 sm:py-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 backdrop-blur-sm"
             >
-              <Icon icon="mdi:close" class="w-5 h-5" />
-              <span>CANCEL</span>
+              <Icon icon="mdi:close" class="w-4 h-4 sm:w-5 sm:h-5" />
+              <span class="text-sm sm:text-base">CANCEL</span>
             </div>
           </button>
 
@@ -383,18 +411,18 @@
             class="flex-1 relative group"
           >
             <div
-              class="absolute inset-0 bg-gradient-to-r from-green-600 via-cyan-600 to-blue-600 rounded-xl blur-lg opacity-70 group-hover:opacity-100 transition-opacity duration-300"
+              class="absolute inset-0 bg-gradient-to-r from-green-600 via-cyan-600 to-blue-600 rounded-lg sm:rounded-xl blur-lg opacity-70 group-hover:opacity-100 transition-opacity duration-300"
             ></div>
             <div
-              class="relative bg-gradient-to-r from-green-600 via-cyan-600 to-blue-600 hover:from-green-500 hover:via-cyan-500 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-3"
+              class="relative bg-gradient-to-r from-green-600 via-cyan-600 to-blue-600 hover:from-green-500 hover:via-cyan-500 hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-800 text-white font-bold py-3 px-4 sm:py-4 sm:px-6 rounded-lg sm:rounded-xl transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3"
             >
               <Icon
                 v-if="changePasswordData.loading"
                 icon="mdi:loading"
-                class="w-5 h-5 animate-spin text-white"
+                class="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-white"
               />
-              <Icon v-else icon="mdi:check" class="w-5 h-5" />
-              <span>{{
+              <Icon v-else icon="mdi:check" class="w-4 h-4 sm:w-5 sm:h-5" />
+              <span class="text-sm sm:text-base">{{
                 changePasswordData.loading ? "UPDATING..." : "UPDATE"
               }}</span>
             </div>
@@ -818,6 +846,41 @@ button:active {
   .floating-orb-2,
   .floating-orb-3 {
     display: none;
+  }
+
+  /* Touch-friendly adjustments for mobile */
+  input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Reduce animations on mobile for performance */
+  .floating-orb-1,
+  .floating-orb-2,
+  .floating-orb-3 {
+    animation: none;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1024px) {
+  /* Tablet specific adjustments */
+  .floating-orb-1,
+  .floating-orb-2 {
+    animation-duration: 30s;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Desktop specific enhancements */
+  .group:hover .floating-orb-1,
+  .group:hover .floating-orb-2,
+  .group:hover .floating-orb-3 {
+    animation-play-state: paused;
   }
 }
 </style>
