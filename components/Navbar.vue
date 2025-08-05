@@ -165,8 +165,11 @@
               :to="localePath('/StandingTicketForm')"
               class="flex items-center gap-3 hover:text-blue-400"
               @click="isOpen = false"
+              @click.prevent="
+                handleMobileNav(localePath('/StandingTicketForm'))
+              "
               ><Icon icon="mdi:ticket-outline" class="text-xl" />
-              >ซื้อตั๋วยืน</NuxtLink
+              ซื้อตั๋วยืน</NuxtLink
             >
           </li>
           <li>
@@ -174,13 +177,15 @@
               :to="localePath('/ringside')"
               class="flex items-center gap-3 hover:text-blue-400"
               @click="isOpen = false"
+              @click.prevent="handleMobileNav(localePath('/ringside'))"
               ><Icon icon="mdi:crown-outline" class="text-xl" />
-              >ซื้อตั๋วริงไซด์</NuxtLink
+              ซื้อตั๋วริงไซด์</NuxtLink
             >
           </li>
           <li>
             <NuxtLink
               :to="localePath('/contacts')"
+              @click.prevent="handleMobileNav(localePath('/contacts'))"
               class="flex items-center gap-3 hover:text-blue-400"
               @click="isOpen = false"
               ><Icon
@@ -192,6 +197,7 @@
           <li v-if="!auth?.user">
             <NuxtLink
               :to="localePath('/login')"
+              @click.prevent="handleMobileNav(localePath('/login'))"
               class="flex items-center gap-3 hover:text-blue-400"
               @click="isOpen = false"
               ><Icon icon="mdi:login-variant" class="text-xl" />
@@ -253,19 +259,14 @@
         <div class="flex flex-col gap-3">
           <button
             v-if="auth?.user"
-            @click="
-              logout;
-              isOpen = false;
-            "
+            @click="handleLogout"
             class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
           >
             <Icon icon="mdi:logout-variant" class="text-xl" /> ออกจากระบบ
           </button>
+
           <button
-            @click="
-              toggleLang;
-              isOpen = false;
-            "
+            @click="handleToggleLang"
             class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
           >
             <Icon icon="mdi:translate" class="text-xl" />
@@ -327,6 +328,19 @@ const closeAdminMenu = () => {
   adminMenuHover.value = false;
 };
 
+const handleMobileNav = async (path) => {
+  await router.push(path);
+  isOpen.value = false;
+};
+const handleLogout = async () => {
+  await logout();
+  isOpen.value = false;
+};
+
+const handleToggleLang = async () => {
+  await toggleLang();
+  isOpen.value = false;
+};
 const toggleLang = () => {
   const newLocale = locale.value === "th" ? "en" : "th";
   const path = switchLocalePath(newLocale);

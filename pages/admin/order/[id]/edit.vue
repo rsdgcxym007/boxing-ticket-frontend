@@ -750,9 +750,14 @@ const validationErrors = computed(() => {
   }
 
   // Validate customer info only for editable fields
+  // เฉพาะกรณีตั๋วยืน (STANDING) และ ONSITE ไม่ต้องกรอกชื่อ
+  const isStandingOnsite =
+    orderData.value?.ticketType === TicketType.RINGSIDE &&
+    orderData.value?.purchaseType === OrderPurchaseType.ONSITE;
   if (
     canEditField(orderData.value, "newCustomerName") &&
-    !formData.value.newCustomerName.trim()
+    !formData.value.newCustomerName.trim() &&
+    !isStandingOnsite
   ) {
     errors.push("กรุณากรอกชื่อลูกค้า");
   }
