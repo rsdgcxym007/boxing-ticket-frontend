@@ -41,7 +41,7 @@ export default defineNuxtConfig({
       { code: "en", file: "en.json" },
     ],
     defaultLocale: "th",
-    strategy: "prefix",
+    strategy: "prefix_except_default",
     langDir: "locales/",
     detectBrowserLanguage: false,
     lazy: true,
@@ -84,53 +84,72 @@ export default defineNuxtConfig({
     },
     compressPublicAssets: true,
     routeRules: {
-      // Static asset caching
-      "/_nuxt/**": { headers: { "cache-control": "max-age=31536000" } },
-      "/images/**": { headers: { "cache-control": "max-age=31536000" } },
-      "/videos/**": { headers: { "cache-control": "max-age=31536000" } },
-      "/fonts/**": { headers: { "cache-control": "max-age=31536000" } },
+      // Static asset caching - ป้องกันไม่ให้มี locale prefix
+      "/_nuxt/**": {
+        headers: { "cache-control": "max-age=31536000" },
+        prerender: false,
+      },
+      "/images/**": {
+        headers: { "cache-control": "max-age=31536000" },
+        prerender: false,
+      },
+      "/videos/**": {
+        headers: { "cache-control": "max-age=31536000" },
+        prerender: false,
+      },
+      "/fonts/**": {
+        headers: { "cache-control": "max-age=31536000" },
+        prerender: false,
+      },
       // CSS and JS files with proper MIME types
       "/**/*.css": {
         headers: {
           "content-type": "text/css; charset=utf-8",
           "cache-control": "max-age=31536000",
         },
+        prerender: false,
       },
       "/**/*.js": {
         headers: {
           "content-type": "application/javascript; charset=utf-8",
           "cache-control": "max-age=31536000",
         },
+        prerender: false,
       },
       "/**/*.mjs": {
         headers: {
           "content-type": "application/javascript; charset=utf-8",
           "cache-control": "max-age=31536000",
         },
+        prerender: false,
       },
       "/**/*.svg": {
         headers: {
           "content-type": "image/svg+xml",
           "cache-control": "max-age=31536000",
         },
+        prerender: false,
       },
       "/**/*.woff2": {
         headers: {
           "content-type": "font/woff2",
           "cache-control": "max-age=31536000",
         },
+        prerender: false,
       },
       "/**/*.woff": {
         headers: {
           "content-type": "font/woff",
           "cache-control": "max-age=31536000",
         },
+        prerender: false,
       },
       "/**/*.ttf": {
         headers: {
           "content-type": "font/ttf",
           "cache-control": "max-age=31536000",
         },
+        prerender: false,
       },
     },
   },
