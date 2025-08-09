@@ -21,7 +21,9 @@
         <div class="flex gap-4">
           <label
             v-for="option in purchaseTypeOptionsForForm.filter(
-              (o) => o.value === OrderPurchaseType.ONSITE || o.value === OrderPurchaseType.BOOKING
+              (o) =>
+                o.value === OrderPurchaseType.ONSITE ||
+                o.value === OrderPurchaseType.BOOKING
             )"
             :key="option.value"
             class="flex-1 flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-white/20 hover:border-orange-400 bg-white/5 hover:bg-orange-50/10 transition-all duration-300"
@@ -45,69 +47,285 @@
         </div>
       </div>
 
-      <!-- ชื่อผู้ซื้อ -->
-      <div v-if="pageData.purchaseType !== OrderPurchaseType.ONSITE">
-        <label class="text-sm mb-1 flex items-center gap-2 text-blue-300">
-          <i class="mdi mdi-account-outline text-lg" />
-          ชื่อผู้ซื้อ
-        </label>
-        <input
-          v-model="pageData.customerName"
-          type="text"
-          placeholder="เช่น สมชาย ใจดี"
-          class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition hover:border-blue-300 hover:ring-1"
-        />
-      </div>
-
-      <!-- เบอร์โทรผู้ซื้อ -->
-      <div v-if="pageData.purchaseType !== OrderPurchaseType.ONSITE">
-        <label class="text-sm mb-1 flex items-center gap-2 text-green-300">
-          <i class="mdi mdi-phone-outline text-lg" />
-          เบอร์โทรผู้ซื้อ
-        </label>
-        <input
-          v-model="pageData.customerPhone"
-          type="text"
-          placeholder="เช่น 0801234567"
-          class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 transition hover:border-green-300 hover:ring-1"
-          @input="
-            pageData.customerPhone = pageData.customerPhone
-              .replace(/[^\d]/g, '')
-              .slice(0, 10)
-          "
-        />
-        <p
-          v-if="
-            !/^\d{10}$/.test(pageData.customerPhone.trim()) &&
-            pageData.customerPhone.trim()
-          "
-          class="text-xs text-red-500 mt-1"
+      <!-- 🏨 ข้อมูลโรงแรม -->
+      <div
+        v-if="pageData.purchaseType === OrderPurchaseType.BOOKING"
+        class="space-y-4 p-4 rounded-xl border border-orange-300/30 bg-orange-50/5"
+      >
+        <h3
+          class="text-lg font-semibold text-orange-300 flex items-center gap-2"
         >
-          ❌ เบอร์โทรต้องมี 10 ตัวเลข
-        </p>
-      </div>
+          <i class="mdi mdi-domain text-orange-400" />
+          ข้อมูลโรงแรม / ข้อมูลผู้จอง
+        </h3>
 
-      <!-- อีเมลผู้ซื้อ -->
-      <div v-if="pageData.purchaseType !== OrderPurchaseType.ONSITE">
-        <label class="text-sm mb-1 flex items-center gap-2 text-red-300">
-          <i class="mdi mdi-email-outline text-lg" />
-          อีเมลผู้ซื้อ
-        </label>
-        <input
-          v-model="pageData.customerEmail"
-          type="text"
-          placeholder="เช่น example@gmail.com"
-          class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400 transition hover:border-red-300 hover:ring-1"
-        />
-        <p
-          v-if="
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pageData.customerEmail.trim()) &&
-            pageData.customerEmail.trim()
-          "
-          class="text-xs text-red-500 mt-1"
-        >
-          ❌ กรุณากรอกอีเมลให้ถูกต้อง
-        </p>
+        <!-- ข้อมูลผู้จอง -->
+        <div class="flex gap-4">
+          <div class="flex-1">
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-account-outline text-lg" />
+              ชื่อผู้ซื้อ
+            </label>
+            <input
+              v-model="pageData.customerName"
+              type="text"
+              placeholder="เช่น สมชาย ใจดี"
+              class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+            />
+          </div>
+          <div class="flex-1">
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-phone-outline text-lg" />
+              เบอร์โทรผู้ซื้อ
+            </label>
+            <input
+              v-model="pageData.customerPhone"
+              type="text"
+              placeholder="เช่น 0801234567"
+              class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+              @input="
+                pageData.customerPhone = pageData.customerPhone
+                  .replace(/[^\d]/g, '')
+                  .slice(0, 10)
+              "
+            />
+            <p
+              v-if="
+                !/^\d{10}$/.test(pageData.customerPhone.trim()) &&
+                pageData.customerPhone.trim()
+              "
+              class="text-xs text-red-500 mt-1"
+            >
+              ❌ เบอร์โทรต้องมี 10 ตัวเลข
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+            <i class="mdi mdi-email-outline text-lg" />
+            อีเมลผู้ซื้อ
+          </label>
+          <input
+            v-model="pageData.customerEmail"
+            type="text"
+            placeholder="เช่น example@gmail.com"
+            class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+          />
+          <p
+            v-if="
+              !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                pageData.customerEmail.trim()
+              ) && pageData.customerEmail.trim()
+            "
+            class="text-xs text-red-500 mt-1"
+          >
+            ❌ กรุณากรอกอีเมลให้ถูกต้อง
+          </p>
+        </div>
+
+        <!-- ชื่อโรงแรมและเขต -->
+        <div class="flex gap-4">
+          <div class="flex-1">
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-home-city-outline text-lg" />
+              ชื่อโรงแรม
+            </label>
+            <input
+              v-model="pageData.hotelName"
+              type="text"
+              placeholder="เช่น โรงแรมแกรนด์พาเลซ"
+              class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+            />
+          </div>
+          <div class="flex-1">
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-map-marker-outline text-lg" />
+              เขต/พื้นที่
+            </label>
+            <input
+              v-model="pageData.hotelDistrict"
+              type="text"
+              placeholder="เช่น สีลม, สุขุมวิท"
+              class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+            />
+          </div>
+        </div>
+
+        <!-- หมายเลขห้องและ Voucher -->
+        <div class="flex gap-4">
+          <div class="flex-1">
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-door-closed-outline text-lg" />
+              หมายเลขห้อง
+            </label>
+            <input
+              v-model="pageData.roomNumber"
+              type="text"
+              placeholder="เช่น 1205"
+              class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+            />
+          </div>
+          <div class="flex-1">
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-ticket-confirmation-outline text-lg" />
+              เลขที่ Voucher (V/C)
+            </label>
+            <input
+              v-model="pageData.voucherNumber"
+              type="text"
+              placeholder="เช่น VC12345"
+              class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+            />
+          </div>
+        </div>
+
+        <!-- จำนวนผู้เข้าพัก -->
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-account-outline text-lg" />
+              ผู้ใหญ่ (AD)
+            </label>
+            <div class="flex items-center gap-2">
+              <button
+                @click="
+                  pageData.adultCount = Math.max(1, pageData.adultCount - 1)
+                "
+                class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
+              >
+                <i class="mdi mdi-minus" />
+              </button>
+              <input
+                v-model.number="pageData.adultCount"
+                type="number"
+                min="1"
+                class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+              />
+              <button
+                @click="pageData.adultCount++"
+                class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
+              >
+                <i class="mdi mdi-plus" />
+              </button>
+            </div>
+          </div>
+          <div class="flex-1">
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-account-child-outline text-lg" />
+              เด็ก (CH)
+            </label>
+            <div class="flex items-center gap-2">
+              <button
+                @click="
+                  pageData.childCount = Math.max(0, pageData.childCount - 1)
+                "
+                class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
+              >
+                <i class="mdi mdi-minus" />
+              </button>
+              <input
+                v-model.number="pageData.childCount"
+                type="number"
+                min="0"
+                class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+              />
+              <button
+                @click="pageData.childCount++"
+                class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
+              >
+                <i class="mdi mdi-plus" />
+              </button>
+            </div>
+          </div>
+          <div class="flex-1">
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-baby-face-outline text-lg" />
+              ทารก (IF)
+            </label>
+            <div class="flex items-center gap-2">
+              <button
+                @click="
+                  pageData.infantCount = Math.max(0, pageData.infantCount - 1)
+                "
+                class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
+              >
+                <i class="mdi mdi-minus" />
+              </button>
+              <input
+                v-model.number="pageData.infantCount"
+                type="number"
+                min="0"
+                class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+              />
+              <button
+                @click="pageData.infantCount++"
+                class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
+              >
+                <i class="mdi mdi-plus" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ข้อมูลการรับส่งและผู้จอง -->
+        <div class="space-y-3">
+          <div>
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-account-tie-outline text-lg" />
+              ชื่อผู้จอง
+            </label>
+            <input
+              v-model="pageData.bookerName"
+              type="text"
+              placeholder="เช่น คุณสมชาย ใจดี"
+              class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+            />
+          </div>
+
+          <div>
+            <label class="text-sm mb-1 flex items-center gap-2 text-orange-300">
+              <i class="mdi mdi-clock-time-four-outline text-lg" />
+              เวลาที่คนไปรับ
+            </label>
+            <input
+              v-model="pageData.pickupScheduledTime"
+              type="time"
+              class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
+            />
+          </div>
+
+          <!-- การรับส่ง -->
+          <div class="flex gap-4">
+            <label
+              class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-orange-300/30 hover:border-orange-400 bg-white/5 hover:bg-orange-50/10 transition-all duration-300"
+            >
+              <input
+                type="checkbox"
+                v-model="pageData.includesPickup"
+                class="accent-orange-500 w-4 h-4"
+              />
+              <div class="flex items-center gap-2">
+                <i class="mdi mdi-car-pickup text-orange-400"></i>
+                <span class="text-orange-200">รวมการรับ</span>
+              </div>
+            </label>
+
+            <label
+              class="flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-orange-300/30 hover:border-orange-400 bg-white/5 hover:bg-orange-50/10 transition-all duration-300"
+            >
+              <input
+                type="checkbox"
+                v-model="pageData.includesDropoff"
+                class="accent-orange-500 w-4 h-4"
+              />
+              <div class="flex items-center gap-2">
+                <i class="mdi mdi-car-off text-orange-400"></i>
+                <span class="text-orange-200">รวมการส่ง</span>
+              </div>
+            </label>
+          </div>
+        </div>
       </div>
 
       <!-- จำนวนตั๋ว -->
@@ -143,7 +361,7 @@
             </button>
           </div>
         </div>
-        <!-- <div class="flex-1">
+        <div class="flex-1">
           <label class="text-sm mb-1 flex items-center gap-2 text-pink-300">
             <i class="mdi mdi-human-child text-pink-400" />
             เด็ก <span class="text-xs text-gray-400">(1300)</span>
@@ -173,7 +391,7 @@
               <i class="mdi mdi-plus" />
             </button>
           </div>
-        </div> -->
+        </div>
       </div>
 
       <!-- Referrer -->
@@ -364,10 +582,22 @@ const pageData = ref({
   customerEmail: "", // อีเมลลูกค้า
   standingAdultQty: 1, // จำนวนตั๋วผู้ใหญ่
   standingChildQty: 0, // จำนวนตั๋วเด็ก
-  referrerCode: "", // รหัสผู้แนะนำ
+  referrerCode: null, // รหัสผู้แนะนำ
   paymentMethod: "CASH", // วิธีการชำระเงิน (เริ่มต้นเป็นเงินสด)
   showDate: `${yyyy}-${mm}-${dd}`, // วันที่แสดง
   purchaseType: "ONSITE", // ประเภทการซื้อ (เริ่มต้นเป็นหน้างาน)
+  // 🏨 ข้อมูลโรงแรม
+  hotelName: null, // ชื่อโรงแรม
+  hotelDistrict: null, // เขต/พื้นที่
+  roomNumber: null, // หมายเลขห้อง
+  adultCount: 0, // จำนวนผู้ใหญ่ (AD)
+  childCount: 0, // จำนวนเด็ก (CH)
+  infantCount: 0, // จำนวนทารก (IF)
+  voucherNumber: null, // เลขที่ voucher (V/C)
+  pickupScheduledTime: null, // เวลาที่คนไปรับ
+  bookerName: null, // ชื่อผู้จอง
+  includesPickup: false, // รวมการรับ
+  includesDropoff: false, // รวมการส่ง
 });
 
 const orderId = ref<string | null>(null);
@@ -380,42 +610,27 @@ const calculateTotal = () => {
 
 // 🆕 จองตั๋วยืนแบบใหม่ (แนะนำ - ใช้ API v1)
 const bookStandingTicketNew = async () => {
-  const {
-    standingAdultQty,
-    standingChildQty,
-    showDate,
-    customerName,
-    customerPhone,
-    customerEmail,
-    paymentMethod,
-  } = pageData.value;
-
   isLoading.loading = true;
 
   try {
-    // 📋 เตรียมข้อมูลสำหรับ API v1
-    const bookingData = {
+    // ส่งข้อมูลทั้งหมดใน pageData.value เข้า submitOrder โดยตรง
+    const response = await submitOrder({
+      ...pageData.value,
       ticketType: "STANDING",
-      standingAdultQty,
-      standingChildQty,
-      showDate,
-      customerName: customerName.trim(),
-      customerPhone: customerPhone.trim(),
-      customerEmail: customerEmail.trim(),
-      paymentMethod,
-      referrerCode: pageData.value.referrerCode || undefined,
-      purchaseType: pageData.value.purchaseType,
+    });
+    // รวมค่าที่ผู้ใช้กรอกไว้ในฟอร์ม (pageData) เข้ากับข้อมูลที่ตอบจาก API
+    // เพื่อให้ SummaryModal แสดงค่าที่กรอกได้ทันที แม้ API จะไม่ echo ฟิลด์ทั้งหมดกลับมา
+    dataOrder.value = {
+      ...(response || {}),
+      ...pageData.value,
+      // ทำให้แน่ใจว่ามี orderId ให้ modal ใช้
+      orderId: (response && (response.id || response.orderId)) || undefined,
     };
 
-    const response = await submitOrder(bookingData);
-    dataOrder.value = response;
-
     showSummaryModal.value = true;
-    // 🎉 แสดงผลลัพธ์การจอง
     showToast("success", "🎉 จองตั๋วยืนสำเร็จ! คุณสามารถชำระเงินได้แล้ว");
 
-    // 📋 เก็บข้อมูลการจองสำหรับขั้นตอนถัดไป
-    if (response.id) {
+    if (response?.id) {
       orderId.value = response.id;
     }
   } catch (error) {
@@ -458,6 +673,18 @@ const confirmPaymentForOrder = async () => {
       paymentMethod: "CASH",
       showDate: `${yyyy}-${mm}-${dd}`,
       purchaseType: pageData.value.purchaseType,
+      // 🏨 ล้างข้อมูลโรงแรม
+      hotelName: "",
+      hotelDistrict: "",
+      roomNumber: "",
+      adultCount: 1,
+      childCount: 0,
+      infantCount: 0,
+      voucherNumber: "",
+      pickupScheduledTime: "",
+      bookerName: "",
+      includesPickup: false,
+      includesDropoff: false,
     };
     orderId.value = null;
   } catch (error) {

@@ -74,6 +74,18 @@ export const usePageData = defineStore("pageData", {
     topReferrers: [],
     orderStatusCounts: {},
     CheckLimitChatSeat: 0,
+    // Hotel booking related fields
+    hotelName: "",
+    hotelDistrict: "",
+    roomNumber: "",
+    adultCount: 1,
+    childCount: 0,
+    infantCount: 0,
+    voucherNumber: "",
+    pickupScheduledTime: "",
+    bookerName: "",
+    includesPickup: false,
+    includesDropoff: false,
   }),
 
   actions: {
@@ -103,6 +115,18 @@ export const usePageData = defineStore("pageData", {
       this.total = 0;
       this.CheckLimitChatSeat = 0;
       this.purchaseType = "ONSITE";
+      // Reset hotel booking related fields
+      this.hotelName = "";
+      this.hotelDistrict = "";
+      this.roomNumber = "";
+      this.adultCount = 1;
+      this.childCount = 0;
+      this.infantCount = 0;
+      this.voucherNumber = "";
+      this.pickupScheduledTime = "";
+      this.bookerName = "";
+      this.includesPickup = false;
+      this.includesDropoff = false;
     },
   },
 });
