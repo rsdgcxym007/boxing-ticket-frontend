@@ -196,6 +196,20 @@
               <span v-else>กำลังสร้าง PDF...</span>
             </BaseButton>
           </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              ส่งออกข้อมูล
+            </label>
+            <BaseButton
+              @click="handleExport"
+              :disabled="pageData.loading || exportPdfLoading"
+              class="w-full h-[40px] bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium rounded-lg shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <i class="mdi mdi-file-pdf-box text-lg"></i>
+              <span v-if="!exportPdfLoading">ส่งออก CSV</span>
+              <span v-else>กำลังสร้าง PDF...</span>
+            </BaseButton>
+          </div>
         </div>
       </div>
 
@@ -374,6 +388,7 @@ const pageData = usePageData();
 const orderData = reactive({});
 const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
 const { showToast } = useSingleToast();
+const { postExportSpreadsheet } = useExport();
 const collapsed = ref(false);
 const showThermalModal = ref(false);
 const generatedTickets = ref([]);
@@ -481,6 +496,11 @@ const onAttendanceStatusChange = () => {
 const onReferrerNameChange = () => {
   pageData.page = 1;
   fetchData();
+};
+
+const handleExport = () => {
+  const payload = pageData.orders.map((order) => order.id);
+  postExportSpreadsheet(payload);
 };
 
 const handleExportPDF = async () => {
