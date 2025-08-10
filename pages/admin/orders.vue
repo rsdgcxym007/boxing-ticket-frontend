@@ -260,6 +260,7 @@
             @cancel-order="onCancelOrder"
             @generate-tickets="onGenerateTickets"
             @edit-order="onEditOrder"
+            @update-attendance="onUpdateAttendance"
           />
         </div>
       </div>
@@ -319,6 +320,14 @@
         showModal = value;
       }
     "
+  />
+
+  <!-- Modal สำหรับอัพเดทสถานะการเข้าร่วม -->
+  <AttendanceUpdateModal
+    v-model:showModal="showAttendanceModal"
+    :order="selectedOrderForAttendance"
+    @success="onAttendanceUpdateSuccess"
+    @close="showAttendanceModal = false"
   />
 
   <!-- Export PDF Modal -->
@@ -388,6 +397,7 @@ import { useI18n } from "vue-i18n";
 import { reactive, onMounted, ref, onUnmounted, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import StandingTicketModal from "~/components/StandingTicketModal.vue";
+import AttendanceUpdateModal from "~/components/AttendanceUpdateModal.vue";
 import BaseButton from "~/components/base/BaseButton.vue";
 import { ZONE_IDS_BY_NAME } from "~~/utils/zoneEnums";
 import { useOrder } from "~/composables/useOrder";
@@ -419,9 +429,14 @@ definePageMeta({
 const showModal = ref(false);
 const pageData = usePageData();
 const orderData = reactive({});
-const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
+const { cancelOrder, generateTickets, downloadThermalReceipt, updateOrder } =
+  useOrder();
 const { showToast } = useSingleToast();
 const { postExportSpreadsheet } = useExport();
+
+// Attendance update related state
+const showAttendanceModal = ref(false);
+const selectedOrderForAttendance = ref(null);
 
 // Export related state
 const showExportDialog = ref(false);
@@ -650,6 +665,19 @@ const onGenerateTickets = async (order) => {
 const onEditOrder = (order) => {
   // Navigate to edit page
   navigateTo(`/admin/order/${order.id}/edit`);
+};
+
+// ฟังก์ชันสำหรับอัพเดทสถานะการเข้าร่วม
+const onUpdateAttendance = (order) => {
+  selectedOrderForAttendance.value = order;
+  showAttendanceModal.value = true;
+};
+
+// ฟังก์ชันสำหรับจัดการเมื่ออัพเดทสถานะการเข้าร่วมสำเร็จ
+const onAttendanceUpdateSuccess = () => {
+  showAttendanceModal.value = false;
+  selectedOrderForAttendance.value = null;
+  fetchData(); // รีเฟรชข้อมูล
 };
 
 // ฟังก์ชันที่มี debounce สำหรับการค้นหา
