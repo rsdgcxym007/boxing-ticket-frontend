@@ -26,13 +26,11 @@ export const useWebSocket = () => {
 
     // การเชื่อมต่อ
     socket.value.on("connect", () => {
-      console.log("🚀 Connected to WebSocket");
       isConnected.value = true;
     });
 
     // การตัดการเชื่อมต่อ
     socket.value.on("disconnect", () => {
-      console.log("❌ WebSocket disconnected");
       isConnected.value = false;
 
       // พยายามเชื่อมต่อใหม่หลัง 5 วินาที
@@ -45,7 +43,6 @@ export const useWebSocket = () => {
 
     // การ join room สำเร็จ
     socket.value.on("joined_room", (data) => {
-      console.log(`📍 Joined room: ${data.room}`);
       currentRoom.value = data.room;
     });
 
@@ -137,7 +134,6 @@ export const useWebSocket = () => {
       return;
     }
 
-    console.log("📡 Broadcasting seat update:", data);
     socket.value.emit("seat_update", data);
   };
 
@@ -147,8 +143,6 @@ export const useWebSocket = () => {
       console.warn("⚠️ Socket not available for onSeatUpdate");
       return;
     }
-
-    console.log("🔗 Setting up seat update listeners...");
 
     const eventTypes = [
       "seat_update",
@@ -165,7 +159,6 @@ export const useWebSocket = () => {
     const eventHandlers: { [key: string]: (event: any) => void } = {};
     eventTypes.forEach((eventType) => {
       eventHandlers[eventType] = (event) => {
-        console.log(`📥 Received ${eventType} event:`, event);
         callback(event);
       };
       socketInstance.on(eventType, eventHandlers[eventType]);
@@ -173,14 +166,11 @@ export const useWebSocket = () => {
 
     // ฟัง event ทั่วไป
     const anyHandler = (eventName: string, ...args: any[]) => {
-      console.log(`📨 Any event received: ${eventName}`, args);
       if (eventName.includes("seat") || eventName.includes("order")) {
         callback(args[0] || { action: eventName, data: args });
       }
     };
     socketInstance.onAny(anyHandler);
-
-    console.log("✅ Seat update listeners configured successfully");
 
     // คืน unsubscribe function
     return () => {
@@ -188,8 +178,44 @@ export const useWebSocket = () => {
         socketInstance.off(eventType, eventHandlers[eventType]);
       });
       socketInstance.offAny(anyHandler);
-      console.log("🧹 Unsubscribed seat update listeners");
     };
+  };
+
+  // Export Events
+  const onExportProgress = (callback: (event: any) => void) => {
+    if (!socket.value) return;
+    socket.value.on("export_progress", callback);
+    return () => {
+      if (socket.value) socket.value.off("export_progress", callback);
+    };
+  };
+
+  const onExportCompleted = (callback: (event: any) => void) => {
+    if (!socket.value) return;
+    socket.value.on("export_completed", callback);
+    return () => {
+      if (socket.value) socket.value.off("export_completed", callback);
+    };
+  };
+
+  const onExportFailed = (callback: (event: any) => void) => {
+    if (!socket.value) return;
+    socket.value.on("export_failed", callback);
+    return () => {
+      if (socket.value) socket.value.off("export_failed", callback);
+    };
+  };
+
+  // Join Export Room
+  const joinExportRoom = (exportId: string) => {
+    if (!socket.value || !isConnected.value) return;
+    socket.value.emit("join_export_room", { exportId });
+  };
+
+  // Leave Export Room
+  const leaveExportRoom = (exportId: string) => {
+    if (!socket.value || !isConnected.value) return;
+    socket.value.emit("leave_export_room", { exportId });
   };
 
   // ส่งข้อมูล emit ทั่วไป
@@ -237,6 +263,11 @@ export const useWebSocket = () => {
     onSeatAvailabilityChanged,
     broadcastSeatUpdate,
     onSeatUpdate,
+    onExportProgress,
+    onExportCompleted,
+    onExportFailed,
+    joinExportRoom,
+    leaveExportRoom,
     emit,
   };
 };

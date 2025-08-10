@@ -483,6 +483,16 @@
           <i class="mdi mdi-ticket-plus-outline text-xl" />
           สร้างออเดอร์
         </BaseButton>
+        <BaseButton
+          @click="bookStandingBooking"
+          variant="primary"
+          size="lg"
+          :disabled="isLoading.loading"
+          class="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600"
+        >
+          <i class="mdi mdi-ticket-plus-outline text-xl" />
+          จองออเดอร์
+        </BaseButton>
 
         <!-- 🆕 ปุ่มยืนยันการชำระเงิน -->
         <!-- <BaseButton
@@ -608,6 +618,37 @@ const calculateTotal = () => {
   return standingAdultQty * 1500 + standingChildQty * 1300;
 };
 
+const bookStandingBooking = async () => {
+  isLoading.loading = true;
+
+  try {
+    // ส่งข้อมูลทั้งหมดใน pageData.value เข้า submitOrder โดยตรง
+    const response = await submitOrder({
+      ...pageData.value,
+      status: "BOOKED",
+      ticketType: "STANDING",
+    });
+    // รวมค่าที่ผู้ใช้กรอกไว้ในฟอร์ม (pageData) เข้ากับข้อมูลที่ตอบจาก API
+    // เพื่อให้ SummaryModal แสดงค่าที่กรอกได้ทันที แม้ API จะไม่ echo ฟิลด์ทั้งหมดกลับมา
+    dataOrder.value = {
+      ...(response || {}),
+      ...pageData.value,
+      // ทำให้แน่ใจว่ามี orderId ให้ modal ใช้
+      orderId: (response && (response.id || response.orderId)) || undefined,
+    };
+
+    showToast("success", "🎉 จองตั๋วยืนสำเร็จ! คุณสามารถชำระเงินได้แล้ว");
+
+    if (response?.id) {
+      orderId.value = response.id;
+    }
+  } catch (error) {
+    console.error("❌ เกิดข้อผิดพลาดในการจองตั๋ว:", error);
+    // showToast("error", "❌ ไม่สามารถจองตั๋วได้ กรุณาลองใหม่อีกครั้ง");
+  } finally {
+    isLoading.loading = false;
+  }
+};
 // 🆕 จองตั๋วยืนแบบใหม่ (แนะนำ - ใช้ API v1)
 const bookStandingTicketNew = async () => {
   isLoading.loading = true;

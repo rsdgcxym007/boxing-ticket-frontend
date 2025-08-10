@@ -707,10 +707,6 @@ const downloadTickets = async () => {
         const actualHeight = ticketElement.scrollHeight;
         const actualWidth = 300;
 
-        console.log(
-          `Ticket ${i} actual dimensions: ${actualWidth}x${actualHeight}`
-        );
-
         // Create canvas to capture the complete ticket including QR and stub
         const canvas = await html2canvas(ticketElement, {
           scale: 2, // Good balance between quality and performance
@@ -741,10 +737,6 @@ const downloadTickets = async () => {
           console.error("Canvas is empty for ticket", i);
           continue;
         }
-
-        console.log(
-          `Canvas created for ticket ${i}: ${canvas.width}x${canvas.height}`
-        );
 
         // Calculate dimensions for PDF (ticket size: 100mm width for better visibility)
         const imgWidth = 100;

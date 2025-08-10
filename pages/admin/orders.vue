@@ -29,6 +29,7 @@
       <!-- ส่วนกรองข้อมูล -->
       <div
         class="bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-blue-200 p-6"
+        style="overflow: visible; z-index: 10; position: relative"
       >
         <div class="flex items-center gap-2 mb-6">
           <i class="mdi mdi-filter-outline text-blue-500 text-lg"></i>
@@ -36,7 +37,8 @@
         </div>
 
         <div
-          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 relative"
+          style="overflow: visible; position: relative"
         >
           <!-- ค้นหา -->
           <div class="space-y-2">
@@ -46,7 +48,7 @@
             <BaseInput
               v-model="pageData.filters.search"
               @input="onOrderIdChange"
-              placeholder="เลขที่ออเดอร์, ชื่อ, เบอร์โทร"
+              placeholder="เลขที่ออเดอร์, ชื่อ, เบอร์โทร,ชื่อโรงแรมม,V/c"
               class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 placeholder-blue-500 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
             />
           </div>
@@ -74,13 +76,14 @@
           </div>
 
           <!-- สร้างโดย -->
-          <div class="space-y-2">
+          <div class="space-y-2 relative z-10">
             <label class="block text-sm font-medium text-blue-700">
               สร้างโดย
             </label>
             <BaseSelect
               v-model="pageData.filters.createdBy"
               :options="masterStaffAdmin"
+              clearable
               option-label="name"
               option-value="id"
               placeholder="เลือกผู้สร้างออเดอร์"
@@ -90,7 +93,7 @@
           </div>
 
           <!-- สถานะออเดอร์ -->
-          <div class="space-y-2">
+          <div class="space-y-2 relative z-10">
             <label class="block text-sm font-medium text-blue-700">
               สถานะออเดอร์
             </label>
@@ -99,13 +102,15 @@
               :options="orderStatusOptions"
               placeholder="เลือกสถานะ"
               clearable
+              multiple
+              :closeOnSelect="false"
               @change="onOrderStatusChange"
               class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
             />
           </div>
 
           <!-- วิธีชำระเงิน -->
-          <div class="space-y-2">
+          <div class="space-y-2 relative z-10">
             <label class="block text-sm font-medium text-blue-700">
               วิธีชำระเงิน
             </label>
@@ -120,7 +125,7 @@
           </div>
 
           <!-- ประเภทการซื้อ -->
-          <div class="space-y-2">
+          <div class="space-y-2 relative z-10">
             <label class="block text-sm font-medium text-blue-700">
               ประเภทการซื้อ
             </label>
@@ -135,7 +140,7 @@
           </div>
 
           <!-- สถานะการเข้าร่วม -->
-          <div class="space-y-2">
+          <div class="space-y-2 relative z-10">
             <label class="block text-sm font-medium text-blue-700">
               สถานะการเข้าร่วม
             </label>
@@ -150,7 +155,7 @@
           </div>
 
           <!-- ชื่อผู้แนะนำ -->
-          <div class="space-y-2">
+          <div class="space-y-2 relative z-10">
             <label class="block text-sm font-medium text-blue-700">
               ชื่อผู้แนะนำ
             </label>
@@ -166,7 +171,7 @@
           </div>
 
           <!-- รายการต่อหน้า -->
-          <div class="space-y-2">
+          <div class="space-y-2 relative z-10">
             <label class="block text-sm font-medium text-blue-700">
               รายการต่อหน้า
             </label>
@@ -182,32 +187,47 @@
           </div>
 
           <!-- ส่งออกข้อมูล -->
-          <div class="space-y-2">
+          <div class="space-y-2 relative z-20">
             <label class="block text-sm font-medium text-blue-700">
               ส่งออกข้อมูล
+            </label>
+            <ExportButton
+              :selected-order-ids="selectedOrderIds"
+              :total-orders="pageData.totalCount"
+              :disabled="pageData.loading"
+              @quick-export="handleQuickExport"
+              @open-advanced="showExportDialog = true"
+              width="100%"
+              height="40px"
+              class="w-full relative z-20"
+            />
+          </div>
+
+          <!-- นำเข้าข้อมูล -->
+          <div class="space-y-2 relative z-20">
+            <label class="block text-sm font-medium text-blue-700">
+              นำเข้าข้อมูล
+            </label>
+            <ImportButton
+              class="w-full relative z-20"
+              width="100%"
+              height="40px"
+            />
+          </div>
+
+          <!-- ส่งออก PDF -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              ส่งออก PDF
             </label>
             <BaseButton
               @click="handleExportPDF"
               :disabled="pageData.loading || exportPdfLoading"
-              class="w-full h-[40px] bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium rounded-lg shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+              :style="{ width: '100%', height: '40px' }"
+              class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium rounded-lg shadow-md transition-all duration-200 flex items-center justify-center"
             >
-              <i class="mdi mdi-file-pdf-box text-lg"></i>
-              <span v-if="!exportPdfLoading">ส่งออก PDF</span>
-              <span v-else>กำลังสร้าง PDF...</span>
-            </BaseButton>
-          </div>
-          <div class="space-y-2">
-            <label class="block text-sm font-medium text-blue-700">
-              ส่งออกข้อมูล
-            </label>
-            <BaseButton
-              @click="handleExport"
-              :disabled="pageData.loading || exportPdfLoading"
-              class="w-full h-[40px] bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium rounded-lg shadow-md transition-all duration-200 flex items-center justify-center gap-2"
-            >
-              <i class="mdi mdi-file-pdf-box text-lg"></i>
-              <span v-if="!exportPdfLoading">ส่งออก CSV</span>
-              <span v-else>กำลังสร้าง PDF...</span>
+              <i class="mdi mdi-file-pdf-box text-lg mr-2"></i>
+              <span class="text-sm">PDF</span>
             </BaseButton>
           </div>
         </div>
@@ -293,7 +313,6 @@
     @success="fetchData"
     @update:showModal="
       async (value) => {
-        console.log('StandingTicketModal showModal updated:', value);
         if (value == false) {
           await fetchData();
         }
@@ -351,6 +370,16 @@
       ></iframe>
     </div>
   </div>
+
+  <!-- Export Dialog -->
+  <ExportDialog
+    :is-open="showExportDialog"
+    :selected-order-ids="selectedOrderIds"
+    :total-orders="pageData.totalCount"
+    :filtered-orders="pageData.totalCount"
+    @close="showExportDialog = false"
+    @exported="handleExportCompleted"
+  />
 </template>
 
 <script setup>
@@ -372,6 +401,10 @@ import {
   attendanceStatusOptions,
 } from "~/utils/orderOptions";
 import { useSingleToast } from "~/composables/useSingleToast";
+import { useExport } from "~/composables/export";
+import ExportButton from "~/components/Export/ExportButton.vue";
+import ImportButton from "~/components/Export/ImportButton.vue";
+import ExportDialog from "~/components/Export/ExportDialog.vue";
 import dayjs from "dayjs";
 import { navigateTo } from "nuxt/app";
 
@@ -389,6 +422,10 @@ const orderData = reactive({});
 const { cancelOrder, generateTickets, downloadThermalReceipt } = useOrder();
 const { showToast } = useSingleToast();
 const { postExportSpreadsheet } = useExport();
+
+// Export related state
+const showExportDialog = ref(false);
+const selectedOrderIds = ref([]);
 const collapsed = ref(false);
 const showThermalModal = ref(false);
 const generatedTickets = ref([]);
@@ -498,8 +535,18 @@ const onReferrerNameChange = () => {
   fetchData();
 };
 
-const handleExport = () => {
-  const payload = pageData.orders.map((order) => order.id);
+const handleExportCSV = () => {
+  const payload = {
+    orders: pageData.orders.map((order) => order.id),
+    format: "csv",
+  };
+  postExportSpreadsheet(payload);
+};
+const handleExportExcel = () => {
+  const payload = {
+    orders: pageData.orders.map((order) => order.id),
+    format: "excel",
+  };
   postExportSpreadsheet(payload);
 };
 
@@ -528,6 +575,18 @@ const handleExportPDF = async () => {
     showToast("error", "เกิดข้อผิดพลาดในการส่งออก PDF");
   }
 };
+
+// Export functions
+const handleQuickExport = async (format, type) => {
+  console.log("Quick export:", format, type);
+  showToast("success", `กำลังส่งออกไฟล์ ${format.toUpperCase()}`);
+};
+
+const handleExportCompleted = (options) => {
+  console.log("Export completed:", options);
+  showToast("success", `ส่งออกไฟล์ ${options.format.toUpperCase()} สำเร็จ`);
+};
+
 const onCancelOrder = async (order) => {
   try {
     await cancelOrder(order.id);
@@ -653,6 +712,73 @@ watch(orderData, (newValue) => {
 </script>
 
 <style scoped>
+/* Export/Import Button dropdown z-index fix */
+:deep(.export-button),
+:deep(.import-button),
+:deep(.export-button-container),
+:deep(.import-button-container) {
+  z-index: 999 !important;
+  position: relative !important;
+}
+
+:deep(.export-button .dropdown),
+:deep(.import-button .dropdown),
+:deep(.export-dropdown),
+:deep(.import-dropdown),
+:deep(.dropdown-overlay),
+:deep(.export-dropdown-overlay) {
+  z-index: 999999 !important;
+  position: absolute !important;
+}
+
+:deep(.dropdown-menu),
+:deep(.dropdown-content) {
+  z-index: 999999 !important;
+  position: absolute !important;
+}
+
+/* Force dropdown to appear below buttons */
+:deep(.import-button-container .dropdown-overlay) {
+  top: calc(100% + 4px) !important;
+  left: 0 !important;
+  right: auto !important;
+  transform: none !important;
+}
+
+:deep(.export-button-container .export-dropdown-overlay) {
+  top: calc(100% + 4px) !important;
+  left: 0 !important;
+  right: auto !important;
+  transform: none !important;
+}
+
+/* BaseSelect dropdown z-index fix */
+:deep(.multiselect) {
+  z-index: 50 !important;
+}
+
+:deep(.multiselect__content-wrapper) {
+  z-index: 50 !important;
+  position: absolute !important;
+}
+
+:deep(.multiselect__content) {
+  z-index: 50 !important;
+}
+
+:deep(.multiselect--active) {
+  z-index: 50 !important;
+}
+
+/* Grid container overflow fix */
+.grid {
+  overflow: visible !important;
+}
+
+.grid > div {
+  overflow: visible !important;
+}
+
 /* Input และ Select customization */
 :deep(.dp__input_reg) {
   height: 40.5px;

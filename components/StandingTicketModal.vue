@@ -292,16 +292,6 @@ const handleCreateOrder = async () => {
     customerEmail,
   } = pageData.value;
 
-  console.log(
-    "standingAdultQty",
-    standingAdultQty,
-    standingChildQty,
-    showDate,
-    customerName,
-    customerPhone,
-    customerEmail
-  );
-
   // ตรวจสอบข้อมูล
   if (
     !showDate ||

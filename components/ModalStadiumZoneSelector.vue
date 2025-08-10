@@ -559,8 +559,6 @@ const getSeatStatus = (seat) => {
 
   // ปลดล็อคทันทีถ้า isLockedUntil ไม่มีค่า
   if (seat.isLockedUntil === null || seat.isLockedUntil === undefined) {
-    // console.log("seat", seat);
-
     // ถ้า seat ถูกจองจริง ๆ ให้คืน "BOOKED"
     if (
       seat.bookingStatus === OrderStatus.BOOKED ||

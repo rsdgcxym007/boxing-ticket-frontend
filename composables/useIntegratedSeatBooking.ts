@@ -28,7 +28,6 @@ export const useIntegratedSeatBooking = () => {
   const initializeBookingManager = async () => {
     try {
       bookingManager = useTicketBookingManager();
-      console.log("✅ เริ่มต้น booking manager สำเร็จ");
     } catch (error) {
       console.error("❌ เริ่มต้น booking manager ล้มเหลว:", error);
       // Fallback
@@ -66,8 +65,6 @@ export const useIntegratedSeatBooking = () => {
 
   // ===== WebSocket Event Handling =====
   const handleWebSocketEvent = (event: any) => {
-    console.log("📡 รับ WebSocket event:", event);
-
     // ตรวจสอบว่าเป็น event ของโซนและวันที่ปัจจุบัน
     const eventData = event.data || event;
 
@@ -75,7 +72,6 @@ export const useIntegratedSeatBooking = () => {
       eventData.zoneKey !== currentZoneKey.value ||
       eventData.showDate !== currentShowDate.value
     ) {
-      console.log("🔄 ข้าม event ของโซน/วันที่อื่น");
       return;
     }
 
@@ -101,7 +97,6 @@ export const useIntegratedSeatBooking = () => {
       }
       seatUpdateUnsubscribe = null;
       listenersSetup.value = false;
-      console.log("🔗 ถอด WebSocket listener เดิมออกแล้ว");
     }
 
     if (webSocket.onSeatUpdate) {
@@ -112,12 +107,10 @@ export const useIntegratedSeatBooking = () => {
         seatUpdateUnsubscribe = null;
       }
       listenersSetup.value = true;
-      console.log("🔗 ตั้งค่า WebSocket listeners สำเร็จ");
     }
 
     if (webSocket.joinShowRoom && currentShowDate.value) {
       webSocket.joinShowRoom(currentShowDate.value);
-      console.log("🚪 เข้าร่วม room:", currentShowDate.value);
     }
   };
 
@@ -329,8 +322,6 @@ export const useIntegratedSeatBooking = () => {
         timestamp: new Date().toISOString(),
       };
 
-      console.log("📡 ส่งข้อมูลอัปเดต:", updateData);
-
       if (webSocket.broadcastSeatUpdate) {
         webSocket.broadcastSeatUpdate(updateData);
       }
@@ -367,7 +358,6 @@ export const useIntegratedSeatBooking = () => {
           seatManager.mySelectedSeats.value.map((s) => s.id)
         );
 
-        console.log("✅ สร้างการจองสำเร็จ:", order);
         return order;
       } else {
         throw new Error("ไม่สามารถสร้างการจองได้");
@@ -386,14 +376,12 @@ export const useIntegratedSeatBooking = () => {
     if (seatUpdateUnsubscribe) {
       if (typeof seatUpdateUnsubscribe === "function") {
         seatUpdateUnsubscribe();
-        console.log("🔗 ถอด WebSocket listener ตอน cleanup");
       }
       seatUpdateUnsubscribe = null;
       listenersSetup.value = false;
     }
     currentZoneKey.value = "";
     currentShowDate.value = "";
-    console.log("🧹 ล้างข้อมูลทั้งหมด");
   };
 
   // ===== Initialization =====

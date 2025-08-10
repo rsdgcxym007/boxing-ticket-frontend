@@ -68,15 +68,12 @@ export function useSeatApi() {
     } catch (error: any) {
       console.error("getSeatsByZoneId - error:", error);
 
-      console.log("error?.message", error?.message);
-
       if (error?.message === "Unauthorized") {
         rounter.push("/login");
         showToast("warning", `กรุณาเข้าสู่ระบบเพื่อดําเนินการต่อ`);
         return [];
       }
 
-      console.log("getSeatsByZoneId - error message:", error?.message);
       showToast(
         "error",
         `โหลดที่นั่งล้มเหลว: ${error?.message || "Unknown error"}`

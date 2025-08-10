@@ -33,6 +33,11 @@ export const getStatusConfig = (status: string) => {
       label: "หมดอายุ",
       icon: "mdi-timer-off text-gray-700 text-base",
     },
+    PARTIAL_ORDER: {
+      class: "bg-white border border-yellow-400 text-yellow-900 font-bold",
+      label: "จ่ายเงินบางส่วน",
+      icon: "mdi-clock-outline text-yellow-700 text-base",
+    },
   };
   return (
     configs[status] || {
@@ -64,6 +69,11 @@ export const getPaymentStatusConfig = (status: string) => {
       class: "bg-white border border-purple-400 text-purple-900 font-bold",
       label: "คืนเงินแล้ว",
       icon: "mdi-cash-refund text-purple-700 text-base",
+    },
+    PARTIAL: {
+      class: "bg-white border border-yellow-400 text-yellow-900 font-bold",
+      label: "ชำระบางส่วน",
+      icon: "mdi-clock-outline text-yellow-700 text-base",
     },
   };
   return (
@@ -133,21 +143,63 @@ export const getPurchaseTypeConfig = (purchaseType: string) => {
 export const canEditField = (orderData: any, field: string): boolean => {
   if (!orderData) return false;
 
-  if (orderData.status === OrderStatus.PAID) {
-    // PAID orders can only edit certain fields
-    if (
-      orderData.ticketType === TicketType.RINGSIDE &&
-      orderData.purchaseType !== OrderPurchaseType.ONSITE
-    ) {
-      // Can edit seats for RINGSIDE non-ONSITE orders
-      return ["seatIds", "newSeatIds"].includes(field);
-    }
-    // Other PAID orders cannot edit anything
+  const { ticketType, purchaseType, status, paymentStatus } = orderData;
+
+  // STANDING + ONSITE: Cannot edit anything
+  if (
+    ticketType === TicketType.STANDING &&
+    purchaseType === OrderPurchaseType.ONSITE
+  ) {
     return false;
   }
 
-  // Non-PAID orders can edit most things
-  return true;
+  // STANDING + BOOKING: Can edit everything except when PAID
+  if (
+    ticketType === TicketType.STANDING &&
+    purchaseType === OrderPurchaseType.BOOKING
+  ) {
+    // Cannot edit if both status and paymentStatus are PAID
+    if (status === OrderStatus.PAID && paymentStatus === "PAID") {
+      return false;
+    }
+    // Can edit everything else (but not seats since it's STANDING)
+    if (field === "seatIds" || field === "newSeatIds") {
+      return false;
+    }
+    return true;
+  }
+
+  // RINGSIDE (any purchaseType): Can edit everything, including seats
+  if (ticketType === TicketType.RINGSIDE) {
+    // newShowDate can always be edited for RINGSIDE
+    if (field === "newShowDate") return true;
+
+    // seatIds can always be edited for RINGSIDE (but with quantity restrictions)
+    if (field === "seatIds" || field === "newSeatIds") return true;
+
+    // For PAID orders, can edit seats, date, and basic customer info
+    if (status === OrderStatus.PAID && paymentStatus === "PAID") {
+      return [
+        "seatIds",
+        "newSeatIds",
+        "newShowDate",
+        "newReferrerCode",
+        "newCustomerName",
+        "newCustomerPhone",
+        "newCustomerEmail",
+      ].includes(field);
+    }
+
+    // Non-PAID RINGSIDE orders can edit everything
+    return true;
+  }
+
+  // Default fallback: can edit most things for non-PAID orders
+  if (status !== OrderStatus.PAID || paymentStatus !== "PAID") {
+    return true;
+  }
+
+  return false;
 };
 
 // Logic to determine what fields should be visible
