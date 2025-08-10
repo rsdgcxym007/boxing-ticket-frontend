@@ -381,18 +381,26 @@
           <div class="flex flex-col sm:flex-row justify-end gap-2">
             <button
               v-if="!['CANCELLED', 'EXPIRED'].includes(order.status)"
-              @click="$emit('edit-order', order)"
+              @click="emit('edit-order', order)"
               class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-bold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 transform text-xs"
             >
               <i class="mdi mdi-pencil text-sm"></i>
               <span>แก้ไขออเดอร์</span>
             </button>
             <button
+              v-if="order.attendanceStatus === 'PENDING'"
+              @click="emit('update-attendance', order)"
+              class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-lg font-bold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 transform text-xs"
+            >
+              <i class="mdi mdi-account-check text-sm"></i>
+              <span>อัพเดทการเข้าร่วม</span>
+            </button>
+            <button
               v-if="
                 order.status === OrderStatus.PAID &&
                 order.paymentStatus === PaymentStatus.PAID
               "
-              @click="$emit('generate-tickets', order)"
+              @click="emit('generate-tickets', order)"
               class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg font-bold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 transform text-xs"
             >
               <i class="mdi mdi-ticket-confirmation text-sm"></i>
@@ -400,7 +408,7 @@
             </button>
             <button
               v-if="order.status !== OrderStatus.CANCELLED"
-              @click="$emit('cancel-order', order)"
+              @click="emit('cancel-order', order)"
               class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg font-bold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 transform text-xs"
             >
               <i class="mdi mdi-close-circle text-sm"></i>
@@ -488,6 +496,7 @@ const emit = defineEmits([
   "cancel-order",
   "generate-tickets",
   "edit-order",
+  "update-attendance",
 ]);
 
 const totalPages = computed(() =>

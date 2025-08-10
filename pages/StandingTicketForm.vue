@@ -190,20 +190,23 @@
             <div class="flex items-center gap-2">
               <button
                 @click="
-                  pageData.adultCount = Math.max(1, pageData.adultCount - 1)
+                  pageData.standingAdultQty = Math.max(
+                    1,
+                    pageData.standingAdultQty - 1
+                  )
                 "
                 class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
               >
                 <i class="mdi mdi-minus" />
               </button>
               <input
-                v-model.number="pageData.adultCount"
+                v-model.number="pageData.standingAdultQty"
                 type="number"
                 min="1"
                 class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
               />
               <button
-                @click="pageData.adultCount++"
+                @click="pageData.standingAdultQty++"
                 class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
               >
                 <i class="mdi mdi-plus" />
@@ -218,20 +221,23 @@
             <div class="flex items-center gap-2">
               <button
                 @click="
-                  pageData.childCount = Math.max(0, pageData.childCount - 1)
+                  pageData.standingChildQty = Math.max(
+                    0,
+                    pageData.standingChildQty - 1
+                  )
                 "
                 class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
               >
                 <i class="mdi mdi-minus" />
               </button>
               <input
-                v-model.number="pageData.childCount"
+                v-model.number="pageData.standingChildQty"
                 type="number"
                 min="0"
                 class="w-full px-4 py-2 bg-white/10 text-white border border-white/20 rounded-xl shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition hover:border-orange-300 hover:ring-1"
               />
               <button
-                @click="pageData.childCount++"
+                @click="pageData.standingChildQty++"
                 class="px-2 py-1 bg-orange-400 text-white rounded-full hover:bg-orange-500"
               >
                 <i class="mdi mdi-plus" />
@@ -625,6 +631,8 @@ const bookStandingBooking = async () => {
     // ส่งข้อมูลทั้งหมดใน pageData.value เข้า submitOrder โดยตรง
     const response = await submitOrder({
       ...pageData.value,
+      adultCount: pageData.value.standingAdultQty || 0,
+      childCount: pageData.value.standingChildQty || 0,
       status: "BOOKED",
       ticketType: "STANDING",
     });
@@ -657,6 +665,8 @@ const bookStandingTicketNew = async () => {
     // ส่งข้อมูลทั้งหมดใน pageData.value เข้า submitOrder โดยตรง
     const response = await submitOrder({
       ...pageData.value,
+      adultCount: pageData.value.standingAdultQty || 0,
+      childCount: pageData.value.standingChildQty || 0,
       ticketType: "STANDING",
     });
     // รวมค่าที่ผู้ใช้กรอกไว้ในฟอร์ม (pageData) เข้ากับข้อมูลที่ตอบจาก API

@@ -99,6 +99,17 @@ export const useOrder = () => {
     standingChildQty,
     status,
     purchaseType,
+    hotelName, // ชื่อโรงแรม
+    hotelDistrict, // เขต/พื้นที่
+    roomNumber, // หมายเลขห้อง
+    adultCount, // จำนวนผู้ใหญ่ (AD)
+    childCount, // จำนวนเด็ก (CH)
+    infantCount, // จำนวนทารก (IF)
+    voucherNumber, // เลขที่ voucher (V/C)
+    pickupScheduledTime, // เวลาที่คนไปรับ
+    bookerName, // ชื่อผู้จอง
+    includesPickup, // รวมการรับ
+    includesDropoff, // รวมการส่ง
   }: {
     customerName: string;
     customerPhone: string;
@@ -115,6 +126,17 @@ export const useOrder = () => {
     standingChildQty?: number;
     status?: string; // Optional status for the order
     purchaseType?: string; // Optional purchase type for the order
+    hotelName?: string | null; // ชื่อโรงแรม
+    hotelDistrict?: string | null; // เขต/พื้นที่
+    roomNumber?: string | null; // หมายเลขห้อง
+    adultCount?: number; // จำนวนผู้ใหญ่ (AD)
+    childCount?: number; // จำนวนเด็ก (CH)
+    infantCount?: number; // จำนวนทารก (IF)
+    voucherNumber?: string | null; // เลขที่ voucher (V/C)
+    pickupScheduledTime?: string | null; // เวลาที่คนไปรับ
+    bookerName?: string | null; // ชื่อผู้จอง
+    includesPickup?: boolean; // รวมการรับ
+    includesDropoff?: boolean; // รวมการส่ง
   }) => {
     const payload = {
       customerName,
@@ -132,6 +154,17 @@ export const useOrder = () => {
       standingChildQty,
       status,
       purchaseType,
+      hotelName, // ชื่อโรงแรม
+      hotelDistrict, // เขต/พื้นที่
+      roomNumber, // หมายเลขห้อง
+      adultCount, // จำนวนผู้ใหญ่ (AD)
+      childCount, // จำนวนเด็ก (CH)
+      infantCount, // จำนวนทารก (IF)
+      voucherNumber, // เลขที่ voucher (V/C)
+      pickupScheduledTime,
+      bookerName,
+      includesPickup,
+      includesDropoff,
     };
 
     try {
@@ -343,6 +376,21 @@ export const useOrder = () => {
       throw err;
     }
   };
+  const updateOrder = async (orderId: string, status: string) => {
+    try {
+      const data = await patch(`/api/v1/orders/${orderId}`, {
+        attendanceStatus: status,
+      });
+      showToast("success", `อัพเดท ${orderId} สำเร็จ`);
+      return data;
+    } catch (err: any) {
+      showToast(
+        "error",
+        `อัพเดทล้มเหลว: ${err.response?.data?.message || "Unknown error"}`
+      );
+      throw err;
+    }
+  };
 
   const generateTickets = async (orderId: string) => {
     try {
@@ -484,5 +532,6 @@ export const useOrder = () => {
     downloadThermalReceipt,
     getMasterStaffAdmin,
     getExportPdfOrder,
+    updateOrder,
   };
 };

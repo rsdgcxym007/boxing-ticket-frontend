@@ -1575,7 +1575,7 @@ const loadOrder = async () => {
     }
     formData.value = {
       seatIds: data.seats.map((seat) => seat.id) || [],
-      newReferrerCode: data.referrerCode || "",
+      newReferrerCode: data.referrer?.code || "",
       newCustomerName: data.customerName || "",
       newCustomerPhone: data.customerPhone || "",
       newCustomerEmail: data.email || "",
@@ -2146,11 +2146,11 @@ const saveChanges = async () => {
       await changeSeats(
         orderId,
         newSeatIds,
-        formData.value.newShowDate,
         formData.value.newReferrerCode,
         formData.value.newCustomerName,
         formData.value.newCustomerPhone,
         formData.value.newCustomerEmail,
+        formData.value.newShowDate,
         formData.value.newSource,
         // Hotel & Transportation fields
         formData.value.hotelName,
@@ -2189,11 +2189,11 @@ const saveChanges = async () => {
       await changeSeats(
         orderId,
         originalSeatIds,
-        formData.value.newShowDate,
         formData.value.newReferrerCode,
         formData.value.newCustomerName,
         formData.value.newCustomerPhone,
         formData.value.newCustomerEmail,
+        formData.value.newShowDate,
         formData.value.newSource,
         // Hotel & Transportation fields
         formData.value.hotelName,
@@ -2222,18 +2222,18 @@ const saveChanges = async () => {
     }
 
     // ถ้าเป็นการจ่ายเงิน ให้สร้าง payment record
-    if (formData.value.paymentAmount > 0) {
-      await createSeatedPayment({
-        orderId,
-        amount: formData.value.totalAmount,
-        method: "CASH",
-        customerName: formData.value.newCustomerName,
-        customerEmail: formData.value.newCustomerEmail,
-        customerPhone: formData.value.newCustomerPhone,
-        referrerCode: formData.value.newReferrerCode || undefined,
-      });
-      router.push("/admin/orders");
-    }
+    // if (formData.value.paymentAmount > 0) {
+    //   await createSeatedPayment({
+    //     orderId,
+    //     amount: formData.value.totalAmount,
+    //     method: "CASH",
+    //     customerName: formData.value.newCustomerName,
+    //     customerEmail: formData.value.newCustomerEmail,
+    //     customerPhone: formData.value.newCustomerPhone,
+    //     referrerCode: formData.value.newReferrerCode || undefined,
+    //   });
+    //   router.push("/admin/orders");
+    // }
 
     showToast("success", "บันทึกการเปลี่ยนแปลงเรียบร้อย");
   } catch (err) {
