@@ -14,12 +14,13 @@
         รายละเอียดผู้แนะนำ:
         <span class="text-blue-400">{{ referrerName }}</span>
       </h4>
-      <NuxtLink
-        :to="`/admin/referrer/referrer-preview/${route.params.id}`"
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+      <button
+        @click="goToPreview"
+        :disabled="!orders.length"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
         ดูตัวอย่าง PDF
-      </NuxtLink>
+      </button>
     </div>
 
     <!-- Header -->
@@ -326,6 +327,7 @@ definePageMeta({
 import { ref, onMounted, computed } from "vue";
 import { useReferrer } from "../../../composables/useReferrer";
 import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import dayjs from "dayjs";
 import { usePageData } from "../../../stores/pageData";
 import { OrderStatus, PaymentStatus, PaymentMethod } from "@/types/Enums";
@@ -334,8 +336,12 @@ import {
   paymentMethodOptions,
 } from "../../../utils/orderOptions";
 import { Order } from "@/types/order";
+import { useReferrerStore } from "../../../stores/referrerStore";
+
 const loading = usePageData();
 const orders = ref<Order[]>([]);
+const router = useRouter();
+const referrerStore = useReferrerStore();
 
 const { getReferrerOrders, exportReferrerReport } = useReferrer();
 const route = useRoute();
@@ -375,6 +381,7 @@ const fetchOrders = async () => {
     const data = await getReferrerOrders(referrerId, query);
 
     orders.value = data;
+    // ลบการ set route.params.orderId เพราะจะใช้ store แทน
     const paid = data.find((o: Order) => o.status === OrderStatus.PAID);
     if (paid) {
       referrerName.value = paid.referrer?.name || "";
@@ -384,6 +391,33 @@ const fetchOrders = async () => {
   } finally {
     loading.loading = false;
   }
+};
+
+const goToPreview = () => {
+  if (!orders.value.length) {
+    alert("ไม่พบข้อมูลออเดอร์");
+    return;
+  }
+
+  const referrerId = Array.isArray(route.params.id)
+    ? route.params.id[0]
+    : route.params.id;
+
+  // เก็บข้อมูลใน store
+  referrerStore.setPreviewData({
+    referrerId,
+    referrerName: referrerName.value,
+    orders: orders.value,
+    filters: {
+      startDate: dayjs(filters.value.start).format("YYYY-MM-DD"),
+      endDate: dayjs(filters.value.end).format("YYYY-MM-DD"),
+      status: filters.value.status,
+      paymentMethod: filters.value.paymentMethod,
+    },
+    timestamp: Date.now(),
+  });
+
+  router.push(`/admin/referrer/referrer-preview/${referrerId}`);
 };
 
 const handleExport = () => {
