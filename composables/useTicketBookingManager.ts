@@ -54,8 +54,6 @@ export const useTicketBookingManager = () => {
     try {
       currentShowDate.value = showDate;
 
-      console.log("showDate", showDate);
-
       // Join WebSocket room
       joinShowRoom(showDate);
 
@@ -64,11 +62,9 @@ export const useTicketBookingManager = () => {
 
       // รีเฟรช seat availability
       const res = await refreshSeatAvailability(showDate);
-      console.log("res", res);
 
       // ตรวจสอบสถานะระบบ
       const checkSystemHealths = await checkSystemHealth();
-      console.log("checkSystemHealths", checkSystemHealths);
 
       showToast("success", "เริ่มต้นระบบจองตั๋วสำเร็จ");
     } catch (error) {
@@ -102,7 +98,6 @@ export const useTicketBookingManager = () => {
   const cleanup = () => {
     removeWebSocketListeners();
     // ... สามารถเพิ่ม logic cleanup อื่นๆ ได้ที่นี่ ...
-    console.log("🧹 Cleanup: ถอด WebSocket listeners แล้ว");
   };
 
   // ถอด listener อัตโนมัติเมื่อ component ถูก unmount
@@ -115,35 +110,30 @@ export const useTicketBookingManager = () => {
     removeWebSocketListeners();
     // เมื่อมี order ใหม่
     const oc = onOrderCreated((event) => {
-      console.log("🎫 New order created:", event);
       refreshSeatAvailability(currentShowDate.value);
     });
     unsubOrderCreated = typeof oc === "function" ? oc : null;
 
     // เมื่อมีการยกเลิก order
     const occ = onOrderCancelled((event) => {
-      console.log("❌ Order cancelled:", event);
       refreshSeatAvailability(currentShowDate.value);
     });
     unsubOrderCancelled = typeof occ === "function" ? occ : null;
 
     // เมื่อมีที่นั่งถูกล็อก
     const osl = onSeatLocked((event) => {
-      console.log("🔒 Seats locked:", event);
       updateSeatStatus(event.data.seatIds, SEAT_STATUS.LOCKED);
     });
     unsubSeatLocked = typeof osl === "function" ? osl : null;
 
     // เมื่อมีที่นั่งถูกปลดล็อก
     const osu = onSeatUnlocked((event) => {
-      console.log("🔓 Seats unlocked:", event);
       updateSeatStatus(event.data.seatIds, SEAT_STATUS.AVAILABLE);
     });
     unsubSeatUnlocked = typeof osu === "function" ? osu : null;
 
     // เมื่อสถานะที่นั่งเปลี่ยน
     const osac = onSeatAvailabilityChanged((event) => {
-      console.log("🎯 Seat availability changed:", event);
       updateSeatStatus(event.data.seatIds, event.data.status);
     });
     unsubSeatAvailabilityChanged = typeof osac === "function" ? osac : null;

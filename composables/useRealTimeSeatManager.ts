@@ -100,8 +100,6 @@ export const useRealTimeSeatManager = () => {
 
     // Check if permanently booked
     if (bookedSeats.value.has(seatId)) {
-      console.log("seatId", seatId);
-
       return "BOOKED";
     }
 
@@ -122,16 +120,6 @@ export const useRealTimeSeatManager = () => {
       // เช็คว่าเป็นวันเดียวกันหรือไม่
       const isSameDay = today.toDateString() === lockDate.toDateString();
       const isStillLocked = lockDate > today; // ยังไม่หมดเวลาล็อค
-
-      console.log(`🔒 Checking seat ${seat.seatNumber} lock:`, {
-        isLockedUntil: seat.isLockedUntil,
-        bookingStatus,
-        isSameDay,
-        isStillLocked,
-        today: today.toISOString(),
-        lockDate: lockDate.toISOString(),
-      });
-
       if (isSameDay && isStillLocked) {
         return "locked";
       }
@@ -150,9 +138,6 @@ export const useRealTimeSeatManager = () => {
 
   // ===== Seat Management Functions =====
   const initializeSeats = (seats: Seat[]) => {
-    console.log("🔄 กำลังเริ่มต้นข้อมูลที่นั่ง:", seats.length);
-    console.log("seats", seats);
-
     // Clear existing data
     allSeats.value.clear();
     bookedSeats.value.clear();
@@ -183,23 +168,10 @@ export const useRealTimeSeatManager = () => {
       }
 
       const bookingStatus = seat.bookingStatus as string;
-      console.log(
-        "bookingStatus",
-        bookingStatus,
-        "isMySelection:",
-        isMySelection
-      );
 
       if (["BOOKED", "PAID", "PENDING", "RESERVED"].includes(bookingStatus)) {
         bookedSeats.value.add(seat.id);
       }
-    });
-
-    console.log("✅ เริ่มต้นข้อมูลที่นั่งสำเร็จ:", {
-      total: allSeats.value.size,
-      booked: bookedSeats.value.size,
-      mySelected: mySelectedSeats.value.size,
-      othersSelected: otherUsersSelections.value.size,
     });
   };
 
@@ -209,7 +181,6 @@ export const useRealTimeSeatManager = () => {
     }
 
     mySelectedSeats.value.add(seatId);
-    console.log("✅ เลือกที่นั่ง:", seatId);
     return true;
   };
 
@@ -218,7 +189,6 @@ export const useRealTimeSeatManager = () => {
     mySelectedSeats.value.delete(seatId);
 
     if (wasSelected) {
-      console.log("❌ ยกเลิกการเลือกที่นั่ง:", seatId);
     }
 
     return wasSelected;
@@ -227,7 +197,6 @@ export const useRealTimeSeatManager = () => {
   const clearMySelections = () => {
     const count = mySelectedSeats.value.size;
     mySelectedSeats.value.clear();
-    console.log("🧹 ล้างการเลือกที่นั่งทั้งหมด:", count);
   };
 
   // ===== WebSocket Event Handling (Source of Truth) =====
@@ -317,12 +286,9 @@ export const useRealTimeSeatManager = () => {
   };
 
   const handleOtherUserSeatSelection = (event: WebSocketSeatEvent) => {
-    console.log("🔒 คนอื่นเลือกที่นั่ง:", event.seatIds);
-
     event.seatIds.forEach((seatId) => {
       // Don't override my selections
       if (mySelectedSeats.value.has(seatId)) {
-        console.log("⚠️ ข้าม seat ที่ฉันเลือกไว้แล้ว:", seatId);
         return;
       }
 
@@ -333,14 +299,6 @@ export const useRealTimeSeatManager = () => {
         timestamp: event.timestamp,
         isTemporary: true,
       });
-
-      console.log("✅ ล็อคที่นั่ง:", seatId, "โดย user:", event.userId);
-    });
-
-    console.log("📊 สถิติที่นั่ง:", {
-      mySelected: mySelectedSeats.value.size,
-      othersSelected: otherUsersSelections.value.size,
-      total: allSeats.value.size,
     });
   };
 
@@ -403,8 +361,6 @@ export const useRealTimeSeatManager = () => {
     zoneKey: string,
     showDate: string | Date
   ) => {
-    console.log("🔄 กำลังรีเฟรชข้อมูลที่นั่งโดยไม่ให้เสียการเลือก...");
-
     try {
       isLoading.value = true;
 
@@ -416,7 +372,6 @@ export const useRealTimeSeatManager = () => {
       const freshSeats = await fetchFunction(zoneKey, showDate);
 
       // Reinitialize seats
-      console.log("freshSeats", freshSeats);
 
       initializeSeats(freshSeats);
 
@@ -434,11 +389,6 @@ export const useRealTimeSeatManager = () => {
         if (allSeats.value.has(seatId)) {
           otherUsersSelections.value.set(seatId, selection);
         }
-      });
-
-      console.log("✅ รีเฟรชสำเร็จ - รักษาการเลือกไว้:", {
-        myRestored: mySelectedSeats.value.size,
-        othersRestored: otherUsersSelections.value.size,
       });
 
       return true;
@@ -481,7 +431,6 @@ export const useRealTimeSeatManager = () => {
     mySelectedSeats.value.clear();
     otherUsersSelections.value.clear();
     bookedSeats.value.clear();
-    console.log("🧹 ล้างข้อมูลทั้งหมด");
   };
 
   // ===== Return API =====

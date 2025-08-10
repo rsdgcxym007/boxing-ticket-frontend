@@ -46,7 +46,7 @@
             <BaseInput
               v-model="pageData.filters.search"
               @input="onOrderIdChange"
-              placeholder="เลขที่ออเดอร์, ชื่อ, เบอร์โทร"
+              placeholder="เลขที่ออเดอร์, ชื่อ, เบอร์โทร,ชื่อโรงแรมม,V/c"
               class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 placeholder-blue-500 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
             />
           </div>
@@ -81,6 +81,7 @@
             <BaseSelect
               v-model="pageData.filters.createdBy"
               :options="masterStaffAdmin"
+              clearable
               option-label="name"
               option-value="id"
               placeholder="เลือกผู้สร้างออเดอร์"
@@ -99,6 +100,8 @@
               :options="orderStatusOptions"
               placeholder="เลือกสถานะ"
               clearable
+              multiple
+              :closeOnSelect="false"
               @change="onOrderStatusChange"
               class="w-full h-[40px] bg-blue-50/70 border-blue-200 text-blue-900 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
             />
@@ -201,13 +204,27 @@
               ส่งออกข้อมูล
             </label>
             <BaseButton
-              @click="handleExport"
+              @click="handleExportCSV"
               :disabled="pageData.loading || exportPdfLoading"
               class="w-full h-[40px] bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium rounded-lg shadow-md transition-all duration-200 flex items-center justify-center gap-2"
             >
               <i class="mdi mdi-file-pdf-box text-lg"></i>
               <span v-if="!exportPdfLoading">ส่งออก CSV</span>
-              <span v-else>กำลังสร้าง PDF...</span>
+              <span v-else>กำลังสร้าง CSV...</span>
+            </BaseButton>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-blue-700">
+              ส่งออกข้อมูล
+            </label>
+            <BaseButton
+              @click="handleExportExcel"
+              :disabled="pageData.loading || exportPdfLoading"
+              class="w-full h-[40px] bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium rounded-lg shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <i class="mdi mdi-file-pdf-box text-lg"></i>
+              <span v-if="!exportPdfLoading">ส่งออก Excel</span>
+              <span v-else>กำลังสร้าง Excel...</span>
             </BaseButton>
           </div>
         </div>
@@ -293,7 +310,6 @@
     @success="fetchData"
     @update:showModal="
       async (value) => {
-        console.log('StandingTicketModal showModal updated:', value);
         if (value == false) {
           await fetchData();
         }
@@ -498,8 +514,18 @@ const onReferrerNameChange = () => {
   fetchData();
 };
 
-const handleExport = () => {
-  const payload = pageData.orders.map((order) => order.id);
+const handleExportCSV = () => {
+  const payload = {
+    orders: pageData.orders.map((order) => order.id),
+    format: "csv",
+  };
+  postExportSpreadsheet(payload);
+};
+const handleExportExcel = () => {
+  const payload = {
+    orders: pageData.orders.map((order) => order.id),
+    format: "excel",
+  };
   postExportSpreadsheet(payload);
 };
 

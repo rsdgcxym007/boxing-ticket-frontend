@@ -8,7 +8,10 @@ export const useExport = () => {
   const config = useRuntimeConfig();
   const base = config.public.apiBase;
 
-  const postExportSpreadsheet = async (orderIds: string[]) => {
+  const postExportSpreadsheet = async (payload: {
+    orders: string[];
+    format: string;
+  }) => {
     const token = localStorage.getItem("token") || "";
     fetch(`${base}/api/v1/orders/export-spreadsheet`, {
       method: "POST",
@@ -16,10 +19,11 @@ export const useExport = () => {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
+
       body: JSON.stringify({
-        orderIds: orderIds,
-        format: "csv",
-        includePayments: true,
+        orderIds: { ...payload.orders },
+        format: payload.format,
+        // includePayments: true,
       }),
     })
       .then((response) => response.blob())

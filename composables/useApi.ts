@@ -67,8 +67,6 @@ export const useApi = () => {
       if (result.timestamp) {
         errorMsg += `\n[Time: ${result.timestamp}]`;
       }
-      console.log("errorMsg", errorMsg);
-
       throw new Error(errorMsg);
     }
 

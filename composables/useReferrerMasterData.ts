@@ -29,10 +29,15 @@ export function useReferrerMasterData() {
   const { getReferrerMasterData } = useReferrer();
   const { getMasterStaffAdmin } = useOrder();
 
-  const fetchMasterData = async () => {
-    // ถ้า masterData มีข้อมูลแล้ว (length > 0) ให้ return cache
-    if (Array.isArray(masterData.value) && masterData.value.length > 0)
+  const fetchMasterData = async (forceReload = false) => {
+    // ถ้า masterData มีข้อมูลแล้ว (length > 0) และไม่ได้บังคับ reload ให้ return cache
+    if (
+      !forceReload &&
+      Array.isArray(masterData.value) &&
+      masterData.value.length > 0
+    ) {
       return masterData.value;
+    }
     loading.value = true;
     try {
       const data = await getReferrerMasterData();

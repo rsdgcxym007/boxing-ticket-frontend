@@ -36,8 +36,34 @@
       >
         <!-- Selected Value Display -->
         <div class="flex items-center min-w-0 h-full w-full">
+          <!-- Multiple Selection Tags -->
+          <div
+            v-if="
+              props.multiple &&
+              Array.isArray(props.modelValue) &&
+              props.modelValue.length > 0
+            "
+            class="flex gap-1 flex-1 min-w-0 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+            style="scrollbar-width: thin"
+          >
+            <span
+              v-for="value in props.modelValue"
+              :key="value"
+              class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-md whitespace-nowrap flex-shrink-0"
+            >
+              <span class="max-w-24 truncate">{{ getOptionLabel(value) }}</span>
+              <button
+                type="button"
+                class="flex-shrink-0 hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                @click.stop="removeOption(value)"
+              >
+                <i class="mdi mdi-close text-xs"></i>
+              </button>
+            </span>
+          </div>
+          <!-- Single Selection or Placeholder -->
           <span
-            v-if="selectedDisplay"
+            v-else-if="!props.multiple && selectedDisplay"
             class="block truncate"
             :class="selectedValueClasses"
           >
@@ -279,6 +305,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  closeOnSelect: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 // Emits
@@ -505,11 +535,31 @@ const selectOption = (option) => {
 
     emit("update:modelValue", newValue);
     emit("change", newValue);
+
+    // Only close if closeOnSelect is true
+    if (props.closeOnSelect) {
+      closeDropdown();
+    }
   } else {
     emit("update:modelValue", option.value);
     emit("change", option.value);
     closeDropdown();
   }
+};
+
+const removeOption = (valueToRemove) => {
+  if (!props.multiple) return;
+
+  const currentValue = Array.isArray(props.modelValue) ? props.modelValue : [];
+  const newValue = currentValue.filter((v) => v !== valueToRemove);
+
+  emit("update:modelValue", newValue);
+  emit("change", newValue);
+};
+
+const getOptionLabel = (value) => {
+  const option = normalizedOptions.value.find((opt) => opt.value === value);
+  return option?.label || String(value);
 };
 
 const isSelected = (option) => {
@@ -625,6 +675,34 @@ const vClickOutside = {
 /* Ensure relative container for proper dropdown positioning */
 .base-select {
   position: relative;
+}
+
+/* Multiple selection tags styling */
+.base-select .inline-flex {
+  word-break: break-word;
+}
+
+/* Horizontal scrollbar for tags */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 /* Dropdown animation */

@@ -851,7 +851,6 @@ const handlePaymentSuccess = async () => {
 };
 
 const handlePaymentError = (error) => {
-  console.log("error", error);
   const errorMessage = error.message?.toLowerCase() || "";
   if (errorMessage.includes("seat")) {
     showToast("error", "ที่นั่งถูกจองแล้ว กรุณาเลือกที่นั่งอื่น");

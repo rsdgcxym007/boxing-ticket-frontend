@@ -243,7 +243,31 @@ export const useOrder = () => {
     newCustomerName?: string,
     newCustomerPhone?: string,
     newCustomerEmail?: string,
-    newShowDate?: string
+    newShowDate?: string,
+    newSource?: string,
+    // Hotel & Transportation fields
+    hotelName?: string,
+    hotelDistrict?: string,
+    roomNumber?: string,
+    adultCount?: number,
+    childCount?: number,
+    infantCount?: number,
+    voucherNumber?: string,
+    pickupScheduledTime?: string,
+    bookerName?: string,
+    includesPickup?: boolean,
+    includesDropoff?: boolean,
+    requiresPickup?: boolean,
+    requiresDropoff?: boolean,
+    pickupHotel?: string,
+    dropoffLocation?: string,
+    pickupTime?: string,
+    dropoffTime?: string,
+    voucherCode?: string,
+    referenceNo?: string,
+    specialRequests?: string,
+    // Payment fields
+    paymentAmount?: number
   ) => {
     try {
       const payload: any = {
@@ -259,6 +283,37 @@ export const useOrder = () => {
       if (newCustomerEmail !== undefined)
         payload.newCustomerEmail = newCustomerEmail;
       if (newShowDate !== undefined) payload.newShowDate = newShowDate;
+      if (newSource !== undefined) payload.newSource = newSource;
+
+      // Hotel & Transportation fields
+      if (hotelName !== undefined) payload.hotelName = hotelName;
+      if (hotelDistrict !== undefined) payload.hotelDistrict = hotelDistrict;
+      if (roomNumber !== undefined) payload.roomNumber = roomNumber;
+      if (adultCount !== undefined) payload.adultCount = adultCount;
+      if (childCount !== undefined) payload.childCount = childCount;
+      if (infantCount !== undefined) payload.infantCount = infantCount;
+      if (voucherNumber !== undefined) payload.voucherNumber = voucherNumber;
+      if (pickupScheduledTime !== undefined)
+        payload.pickupScheduledTime = pickupScheduledTime;
+      if (bookerName !== undefined) payload.bookerName = bookerName;
+      if (includesPickup !== undefined) payload.includesPickup = includesPickup;
+      if (includesDropoff !== undefined)
+        payload.includesDropoff = includesDropoff;
+      if (requiresPickup !== undefined) payload.requiresPickup = requiresPickup;
+      if (requiresDropoff !== undefined)
+        payload.requiresDropoff = requiresDropoff;
+      if (pickupHotel !== undefined) payload.pickupHotel = pickupHotel;
+      if (dropoffLocation !== undefined)
+        payload.dropoffLocation = dropoffLocation;
+      if (pickupTime !== undefined) payload.pickupTime = pickupTime;
+      if (dropoffTime !== undefined) payload.dropoffTime = dropoffTime;
+      if (voucherCode !== undefined) payload.voucherCode = voucherCode;
+      if (referenceNo !== undefined) payload.referenceNo = referenceNo;
+      if (specialRequests !== undefined)
+        payload.specialRequests = specialRequests;
+
+      // Payment fields
+      if (paymentAmount !== undefined) payload.paymentAmount = paymentAmount;
 
       await patch(`/api/v1/orders/${orderId}/change-seats`, payload);
 
@@ -273,8 +328,6 @@ export const useOrder = () => {
     newSeatIds: string[],
     showDate: string
   ) => {
-    console.log(orderId, newSeatIds, showDate);
-
     try {
       const data = await patch(`/api/v1/orders/update-booked/${orderId}`, {
         seatIds: newSeatIds,
@@ -380,7 +433,7 @@ export const useOrder = () => {
       if (referrerName) queryParams.append("referrerName", referrerName);
       if (attendanceStatus)
         queryParams.append("attendanceStatus", attendanceStatus);
-      queryParams.append("includeAllPages", "true");
+      // queryParams.append("includeAllPages", "true");
       queryParams.append("page", String(page));
       queryParams.append("limit", String(limit));
 

@@ -347,7 +347,6 @@ const toggleLang = () => {
   router.push(path);
 };
 const logout = async () => {
-  console.log("🚪 Starting logout process...");
   authDebug.logAuthState();
 
   // Clear authentication data
@@ -355,7 +354,6 @@ const logout = async () => {
   localStorage.removeItem("user");
   auth.logout();
 
-  console.log("🧹 After logout call, auth data cleared");
   authDebug.logAuthState();
 
   // Navigate to login with proper locale
@@ -363,7 +361,6 @@ const logout = async () => {
 
   // Force reload to ensure clean state
   await nextTick();
-  console.log("🔄 Reloading page for clean state");
 };
 
 const updateScreen = () => {

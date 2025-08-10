@@ -173,6 +173,8 @@ export const orderStatusOptions = [
   { value: "CANCELLED", label: "ยกเลิกแล้ว" },
   { value: "EXPIRED", label: "หมดอายุ" },
   { value: "BOOKED", label: "จองแล้ว" },
+  { value: "PARTIAL_ORDER", label: "จ่ายเงินบางส่วน" },
+
   //   { value: "REFUNDED", label: "คืนเงินแล้ว" },
   //   { value: "NO_SHOW", label: "ไม่มาแสดงตัว" },
 ];

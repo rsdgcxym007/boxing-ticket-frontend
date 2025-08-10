@@ -1,7 +1,7 @@
 <template>
   <div
-    class="flex flex-col items-center justify-center gap-1"
-    :style="{ width: size, height: size }"
+    class="flex flex-col items-center justify-center gap-1 relative"
+    :style="{ width: size, height: 'auto', minHeight: size }"
   >
     <button
       class="w-8 h-8 relative transition-all duration-300 hover:scale-110 focus:outline-none rounded-lg flex items-center justify-center"
@@ -16,9 +16,9 @@
         :style="{
           transform:
             zoneKey === 'left'
-              ? 'rotate(-90deg)'
+              ? 'rotate(0deg)'
               : zoneKey === 'right'
-              ? 'rotate(90deg)'
+              ? 'rotate(180deg)'
               : zoneKey === 'front-ringside'
               ? 'rotate(180deg)'
               : 'rotate(0deg)',
@@ -32,12 +32,12 @@
     </button>
     <span
       v-if="seat?.seatNumber"
-      class="block w-8 text-xs font-bold text-center pointer-events-none select-none"
+      class="block w-8 text-xs font-bold text-center pointer-events-none select-none relative z-10 leading-tight py-0.5"
       :class="getSeatNumberClasses()"
       style="
-        background: rgba(255, 255, 255, 0.7);
-        border-radius: 0.5rem;
-        z-index: 2;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 0.25rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       "
     >
       {{ seat?.seatNumber }}
@@ -104,9 +104,23 @@ const isLocked = computed(() => {
   );
 });
 
-const isSelected = computed(() =>
-  selectedSeats.value.some((s) => s.id === seat.value?.id)
-);
+const isSelected = computed(() => {
+  // ตรวจสอบว่าเป็นที่นั่งของออเดอร์ปัจจุบันหรือไม่ (ต้องแสดงเป็นสีเขียวเสมอ)
+  const isOwnSeat = props.ownSeatIds.includes(seat.value?.id);
+  if (isOwnSeat) {
+    return true;
+  }
+
+  // ตรวจสอบว่าอยู่ในรายการที่เลือกใหม่หรือไม่
+  const isInSelectedList = selectedSeats.value.some(
+    (s) => s.id === seat.value?.id
+  );
+  if (isInSelectedList) {
+    return true;
+  }
+
+  return false;
+});
 
 // ฟังก์ชันสำหรับกำหนด CSS classes ของที่นั่ง
 const getSeatClasses = () => {
@@ -117,7 +131,15 @@ const getSeatClasses = () => {
     return "bg-gradient-to-br from-amber-100 to-orange-200 border-2 border-amber-400 text-amber-600 cursor-not-allowed shadow-md";
   }
   if (isSelected.value) {
-    return "bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-blue-300 text-white shadow-lg ring-2 ring-blue-300 ring-opacity-50";
+    // ตรวจสอบว่าเป็นที่นั่งของออเดอร์ปัจจุบันหรือไม่
+    const isOwnSeat = props.ownSeatIds.includes(seat.value?.id);
+    if (isOwnSeat) {
+      // ที่นั่งของออเดอร์ปัจจุบัน - สีเขียว
+      return "bg-gradient-to-br from-green-400 to-green-600 border-2 border-green-300 text-white shadow-lg ring-2 ring-green-300 ring-opacity-50";
+    } else {
+      // ที่นั่งที่เลือกใหม่ - สีน้ำเงิน
+      return "bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-blue-300 text-white shadow-lg ring-2 ring-blue-300 ring-opacity-50";
+    }
   }
   return "bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-300 text-slate-600 hover:from-slate-100 hover:to-slate-200 hover:border-slate-400 hover:shadow-md active:scale-95";
 };
@@ -145,7 +167,15 @@ const getSeatNumberClasses = () => {
     return "text-amber-600 font-extrabold";
   }
   if (isSelected.value) {
-    return "text-blue-600 font-extrabold bg-white/80 px-1 rounded text-shadow";
+    // ตรวจสอบว่าเป็นที่นั่งของออเดอร์ปัจจุบันหรือไม่
+    const isOwnSeat = props.ownSeatIds.includes(seat.value?.id);
+    if (isOwnSeat) {
+      // ที่นั่งของออเดอร์ปัจจุบัน - สีเขียว
+      return "text-green-600 font-extrabold bg-white/80 px-1 rounded text-shadow";
+    } else {
+      // ที่นั่งที่เลือกใหม่ - สีน้ำเงิน
+      return "text-blue-600 font-extrabold bg-white/80 px-1 rounded text-shadow";
+    }
   }
   return "text-slate-700 font-semibold";
 };
