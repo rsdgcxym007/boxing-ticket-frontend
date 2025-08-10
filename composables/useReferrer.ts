@@ -196,6 +196,42 @@ export const useReferrer = () => {
       throw err;
     }
   };
+  const postReferrerOrdersPdfForPreview = async (orderIds: string[]) => {
+    try {
+      const url = `${base}/api/v1/referrers/preview-pdf-by-orders`;
+
+      // Fetch PDF as blob
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/pdf",
+        },
+        body: JSON.stringify({
+          orderIds: orderIds,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      return {
+        success: true,
+        url: blobUrl,
+        blob: blob,
+      };
+    } catch (err: any) {
+      console.error("Error fetching PDF:", err);
+      showToast(
+        "error",
+        `ไม่สามารถโหลด PDF ได้: ${err.message || "Unknown error"}`
+      );
+      throw err;
+    }
+  };
 
   // Legacy method - รองรับเดิม
   const getReferrerById = async (id: string) => {
@@ -236,6 +272,7 @@ export const useReferrer = () => {
     getReferrerOrders,
     exportReferrerReport,
     getReferrerPdfForPreview,
+    postReferrerOrdersPdfForPreview,
     getReferrerMasterData,
     // เพิ่มฟังก์ชันใหม่
     // Legacy methods

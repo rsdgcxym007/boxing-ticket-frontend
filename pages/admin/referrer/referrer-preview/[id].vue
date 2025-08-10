@@ -124,12 +124,16 @@ definePageMeta({
 });
 
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
 import { useReferrer } from "../../../../composables/useReferrer";
+import { useReferrerStore } from "../../../../stores/referrerStore";
 
-// เรียกใช้งาน composable
-const { getReferrerPdfForPreview } = useReferrer();
+// เรียกใช้งาน composable และ store
+const { getReferrerPdfForPreview, postReferrerOrdersPdfForPreview } =
+  useReferrer();
+const referrerStore = useReferrerStore();
+const router = useRouter();
 
 // ดึง referrer ID จาก route
 const route = useRoute();
@@ -137,9 +141,8 @@ const referrerId = computed(() =>
   Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
 );
 
-// วันที่เริ่มต้น-สิ้นสุด เป็นวันนี้
-const startDate = dayjs().format("YYYY-MM-DD");
-const endDate = dayjs().format("YYYY-MM-DD");
+// ตรวจสอบข้อมูลจาก store
+const previewData = computed(() => referrerStore.previewData);
 
 // State management
 const pdfUrl = ref<string>("");
@@ -162,11 +165,32 @@ const isMobile = computed(() => {
 
 // สร้าง cache key
 const getCacheKey = () => {
+  if (!previewData.value) return `${referrerId.value}-default`;
+  const { startDate, endDate } = previewData.value.filters;
   return `${referrerId.value}-${startDate}-${endDate}`;
+};
+
+// ตรวจสอบข้อมูลและ redirect ถ้าจำเป็น
+const validatePreviewData = () => {
+  if (!previewData.value || !referrerStore.isDataValid()) {
+    alert("ข้อมูลหมดอายุหรือไม่พบข้อมูล กรุณาค้นหาใหม่");
+    router.back();
+    return false;
+  }
+
+  if (previewData.value.referrerId !== referrerId.value) {
+    alert("ข้อมูลไม่ตรงกับผู้แนะนำที่เลือก");
+    router.back();
+    return false;
+  }
+
+  return true;
 };
 
 // ดึง URL จาก composable แล้วเซ็ตค่าลงใน pdfUrl
 const fetchPdf = async () => {
+  if (!validatePreviewData()) return;
+
   const cacheKey = getCacheKey();
 
   // เช็ค cache ก่อน
@@ -183,10 +207,9 @@ const fetchPdf = async () => {
 
     console.log("📥 กำลังโหลด PDF สำหรับ referrer:", referrerId.value);
 
-    const result = await getReferrerPdfForPreview(referrerId.value, {
-      startDate,
-      endDate,
-    });
+    // ใช้ข้อมูลจาก store
+    const orderIds = previewData.value!.orders.map((order) => order.id);
+    const result = await postReferrerOrdersPdfForPreview(orderIds);
 
     pdfUrl.value = result.url;
 
@@ -210,11 +233,16 @@ const downloadPdf = () => {
   const cacheKey = getCacheKey();
   const cached = pdfCache.value.get(cacheKey);
 
+  // สร้างชื่อไฟล์จากข้อมูลใน store หรือใช้ default
+  const fileName = previewData.value
+    ? `referrer-report-${previewData.value.filters.startDate}_to_${previewData.value.filters.endDate}.pdf`
+    : `referrer-report-${referrerId.value}.pdf`;
+
   if (cached?.blob) {
     const url = URL.createObjectURL(cached.blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `referrer-report-${startDate}_to_${endDate}.pdf`;
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -223,7 +251,7 @@ const downloadPdf = () => {
     // Fallback - ใช้ blob URL ที่มีอยู่
     const link = document.createElement("a");
     link.href = pdfUrl.value;
-    link.download = `referrer-report-${startDate}_to_${endDate}.pdf`;
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -261,5 +289,7 @@ onMounted(() => {
 // Cleanup เมื่อ component unmount
 onBeforeUnmount(() => {
   cleanup();
+  // ล้างข้อมูล store เมื่อออกจากหน้า
+  referrerStore.clearPreviewData();
 });
 </script>

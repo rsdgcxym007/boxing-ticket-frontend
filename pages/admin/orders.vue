@@ -177,7 +177,7 @@
             </label>
             <BaseSelect
               v-model="pageData.limit"
-              :options="[10, 20, 40]"
+              :options="optionsShowData"
               option-label="label"
               option-value="value"
               placeholder="เลือกรายการต่อหน้า"
@@ -425,6 +425,13 @@ definePageMeta({
   title: "รายการออเดอร์",
 });
 
+const optionsShowData = [
+  { label: "ทั้งหมด", value: -1 },
+  { label: "10", value: 10 },
+  { label: "20", value: 20 },
+  { label: "40", value: 40 },
+  { label: "60", value: 60 },
+];
 // ตัวแปร reactive สำหรับจัดการสถานะ
 const showModal = ref(false);
 const pageData = usePageData();

@@ -641,6 +641,8 @@ const bookStandingBooking = async () => {
     dataOrder.value = {
       ...(response || {}),
       ...pageData.value,
+      adultCount: pageData.value.standingAdultQty || 0,
+      childCount: pageData.value.standingChildQty || 0,
       // ทำให้แน่ใจว่ามี orderId ให้ modal ใช้
       orderId: (response && (response.id || response.orderId)) || undefined,
     };
@@ -674,6 +676,8 @@ const bookStandingTicketNew = async () => {
     dataOrder.value = {
       ...(response || {}),
       ...pageData.value,
+      adultCount: pageData.value.standingAdultQty || 0,
+      childCount: pageData.value.standingChildQty || 0,
       // ทำให้แน่ใจว่ามี orderId ให้ modal ใช้
       orderId: (response && (response.id || response.orderId)) || undefined,
     };
