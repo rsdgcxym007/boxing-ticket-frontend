@@ -181,6 +181,43 @@ export const useWebSocket = () => {
     };
   };
 
+  // Export Events
+  const onExportProgress = (callback: (event: any) => void) => {
+    if (!socket.value) return;
+    socket.value.on("export_progress", callback);
+    return () => {
+      if (socket.value) socket.value.off("export_progress", callback);
+    };
+  };
+
+  const onExportCompleted = (callback: (event: any) => void) => {
+    if (!socket.value) return;
+    socket.value.on("export_completed", callback);
+    return () => {
+      if (socket.value) socket.value.off("export_completed", callback);
+    };
+  };
+
+  const onExportFailed = (callback: (event: any) => void) => {
+    if (!socket.value) return;
+    socket.value.on("export_failed", callback);
+    return () => {
+      if (socket.value) socket.value.off("export_failed", callback);
+    };
+  };
+
+  // Join Export Room
+  const joinExportRoom = (exportId: string) => {
+    if (!socket.value || !isConnected.value) return;
+    socket.value.emit("join_export_room", { exportId });
+  };
+
+  // Leave Export Room
+  const leaveExportRoom = (exportId: string) => {
+    if (!socket.value || !isConnected.value) return;
+    socket.value.emit("leave_export_room", { exportId });
+  };
+
   // ส่งข้อมูล emit ทั่วไป
   const emit = (event: string, data: any) => {
     if (!socket.value || !isConnected.value) {
@@ -226,6 +263,11 @@ export const useWebSocket = () => {
     onSeatAvailabilityChanged,
     broadcastSeatUpdate,
     onSeatUpdate,
+    onExportProgress,
+    onExportCompleted,
+    onExportFailed,
+    joinExportRoom,
+    leaveExportRoom,
     emit,
   };
 };

@@ -172,4 +172,8 @@ export default defineNuxtConfig({
   build: {
     transpile: [],
   },
+
+  alias: {
+    composables: "<rootDir>/composables",
+  },
 });

@@ -35,7 +35,7 @@
             ></div>
           </div>
 
-          <div class="flex items-center justify-between relative z-10">
+          <div class="flex items-center justify-between relative">
             <!-- Left: Order Info -->
             <div class="flex items-center space-x-3">
               <div
