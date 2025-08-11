@@ -480,6 +480,7 @@
       <div class="flex flex-col gap-3 pt-2">
         <!-- 🆕 ปุ่มจองแบบใหม่ (แนะนำ) -->
         <BaseButton
+          v-if="pageData.standingAdultQty > 0 || pageData.standingChildQty > 0"
           @click="bookStandingTicketNew"
           variant="primary"
           size="lg"
@@ -490,6 +491,7 @@
           สร้างออเดอร์
         </BaseButton>
         <BaseButton
+          v-if="pageData.standingAdultQty > 0 || pageData.standingChildQty > 0"
           @click="bookStandingBooking"
           variant="primary"
           size="lg"
@@ -533,7 +535,6 @@ import { onMounted, computed } from "vue";
 import { useReferrerMasterData } from "../composables/useReferrerMasterData";
 import BaseSelect from "../components/base/BaseSelect.vue";
 import { purchaseTypeOptions } from "../utils/orderOptions";
-
 // Referrer options from master data
 const { masterData, fetchMasterData } = useReferrerMasterData();
 
@@ -647,11 +648,20 @@ const bookStandingBooking = async () => {
       orderId: (response && (response.id || response.orderId)) || undefined,
     };
 
-    showToast("success", "🎉 จองตั๋วยืนสำเร็จ! คุณสามารถชำระเงินได้แล้ว");
-
+    // ตั้งค่า orderId ก่อนเรียก confirmPaymentForOrder
     if (response?.id) {
       orderId.value = response.id;
     }
+
+    if (response) {
+      await confirmPaymentForOrder();
+    }
+    showToast("success", "🎉 จองตั๋วยืนสำเร็จ! คุณสามารถชำระเงินได้แล้ว");
+
+    // ลบบรรทัดนี้ออกเพราะย้ายขึ้นไปแล้ว
+    // if (response?.id) {
+    //   orderId.value = response.id;
+    // }
   } catch (error) {
     console.error("❌ เกิดข้อผิดพลาดในการจองตั๋ว:", error);
     // showToast("error", "❌ ไม่สามารถจองตั๋วได้ กรุณาลองใหม่อีกครั้ง");
@@ -702,21 +712,20 @@ const confirmPaymentForOrder = async () => {
     showToast("error", "❌ ไม่พบข้อมูลออเดอร์ กรุณาจองตั๋วก่อน");
     return;
   }
-  isLoading.loading = true;
+
+  // ไม่ต้องตั้งค่า isLoading ใหม่เพราะ bookStandingBooking ตั้งค่าแล้ว
+  // isLoading.loading = true;
 
   try {
     const paymentData = {
+      ...dataOrder.value,
       orderId: orderId.value,
       method: pageData.value.paymentMethod,
-      amount: calculateTotal(),
-      customerName: pageData.value.customerName.trim(),
-      referrerCode: pageData.value.referrerCode || undefined,
-      purchaseType: pageData.value.purchaseType,
+      amount: 0,
     };
 
     await createStandingPayment(paymentData as any);
 
-    showToast("success", "🎉 ยืนยันการชำระเงินสำเร็จ!");
     // 🆕 ล้างค่าฟอร์มเพื่อสร้างออเดอร์ใหม่
     pageData.value = {
       customerName: "",
@@ -736,7 +745,7 @@ const confirmPaymentForOrder = async () => {
       childCount: 0,
       infantCount: 0,
       voucherNumber: "",
-      pickupScheduledTime: "",
+      pickupScheduledTime: null,
       bookerName: "",
       includesPickup: false,
       includesDropoff: false,
@@ -745,9 +754,11 @@ const confirmPaymentForOrder = async () => {
   } catch (error) {
     // console.error("❌ เกิดข้อผิดพลาดในการยืนยันการชำระเงิน:", error);
     showToast("error", `❌ ${error}`);
-  } finally {
-    isLoading.loading = false;
   }
+  // ไม่ต้องตั้งค่า isLoading ที่นี่เพราะ bookStandingBooking จะจัดการให้
+  // finally {
+  //   isLoading.loading = false;
+  // }
 };
 const onCloseSummaryModal = async () => {
   showSummaryModal.value = false;

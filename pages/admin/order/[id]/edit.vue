@@ -127,9 +127,7 @@
               <div class="flex justify-between">
                 <span class="text-blue-700">ยอดเงินที่จ่าย:</span>
                 <span class="font-bold text-green-600">{{
-                  formatCurrency(
-                    orderData.paymentAmount || orderData.totalAmount
-                  )
+                  formatCurrency(orderData.paymentAmount)
                 }}</span>
               </div>
               <div class="flex justify-between">
@@ -1131,17 +1129,6 @@
                     </span>
                   </div>
                 </div>
-
-                <!-- Seat selection button -->
-                <button
-                  @click="openSeatSelector"
-                  type="button"
-                  class="mb-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition-colors flex items-center gap-2"
-                >
-                  <i class="mdi mdi-seat-passenger"></i>
-                  เลือกที่นั่งใหม่
-                </button>
-
                 <!-- Selected seats from seat manager -->
                 <div
                   v-if="seatManager.selectedSeatCount.value > 0"
@@ -1607,7 +1594,7 @@ const loadOrder = async () => {
       specialRequests: data.specialRequests || "",
       // Payment fields
       total: data.totalAmount || 0,
-      paymentAmount: data.paymentAmount || data.totalAmount || 0,
+      paymentAmount: data.paymentAmount || 0,
     };
     console.log(" formData.value", formData.value);
 
@@ -1754,7 +1741,7 @@ const handleSeatConfirm = async (selectedSeats) => {
         (sum, seat) => sum + (seat.price || 1800),
         0
       );
-      formData.value.totalAmount = totalPrice;
+      // formData.value.totalAmount = totalPrice;
       formData.value.paymentAmount = totalPrice;
     }
 
@@ -2176,10 +2163,12 @@ const saveChanges = async () => {
         // Payment fields
         formData.value.paymentAmount
       );
-
+      await loadOrder();
+      await loadReferrers();
+      await fetchMasterData();
       // ปลดล็อกที่นั่งเก่า
       try {
-        await unlockSeats(originalSeatIds, orderData.value.showDate);
+        // await unlockSeats(originalSeatIds, orderData.value.showDate);
         console.log("Successfully unlocked old seats");
       } catch (unlockError) {
         console.warn("Failed to unlock old seats:", unlockError);
@@ -2220,7 +2209,9 @@ const saveChanges = async () => {
         formData.value.paymentAmount
       );
     }
-
+    await loadOrder();
+    await loadReferrers();
+    await fetchMasterData();
     // ถ้าเป็นการจ่ายเงิน ให้สร้าง payment record
     // if (formData.value.paymentAmount > 0) {
     //   await createSeatedPayment({
@@ -2234,8 +2225,6 @@ const saveChanges = async () => {
     //   });
     //   router.push("/admin/orders");
     // }
-
-    showToast("success", "บันทึกการเปลี่ยนแปลงเรียบร้อย");
   } catch (err) {
     console.error("Error saving changes:", err);
     showToast("error", err.message);

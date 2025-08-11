@@ -212,6 +212,7 @@
               class="w-full relative z-20"
               width="100%"
               height="40px"
+              @import-success="handleImportSuccess"
             />
           </div>
 
@@ -685,6 +686,16 @@ const onAttendanceUpdateSuccess = () => {
   showAttendanceModal.value = false;
   selectedOrderForAttendance.value = null;
   fetchData(); // รีเฟรชข้อมูล
+};
+
+// ฟังก์ชันสำหรับจัดการเมื่อ import ข้อมูลสำเร็จ
+const handleImportSuccess = (result) => {
+  console.log("Import success:", result);
+  showToast("success", "นำเข้าข้อมูลสำเร็จ กำลังรีเฟรชหน้า...");
+  // รีเฟรชข้อมูลหลังจาก import สำเร็จ
+  setTimeout(() => {
+    fetchData();
+  }, 1000);
 };
 
 // ฟังก์ชันที่มี debounce สำหรับการค้นหา

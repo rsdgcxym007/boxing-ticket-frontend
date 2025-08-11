@@ -351,6 +351,8 @@ export const useIntegratedSeatBooking = () => {
         order = await bookingManager.createOrderWithProtection(bookingData);
       }
 
+      console.log("📦 สร้างการจอง:", order);
+
       if (order) {
         // ส่ง WebSocket event
         await broadcastSeatUpdate(
