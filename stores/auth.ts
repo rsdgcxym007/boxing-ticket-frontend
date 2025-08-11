@@ -65,6 +65,7 @@ export const useAuthStore = defineStore("auth", () => {
       // Clear all authentication related data
       localStorage.removeItem("user");
       localStorage.removeItem("token");
+      localStorage.removeItem("tokenExpiration");
 
       // Clear any other potential auth data
       localStorage.removeItem("authToken");
