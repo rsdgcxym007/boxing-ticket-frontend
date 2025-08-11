@@ -6,7 +6,22 @@ export const useApi = () => {
 
   const getToken = () => {
     if (process.client) {
-      return localStorage.getItem("token") || "";
+      const token = localStorage.getItem("token");
+      const tokenExpiration = localStorage.getItem("tokenExpiration");
+
+      // Check if token exists and is not expired
+      if (token && tokenExpiration) {
+        if (Date.now() > parseInt(tokenExpiration)) {
+          console.log("🕒 Token expired in API call, clearing auth data...");
+          // Clear expired token
+          localStorage.removeItem("token");
+          localStorage.removeItem("tokenExpiration");
+          localStorage.removeItem("user");
+          return "";
+        }
+        return token;
+      }
+      return "";
     }
     return "";
   };

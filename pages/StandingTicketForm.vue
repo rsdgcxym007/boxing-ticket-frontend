@@ -491,7 +491,10 @@
           สร้างออเดอร์
         </BaseButton>
         <BaseButton
-          v-if="pageData.standingAdultQty > 0 || pageData.standingChildQty > 0"
+          v-if="
+            pageData.purchaseType !== OrderPurchaseType.ONSITE &&
+            (pageData.standingAdultQty > 0 || pageData.standingChildQty > 0)
+          "
           @click="bookStandingBooking"
           variant="primary"
           size="lg"

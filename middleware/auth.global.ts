@@ -3,20 +3,12 @@ import { useAuthStore } from "@/stores/auth";
 
 /**
  * Global Authentication Middleware
- * ตรวจสอบการ authentication ทุกหน้า ยกเว้นหน้า public
+ * บังคับให้ทุกหน้าต้อง login ยกเว้นหน้า login เท่านั้น
+ * รองรับ token expiration checking
  */
 export default defineNuxtRouteMiddleware((to) => {
-  // หน้าที่ไม่ต้อง login
-  const publicPages = [
-    "/",
-    "/login",
-    "/register",
-    "/about",
-    "/contacts",
-    "/ringside",
-    "/components-demo",
-    "/StandingTicketForm",
-  ];
+  // หน้าที่ไม่ต้อง login (เหลือแค่หน้า login เท่านั้น)
+  const publicPages = ["/login"];
 
   // ลบ locale prefix สำหรับการตรวจสอบ (รองรับ prefix_except_default)
   let cleanPath = to.path;
@@ -41,9 +33,31 @@ export default defineNuxtRouteMiddleware((to) => {
     authStore.initialize();
 
     const token = localStorage.getItem("token");
+    const tokenExpiration = localStorage.getItem("tokenExpiration");
 
-    // ถ้าไม่ได้ login
-    if (!authStore.isAuthenticated) {
+    // ตรวจสอบว่า token หมดอายุหรือไม่
+    const isTokenExpired = () => {
+      if (!tokenExpiration) return true;
+      return Date.now() > parseInt(tokenExpiration);
+    };
+
+    // ถ้าไม่ได้ login หรือ token หมดอายุ
+    if (!authStore.isAuthenticated || !token || isTokenExpired()) {
+      console.log("❌ Authentication failed:", {
+        hasUser: !!authStore.user,
+        hasToken: !!token,
+        isExpired: isTokenExpired(),
+        tokenExpiration: tokenExpiration
+          ? new Date(parseInt(tokenExpiration)).toISOString()
+          : null,
+      });
+
+      // ถ้า token หมดอายุ ให้ clear ข้อมูล authentication
+      if (token && isTokenExpired()) {
+        console.log("🕒 Token expired, clearing auth data...");
+        authStore.logout();
+      }
+
       // สำหรับ prefix_except_default: th ไม่มี prefix, en มี /en/
       const currentLocale = to.path.startsWith("/en/") ? "en" : "th";
       const loginPath = currentLocale === "en" ? "/en/login" : "/login";

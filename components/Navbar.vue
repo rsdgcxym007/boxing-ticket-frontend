@@ -102,13 +102,74 @@
 
         <!-- Logout & Lang -->
         <div class="flex items-center gap-3">
-          <button
-            v-if="auth?.user"
-            @click="logout"
-            class="px-4 py-1.5 text-sm border border-white/30 rounded-md hover:bg-white hover:text-black transition"
-          >
-            ออกจากระบบ
-          </button>
+          <!-- Enhanced Logout Dropdown -->
+          <div v-if="auth?.user" class="relative" ref="logoutMenuRef">
+            <button
+              @click="logoutMenuOpen = !logoutMenuOpen"
+              class="px-4 py-1.5 text-sm border border-white/30 rounded-md hover:bg-white hover:text-black transition flex items-center gap-2"
+            >
+              <Icon icon="mdi:logout-variant" class="text-base" />
+              ออกจากระบบ
+              <Icon
+                icon="mdi:chevron-down"
+                class="text-sm transition-transform duration-200"
+                :class="{ 'rotate-180': logoutMenuOpen }"
+              />
+            </button>
+
+            <!-- Logout Options Dropdown -->
+            <transition
+              enter-active-class="transition ease-out duration-200"
+              enter-from-class="transform opacity-0 scale-95"
+              enter-to-class="transform opacity-100 scale-100"
+              leave-active-class="transition ease-in duration-150"
+              leave-from-class="transform opacity-100 scale-100"
+              leave-to-class="transform opacity-0 scale-95"
+            >
+              <div
+                v-if="logoutMenuOpen"
+                class="absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50"
+              >
+                <div class="py-2">
+                  <button
+                    @click="
+                      logout();
+                      logoutMenuOpen = false;
+                    "
+                    class="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-3"
+                  >
+                    <Icon icon="mdi:logout" class="text-lg text-blue-400" />
+                    <div>
+                      <div class="font-medium">ออกจากระบบ</div>
+                      <div class="text-xs text-gray-400">
+                        ออกจากอุปกรณ์นี้เท่านั้น
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    @click="
+                      logoutAllDevices();
+                      logoutMenuOpen = false;
+                    "
+                    class="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-3"
+                  >
+                    <Icon
+                      icon="mdi:logout-variant"
+                      class="text-lg text-red-400"
+                    />
+                    <div>
+                      <div class="font-medium">ออกจากทุกอุปกรณ์</div>
+                      <div class="text-xs text-gray-400">
+                        ออกจากระบบทุกอุปกรณ์ที่เข้าสู่ระบบ
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </transition>
+          </div>
+
           <button
             @click="toggleLang"
             class="px-4 py-1.5 text-sm border border-white/30 rounded-md hover:bg-white hover:text-black transition"
@@ -257,13 +318,39 @@
 
         <!-- Logout & Language -->
         <div class="flex flex-col gap-3">
-          <button
-            v-if="auth?.user"
-            @click="handleLogout"
-            class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
-          >
-            <Icon icon="mdi:logout-variant" class="text-xl" /> ออกจากระบบ
-          </button>
+          <div v-if="auth?.user" class="flex flex-col gap-2">
+            <button
+              @click="
+                logout();
+                isOpen = false;
+              "
+              class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
+            >
+              <Icon icon="mdi:logout" class="text-xl text-blue-400" />
+              <div class="text-left">
+                <div class="font-medium">ออกจากระบบ</div>
+                <div class="text-xs text-gray-400">
+                  ออกจากอุปกรณ์นี้เท่านั้น
+                </div>
+              </div>
+            </button>
+
+            <button
+              @click="
+                logoutAllDevices();
+                isOpen = false;
+              "
+              class="flex items-center gap-3 px-4 py-2 rounded-md border border-white/10 hover:bg-white hover:text-black"
+            >
+              <Icon icon="mdi:logout-variant" class="text-xl text-red-400" />
+              <div class="text-left">
+                <div class="font-medium">ออกจากทุกอุปกรณ์</div>
+                <div class="text-xs text-gray-400">
+                  ออกจากระบบทุกอุปกรณ์ที่เข้าสู่ระบบ
+                </div>
+              </div>
+            </button>
+          </div>
 
           <button
             @click="handleToggleLang"
@@ -285,6 +372,7 @@ import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/composables/useAuth";
 import { useAdminMenu } from "@/composables/useAdminMenu";
 import { useImagePath } from "@/composables/useImagePath";
 import { useRouter } from "vue-router";
@@ -297,6 +385,7 @@ const router = useRouter();
 const switchLocalePath = useSwitchLocalePath();
 const localePath = useLocalePath();
 const auth = useAuthStore();
+const enhancedAuth = useAuth();
 
 const isOpen = ref(false);
 const isDesktop = ref(false);
@@ -305,9 +394,15 @@ const adminMenuOpen = ref(false);
 const adminMenuHover = ref(false);
 const adminSubOpen = ref(false);
 const adminDropdownMenuRef = ref(null);
+const logoutMenuOpen = ref(false);
+const logoutMenuRef = ref(null);
 // ปิด dropdown เมื่อคลิกนอกเมนู
 onClickOutside(adminDropdownMenuRef, () => {
   if (adminMenuOpen.value) adminMenuOpen.value = false;
+});
+
+onClickOutside(logoutMenuRef, () => {
+  if (logoutMenuOpen.value) logoutMenuOpen.value = false;
 });
 
 // ปิด dropdown เมื่อเปลี่ยน route
@@ -347,20 +442,39 @@ const toggleLang = () => {
   router.push(path);
 };
 const logout = async () => {
+  console.log("🚪 Initiating regular logout...");
   authDebug.logAuthState();
 
-  // Clear authentication data
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  auth.logout();
+  try {
+    // Use enhanced auth logout which handles API call
+    await enhancedAuth.logout();
+    console.log("✅ Logout completed successfully");
+  } catch (error) {
+    console.error("❌ Logout error:", error);
+    // Fallback to local logout if API fails
+    auth.logout();
+    await router.push(localePath("/login"));
+  }
 
   authDebug.logAuthState();
+};
 
-  // Navigate to login with proper locale
-  await router.push(localePath("/login"));
+const logoutAllDevices = async () => {
+  console.log("🚪 Initiating logout from all devices...");
+  authDebug.logAuthState();
 
-  // Force reload to ensure clean state
-  await nextTick();
+  try {
+    // Use enhanced auth logout all devices
+    await enhancedAuth.logoutAllDevices();
+    console.log("✅ Logout from all devices completed successfully");
+  } catch (error) {
+    console.error("❌ Logout all devices error:", error);
+    // Fallback to local logout if API fails
+    auth.logout();
+    await router.push(localePath("/login"));
+  }
+
+  authDebug.logAuthState();
 };
 
 const updateScreen = () => {

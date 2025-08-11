@@ -439,6 +439,7 @@ import { Icon } from "@iconify/vue";
 import { reactive, ref, onMounted } from "vue";
 import { useSingleToast } from "../composables/useSingleToast";
 import { useApi } from "../composables/useApi";
+import { useAuth } from "../composables/useAuth";
 import { useRouter } from "vue-router";
 import { useRuntimeConfig } from "nuxt/app";
 import { useAuthStore } from "~/stores/auth";
@@ -473,6 +474,7 @@ const changePasswordData = reactive({
 const { showToast } = useSingleToast();
 const router = useRouter();
 const { post } = useApi();
+const auth = useAuth();
 
 // ===== Authentication State Cleanup =====
 // Ensure clean authentication state when accessing login page
@@ -566,86 +568,44 @@ const changePassword = async () => {
 };
 
 /**
- * ฟังก์ชันสำหรับเข้าสู่ระบบ
- * จะเรียก API เพื่อตรวจสอบข้อมูลและบันทึก token
+ * ฟังก์ชันสำหรับเข้าสู่ระบบใหม่ด้วย Enhanced Authentication API
+ * รองรับ device information และ token expiration
  */
 const login = async () => {
   pageData.loading = true;
 
   try {
-    const endpoints = ["/auth/login"];
+    // ใช้ enhanced auth composable ที่รองรับ device info และ token management
+    const loginResponse = await auth.login({
+      username: pageData.email, // API ใช้ username แต่เราส่ง email
+      password: pageData.password,
+    });
 
-    let success = false;
-    let data;
-
-    for (const endpoint of endpoints) {
-      try {
-        const res = await fetch(`${base}/api/v1${endpoint}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: pageData.email,
-            password: pageData.password,
-          }),
-        });
-
-        if (res.ok) {
-          const responseText = await res.text();
-
-          try {
-            data = JSON.parse(responseText);
-            success = true;
-            break;
-          } catch (jsonError) {
-            console.log("❌ ไม่สามารถแปลง response เป็น JSON:", jsonError);
-            throw new Error("API ส่งกลับข้อมูลที่ไม่ใช่ JSON");
-          }
-        } else {
-          // Try to parse error response
-          let errorData;
-          try {
-            errorData = await res.json();
-          } catch {}
-          if (errorData && errorData.code === "NO_PASSWORD") {
-            showToast(
-              "error",
-              "บัญชีนี้ยังไม่ได้ตั้งรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ"
-            );
-            pageData.loading = false;
-            return;
-          }
-          console.log(`❌ ${endpoint} ล้มเหลว:`, res.status, res.statusText);
-        }
-      } catch (fetchError) {
-        console.log(`❌ Error เรียก ${endpoint}:`, fetchError);
-      }
-    }
-
-    if (!success) {
-      throw new Error(
-        "ไม่สามารถเชื่อมต่อ API ได้ กรุณาตรวจสอบว่า Backend Server ทำงานอยู่"
-      );
-    }
-
-    // ตรวจสอบว่ามี access_token หรือไม่
-    if (!data.data.access_token && !data.data.token) {
-      throw new Error("ไม่พบ access_token ในการตอบกลับ");
-    }
-
-    // บันทึกข้อมูลการเข้าสู่ระบบ
-    const token = data.data.access_token || data.data.token;
-    const userData = data.data.user || data.data?.user || {};
-
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
-
-    // อัพเดท auth store
+    // บันทึกข้อมูลผู้ใช้ (ถ้ามีใน response)
     const authStore = useAuthStore();
-    authStore.setUser(userData);
+
+    // สำหรับการ backward compatibility กับระบบเดิม
+    // ถ้า API ส่ง user data มาด้วย
+    if ("user" in loginResponse) {
+      authStore.setUser((loginResponse as any).user);
+    } else {
+      // ถ้าไม่มี user data ให้สร้าง basic user object
+      const basicUser = {
+        id: "1", // สามารถดึงจาก JWT token ได้
+        name: pageData.email.split("@")[0], // ใช้ส่วนแรกของ email เป็นชื่อ
+        role: "user", // default role
+        email: pageData.email,
+      };
+      authStore.setUser(basicUser);
+    }
 
     showToast("success", "🎉 เข้าสู่ระบบสำเร็จ");
+
+    // แสดงข้อมูล token expiration
+    const timeUntilExpiration = auth.getTimeUntilExpiration();
+    const hoursUntilExpiration = Math.floor(timeUntilExpiration / 3600);
+    console.log(`🕒 Token จะหมดอายุใน ${hoursUntilExpiration} ชั่วโมง`);
+
     console.log("🏠 กำลังเปลี่ยนเส้นทางไปหน้าแรก...");
 
     // เปลี่ยนเส้นทางไปหน้าแรก
@@ -658,8 +618,12 @@ const login = async () => {
 
     if (err.message) {
       errorMessage = err.message;
-    } else if (err.response?.data?.message) {
-      errorMessage = err.response.data.message;
+    } else if (err.status === 401) {
+      errorMessage = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+    } else if (err.status === 429) {
+      errorMessage = "ขอเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่";
+    } else if (err.status >= 500) {
+      errorMessage = "เซิร์ฟเวอร์มีปัญหา กรุณาลองใหม่อีกครั้ง";
     }
 
     showToast("error", `🚫 ${errorMessage}`);
@@ -667,6 +631,7 @@ const login = async () => {
     // แสดงข้อมูลเพิ่มเติมสำหรับการ debug
     console.log("🔍 ข้อมูลการ debug:");
     console.log("- API Base URL:", base);
+    console.log("- Error Status:", err.status);
     console.log("- Error:", err);
   } finally {
     pageData.loading = false;
