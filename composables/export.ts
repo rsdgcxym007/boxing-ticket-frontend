@@ -356,10 +356,11 @@ export const useExport = () => {
       if (!result || result.success === false) {
         throw new Error(result?.message || "การ import ล้มเหลว");
       }
+      console.log("result", result);
 
       importProgress.value = 100;
       importSuccess.value = true;
-      importResult.value = result;
+      importResult.value = result.data;
 
       // Show success message
       const message =

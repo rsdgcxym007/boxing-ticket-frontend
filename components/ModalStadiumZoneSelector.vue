@@ -174,12 +174,62 @@
           </div>
 
           <!-- Seat Grid -->
-          <div class="w-full">
+          <div class="w-full px-4">
             <div
               class="max-h-[70vh] overflow-auto bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border border-slate-200 shadow-inner p-6"
               style="margin: 0 auto"
             >
-              <div class="flex flex-col gap-3 items-center w-full">
+              <!-- แนวนอนสำหรับ zone left และ right -->
+              <div
+                v-if="
+                  pageData.zoneKey === 'left' || pageData.zoneKey === 'right'
+                "
+                class="w-full overflow-x-auto px-8 pb-8"
+              >
+                <div
+                  class="grid gap-2 justify-center pb-4 min-w-max"
+                  :style="{
+                    gridTemplateColumns: `repeat(${pageData.currentZoneSeats.length}, minmax(2.2rem, auto))`,
+                    gridTemplateRows: `repeat(${Math.max(
+                      ...pageData.currentZoneSeats.map((row) => row.length)
+                    )}, minmax(2.2rem, auto))`,
+                  }"
+                >
+                  <template
+                    v-for="(row, colIndex) in pageData.currentZoneSeats"
+                    :key="colIndex"
+                  >
+                    <div
+                      v-for="(seat, rowIndex) in row"
+                      :key="`${seat?.id || 'empty'}-${
+                        seatManager.lastUpdateTimestamp.value
+                      }`"
+                      class="flex flex-col items-center justify-center"
+                      :style="{
+                        gridColumn: colIndex + 1,
+                        gridRow: rowIndex + 1,
+                      }"
+                    >
+                      <SeatIcon
+                        v-if="seat && seat.seatNumber"
+                        :seat="{ ...seat }"
+                        :status="getSeatStatus(seat)"
+                        :selectedSeats="[...seatManager.mySelectedSeats.value]"
+                        :bookedSeats="[...(pageData.bookedSeats || [])]"
+                        :zoneKey="pageData.zoneKey"
+                        @toggle="handleSeatToggle"
+                        :ownSeatIds="[
+                          ...(props.orderData?.seats.map((b) => b.id) || []),
+                        ]"
+                        class="w-8 sm:w-10 md:w-11 transition-all duration-300 hover:scale-105 cursor-pointer mb-3"
+                      />
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- แนวตั้งสำหรับ zone อื่นๆ -->
+              <div v-else class="flex flex-col gap-3 items-center w-full">
                 <div
                   v-for="(row, i) in pageData.currentZoneSeats"
                   :key="i"
@@ -405,12 +455,10 @@ import { useI18n } from "vue-i18n";
 import { usePageData } from "@/stores/pageData";
 import { useAuthStore } from "@/stores/auth";
 import { useSeatApi } from "@/composables/useSeatApi";
-import { useOrder } from "@/composables/useOrder";
 import { buildSeatLayoutFromCoordinates } from "@/utils/buildSeatLayout";
 import { useIntegratedSeatBooking } from "@/composables/useIntegratedSeatBooking";
-import { ref as vueRef } from "vue";
 import { purchaseTypeOptions } from "@/utils/orderOptions";
-
+import { usePayments } from "@/composables/usePayments";
 import { OrderStatus, OrderPurchaseType } from "@/types/Enums";
 const { getImagePath } = useImagePath();
 const { showToast } = useSingleToast();
@@ -418,7 +466,7 @@ const { t } = useI18n();
 const pageData = usePageData();
 const { getSeatsByZoneId } = useSeatApi();
 const auth = useAuthStore();
-
+const { createSeatedPayment } = usePayments();
 // ===== New Integrated Seat Booking System =====
 const seatBookingSystem = useIntegratedSeatBooking();
 const {
@@ -634,7 +682,14 @@ const handleMarkOrder = async () => {
       purchaseType: pageData.purchaseType,
     };
 
-    await createBooking(orderData);
+    const res = await createBooking(orderData);
+    console.log("res", res);
+
+    await createSeatedPayment({
+      orderId: res.id,
+      amount: 0,
+      method: "CASH",
+    });
 
     showToast("success", "จองที่นั่งเรียบร้อยแล้ว");
     await resetAndClose();

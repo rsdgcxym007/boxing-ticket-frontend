@@ -348,9 +348,14 @@ export const useOrder = () => {
       // Payment fields
       if (paymentAmount !== undefined) payload.paymentAmount = paymentAmount;
 
-      await patch(`/api/v1/orders/${orderId}/change-seats`, payload);
+      const res = await patch(
+        `/api/v1/orders/${orderId}/change-seats`,
+        payload
+      );
 
-      showToast("success", `เปลี่ยนที่นั่งออเดอร์ ${orderId} สำเร็จ`);
+      console.log("res", res);
+
+      showToast("success", res.data.message || "เปลี่ยนที่นั่งสำเร็จ");
     } catch (err: any) {
       throw err;
     }

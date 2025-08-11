@@ -142,17 +142,70 @@
         >
           <h4 class="text-sm font-semibold text-green-800 mb-1">ผลการนำเข้า</h4>
           <ul class="text-xs text-green-700 space-y-1">
-            <li>✓ นำเข้าสำเร็จ: {{ importResult.imported || 0 }} รายการ</li>
-            <li v-if="importResult.updated">
+            <!-- รองรับ format ใหม่ -->
+            <li v-if="(importResult as any).ordersUpdated !== undefined">
+              ✓ อัปเดตออเดอร์:
+              {{ (importResult as any).ordersUpdated || 0 }} รายการ
+            </li>
+            <li v-if="(importResult as any).paymentsUpdated !== undefined">
+              ✓ อัปเดตการชำระเงิน:
+              {{ (importResult as any).paymentsUpdated || 0 }} รายการ
+            </li>
+            <li
+              v-if="(importResult as any).commissionsRecalculated !== undefined"
+            >
+              ✓ คำนวณค่าคอมมิชชันใหม่:
+              {{ (importResult as any).commissionsRecalculated || 0 }} รายการ
+            </li>
+            <li v-if="(importResult as any).details?.length">
+              📋 รายละเอียด: {{ (importResult as any).details.length }} ออเดอร์
+            </li>
+
+            <!-- รองรับ format เก่า -->
+            <li v-if="importResult.imported !== undefined">
+              ✓ นำเข้าสำเร็จ: {{ importResult.imported || 0 }} รายการ
+            </li>
+            <li v-if="importResult.updated !== undefined">
               ✓ อัปเดต: {{ importResult.updated }} รายการ
             </li>
-            <li v-if="importResult.duplicates">
+            <li v-if="importResult.duplicates !== undefined">
               ⚠ ข้าม (ซ้ำ): {{ importResult.duplicates }} รายการ
             </li>
+
+            <!-- แสดง errors สำหรับทั้งสอง format -->
             <li v-if="importResult.errors?.length">
               ❌ ข้อผิดพลาด: {{ importResult.errors.length }} รายการ
             </li>
           </ul>
+
+          <!-- แสดงรายละเอียดเพิ่มเติมสำหรับ format ใหม่ -->
+          <div v-if="(importResult as any).details?.length" class="mt-2">
+            <button
+              @click="showDetails = !showDetails"
+              class="text-xs text-green-600 hover:text-green-800 underline"
+            >
+              {{ showDetails ? "ซ่อน" : "แสดง" }}รายละเอียด
+            </button>
+            <div v-if="showDetails" class="mt-2 max-h-32 overflow-y-auto">
+              <div
+                v-for="detail in (importResult as any).details"
+                :key="detail.orderNumber"
+                class="text-xs bg-white p-2 rounded border mb-1"
+              >
+                <div class="font-medium text-gray-800">
+                  {{ detail.orderNumber }}
+                </div>
+                <div class="text-gray-600">
+                  เปลี่ยนแปลง: {{ detail.changes?.join(", ") || "ไม่ระบุ" }}
+                </div>
+                <div
+                  :class="detail.success ? 'text-green-600' : 'text-red-600'"
+                >
+                  {{ detail.success ? "✓ สำเร็จ" : "❌ ล้มเหลว" }}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Error Display -->
@@ -184,6 +237,12 @@ const props = withDefaults(defineProps<Props>(), {
   class: "",
 });
 
+// Define emits
+const emit = defineEmits<{
+  "import-success": [result: any];
+  "import-error": [error: any];
+}>();
+
 // Extend HTMLElement interface
 interface ExtendedHTMLElement extends HTMLElement {
   clickAwayEvent?: (event: Event) => void;
@@ -208,6 +267,7 @@ const showDropdown = ref(false);
 const selectedFile = ref<File | null>(null);
 const fileInput = ref<HTMLInputElement>();
 const showQuickFeedback = ref(false);
+const showDetails = ref(false);
 
 // Import options
 const importOptions = reactive({
@@ -351,6 +411,9 @@ const performImport = async () => {
       updateExisting: importOptions.updateExisting,
     });
 
+    // Emit success event พร้อมผลลัพธ์
+    emit("import-success", importResult.value);
+
     // Reset form after successful import
     setTimeout(() => {
       selectedFile.value = null;
@@ -361,6 +424,8 @@ const performImport = async () => {
     }, 3000);
   } catch (error) {
     console.error("Import failed:", error);
+    // Emit error event
+    emit("import-error", error);
   }
 };
 
