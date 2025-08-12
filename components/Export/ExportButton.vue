@@ -113,7 +113,6 @@
                 </div>
               </div>
             </button>
-
             <button
               v-if="selectedOrderIds && selectedOrderIds.length > 0"
               @click="quickExport('csv', 'selected')"
@@ -192,6 +191,7 @@ interface Props {
   disabled?: boolean;
   width?: string | number;
   height?: string | number;
+  filterIds?: string[]; // IDs to filter for export
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -200,6 +200,7 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   width: "auto",
   height: "40px",
+  filterIds: () => [],
 });
 
 const emit = defineEmits<{

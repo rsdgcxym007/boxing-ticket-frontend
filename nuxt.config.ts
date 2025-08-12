@@ -74,6 +74,9 @@ export default defineNuxtConfig({
 
   experimental: {
     payloadExtraction: false,
+    inlineRouteRules: true,
+    viewTransition: false,
+    typedPages: false,
   },
 
   // การตั้งค่าสำหรับ production deployment
@@ -151,6 +154,17 @@ export default defineNuxtConfig({
         },
         prerender: false,
       },
+
+      // API Route Rules for caching
+      // Analytics data - cache for 5 minutes
+      "/api/analytics/**": { isr: 300 },
+      // Mobile API - cache for 10 minutes
+      "/api/mobile/home": { isr: 600 },
+      // AI recommendations - cache for 15 minutes
+      "/api/ai-recommendations/**": { isr: 900 },
+      // User-specific data - no cache
+      "/api/notifications/**": { headers: { "cache-control": "no-cache" } },
+      "/api/mobile/settings/**": { headers: { "cache-control": "no-cache" } },
     },
   },
 
@@ -165,7 +179,15 @@ export default defineNuxtConfig({
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:4000",
       socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
+      wsUrl: process.env.NUXT_PUBLIC_WS_URL || "ws://localhost:4000/realtime",
+      appName:
+        process.env.NUXT_PUBLIC_APP_NAME || "Patong Boxing Ticket System",
+      appVersion: process.env.NUXT_PUBLIC_APP_VERSION || "1.0.31",
+      environment: process.env.NODE_ENV || "development",
     },
+    // Server-side only
+    apiSecret: process.env.NUXT_API_SECRET || "",
+    jwtSecret: process.env.NUXT_JWT_SECRET || "",
   },
 
   // Development server configuration

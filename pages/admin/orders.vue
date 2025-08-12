@@ -193,6 +193,7 @@
             </label>
             <ExportButton
               :selected-order-ids="selectedOrderIds"
+              :filter-ids="pageData.orders.map((o) => o.id)"
               :total-orders="pageData.totalCount"
               :disabled="pageData.loading"
               @quick-export="handleQuickExport"
@@ -690,7 +691,11 @@ const handleQuickExport = async (format, type) => {
       const filters = getCurrentFilters();
 
       // ส่ง filters แทนการส่ง orderIds ว่าง
-      await exportWithProgress([], format, { filters });
+      await exportWithProgress(
+        pageData.orders.map((o) => o.id),
+        format,
+        { filters }
+      );
     } else {
       // ส่งออกเฉพาะที่เลือก
       if (selectedOrderIds.value.length === 0) {

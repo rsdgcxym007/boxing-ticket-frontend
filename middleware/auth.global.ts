@@ -7,8 +7,22 @@ import { useAuthStore } from "@/stores/auth";
  * รองรับ token expiration checking
  */
 export default defineNuxtRouteMiddleware((to) => {
-  // หน้าที่ไม่ต้อง login (เหลือแค่หน้า login เท่านั้น)
-  const publicPages = ["/login"];
+  // หน้าที่ไม่ต้อง login (หน้าสาธารณะ)
+  const publicPages = [
+    "/",
+    "/login",
+    "/StandingTicketForm",
+    "/ringside",
+    "/contacts",
+    "/about",
+    "/schedule",
+    "/news",
+    "/gallery",
+    "/rules",
+  ];
+
+  // หน้าที่ต้อง login เฉพาะ admin/staff
+  const protectedPages = ["/admin", "/mobile"];
 
   // ลบ locale prefix สำหรับการตรวจสอบ (รองรับ prefix_except_default)
   let cleanPath = to.path;
@@ -18,10 +32,16 @@ export default defineNuxtRouteMiddleware((to) => {
     cleanPath = cleanPath.replace(/^\/en/, "") || "/";
   }
 
-  const isPublicPage = publicPages.includes(cleanPath);
+  const isPublicPage = publicPages.some(
+    (page) => cleanPath === page || cleanPath.startsWith(page + "/")
+  );
+
+  const isProtectedPage = protectedPages.some((page) =>
+    cleanPath.startsWith(page)
+  );
 
   // ถ้าเป็นหน้า public ให้ผ่านไปได้
-  if (isPublicPage) {
+  if (isPublicPage && !isProtectedPage) {
     return;
   }
 
@@ -41,31 +61,43 @@ export default defineNuxtRouteMiddleware((to) => {
       return Date.now() > parseInt(tokenExpiration);
     };
 
-    // ถ้าไม่ได้ login หรือ token หมดอายุ
-    if (!authStore.isAuthenticated || !token || isTokenExpired()) {
-      console.log("❌ Authentication failed:", {
-        hasUser: !!authStore.user,
-        hasToken: !!token,
-        isExpired: isTokenExpired(),
-        tokenExpiration: tokenExpiration
-          ? new Date(parseInt(tokenExpiration)).toISOString()
-          : null,
-      });
-
-      // ถ้า token หมดอายุ ให้ clear ข้อมูล authentication
-      if (token && isTokenExpired()) {
-        console.log("🕒 Token expired, clearing auth data...");
-        authStore.logout();
+    // สำหรับหน้า mobile/scanner ต้อง check role
+    if (cleanPath.startsWith("/mobile/scanner")) {
+      if (!authStore.isAuthenticated || !token || isTokenExpired()) {
+        console.log("❌ Authentication required for scanner");
+        // redirect ไป mobile login
+        return navigateTo("/mobile/login");
       }
 
-      // สำหรับ prefix_except_default: th ไม่มี prefix, en มี /en/
-      const currentLocale = to.path.startsWith("/en/") ? "en" : "th";
-      const loginPath = currentLocale === "en" ? "/en/login" : "/login";
+      // ตรวจสอบ role สำหรับ scanner
+      if (!["admin", "staff"].includes(authStore.user?.role)) {
+        console.log("❌ Insufficient permissions for scanner");
+        return navigateTo("/login");
+      }
 
-      // redirect ไปหน้า login
-      return navigateTo(loginPath);
-    } else {
-      console.log("✅ Authenticated - allowing access");
+      return; // อนุญาตให้เข้าได้
+    }
+
+    // สำหรับหน้า admin ต้อง login และมี role
+    if (cleanPath.startsWith("/admin")) {
+      if (!authStore.isAuthenticated || !token || isTokenExpired()) {
+        console.log("❌ Authentication required for admin");
+
+        if (token && isTokenExpired()) {
+          console.log("🕒 Token expired, clearing auth data...");
+          authStore.logout();
+        }
+
+        const currentLocale = to.path.startsWith("/en/") ? "en" : "th";
+        const loginPath = currentLocale === "en" ? "/en/login" : "/login";
+        return navigateTo(loginPath);
+      }
+
+      // ตรวจสอบ role สำหรับ admin
+      if (!["admin", "staff"].includes(authStore.user?.role)) {
+        console.log("❌ Insufficient permissions for admin area");
+        return navigateTo("/");
+      }
     }
   }
 });

@@ -276,6 +276,8 @@ export const useExport = () => {
 
   // Advanced export with full options
   const exportOrdersAdvanced = async (options: ExportOptions) => {
+    console.log("options", options);
+
     try {
       const orderIds =
         options.type === "selected" ? options.orderIds || [] : [];

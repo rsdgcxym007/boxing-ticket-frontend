@@ -6,6 +6,20 @@
   "login": "เข้าสู่ระบบ",
   "ringsideTicket": "ซื้อตั๋วริงไซด์",
   "stadiumTicket": "ซื้อตั๋วยืน",
+  
+  "menu": {
+    "myAccount": "บัญชีของฉัน",
+    "profile": "ข้อมูลส่วนตัว",
+    "myTickets": "ตั๋วของฉัน",
+    "purchaseHistory": "ประวัติการซื้อ",
+    "favorites": "รายการโปรด",
+    "info": "ข้อมูล",
+    "about": "เกี่ยวกับเรา",
+    "schedule": "ตารางการแข่งขัน",
+    "news": "ข่าวสาร",
+    "gallery": "แกลลอรี่",
+    "rules": "กฎและระเบียบ"
+  },
     "hero": {
       "title": "PATONG BOXING STADIUM",
       "subtitle": "เพื่อการแข่งขังมวยไทยที่ดีที่สุดในภูเก็ต นัดถัดไป",
