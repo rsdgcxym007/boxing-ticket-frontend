@@ -38,6 +38,130 @@
               >{{ t("ringsideTicket") }}</NuxtLink
             >
           </li>
+
+          <!-- My Account Dropdown (for logged in users) -->
+          <li
+            v-if="auth?.user && !['admin', 'staff'].includes(auth?.user?.role)"
+            class="relative group"
+          >
+            <button
+              @click="toggleUserMenu"
+              @mouseenter="userMenuHover = true"
+              @mouseleave="userMenuHover = false"
+              class="hover:text-green-400 flex items-center gap-1"
+            >
+              <Icon icon="mdi:account-outline" class="text-lg" />
+              {{ t("menu.myAccount") }}
+              <Icon icon="mdi:chevron-down" class="w-4 h-4 mt-0.5" />
+            </button>
+
+            <!-- User Dropdown Menu -->
+            <div
+              v-if="userMenuHover || userMenuOpen"
+              ref="userDropdownMenuRef"
+              @mouseenter="userMenuHover = true"
+              @mouseleave="userMenuHover = false"
+              class="absolute top-full left-0 mt-2 w-56 bg-[#0f1f3c] text-white shadow-xl rounded-xl z-50 py-2 border border-white/10"
+            >
+              <router-link
+                :to="localePath('/profile')"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeUserMenu"
+              >
+                <Icon icon="mdi:account-circle" class="text-lg text-white/80" />
+                <span>{{ t("menu.profile") }}</span>
+              </router-link>
+              <router-link
+                :to="localePath('/my-tickets')"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeUserMenu"
+              >
+                <Icon icon="mdi:ticket" class="text-lg text-white/80" />
+                <span>{{ t("menu.myTickets") }}</span>
+              </router-link>
+              <router-link
+                :to="localePath('/purchase-history')"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeUserMenu"
+              >
+                <Icon icon="mdi:history" class="text-lg text-white/80" />
+                <span>{{ t("menu.purchaseHistory") }}</span>
+              </router-link>
+              <router-link
+                :to="localePath('/favorites')"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeUserMenu"
+              >
+                <Icon icon="mdi:heart" class="text-lg text-white/80" />
+                <span>{{ t("menu.favorites") }}</span>
+              </router-link>
+            </div>
+          </li>
+
+          <!-- About & Info Dropdown -->
+          <li class="relative group">
+            <button
+              @click="toggleInfoMenu"
+              @mouseenter="infoMenuHover = true"
+              @mouseleave="infoMenuHover = false"
+              class="hover:text-green-400 flex items-center gap-1"
+            >
+              <Icon icon="mdi:information-outline" class="text-lg" />
+              ข้อมูล
+              <Icon icon="mdi:chevron-down" class="w-4 h-4 mt-0.5" />
+            </button>
+
+            <!-- Info Dropdown Menu -->
+            <div
+              v-if="infoMenuHover || infoMenuOpen"
+              ref="infoDropdownMenuRef"
+              @mouseenter="infoMenuHover = true"
+              @mouseleave="infoMenuHover = false"
+              class="absolute top-full left-0 mt-2 w-56 bg-[#0f1f3c] text-white shadow-xl rounded-xl z-50 py-2 border border-white/10"
+            >
+              <router-link
+                :to="localePath('/about')"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeInfoMenu"
+              >
+                <Icon icon="mdi:information" class="text-lg text-white/80" />
+                <span>เกี่ยวกับเรา</span>
+              </router-link>
+              <router-link
+                :to="localePath('/schedule')"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeInfoMenu"
+              >
+                <Icon icon="mdi:calendar" class="text-lg text-white/80" />
+                <span>ตารางการแข่งขัน</span>
+              </router-link>
+              <router-link
+                :to="localePath('/news')"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeInfoMenu"
+              >
+                <Icon icon="mdi:newspaper" class="text-lg text-white/80" />
+                <span>ข่าวสาร</span>
+              </router-link>
+              <router-link
+                :to="localePath('/gallery')"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeInfoMenu"
+              >
+                <Icon icon="mdi:image-multiple" class="text-lg text-white/80" />
+                <span>แกลลอรี่</span>
+              </router-link>
+              <router-link
+                :to="localePath('/rules')"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeInfoMenu"
+              >
+                <Icon icon="mdi:gavel" class="text-lg text-white/80" />
+                <span>กฎและระเบียบ</span>
+              </router-link>
+            </div>
+          </li>
+
           <li>
             <NuxtLink
               :to="localePath('/contacts')"
@@ -86,7 +210,7 @@
                   (i) => !i.role || i.role.includes(auth?.user?.role)
                 )"
                 :key="item.to"
-                :to="localePath(item.to)"
+                :to="item.to"
                 class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
                 @click="closeAdminMenu"
               >
@@ -95,6 +219,17 @@
                   class="text-lg text-white/80"
                 />
                 <span>{{ item.label }}</span>
+              </router-link>
+
+              <!-- QR Scanner สำหรับ Staff -->
+              <router-link
+                v-if="['admin', 'staff'].includes(auth?.user?.role)"
+                to="/mobile/scanner"
+                class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-white/10 transition rounded-md"
+                @click="closeAdminMenu"
+              >
+                <Icon icon="mdi:qrcode-scan" class="text-lg text-white/80" />
+                <span>🔍 QR Scanner</span>
               </router-link>
             </div>
           </li>
@@ -243,6 +378,169 @@
               ซื้อตั๋วริงไซด์</NuxtLink
             >
           </li>
+
+          <!-- User Account Menu (Mobile) -->
+          <li
+            v-if="auth?.user && !['admin', 'staff'].includes(auth?.user?.role)"
+            class="flex flex-col"
+          >
+            <button
+              @click="userSubOpen = !userSubOpen"
+              class="flex items-center gap-3 w-full text-left hover:text-blue-400"
+            >
+              <Icon icon="mdi:account-outline" class="text-xl" />
+              {{ t("menu.myAccount") }}
+              <Icon
+                :icon="userSubOpen ? 'mdi:chevron-up' : 'mdi:chevron-down'"
+              />
+            </button>
+            <transition name="slide-fade">
+              <ul
+                v-if="userSubOpen"
+                class="mt-2 ml-6 flex flex-col gap-2 text-sm text-white/80"
+              >
+                <li>
+                  <router-link
+                    :to="localePath('/profile')"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      userSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:account-circle" />
+                    ข้อมูลส่วนตัว
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    :to="localePath('/my-tickets')"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      userSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:ticket" />
+                    ตั๋วของฉัน
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    :to="localePath('/purchase-history')"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      userSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:history" />
+                    ประวัติการซื้อ
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    :to="localePath('/favorites')"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      userSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:heart" />
+                    รายการโปรด
+                  </router-link>
+                </li>
+              </ul>
+            </transition>
+          </li>
+
+          <!-- Info Menu (Mobile) -->
+          <li class="flex flex-col">
+            <button
+              @click="infoSubOpen = !infoSubOpen"
+              class="flex items-center gap-3 w-full text-left hover:text-blue-400"
+            >
+              <Icon icon="mdi:information-outline" class="text-xl" />
+              ข้อมูล
+              <Icon
+                :icon="infoSubOpen ? 'mdi:chevron-up' : 'mdi:chevron-down'"
+              />
+            </button>
+            <transition name="slide-fade">
+              <ul
+                v-if="infoSubOpen"
+                class="mt-2 ml-6 flex flex-col gap-2 text-sm text-white/80"
+              >
+                <li>
+                  <router-link
+                    :to="localePath('/about')"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      infoSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:information" />
+                    เกี่ยวกับเรา
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    :to="localePath('/schedule')"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      infoSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:calendar" />
+                    ตารางการแข่งขัน
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    :to="localePath('/news')"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      infoSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:newspaper" />
+                    ข่าวสาร
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    :to="localePath('/gallery')"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      infoSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:image-multiple" />
+                    แกลลอรี่
+                  </router-link>
+                </li>
+                <li>
+                  <router-link
+                    :to="localePath('/rules')"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      infoSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:gavel" />
+                    กฎและระเบียบ
+                  </router-link>
+                </li>
+              </ul>
+            </transition>
+          </li>
+
           <li>
             <NuxtLink
               :to="localePath('/contacts')"
@@ -297,7 +595,7 @@
                   :key="item.to"
                 >
                   <router-link
-                    :to="localePath(item.to)"
+                    :to="item.to"
                     class="flex items-center gap-2 hover:text-white"
                     @click="
                       adminSubOpen = false;
@@ -306,6 +604,21 @@
                   >
                     <Icon :icon="item.icon.replace('mdi-', 'mdi:')" />
                     {{ item.label }}
+                  </router-link>
+                </li>
+
+                <!-- QR Scanner สำหรับ Staff (Mobile) -->
+                <li v-if="['admin', 'staff'].includes(auth?.user?.role)">
+                  <router-link
+                    to="/mobile/scanner"
+                    class="flex items-center gap-2 hover:text-white"
+                    @click="
+                      adminSubOpen = false;
+                      isOpen = false;
+                    "
+                  >
+                    <Icon icon="mdi:qrcode-scan" />
+                    🔍 QR Scanner
                   </router-link>
                 </li>
               </ul>
@@ -396,6 +709,18 @@ const adminSubOpen = ref(false);
 const adminDropdownMenuRef = ref(null);
 const logoutMenuOpen = ref(false);
 const logoutMenuRef = ref(null);
+
+// User menu refs and states
+const userMenuOpen = ref(false);
+const userMenuHover = ref(false);
+const userDropdownMenuRef = ref(null);
+const userSubOpen = ref(false);
+
+// Info menu refs and states
+const infoMenuOpen = ref(false);
+const infoMenuHover = ref(false);
+const infoDropdownMenuRef = ref(null);
+const infoSubOpen = ref(false);
 // ปิด dropdown เมื่อคลิกนอกเมนู
 onClickOutside(adminDropdownMenuRef, () => {
   if (adminMenuOpen.value) adminMenuOpen.value = false;
@@ -405,12 +730,24 @@ onClickOutside(logoutMenuRef, () => {
   if (logoutMenuOpen.value) logoutMenuOpen.value = false;
 });
 
+onClickOutside(userDropdownMenuRef, () => {
+  if (userMenuOpen.value) userMenuOpen.value = false;
+});
+
+onClickOutside(infoDropdownMenuRef, () => {
+  if (infoMenuOpen.value) infoMenuOpen.value = false;
+});
+
 // ปิด dropdown เมื่อเปลี่ยน route
 watch(
   () => router.currentRoute.value.fullPath,
   () => {
     adminMenuOpen.value = false;
     adminMenuHover.value = false;
+    userMenuOpen.value = false;
+    userMenuHover.value = false;
+    infoMenuOpen.value = false;
+    infoMenuHover.value = false;
   }
 );
 
@@ -421,6 +758,24 @@ const toggleAdminMenu = () => {
 const closeAdminMenu = () => {
   adminMenuOpen.value = false;
   adminMenuHover.value = false;
+};
+
+const toggleUserMenu = () => {
+  userMenuOpen.value = !userMenuOpen.value;
+};
+
+const closeUserMenu = () => {
+  userMenuOpen.value = false;
+  userMenuHover.value = false;
+};
+
+const toggleInfoMenu = () => {
+  infoMenuOpen.value = !infoMenuOpen.value;
+};
+
+const closeInfoMenu = () => {
+  infoMenuOpen.value = false;
+  infoMenuHover.value = false;
 };
 
 const handleMobileNav = async (path) => {

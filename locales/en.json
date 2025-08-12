@@ -6,6 +6,20 @@
   "login": "Login",
   "ringsideTicket": "Buy Ringside Tickets",
   "stadiumTicket": "Buy Stadium Tickets",
+  
+  "menu": {
+    "myAccount": "My Account",
+    "profile": "Profile",
+    "myTickets": "My Tickets",
+    "purchaseHistory": "Purchase History",
+    "favorites": "Favorites",
+    "info": "Information",
+    "about": "About Us",
+    "schedule": "Fight Schedule",
+    "news": "News",
+    "gallery": "Gallery",
+    "rules": "Rules & Regulations"
+  },
     "hero": {
       "title": "PATONG BOXING STADIUM",
       "subtitle": "For the best Muay Thai fights in Phuket – next bouts",
