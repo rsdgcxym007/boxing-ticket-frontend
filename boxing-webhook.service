@@ -1,0 +1,21 @@
+[Unit]
+Description=Boxing Ticket Frontend Webhook Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/frontend/boxing-ticket-frontend
+ExecStart=/usr/bin/node webhook-standalone.mjs
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=4300
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=boxing-webhook
+
+[Install]
+WantedBy=multi-user.target
