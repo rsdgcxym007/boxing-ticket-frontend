@@ -214,6 +214,19 @@ export default defineNuxtConfig({
           charset: false,
         },
       },
+      devSourcemap: process.env.NODE_ENV === 'development',
+    },
+    build: {
+      sourcemap: false, // ปิด sourcemap ใน production เพื่อลด warnings
+      minify: process.env.NODE_ENV === 'production' ? 'esbuild' : false,
+      rollupOptions: {
+        output: {
+          manualChunks: undefined,
+        },
+      },
+    },
+    define: {
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
     },
   },
 
