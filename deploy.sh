@@ -17,7 +17,7 @@ PROJECT_NAME="Boxing Ticket Frontend"
 APP_DIR="/var/www/frontend/boxing-ticket-frontend"
 PM2_APP_NAME="boxing-ticket-frontend"
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
-BRANCH="main"
+BRANCH="featues/v1"
 NODE_VERSION="18"
 
 # Functions
