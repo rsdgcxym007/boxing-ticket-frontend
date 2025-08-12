@@ -275,12 +275,14 @@ interface Props {
   selectedOrderIds?: string[];
   totalOrders?: number;
   filteredOrders?: number;
+  currentFilters?: any;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   selectedOrderIds: () => [],
   totalOrders: 0,
   filteredOrders: 0,
+  currentFilters: () => ({}),
 });
 
 const emit = defineEmits<{
@@ -295,6 +297,7 @@ interface ExportOptions {
   includeSeatDetails: boolean;
   includeCustomerInfo: boolean;
   orderIds?: string[];
+  filters?: any;
 }
 
 const {
@@ -339,6 +342,8 @@ const handleExport = async () => {
 
     if (exportType.value === "selected") {
       options.orderIds = props.selectedOrderIds;
+    } else if (exportType.value === "filtered") {
+      options.filters = props.currentFilters;
     }
 
     await exportOrdersAdvanced(options);

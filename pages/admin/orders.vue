@@ -235,6 +235,7 @@
       </div>
 
       <!-- ส่วนแสดงรายการออเดอร์ -->
+      <!-- รายการออเดอร์ -->
       <div class="space-y-4">
         <!-- Loading State -->
         <div
@@ -249,8 +250,43 @@
 
         <!-- รายการออเดอร์ -->
         <div v-else>
+          <!-- เพิ่มส่วนเลือกทั้งหมด -->
+          <div
+            class="bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-blue-200 p-4 mb-4"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    :checked="isAllSelected"
+                    @change="toggleSelectAll"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span class="text-sm font-medium text-blue-900">
+                    เลือกทั้งหมด
+                  </span>
+                </label>
+                <span class="text-sm text-blue-700">
+                  เลือกแล้ว {{ selectedOrderIds.length }} จาก
+                  {{ pageData.orders.length }} รายการ
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  v-if="selectedOrderIds.length > 0"
+                  @click="clearSelection"
+                  class="text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                  ยกเลิกการเลือก
+                </button>
+              </div>
+            </div>
+          </div>
+
           <AdminOrderCardList
             :orders="pageData.orders"
+            :selectedOrderIds="selectedOrderIds"
             :page="pageData.page"
             :hasNext="pageData.page < pageData.totalPage"
             :total="pageData.totalCount"
@@ -262,6 +298,7 @@
             @generate-tickets="onGenerateTickets"
             @edit-order="onEditOrder"
             @update-attendance="onUpdateAttendance"
+            @toggle-selection="onToggleSelection"
           />
         </div>
       </div>
@@ -387,6 +424,7 @@
     :selected-order-ids="selectedOrderIds"
     :total-orders="pageData.totalCount"
     :filtered-orders="pageData.totalCount"
+    :current-filters="getCurrentFilters()"
     @close="showExportDialog = false"
     @exported="handleExportCompleted"
   />
@@ -440,7 +478,7 @@ const orderData = reactive({});
 const { cancelOrder, generateTickets, downloadThermalReceipt, updateOrder } =
   useOrder();
 const { showToast } = useSingleToast();
-const { postExportSpreadsheet } = useExport();
+const { exportOrders, exportAllOrders, exportWithProgress } = useExport();
 
 // Attendance update related state
 const showAttendanceModal = ref(false);
@@ -455,6 +493,36 @@ const generatedTickets = ref([]);
 const isDownloadingThermal = ref(false);
 const thermalPdfUrl = ref("");
 const thermalPdfError = ref(false);
+
+// Selection related computed
+const isAllSelected = computed(() => {
+  return (
+    pageData.orders.length > 0 &&
+    selectedOrderIds.value.length === pageData.orders.length
+  );
+});
+
+// Selection functions
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    selectedOrderIds.value = [];
+  } else {
+    selectedOrderIds.value = pageData.orders.map((order) => order.id);
+  }
+};
+
+const clearSelection = () => {
+  selectedOrderIds.value = [];
+};
+
+const onToggleSelection = (orderId) => {
+  const index = selectedOrderIds.value.indexOf(orderId);
+  if (index > -1) {
+    selectedOrderIds.value.splice(index, 1);
+  } else {
+    selectedOrderIds.value.push(orderId);
+  }
+};
 
 const exportPdfModal = ref(false);
 const exportPdfUrl = ref("");
@@ -484,7 +552,6 @@ const getStatusLabel = (value) => {
 
 const fetchData = async () => {
   pageData.loading = true;
-  console.log("pageData.filters.showDate", pageData.filters.showDate);
 
   try {
     const res = await useOrder().getOrders({
@@ -505,6 +572,10 @@ const fetchData = async () => {
     });
 
     pageData.orders = res.data;
+    // ไม่ต้อง auto-select ทุกรายการแล้ว เหลือแค่รายการที่เลือกไว้ก่อนหน้า
+    selectedOrderIds.value = selectedOrderIds.value.filter((id) =>
+      res.data.some((order) => order.id === id)
+    );
     pageData.totalCount = res.total;
     pageData.totalPage = res.totalPages;
   } catch (error) {
@@ -558,21 +629,6 @@ const onReferrerNameChange = () => {
   fetchData();
 };
 
-const handleExportCSV = () => {
-  const payload = {
-    orders: pageData.orders.map((order) => order.id),
-    format: "csv",
-  };
-  postExportSpreadsheet(payload);
-};
-const handleExportExcel = () => {
-  const payload = {
-    orders: pageData.orders.map((order) => order.id),
-    format: "excel",
-  };
-  postExportSpreadsheet(payload);
-};
-
 const handleExportPDF = async () => {
   try {
     const query = {
@@ -599,10 +655,56 @@ const handleExportPDF = async () => {
   }
 };
 
+// ฟังก์ชันสำหรับสร้าง filters object
+const getCurrentFilters = () => {
+  return {
+    status: pageData.filters.status,
+    search: pageData.filters.search,
+    zone: ZONE_IDS_BY_NAME[pageData.filters.zone] || undefined,
+    createdBy: pageData.filters.createdBy || undefined,
+    showDate: dayjs(
+      pageData.filters.showDate ? pageData.filters.showDate : new Date()
+    ).format("YYYY-MM-DD"),
+    paymentMethod: pageData.filters.paymentMethod || undefined,
+    purchaseType: pageData.filters.purchaseType || undefined,
+    attendanceStatus: pageData.filters.attendanceStatus || undefined,
+    referrerName: pageData.filters.referrerName || undefined,
+  };
+};
+
 // Export functions
 const handleQuickExport = async (format, type) => {
-  console.log("Quick export:", format, type);
-  showToast("success", `กำลังส่งออกไฟล์ ${format.toUpperCase()}`);
+  console.log(
+    "Quick export:",
+    format,
+    type,
+    "Selected IDs:",
+    selectedOrderIds.value
+  );
+
+  try {
+    const { exportOrders, exportAllOrders, exportWithProgress } = useExport();
+
+    if (type === "all") {
+      // ส่งออกทั้งหมดตาม filters ปัจจุบัน
+      const filters = getCurrentFilters();
+
+      // ส่ง filters แทนการส่ง orderIds ว่าง
+      await exportWithProgress([], format, { filters });
+    } else {
+      // ส่งออกเฉพาะที่เลือก
+      if (selectedOrderIds.value.length === 0) {
+        showToast("warning", "กรุณาเลือกออเดอร์ที่ต้องการส่งออก");
+        return;
+      }
+      await exportOrders(selectedOrderIds.value, format);
+    }
+
+    showToast("success", `กำลังส่งออกไฟล์ ${format.toUpperCase()}`);
+  } catch (error) {
+    console.error("Export failed:", error);
+    showToast("error", "การส่งออกล้มเหลว");
+  }
 };
 
 const handleExportCompleted = (options) => {
