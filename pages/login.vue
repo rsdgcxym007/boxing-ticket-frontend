@@ -581,32 +581,8 @@ const login = async () => {
       password: pageData.password,
     });
 
-    // บันทึกข้อมูลผู้ใช้ (ถ้ามีใน response)
-    const authStore = useAuthStore();
-
-    // สำหรับการ backward compatibility กับระบบเดิม
-    // ถ้า API ส่ง user data มาด้วย
-    if ("user" in loginResponse) {
-      authStore.setUser((loginResponse as any).user);
-    } else {
-      // ถ้าไม่มี user data ให้สร้าง basic user object
-      const basicUser = {
-        id: "1", // สามารถดึงจาก JWT token ได้
-        name: pageData.email.split("@")[0], // ใช้ส่วนแรกของ email เป็นชื่อ
-        role: "user", // default role
-        email: pageData.email,
-      };
-      authStore.setUser(basicUser);
-    }
-
+    console.log("✅ Login successful:", loginResponse);
     showToast("success", "🎉 เข้าสู่ระบบสำเร็จ");
-
-    // แสดงข้อมูล token expiration
-    const timeUntilExpiration = auth.getTimeUntilExpiration();
-    const hoursUntilExpiration = Math.floor(timeUntilExpiration / 3600);
-    console.log(`🕒 Token จะหมดอายุใน ${hoursUntilExpiration} ชั่วโมง`);
-
-    console.log("🏠 กำลังเปลี่ยนเส้นทางไปหน้าแรก...");
 
     // เปลี่ยนเส้นทางไปหน้าแรก
     await router.push("/");
@@ -618,21 +594,9 @@ const login = async () => {
 
     if (err.message) {
       errorMessage = err.message;
-    } else if (err.status === 401) {
-      errorMessage = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
-    } else if (err.status === 429) {
-      errorMessage = "ขอเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่";
-    } else if (err.status >= 500) {
-      errorMessage = "เซิร์ฟเวอร์มีปัญหา กรุณาลองใหม่อีกครั้ง";
+    } else if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
     }
-
-    showToast("error", `🚫 ${errorMessage}`);
-
-    // แสดงข้อมูลเพิ่มเติมสำหรับการ debug
-    console.log("🔍 ข้อมูลการ debug:");
-    console.log("- API Base URL:", base);
-    console.log("- Error Status:", err.status);
-    console.log("- Error:", err);
   } finally {
     pageData.loading = false;
   }
