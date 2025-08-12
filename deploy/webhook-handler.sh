@@ -5,7 +5,7 @@ echo "🎯 Webhook handler started on port 4100"
 
 # Configuration
 PORT=4100
-PROJECT_DIR="/var/www/boxing-ticket-frontend"
+PROJECT_DIR="/var/www/frontend/boxing-ticket-frontend"
 WEBHOOK_SECRET="boxing-ticket-webhook-2024"
 LOG_FILE="/var/log/webhook-deploy.log"
 

@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_NAME="Boxing Ticket Frontend"
-APP_DIR="/var/www/boxing-ticket-frontend"
+APP_DIR="/var/www/frontend/boxing-ticket-frontend"
 PM2_APP_NAME="boxing-ticket-frontend"
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
 BRANCH="main"
@@ -146,8 +146,8 @@ backup_current() {
     log_info "Creating backup of current deployment..."
     
     if [ -d "$APP_DIR" ]; then
-        local backup_dir="/var/backups/boxing-ticket-frontend-$(date +%Y%m%d-%H%M%S)"
-        sudo mkdir -p /var/backups
+        local backup_dir="/var/backups/frontend/boxing-ticket-frontend-$(date +%Y%m%d-%H%M%S)"
+        sudo mkdir -p /var/backups/frontend
         sudo cp -r "$APP_DIR" "$backup_dir" 2>/dev/null || true
         log_success "Backup created at $backup_dir"
     else
@@ -270,7 +270,7 @@ cleanup() {
     rm -rf .nuxt .output dist || true
     
     # Keep only last 5 backups
-    sudo find /var/backups -name "boxing-ticket-frontend-*" -type d | sort -r | tail -n +6 | xargs -r sudo rm -rf
+    sudo find /var/backups/frontend -name "boxing-ticket-frontend-*" -type d | sort -r | tail -n +6 | xargs -r sudo rm -rf
     
     log_success "Cleanup completed"
 }
