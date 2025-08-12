@@ -1,6 +1,10 @@
 # การแก้ไขปัญหา Authentication System
 
 ## 🔍 **ปัญหาที่พบ**
+dwqd
+wqd
+dwq
+dqw
 
 <!-- fwefwec -->
 
