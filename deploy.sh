@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# 🚀 Boxing Ticket Frontend - VPS Deployment Script
-# Auto deployment with Discord notifications
+# 🚀 Boxing Ticket Frontend - Complete VPS Deployment Script
+# Includes setup, deployment, webhook testing, and dependency management
 
 set -e  # Exit on any error
 
@@ -19,6 +19,7 @@ PM2_APP_NAME="boxing-ticket-frontend"
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
 BRANCH="master"
 NODE_VERSION="18"
+USER=$(whoami)
 
 # Functions
 log_info() {
@@ -93,6 +94,142 @@ send_discord_notification() {
              }]
          }" \
          "$DISCORD_WEBHOOK" > /dev/null 2>&1 || log_warning "Failed to send Discord notification"
+}
+
+# VPS Setup Function
+setup_vps() {
+    log_info "🚀 Setting up VPS environment..."
+    
+    # Create directories
+    sudo mkdir -p "/var/www/frontend" "/var/backups/frontend" "/var/log/frontend"
+    
+    # Set permissions
+    sudo chown -R "$USER:$USER" "/var/www/frontend" "/var/backups/frontend" "/var/log/frontend"
+    chmod -R 755 "/var/www/frontend" "/var/backups/frontend" "/var/log/frontend"
+    
+    # Create environment file if not exists
+    if [ ! -f "$APP_DIR/.env.production" ]; then
+        cat > "$APP_DIR/.env.production" << EOF
+NODE_ENV=production
+NUXT_APP_BASE_URL=http://43.229.133.51:3000
+NUXT_PUBLIC_API_BASE=http://43.229.133.51:8000/api
+NUXT_PUBLIC_STORAGE_URL=http://43.229.133.51:8000/storage
+EOF
+        log_success "Environment file created"
+    fi
+    
+    # Create PM2 ecosystem file
+    if [ ! -f "$APP_DIR/ecosystem.config.js" ]; then
+        cat > "$APP_DIR/ecosystem.config.js" << 'EOF'
+module.exports = {
+  apps: [{
+    name: 'boxing-ticket-frontend',
+    port: '3000',
+    exec_mode: 'cluster',
+    instances: 'max',
+    script: './.output/server/index.mjs',
+    cwd: '/var/www/frontend/boxing-ticket-frontend',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000,
+      NITRO_HOST: '0.0.0.0',
+      NITRO_PORT: 3000
+    },
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+    error_file: '/var/log/frontend/error.log',
+    out_file: '/var/log/frontend/out.log',
+    log_file: '/var/log/frontend/combined.log',
+    autorestart: true,
+    max_memory_restart: '1G'
+  }]
+}
+EOF
+        log_success "PM2 ecosystem file created"
+    fi
+    
+    # Create health check script
+    cat > "/var/log/frontend/health-check.sh" << 'EOF'
+#!/bin/bash
+HEALTH_URL="http://localhost:3000/health"
+if curl -s "$HEALTH_URL" > /dev/null 2>&1; then
+    echo "✅ Application is healthy"
+    exit 0
+else
+    echo "❌ Application is not responding"
+    exit 1
+fi
+EOF
+    chmod +x "/var/log/frontend/health-check.sh"
+    
+    # Create systemd service for webhook
+    sudo tee /etc/systemd/system/boxing-webhook.service > /dev/null << EOF
+[Unit]
+Description=Boxing Ticket Frontend Webhook Handler
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$APP_DIR
+ExecStart=/bin/bash $APP_DIR/deploy/webhook-handler.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    
+    sudo systemctl daemon-reload
+    sudo systemctl enable boxing-webhook.service
+    
+    log_success "VPS setup completed!"
+}
+
+# Install missing dependencies
+install_dependencies_fix() {
+    log_info "📦 Installing missing dependencies..."
+    
+    cd "$APP_DIR"
+    
+    # Install qr-scanner if missing
+    if ! npm list qr-scanner >/dev/null 2>&1; then
+        npm install qr-scanner@1.4.2
+        log_success "qr-scanner installed"
+    fi
+    
+    # Clear cache and reinstall
+    npm cache clean --force
+    npm ci --production=false
+    
+    log_success "Dependencies fixed!"
+}
+
+# Test webhook system
+test_webhook() {
+    log_info "🧪 Testing webhook system..."
+    
+    local webhook_url="http://43.229.133.51:4100/hooks/deploy-frontend"
+    
+    # Test Discord notification
+    send_discord_notification "🧪 TESTING" "Webhook test started" "16776960"
+    
+    # Test webhook endpoint
+    local response=$(curl -s -X POST \
+        -H "Content-Type: application/json" \
+        -d '{"ref":"refs/heads/featues/v1","repository":{"name":"boxing-ticket-frontend"}}' \
+        -w "%{http_code}" \
+        "$webhook_url" 2>/dev/null)
+    
+    local http_code="${response: -3}"
+    local response_body="${response%???}"
+    
+    if [ "$http_code" = "200" ]; then
+        log_success "Webhook test successful!"
+        send_discord_notification "✅ TEST SUCCESS" "Webhook system working correctly" "3066993"
+    else
+        log_error "Webhook test failed with HTTP $http_code"
+        send_discord_notification "❌ TEST FAILED" "HTTP Code: $http_code" "15158332"
+    fi
 }
 
 # Check if running as root
@@ -330,12 +467,15 @@ deploy_failed() {
 
 # Show help
 show_help() {
-    echo "Boxing Ticket Frontend - VPS Deployment Script"
+    echo "Boxing Ticket Frontend - Complete VPS Deployment Script"
     echo ""
     echo "Usage: $0 [OPTION]"
     echo ""
     echo "Options:"
     echo "  deploy          Start deployment process (default)"
+    echo "  setup           Setup VPS environment (first time)"
+    echo "  deps            Install/fix dependencies"
+    echo "  test            Test webhook system"
     echo "  status          Show application status"
     echo "  logs            Show application logs"
     echo "  restart         Restart application"
@@ -345,7 +485,10 @@ show_help() {
     echo "  help            Show this help message"
     echo ""
     echo "Examples:"
+    echo "  $0 setup        # First time VPS setup"
     echo "  $0 deploy       # Deploy application"
+    echo "  $0 deps         # Fix dependencies"
+    echo "  $0 test         # Test webhook"
     echo "  $0 status       # Show PM2 status"
     echo "  $0 logs         # Show application logs"
 }
@@ -354,6 +497,15 @@ show_help() {
 case "${1:-deploy}" in
     deploy)
         deploy
+        ;;
+    setup)
+        setup_vps
+        ;;
+    deps)
+        install_dependencies_fix
+        ;;
+    test)
+        test_webhook
         ;;
     status)
         pm2 describe "$PM2_APP_NAME" 2>/dev/null || echo "Application not running"
