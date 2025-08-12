@@ -38,11 +38,13 @@
     "deploy:restart": "./deploy.sh restart",
     "deploy:health": "./deploy.sh health",
     "deploy:backup": "./deploy.sh backup",
-    "pm2:start": "pm2 start ecosystem.config.js",
+    "deploy:cleanup": "./cleanup-pm2.sh",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
     "pm2:stop": "pm2 stop boxing-ticket-frontend",
     "pm2:restart": "pm2 restart boxing-ticket-frontend",
     "pm2:logs": "pm2 logs boxing-ticket-frontend",
-    "pm2:status": "pm2 status"
+    "pm2:status": "pm2 status",
+    "pm2:cleanup": "./cleanup-pm2.sh"
   },
   "dependencies": {
     "@fontsource/prompt": "^5.2.6",
