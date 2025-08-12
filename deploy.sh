@@ -35,7 +35,7 @@ log_warning() {
 }
 
 log_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}❌        if curl -s http://localhost:4100/health > /dev/null; then$1${NC}"
 }
 
 # Alias for compatibility
@@ -188,7 +188,7 @@ EOF
     # Create health check script
     cat > "/var/log/frontend/health-check.sh" << 'EOF'
 #!/bin/bash
-HEALTH_URL="http://localhost:3000/health"
+HEALTH_URL="http://localhost:4100/health"
 if curl -s "$HEALTH_URL" > /dev/null 2>&1; then
     echo "✅ Application is healthy"
     exit 0
@@ -638,7 +638,7 @@ health_check() {
     local attempt=0
     
     while [ $attempt -lt $max_attempts ]; do
-        if curl -s http://localhost:3000/health > /dev/null 2>&1; then
+        if curl -s http://localhost:4100/health > /dev/null 2>&1; then
             log_success "Health check passed"
             return 0
         fi
@@ -746,8 +746,8 @@ deploy() {
         log_info "Application Status:"
         pm2 describe "$PM2_APP_NAME" | grep -E "(status|uptime|memory|cpu)"
         
-        log_info "Application URL: http://43.229.133.51:3000"
-        log_info "Health Check: http://43.229.133.51:3000/health"
+        log_info "Application URL: http://43.229.133.51:4100"
+        log_info "Health Check: http://43.229.133.51:4100/health"
         
     else
         deploy_failed
