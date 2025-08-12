@@ -121,7 +121,7 @@ EOF
     # Create PM2 ecosystem file
     if [ ! -f "$APP_DIR/ecosystem.config.js" ]; then
         cat > "$APP_DIR/ecosystem.config.js" << 'EOF'
-export default {
+module.exports = {
   apps: [{
     name: 'boxing-ticket-frontend',
     port: '3000',
@@ -602,7 +602,19 @@ manage_pm2() {
         pm2 restart "$PM2_APP_NAME"
     else
         log_info "Starting new PM2 application..."
-        pm2 start ecosystem.config.js --env production
+        # Try with ecosystem config first
+        if ! pm2 start ecosystem.config.js --env production; then
+            log_warn "Ecosystem config failed, trying direct script start..."
+            # Fallback to direct script start
+            pm2 start .output/server/index.mjs \
+                --name "$PM2_APP_NAME" \
+                --instances max \
+                --node-args="--max-old-space-size=1024" \
+                --env NODE_ENV=production \
+                --env PORT=3000 \
+                --env NITRO_HOST=0.0.0.0 \
+                --env NITRO_PORT=3000
+        fi
     fi
     
     # Save PM2 configuration
