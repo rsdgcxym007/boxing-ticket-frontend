@@ -163,14 +163,36 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:4000/api",
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:4000",
       socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
     },
+  },
+
+  // Development server configuration
+  devServer: {
+    port: 3000,
+    host: "localhost",
   },
 
   // Build optimization for production
   build: {
     transpile: [],
+  },
+
+  // Vite configuration
+  vite: {
+    server: {
+      fs: {
+        allow: [".."],
+      },
+    },
+    css: {
+      preprocessorOptions: {
+        css: {
+          charset: false,
+        },
+      },
+    },
   },
 
   alias: {
