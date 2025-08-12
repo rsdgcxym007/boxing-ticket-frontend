@@ -36,8 +36,18 @@
           </div>
 
           <div class="flex items-center justify-between relative">
-            <!-- Left: Order Info -->
+            <!-- Left: Selection Checkbox + Order Info -->
             <div class="flex items-center space-x-3">
+              <!-- Selection checkbox -->
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  :checked="props.selectedOrderIds?.includes(order.id)"
+                  @change="$emit('toggle-selection', order.id)"
+                  class="w-4 h-4 text-blue-600 bg-white border-white rounded focus:ring-blue-500 focus:ring-2"
+                />
+              </div>
+
               <div
                 class="bg-white/20 backdrop-blur-sm p-2 rounded-lg shadow-lg"
               >
@@ -483,6 +493,7 @@ import * as orderHelpers from "../utils/orderHelpers";
 
 const props = defineProps<{
   orders: any[];
+  selectedOrderIds?: string[];
   page: number;
   hasNext: boolean;
   total: number;
@@ -497,6 +508,7 @@ const emit = defineEmits([
   "generate-tickets",
   "edit-order",
   "update-attendance",
+  "toggle-selection",
 ]);
 
 const totalPages = computed(() =>

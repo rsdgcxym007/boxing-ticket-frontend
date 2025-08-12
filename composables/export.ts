@@ -10,6 +10,17 @@ interface ExportOptions {
   includeSeatDetails?: boolean;
   includeCustomerInfo?: boolean;
   orderIds?: string[];
+  filters?: {
+    status?: any;
+    search?: string;
+    zone?: string;
+    createdBy?: string;
+    showDate?: string;
+    paymentMethod?: string;
+    purchaseType?: string;
+    attendanceStatus?: string;
+    referrerName?: string;
+  };
 }
 
 interface ImportOptions {
@@ -146,6 +157,7 @@ export const useExport = () => {
         orderIds: orderIds.length > 0 ? orderIds : [],
         format,
         exportId,
+        filters: options.filters || {},
         options: {
           includePaymentDetails: options.includePaymentDetails ?? true,
           includeSeatDetails: options.includeSeatDetails ?? true,
@@ -387,22 +399,26 @@ export const useExport = () => {
   const postExportSpreadsheet = async (payload: {
     orders: string[];
     format: string;
+    filters?: any;
   }) => {
     const token = localStorage.getItem("token") || "";
 
     try {
+      const requestPayload = {
+        orderIds: Array.isArray(payload.orders)
+          ? payload.orders
+          : [payload.orders].flat(),
+        format: payload.format,
+        filters: payload.filters || {},
+      };
+
       const response = await fetch(`${base}/api/v1/orders/export-spreadsheet`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({
-          orderIds: Array.isArray(payload.orders)
-            ? payload.orders
-            : [payload.orders].flat(),
-          format: payload.format,
-        }),
+        body: JSON.stringify(requestPayload),
       });
 
       if (!response.ok) {

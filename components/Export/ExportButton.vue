@@ -92,9 +92,9 @@
                 class="mdi mdi-file-delimited text-green-600 text-xl mr-4 group-hover:scale-110 transition-transform"
               ></i>
               <div class="flex-1">
-                <div class="font-medium text-gray-900">CSV ทั้งหมด</div>
+                <div class="font-medium text-gray-900">CSV ตามฟิลเตอร์</div>
                 <div class="text-xs text-gray-500 mt-0.5">
-                  {{ totalOrders }} รายการ
+                  {{ totalOrders }} รายการ (ตามการกรองปัจจุบัน)
                 </div>
               </div>
             </button>
@@ -107,15 +107,15 @@
                 class="mdi mdi-microsoft-excel text-blue-600 text-xl mr-4 group-hover:scale-110 transition-transform"
               ></i>
               <div class="flex-1">
-                <div class="font-medium text-gray-900">Excel ทั้งหมด</div>
+                <div class="font-medium text-gray-900">Excel ตามฟิลเตอร์</div>
                 <div class="text-xs text-gray-500 mt-0.5">
-                  {{ totalOrders }} รายการ
+                  {{ totalOrders }} รายการ (ตามการกรองปัจจุบัน)
                 </div>
               </div>
             </button>
 
             <button
-              v-if="selectedOrderIds.length > 0"
+              v-if="selectedOrderIds && selectedOrderIds.length > 0"
               @click="quickExport('csv', 'selected')"
               class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center group"
             >
@@ -131,7 +131,7 @@
             </button>
 
             <button
-              v-if="selectedOrderIds.length > 0"
+              v-if="selectedOrderIds && selectedOrderIds.length > 0"
               @click="quickExport('excel', 'selected')"
               class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center group"
             >
@@ -166,7 +166,6 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted, onUnmounted } from "vue";
-import { useExport } from "~/composables/export";
 /**
  * ExportButton Component
  *
@@ -208,19 +207,16 @@ const emit = defineEmits<{
   openAdvanced: [];
 }>();
 
-const {
-  exportAllOrders,
-  exportOrders,
-  isExporting,
-  exportProgress,
-  exportError,
-  exportStatusText,
-} = useExport();
-
 // Refs
 const containerRef = ref<HTMLElement>();
 const buttonRef = ref<HTMLElement>();
 const showDropdown = ref(false);
+
+// State for export loading (controlled by parent)
+const isExporting = ref(false);
+const exportProgress = ref(0);
+const exportError = ref("");
+const exportStatusText = ref("");
 
 // Computed style for dynamic sizing
 const buttonStyle = computed(() => {
@@ -311,29 +307,20 @@ const quickExport = async (
     format,
     type,
     selectedOrderIds: props.selectedOrderIds,
+    selectedCount: props.selectedOrderIds.length,
   });
   closeDropdown();
 
-  try {
-    let result;
-    if (type === "all") {
-      console.log("Exporting all orders...");
-      result = await exportAllOrders(format);
-    } else {
-      console.log("Exporting selected orders...", props.selectedOrderIds);
-      result = await exportOrders(props.selectedOrderIds, format);
-    }
-
-    console.log("Export result:", result);
-
-    // Emit only if export was successful
-    if (result !== undefined) {
-      emit("quickExport", format, type);
-    }
-  } catch (error: any) {
-    console.error("Quick export failed:", error);
-    // Error is already handled in the composable, so we don't need to do anything here
+  // ตรวจสอบว่ามีรายการเลือกหรือไม่สำหรับ selected type
+  if (type === "selected" && props.selectedOrderIds.length === 0) {
+    console.warn("No orders selected for export");
+    // ให้ parent จัดการ warning message
+    emit("quickExport", format, type);
+    return;
   }
+
+  // Emit ไปให้ parent จัดการ export
+  emit("quickExport", format, type);
 };
 
 const openAdvancedDialog = () => {

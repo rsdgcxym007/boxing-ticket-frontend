@@ -394,15 +394,6 @@ const performImport = async () => {
     // Determine format from file extension
     const fileName = selectedFile.value.name.toLowerCase();
     const format = fileName.endsWith(".csv") ? "csv" : "excel";
-
-    console.log("Import options:", {
-      file: selectedFile.value.name,
-      format,
-      validateData: importOptions.validateData,
-      preventDuplicates: importOptions.preventDuplicates,
-      updateExisting: importOptions.updateExisting,
-    });
-
     await importOrdersFromFile({
       file: selectedFile.value,
       format,
