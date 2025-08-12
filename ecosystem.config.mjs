@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   apps: [
     {
       name: "boxing-ticket-frontend",
@@ -91,7 +91,7 @@ module.exports = {
       repo: "git@github.com:your-username/boxing-ticket-frontend.git",
       path: "/var/www/boxing-ticket-frontend",
       "post-deploy":
-        "npm ci && npm run build && pm2 reload ecosystem.config.js --env production && pm2 save",
+        "npm ci && npm run build && pm2 reload ecosystem.config.mjs --env production && pm2 save",
       ssh_options: "StrictHostKeyChecking=no",
     },
   },
