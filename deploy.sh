@@ -209,7 +209,7 @@ After=network.target
 Type=simple
 User=$USER
 WorkingDirectory=$APP_DIR
-ExecStart=/bin/bash $APP_DIR/deploy/webhook-handler.sh
+ExecStart=/bin/bash $APP_DIR/webhook-handler.sh
 Restart=always
 RestartSec=10
 

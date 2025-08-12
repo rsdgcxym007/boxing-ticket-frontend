@@ -4,7 +4,9 @@
 # This script handles webhook requests for auto-deployment
 
 LOG_FILE="/var/log/boxing-ticket-webhook.log"
-DEPLOY_SCRIPT="/var/www/boxing-ticket-frontend/deploy.sh"
+# Use the same APP_DIR as deploy.sh
+APP_DIR="/var/www/frontend/boxing-ticket-frontend"
+DEPLOY_SCRIPT="$APP_DIR/deploy.sh"
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
 
 # Colors
@@ -109,7 +111,7 @@ execute_deployment() {
     send_discord_notification "🚀 Webhook Deployment" "Deployment triggered via webhook" "3447003"
     
     # Change to application directory
-    cd /var/www/boxing-ticket-frontend || {
+    cd "$APP_DIR" || {
         log_message "ERROR" "Failed to change to application directory"
         send_discord_notification "❌ Deployment Failed" "Could not access application directory" "16711680"
         exit 1
@@ -148,9 +150,9 @@ execute_deployment() {
 # Main webhook handler
 main() {
     # Create log file if it doesn't exist
-    sudo mkdir -p "$(dirname "$LOG_FILE")"
-    sudo touch "$LOG_FILE"
-    sudo chmod 666 "$LOG_FILE"
+    mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null || true
+    touch "$LOG_FILE" 2>/dev/null || true
+    chmod 666 "$LOG_FILE" 2>/dev/null || true
     
     # Get request method and content type from environment
     local method="${REQUEST_METHOD:-POST}"
