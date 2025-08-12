@@ -118,6 +118,13 @@ execute_deployment() {
     if [ -f "$DEPLOY_SCRIPT" ]; then
         log_message "INFO" "Executing deployment script: $DEPLOY_SCRIPT"
 
+        # Quick dependency install before full deployment
+        log_message "INFO" "Installing dependencies..."
+        cd "$APP_DIR"
+        npm ci --production=false >> "$LOG_FILE" 2>&1 || {
+            log_message "WARNING" "npm ci failed, continuing with deployment..."
+        }
+
         if command -v timeout > /dev/null 2>&1; then
             timeout 1800 /bin/bash "$DEPLOY_SCRIPT" deploy >> "$LOG_FILE" 2>&1
         else
