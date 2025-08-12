@@ -105,30 +105,34 @@ send_discord_notification() {
 cleanup_pm2_duplicates() {
     log_info "🧹 Cleaning up PM2 duplicate processes..."
     
-    # Stop all processes with our app name
+    # Stop all PM2 processes first
     pm2 stop all 2>/dev/null || true
     
     # Delete all instances of our app name
     pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
     
-    # Also try to delete by ecosystem config
+    # Delete any ecosystem config processes (both .cjs and .mjs)
     pm2 delete ecosystem.config.cjs 2>/dev/null || true
+    pm2 delete ecosystem.config.mjs 2>/dev/null || true
     
-    # List all PM2 processes to check for any remaining duplicates
-    local pm2_processes=$(pm2 jlist 2>/dev/null | jq -r '.[].name' 2>/dev/null || echo "")
+    # Get list of all processes and remove any boxing/frontend related ones
+    local pm2_processes=$(pm2 jlist 2>/dev/null || echo "[]")
     
-    if [ -n "$pm2_processes" ]; then
-        echo "$pm2_processes" | grep -i "boxing\|frontend" | while read -r process_name; do
-            if [ -n "$process_name" ]; then
-                log_warning "Removing duplicate process: $process_name"
-                pm2 delete "$process_name" 2>/dev/null || true
+    if [ "$pm2_processes" != "[]" ]; then
+        echo "$pm2_processes" | jq -r '.[].name' 2>/dev/null | while read -r process_name; do
+            if [ -n "$process_name" ] && [ "$process_name" != "null" ]; then
+                # Check if process name contains boxing, frontend, or ticket
+                if echo "$process_name" | grep -iq "boxing\|frontend\|ticket"; then
+                    log_warning "Removing duplicate process: $process_name"
+                    pm2 delete "$process_name" 2>/dev/null || true
+                fi
             fi
         done
     fi
     
-    # Clear PM2 dump
+    # Kill and resurrect PM2 daemon to ensure clean state
     pm2 kill 2>/dev/null || true
-    pm2 resurrect 2>/dev/null || true
+    sleep 2
     
     log_success "PM2 cleanup completed"
 }
@@ -657,33 +661,43 @@ manage_pm2() {
     
     cd "$APP_DIR"
     
-    # Stop and delete any existing instances of the app (including duplicates)
-    log_info "Cleaning up existing PM2 processes..."
+    # More thorough cleanup of existing PM2 processes
+    log_info "Performing comprehensive PM2 cleanup..."
+    
+    # Stop all processes first
+    pm2 stop all 2>/dev/null || true
+    
+    # Delete by name
     pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
     
-    # Also clean up by ecosystem config name
+    # Delete by ecosystem config files (both extensions)
     pm2 delete ecosystem.config.cjs 2>/dev/null || true
+    pm2 delete ecosystem.config.mjs 2>/dev/null || true
     
-    # Wait a moment for processes to fully stop
-    sleep 2
-    
-    log_info "Starting new PM2 application..."
-    # Try with ecosystem config first
-    if ! pm2 start ecosystem.config.cjs --env production; then
-        log_warning "Ecosystem config failed, trying direct script start..."
-        # Fallback to direct script start
-        pm2 start .output/server/index.mjs \
-            --name "$PM2_APP_NAME" \
-            --instances max \
-            --node-args="--max-old-space-size=1024" \
-            --env NODE_ENV=production \
-            --env PORT=3000 \
-            --env NITRO_HOST=0.0.0.0 \
-            --env NITRO_PORT=3000
+    # Check for any remaining processes with similar names
+    local pm2_list=$(pm2 jlist 2>/dev/null || echo "[]")
+    if [ "$pm2_list" != "[]" ]; then
+        echo "$pm2_list" | jq -r '.[].name' 2>/dev/null | grep -i "boxing\|frontend" | while read -r process_name; do
+            if [ -n "$process_name" ] && [ "$process_name" != "null" ]; then
+                log_warning "Removing remaining process: $process_name"
+                pm2 delete "$process_name" 2>/dev/null || true
+            fi
+        done
     fi
     
-    # Save PM2 configuration
-    pm2 save
+    # Wait for processes to fully stop
+    sleep 3
+    
+    log_info "Starting new PM2 application..."
+    # Start only with ecosystem config
+    if pm2 start ecosystem.config.cjs --env production; then
+        log_success "PM2 started successfully with ecosystem config"
+    else
+        log_error "Failed to start PM2 with ecosystem config"
+        return 1
+    fi
+    
+    # Save PM2 configuration only once
     pm2 save
     
     log_success "PM2 application managed successfully"
