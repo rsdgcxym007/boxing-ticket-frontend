@@ -132,9 +132,9 @@ import { ref, onMounted, onUnmounted, nextTick } from "vue";
 import { Icon } from "@iconify/vue";
 import { useQRScannerStore } from "@/stores/qrScanner";
 import { useAuthStore } from "@/stores/auth";
-import ScanResultModal from "@/components/mobile/ScanResultModal.vue";
-import ScanHistoryModal from "@/components/mobile/ScanHistoryModal.vue";
-import ErrorModal from "@/components/mobile/ErrorModal.vue";
+import ScanResultModal from "@/components/Mobile/ScanResultModal.vue";
+import ScanHistoryModal from "@/components/Mobile/ScanHistoryModal.vue";
+import ErrorModal from "@/components/Mobile/ErrorModal.vue";
 
 // Composables
 const qrStore = useQRScannerStore();

@@ -1,6 +1,20 @@
 import dayjs from "dayjs";
 import { TicketType } from "@/types/Enums";
-import { formatCurrency } from "@/utils/formatCurrency";
+
+export const formatCurrency = (value: any): string => {
+  if (value == null || value === "") return "฿0";
+
+  const cleaned = String(value).replace(/[^\d.-]/g, "");
+
+  const num = Number(cleaned);
+
+  if (isNaN(num)) return "0";
+
+  return `${num.toLocaleString("th-TH", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
+};
 
 // Format date to DD/MM/YYYY
 export const formatDate = (dateStr: string): string => {

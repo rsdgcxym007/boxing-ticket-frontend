@@ -528,7 +528,7 @@ import {
   CalendarCheck,
 } from "lucide-vue-next";
 
-import { formatCurrency } from "@/utils/formatCurrency";
+import { formatCurrency } from "@/utils/orderHelpers";
 
 // 🎯 การใช้งาน Composables
 const { t } = useI18n();

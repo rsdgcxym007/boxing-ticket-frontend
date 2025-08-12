@@ -1334,7 +1334,7 @@ import { useIntegratedSeatBooking } from "@/composables/useIntegratedSeatBooking
 import { useRealTimeSeatManager } from "@/composables/useRealTimeSeatManager";
 import { ZONE_IDS_BY_NAME } from "@/utils/zoneEnums";
 import { buildSeatLayoutFromCoordinates } from "@/utils/buildSeatLayout";
-import { formatCurrency } from "@/utils/formatCurrency";
+import { formatCurrency } from "@/utils/orderHelpers";
 import {
   getStatusConfig,
   getPaymentStatusConfig,
