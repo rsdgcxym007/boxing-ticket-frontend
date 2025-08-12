@@ -587,6 +587,7 @@ const login = async () => {
     // เปลี่ยนเส้นทางไปหน้าแรก
     await router.push("/");
   } catch (err: any) {
+    showToast("error", `❌ ${err}`);
     console.error("❌ เกิดข้อผิดพลาดในการเข้าสู่ระบบ:", err);
 
     // แสดงข้อความแจ้งเตือนที่เหมาะสม

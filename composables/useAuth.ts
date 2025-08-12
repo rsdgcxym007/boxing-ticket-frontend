@@ -3,7 +3,8 @@ import { useRouter, useRuntimeConfig, useNuxtApp, navigateTo } from "nuxt/app";
 import { useApi } from "./useApi";
 import { useAuthStore } from "@/stores/auth";
 import { collectDeviceInfo, type DeviceInfo } from "@/utils/deviceInfo";
-
+import { useSingleToast } from "@/composables/useSingleToast";
+const { showToast } = useSingleToast();
 export interface LoginCredentials {
   username: string;
   password: string;
@@ -146,6 +147,10 @@ export const useAuth = () => {
         user: userData,
       };
     } catch (error) {
+      // showToast(
+      //   "error",
+      //   "บัญชีนี้ยังไม่ได้ตั้งรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ"
+      // );
       console.error("Login error:", error);
       throw error;
     }
