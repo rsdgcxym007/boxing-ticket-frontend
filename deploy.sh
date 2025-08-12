@@ -204,6 +204,220 @@ install_dependencies_fix() {
     log_success "Dependencies fixed!"
 }
 
+# Create missing mobile components
+create_missing_components() {
+    log_info "🔧 Creating missing mobile components..."
+    
+    cd "$APP_DIR"
+    
+    # Create mobile components directory
+    mkdir -p "components/mobile"
+    
+    # Check and create ScanHistoryModal.vue if missing
+    if [ ! -f "components/mobile/ScanHistoryModal.vue" ]; then
+        log_info "Creating ScanHistoryModal.vue..."
+        cat > "components/mobile/ScanHistoryModal.vue" << 'EOF'
+<template>
+  <div 
+    class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+    @click.self="$emit('close')"
+  >
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 text-white">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <Icon icon="mdi:history" class="text-2xl" />
+            <h3 class="text-lg font-semibold">ประวัติการสแกน</h3>
+          </div>
+          <button 
+            @click="$emit('close')"
+            class="p-2 hover:bg-white/20 rounded-full transition-colors"
+          >
+            <Icon icon="mdi:close" class="text-xl" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6">
+        <!-- Empty State -->
+        <div class="text-center py-12">
+          <Icon icon="mdi:history" class="text-6xl text-gray-300 mx-auto mb-4" />
+          <h4 class="text-lg font-medium text-gray-900 mb-2">ยังไม่มีประวัติการสแกน</h4>
+          <p class="text-gray-500">เริ่มสแกน QR Code เพื่อดูประวัติ</p>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="flex space-x-3 mt-6 pt-4 border-t border-gray-200">
+          <button
+            @click="$emit('close')"
+            class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+          >
+            ปิด
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { Icon } from "@iconify/vue";
+defineEmits(['close']);
+</script>
+EOF
+        log_success "ScanHistoryModal.vue created"
+    fi
+    
+    # Check and create ErrorModal.vue if missing
+    if [ ! -f "components/mobile/ErrorModal.vue" ]; then
+        log_info "Creating ErrorModal.vue..."
+        cat > "components/mobile/ErrorModal.vue" << 'EOF'
+<template>
+  <div 
+    class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+    @click.self="$emit('close')"
+  >
+    <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 text-white">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <Icon icon="mdi:alert-circle" class="text-2xl" />
+            <h3 class="text-lg font-semibold">เกิดข้อผิดพลาด</h3>
+          </div>
+          <button 
+            @click="$emit('close')"
+            class="p-2 hover:bg-white/20 rounded-full transition-colors"
+          >
+            <Icon icon="mdi:close" class="text-xl" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6">
+        <!-- Error Icon -->
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Icon icon="mdi:alert-circle" class="text-3xl text-red-600" />
+          </div>
+          <h4 class="text-xl font-semibold text-gray-900 mb-2">เกิดข้อผิดพลาด</h4>
+        </div>
+
+        <!-- Error Message -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p class="text-red-800 text-center">
+            {{ error || 'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ' }}
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex space-x-3">
+          <button
+            @click="$emit('retry')"
+            class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+          >
+            <Icon icon="mdi:refresh" class="text-lg" />
+            <span>ลองใหม่</span>
+          </button>
+          <button
+            @click="$emit('close')"
+            class="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+          >
+            ปิด
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { Icon } from "@iconify/vue";
+const props = defineProps({
+  error: {
+    type: String,
+    default: ''
+  }
+});
+defineEmits(['close', 'retry']);
+</script>
+EOF
+        log_success "ErrorModal.vue created"
+    fi
+    
+    # Check and create ScanResultModal.vue if missing
+    if [ ! -f "components/mobile/ScanResultModal.vue" ]; then
+        log_info "Creating ScanResultModal.vue..."
+        cat > "components/mobile/ScanResultModal.vue" << 'EOF'
+<template>
+  <div 
+    class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+    @click.self="$emit('close')"
+  >
+    <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 text-white">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <Icon icon="mdi:qrcode-scan" class="text-2xl" />
+            <h3 class="text-lg font-semibold">ผลการสแกน</h3>
+          </div>
+          <button 
+            @click="$emit('close')"
+            class="p-2 hover:bg-white/20 rounded-full transition-colors"
+          >
+            <Icon icon="mdi:close" class="text-xl" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6">
+        <div class="text-center py-8">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Icon icon="mdi:check-circle" class="text-3xl text-green-600" />
+          </div>
+          <h4 class="text-xl font-semibold text-gray-900 mb-2">สแกนสำเร็จ!</h4>
+          <div class="flex space-x-3 mt-6">
+            <button
+              @click="$emit('scan-next')"
+              class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
+              สแกนต่อ
+            </button>
+            <button
+              @click="$emit('close')"
+              class="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { Icon } from "@iconify/vue";
+const props = defineProps({
+  result: {
+    type: Object,
+    default: () => ({})
+  }
+});
+defineEmits(['close', 'scan-next']);
+</script>
+EOF
+        log_success "ScanResultModal.vue created"
+    fi
+    
+    log_success "Missing components created!"
+}
+
 # Test webhook system
 test_webhook() {
     log_info "🧪 Testing webhook system..."
@@ -428,6 +642,7 @@ deploy() {
     check_prerequisites
     backup_current
     pull_code
+    create_missing_components
     install_dependencies
     cleanup
     build_application
@@ -475,6 +690,7 @@ show_help() {
     echo "  deploy          Start deployment process (default)"
     echo "  setup           Setup VPS environment (first time)"
     echo "  deps            Install/fix dependencies"
+    echo "  components      Create missing components"
     echo "  test            Test webhook system"
     echo "  status          Show application status"
     echo "  logs            Show application logs"
@@ -487,6 +703,7 @@ show_help() {
     echo "Examples:"
     echo "  $0 setup        # First time VPS setup"
     echo "  $0 deploy       # Deploy application"
+    echo "  $0 components   # Create missing components"
     echo "  $0 deps         # Fix dependencies"
     echo "  $0 test         # Test webhook"
     echo "  $0 status       # Show PM2 status"
@@ -503,6 +720,9 @@ case "${1:-deploy}" in
         ;;
     deps)
         install_dependencies_fix
+        ;;
+    components)
+        create_missing_components
         ;;
     test)
         test_webhook
