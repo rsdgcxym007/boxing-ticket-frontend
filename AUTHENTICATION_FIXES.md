@@ -2,6 +2,8 @@
 
 ## 🔍 **ปัญหาที่พบ**
 
+<!-- fwefwec -->
+
 1. **Token Expiration Issues**: Token หมดอายุทันทีหลัง login
 2. **API Response Mismatch**: Backend ส่ง `access_token` แต่ frontend คาดหวัง `accessToken`
 3. **Missing expiresIn**: Backend ไม่ส่ง `expiresIn` มาพร้อม response
