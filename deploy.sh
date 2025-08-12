@@ -98,8 +98,9 @@ send_discord_notification() {
 # Check if running as root
 check_permissions() {
     if [ "$EUID" -eq 0 ]; then
-        log_error "Don't run this script as root!"
-        exit 1
+        log_warning "Running as root - this is not recommended in production!"
+        log_warning "Consider creating a dedicated user for deployment"
+        sleep 2
     fi
 }
 
