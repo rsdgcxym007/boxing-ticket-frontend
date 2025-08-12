@@ -1,0 +1,33 @@
+[
+  {
+    "id": "deploy-frontend",
+    "execute-command": "/var/www/frontend/boxing-ticket-frontend/deploy.sh", 
+    "command-working-directory": "/var/www/frontend/boxing-ticket-frontend",
+    "response-message": "🚀 Deploying frontend...",
+    "response-headers": {
+      "Content-Type": "application/json"
+    },
+    "pass-arguments-to-command": [
+      {
+        "source": "payload",
+        "name": "ref"
+      },
+      {
+        "source": "payload", 
+        "name": "repository.name"
+      }
+    ],
+    "trigger-rule": {
+      "match": {
+        "type": "regex",
+        "value": "^refs/heads/.*$",
+        "parameter": {
+          "source": "payload",
+          "name": "ref"
+        }
+      }
+    },
+    "trigger-rule-mismatch-http-response-code": 200,
+    "response-message-on-trigger-rule-mismatch": "Branch not configured for deployment"
+  }
+]

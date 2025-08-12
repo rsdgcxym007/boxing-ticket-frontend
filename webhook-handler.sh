@@ -121,9 +121,15 @@ execute_deployment() {
         # Quick dependency install before full deployment
         log_message "INFO" "Installing dependencies..."
         cd "$APP_DIR"
-        npm ci --production=false >> "$LOG_FILE" 2>&1 || {
-            log_message "WARNING" "npm ci failed, continuing with deployment..."
-        }
+        if [ -f "package-lock.json" ]; then
+            npm ci --production=false >> "$LOG_FILE" 2>&1 || {
+                log_message "WARNING" "npm ci failed, trying npm install..."
+                npm install --production=false >> "$LOG_FILE" 2>&1
+            }
+        else
+            log_message "INFO" "No package-lock.json found, using npm install..."
+            npm install --production=false >> "$LOG_FILE" 2>&1
+        fi
 
         if command -v timeout > /dev/null 2>&1; then
             timeout 1800 /bin/bash "$DEPLOY_SCRIPT" deploy >> "$LOG_FILE" 2>&1

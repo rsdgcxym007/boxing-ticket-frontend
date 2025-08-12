@@ -79,31 +79,6 @@ module.exports = {
       // Cron restart (restart every day at 3 AM)
       cron_restart: "0 3 * * *",
     },
-    {
-      name: "boxing-webhook",
-      script: "webhook-standalone.mjs",
-      instances: 1,
-      exec_mode: "fork",
-      cwd: ".",
-      env: {
-        NODE_ENV: "development",
-        PORT: 4300,
-        APP_DIR: "/var/www/frontend/boxing-ticket-frontend",
-      },
-      env_production: {
-        NODE_ENV: "production",
-        PORT: 4300,
-        APP_DIR: "/var/www/frontend/boxing-ticket-frontend",
-      },
-      watch: false,
-      log_file: "./logs/webhook-combined.log",
-      out_file: "./logs/webhook-out.log",
-      error_file: "./logs/webhook-error.log",
-      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
-      max_memory_restart: "256M",
-      restart_delay: 1000,
-      time: true,
-    },
   ],
 
   // Deployment configuration for PM2 deploy
