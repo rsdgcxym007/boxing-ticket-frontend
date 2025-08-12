@@ -1,11 +1,6 @@
 import dayjs from "dayjs";
 import { TicketType } from "@/types/Enums";
-
-// Format currency with comma separator
-export const formatCurrency = (amount: number | string): string => {
-  if (!amount) return "0";
-  return Number(amount).toLocaleString();
-};
+import { formatCurrency } from "@/utils/formatCurrency";
 
 // Format date to DD/MM/YYYY
 export const formatDate = (dateStr: string): string => {
