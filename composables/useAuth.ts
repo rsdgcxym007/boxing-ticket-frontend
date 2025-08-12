@@ -13,6 +13,7 @@ export interface LoginCredentials {
 export interface LoginResponse {
   accessToken: string;
   expiresIn: number; // seconds
+  user?: any; // User data from backend
 }
 
 export interface AuthError extends Error {
@@ -82,7 +83,7 @@ export const useAuth = () => {
       const deviceInfo = await collectDeviceInfo();
 
       const requestBody = {
-        username: credentials.username,
+        email: credentials.username, // Backend expects 'email' field
         password: credentials.password,
         deviceInfo,
       };
@@ -113,18 +114,37 @@ export const useAuth = () => {
         throw error;
       }
 
-      const data: LoginResponse = await response.json();
+      const data = await response.json();
+      console.log("data", data);
 
-      // Store token with expiration
-      setTokenWithExpiration(data.accessToken, data.expiresIn);
+      // Extract token and user data from backend response
+      // Backend wraps response in { data: { access_token, user } }
+      const responseData = data.data || data;
+      const accessToken = responseData.access_token || responseData.accessToken;
+      const userData = responseData.user;
 
-      // Store user data (assuming it comes with the login response)
-      // You may need to adjust this based on your actual API response structure
-      if ("user" in data) {
-        authStore.setUser((data as any).user);
+      // Default expiration time (24 hours) if not provided by backend
+      const expiresIn = data.expiresIn || 86400; // 24 hours = 86400 seconds
+
+      if (!accessToken) {
+        throw new Error("No access token received from server");
       }
 
-      return data;
+      if (!userData) {
+        throw new Error("No user data received from server");
+      }
+
+      // Store token with expiration
+      setTokenWithExpiration(accessToken, expiresIn);
+
+      // Store user data
+      authStore.setUser(userData);
+
+      return {
+        accessToken,
+        expiresIn,
+        user: userData,
+      };
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -138,7 +158,7 @@ export const useAuth = () => {
     try {
       const token = getToken();
       if (token) {
-        await fetch(`${useRuntimeConfig().public.apiBase}/auth/logout`, {
+        await fetch(`${useRuntimeConfig().public.apiBase}/api/v1/auth/logout`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -165,13 +185,16 @@ export const useAuth = () => {
     try {
       const token = getToken();
       if (token) {
-        await fetch(`${useRuntimeConfig().public.apiBase}/auth/logout-all`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        await fetch(
+          `${useRuntimeConfig().public.apiBase}/api/v1/auth/logout-all`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
       }
     } catch (error) {
       console.error("Logout all devices API error:", error);
