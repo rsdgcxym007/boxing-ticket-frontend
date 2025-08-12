@@ -121,7 +121,7 @@ EOF
     # Create PM2 ecosystem file
     if [ ! -f "$APP_DIR/ecosystem.config.js" ]; then
         cat > "$APP_DIR/ecosystem.config.js" << 'EOF'
-module.exports = {
+export default {
   apps: [{
     name: 'boxing-ticket-frontend',
     port: '3000',
