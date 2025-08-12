@@ -101,6 +101,38 @@ send_discord_notification() {
          "$DISCORD_WEBHOOK" > /dev/null 2>&1 || log_warning "Failed to send Discord notification"
 }
 
+# Clean up PM2 duplicates
+cleanup_pm2_duplicates() {
+    log_info "🧹 Cleaning up PM2 duplicate processes..."
+    
+    # Stop all processes with our app name
+    pm2 stop all 2>/dev/null || true
+    
+    # Delete all instances of our app name
+    pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
+    
+    # Also try to delete by ecosystem config
+    pm2 delete ecosystem.config.cjs 2>/dev/null || true
+    
+    # List all PM2 processes to check for any remaining duplicates
+    local pm2_processes=$(pm2 jlist 2>/dev/null | jq -r '.[].name' 2>/dev/null || echo "")
+    
+    if [ -n "$pm2_processes" ]; then
+        echo "$pm2_processes" | grep -i "boxing\|frontend" | while read -r process_name; do
+            if [ -n "$process_name" ]; then
+                log_warning "Removing duplicate process: $process_name"
+                pm2 delete "$process_name" 2>/dev/null || true
+            fi
+        done
+    fi
+    
+    # Clear PM2 dump
+    pm2 kill 2>/dev/null || true
+    pm2 resurrect 2>/dev/null || true
+    
+    log_success "PM2 cleanup completed"
+}
+
 # VPS Setup Function
 setup_vps() {
     log_info "🚀 Setting up VPS environment..."
@@ -625,28 +657,33 @@ manage_pm2() {
     
     cd "$APP_DIR"
     
-    # Check if PM2 app exists
-    if pm2 describe "$PM2_APP_NAME" > /dev/null 2>&1; then
-        log_info "Restarting existing PM2 application..."
-        pm2 restart "$PM2_APP_NAME"
-    else
-        log_info "Starting new PM2 application..."
-        # Try with ecosystem config first
-        if ! pm2 start ecosystem.config.cjs --env production; then
-            log_warning "Ecosystem config failed, trying direct script start..."
-            # Fallback to direct script start
-            pm2 start .output/server/index.mjs \
-                --name "$PM2_APP_NAME" \
-                --instances max \
-                --node-args="--max-old-space-size=1024" \
-                --env NODE_ENV=production \
-                --env PORT=3000 \
-                --env NITRO_HOST=0.0.0.0 \
-                --env NITRO_PORT=3000
-        fi
+    # Stop and delete any existing instances of the app (including duplicates)
+    log_info "Cleaning up existing PM2 processes..."
+    pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
+    
+    # Also clean up by ecosystem config name
+    pm2 delete ecosystem.config.cjs 2>/dev/null || true
+    
+    # Wait a moment for processes to fully stop
+    sleep 2
+    
+    log_info "Starting new PM2 application..."
+    # Try with ecosystem config first
+    if ! pm2 start ecosystem.config.cjs --env production; then
+        log_warning "Ecosystem config failed, trying direct script start..."
+        # Fallback to direct script start
+        pm2 start .output/server/index.mjs \
+            --name "$PM2_APP_NAME" \
+            --instances max \
+            --node-args="--max-old-space-size=1024" \
+            --env NODE_ENV=production \
+            --env PORT=3000 \
+            --env NITRO_HOST=0.0.0.0 \
+            --env NITRO_PORT=3000
     fi
     
     # Save PM2 configuration
+    pm2 save
     pm2 save
     
     log_success "PM2 application managed successfully"
@@ -681,6 +718,7 @@ deploy() {
     # Run deployment steps
     check_permissions
     check_prerequisites
+    cleanup_pm2_duplicates  # Clean up any duplicate PM2 processes first
     backup_current
     pull_code
     cleanup_mobile_conflicts
