@@ -3,7 +3,7 @@ import express from "express";
 import { spawn } from "node:child_process";
 
 const app = express();
-const PORT = process.env.PORT || 4200;
+const PORT = process.env.PORT || 4300;
 const APP_DIR = "/var/www/frontend/boxing-ticket-frontend";
 
 // Middleware

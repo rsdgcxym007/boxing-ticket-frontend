@@ -105,7 +105,7 @@ parse_payload() {
 # Execute deployment
 execute_deployment() {
     log_message "INFO" "Starting webhook-triggered deployment"
-    send_discord_notification "🚀 Webhook Deployment" "Deployment triggered via webhook" "3447003"
+    send_discord_notification "🚀 Webhook Deployment" "Deployment triggered via webhook on port 4300 → deploying to port 4100" "3447003"
     
     # Change to application directory
     cd "$APP_DIR" || {
@@ -133,12 +133,14 @@ execute_deployment() {
 
         if [ $? -eq 0 ]; then
             log_message "SUCCESS" "Deployment completed successfully"
+            send_discord_notification "✅ Deployment Success" "Deployment completed successfully! App running on http://43.229.133.51:3000" "65280"
             echo "HTTP/1.1 200 OK"
             echo "Content-Type: application/json"
             echo ""
-            echo '{"status": "success", "message": "Deployment completed successfully"}'
+            echo '{"status": "success", "message": "Deployment completed successfully", "app_url": "http://43.229.133.51:3000"}'
         else
             log_message "ERROR" "Deployment failed (see $LOG_FILE)"
+            send_discord_notification "❌ Deployment Failed" "Deployment failed! Check logs for details." "16711680"
             echo "HTTP/1.1 500 Internal Server Error"
             echo "Content-Type: application/json"
             echo ""
