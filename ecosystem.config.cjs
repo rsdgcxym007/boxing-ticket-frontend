@@ -3,8 +3,8 @@ module.exports = {
     {
       name: "boxing-ticket-frontend",
       script: ".output/server/index.mjs",
-      instances: "max",
-      exec_mode: "cluster",
+      instances: 1,
+      exec_mode: "fork",
       env: {
         NODE_ENV: "development",
         PORT: 3000,
@@ -91,7 +91,7 @@ module.exports = {
       repo: "git@github.com:your-username/boxing-ticket-frontend.git",
       path: "/var/www/boxing-ticket-frontend",
       "post-deploy":
-        "npm ci && npm run build && pm2 reload ecosystem.config.js --env production && pm2 save",
+        "npm ci && npm run build && chmod +x ./pre-deploy-cleanup.sh && ./pre-deploy-cleanup.sh && pm2 start ecosystem.config.cjs --env production && pm2 save",
       ssh_options: "StrictHostKeyChecking=no",
     },
   },

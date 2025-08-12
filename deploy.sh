@@ -658,26 +658,23 @@ manage_pm2() {
     
     cd "$APP_DIR"
     
-    # More targeted cleanup of existing PM2 processes
-    log_info "Performing targeted PM2 cleanup..."
-    
-    # Stop and delete only our specific app instances
-    pm2 stop "$PM2_APP_NAME" 2>/dev/null || true
-    pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
-    
-    # Delete by ecosystem config files (both extensions) 
-    pm2 delete ecosystem.config.cjs 2>/dev/null || true
-    pm2 delete ecosystem.config.mjs 2>/dev/null || true
-    
-    # Check for any remaining processes with exact name match only
-    local pm2_list=$(pm2 jlist 2>/dev/null || echo "[]")
-    if [ "$pm2_list" != "[]" ]; then
-        echo "$pm2_list" | jq -r '.[] | select(.name == "boxing-ticket-frontend") | .pm_id' 2>/dev/null | while read -r process_id; do
-            if [ -n "$process_id" ] && [ "$process_id" != "null" ]; then
-                log_warning "Removing remaining boxing-ticket-frontend process ID: $process_id"
-                pm2 delete "$process_id" 2>/dev/null || true
-            fi
-        done
+    # Run pre-deployment cleanup script
+    log_info "Running pre-deployment cleanup..."
+    if [ -f "./pre-deploy-cleanup.sh" ]; then
+        chmod +x ./pre-deploy-cleanup.sh
+        ./pre-deploy-cleanup.sh
+        if [ $? -ne 0 ]; then
+            log_error "Pre-deployment cleanup failed"
+            return 1
+        fi
+    else
+        log_warning "Pre-deployment cleanup script not found, performing basic cleanup..."
+        
+        # Fallback basic cleanup
+        pm2 stop "$PM2_APP_NAME" 2>/dev/null || true
+        pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
+        pm2 delete ecosystem.config.cjs 2>/dev/null || true
+        pm2 delete ecosystem.config.mjs 2>/dev/null || true
     fi
     
     # Wait for processes to fully stop
