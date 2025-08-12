@@ -38,6 +38,11 @@ log_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
+# Alias for compatibility
+log_warn() {
+    log_warning "$1"
+}
+
 # Send Discord notification
 send_discord_notification() {
     local status="$1"
@@ -119,8 +124,8 @@ EOF
     fi
     
     # Create PM2 ecosystem file
-    if [ ! -f "$APP_DIR/ecosystem.config.js" ]; then
-        cat > "$APP_DIR/ecosystem.config.js" << 'EOF'
+    if [ ! -f "$APP_DIR/ecosystem.config.cjs" ]; then
+        cat > "$APP_DIR/ecosystem.config.cjs" << 'EOF'
 module.exports = {
   apps: [{
     name: 'boxing-ticket-frontend',
@@ -204,19 +209,43 @@ install_dependencies_fix() {
     log_success "Dependencies fixed!"
 }
 
+# Cleanup conflicting mobile components
+cleanup_mobile_conflicts() {
+    log_info "Cleaning up conflicting mobile components..."
+    
+    cd "$APP_DIR"
+    
+    # Remove lowercase mobile folder if it exists
+    if [ -d "components/mobile" ]; then
+        log_warning "Removing conflicting lowercase mobile folder..."
+        rm -rf "components/mobile"
+        log_success "Removed components/mobile/"
+    else
+        log_info "No conflicting mobile folder found"
+    fi
+    
+    # Ensure uppercase Mobile folder exists
+    if [ ! -d "components/Mobile" ]; then
+        mkdir -p "components/Mobile"
+        log_success "Created components/Mobile/"
+    fi
+    
+    log_success "Mobile component conflicts cleaned up"
+}
+
 # Create missing mobile components
 create_missing_components() {
     log_info "🔧 Creating missing mobile components..."
     
     cd "$APP_DIR"
     
-    # Create mobile components directory
-    mkdir -p "components/mobile"
+    # Create Mobile components directory (with correct capitalization)
+    mkdir -p "components/Mobile"
     
     # Check and create ScanHistoryModal.vue if missing
-    if [ ! -f "components/mobile/ScanHistoryModal.vue" ]; then
+    if [ ! -f "components/Mobile/ScanHistoryModal.vue" ]; then
         log_info "Creating ScanHistoryModal.vue..."
-        cat > "components/mobile/ScanHistoryModal.vue" << 'EOF'
+        cat > "components/Mobile/ScanHistoryModal.vue" << 'EOF'
 <template>
   <div 
     class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
@@ -271,9 +300,9 @@ EOF
     fi
     
     # Check and create ErrorModal.vue if missing
-    if [ ! -f "components/mobile/ErrorModal.vue" ]; then
+    if [ ! -f "components/Mobile/ErrorModal.vue" ]; then
         log_info "Creating ErrorModal.vue..."
-        cat > "components/mobile/ErrorModal.vue" << 'EOF'
+        cat > "components/Mobile/ErrorModal.vue" << 'EOF'
 <template>
   <div 
     class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
@@ -349,9 +378,9 @@ EOF
     fi
     
     # Check and create ScanResultModal.vue if missing
-    if [ ! -f "components/mobile/ScanResultModal.vue" ]; then
+    if [ ! -f "components/Mobile/ScanResultModal.vue" ]; then
         log_info "Creating ScanResultModal.vue..."
-        cat > "components/mobile/ScanResultModal.vue" << 'EOF'
+        cat > "components/Mobile/ScanResultModal.vue" << 'EOF'
 <template>
   <div 
     class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
@@ -603,8 +632,8 @@ manage_pm2() {
     else
         log_info "Starting new PM2 application..."
         # Try with ecosystem config first
-        if ! pm2 start ecosystem.config.js --env production; then
-            log_warn "Ecosystem config failed, trying direct script start..."
+        if ! pm2 start ecosystem.config.cjs --env production; then
+            log_warning "Ecosystem config failed, trying direct script start..."
             # Fallback to direct script start
             pm2 start .output/server/index.mjs \
                 --name "$PM2_APP_NAME" \
@@ -654,6 +683,7 @@ deploy() {
     check_prerequisites
     backup_current
     pull_code
+    cleanup_mobile_conflicts
     create_missing_components
     install_dependencies
     cleanup
@@ -703,6 +733,7 @@ show_help() {
     echo "  setup           Setup VPS environment (first time)"
     echo "  deps            Install/fix dependencies"
     echo "  components      Create missing components"
+    echo "  cleanup         Remove conflicting mobile components"
     echo "  test            Test webhook system"
     echo "  status          Show application status"
     echo "  logs            Show application logs"
@@ -716,6 +747,7 @@ show_help() {
     echo "  $0 setup        # First time VPS setup"
     echo "  $0 deploy       # Deploy application"
     echo "  $0 components   # Create missing components"
+    echo "  $0 cleanup      # Remove conflicting files"
     echo "  $0 deps         # Fix dependencies"
     echo "  $0 test         # Test webhook"
     echo "  $0 status       # Show PM2 status"
@@ -735,6 +767,9 @@ case "${1:-deploy}" in
         ;;
     components)
         create_missing_components
+        ;;
+    cleanup)
+        cleanup_mobile_conflicts
         ;;
     test)
         test_webhook
