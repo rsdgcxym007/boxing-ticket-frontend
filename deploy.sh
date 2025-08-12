@@ -17,7 +17,7 @@ PROJECT_NAME="Boxing Ticket Frontend"
 APP_DIR="/var/www/frontend/boxing-ticket-frontend"
 PM2_APP_NAME="boxing-ticket-frontend"
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
-BRANCH="master"
+BRANCH="featues/v1"
 NODE_VERSION="18"
 USER=$(whoami)
 
@@ -105,36 +105,33 @@ send_discord_notification() {
 cleanup_pm2_duplicates() {
     log_info "🧹 Cleaning up PM2 duplicate processes..."
     
-    # Stop all PM2 processes first
-    pm2 stop all 2>/dev/null || true
+    # Only target our specific application, not all PM2 processes
+    log_info "Stopping only boxing-ticket-frontend processes..."
     
-    # Delete all instances of our app name
+    # Stop and delete only our app instances (by name)
+    pm2 stop "$PM2_APP_NAME" 2>/dev/null || true
     pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
     
-    # Delete any ecosystem config processes (both .cjs and .mjs)
+    # Delete any ecosystem config processes (both .cjs and .mjs) - but be specific
     pm2 delete ecosystem.config.cjs 2>/dev/null || true
     pm2 delete ecosystem.config.mjs 2>/dev/null || true
     
-    # Get list of all processes and remove any boxing/frontend related ones
+    # Get list of all processes and remove only our specific boxing-ticket-frontend ones
     local pm2_processes=$(pm2 jlist 2>/dev/null || echo "[]")
     
     if [ "$pm2_processes" != "[]" ]; then
-        echo "$pm2_processes" | jq -r '.[].name' 2>/dev/null | while read -r process_name; do
-            if [ -n "$process_name" ] && [ "$process_name" != "null" ]; then
-                # Check if process name contains boxing, frontend, or ticket
-                if echo "$process_name" | grep -iq "boxing\|frontend\|ticket"; then
-                    log_warning "Removing duplicate process: $process_name"
-                    pm2 delete "$process_name" 2>/dev/null || true
-                fi
+        echo "$pm2_processes" | jq -r '.[] | select(.name | test("^boxing-ticket-frontend$")) | .pm_id' 2>/dev/null | while read -r process_id; do
+            if [ -n "$process_id" ] && [ "$process_id" != "null" ]; then
+                log_warning "Removing duplicate boxing-ticket-frontend process ID: $process_id"
+                pm2 delete "$process_id" 2>/dev/null || true
             fi
         done
     fi
     
-    # Kill and resurrect PM2 daemon to ensure clean state
-    pm2 kill 2>/dev/null || true
+    # Wait for processes to fully stop
     sleep 2
     
-    log_success "PM2 cleanup completed"
+    log_success "PM2 cleanup completed (only boxing-ticket-frontend processes affected)"
 }
 
 # VPS Setup Function
@@ -487,7 +484,7 @@ EOF
 test_webhook() {
     log_info "🧪 Testing webhook system..."
     
-    local webhook_url="http://43.229.133.51:4100/hooks/deploy-frontend"
+    local webhook_url="http://43.229.133.51:4300/hooks/deploy-frontend"
     
     # Test Discord notification
     send_discord_notification "🧪 TESTING" "Webhook test started" "16776960"
@@ -661,26 +658,24 @@ manage_pm2() {
     
     cd "$APP_DIR"
     
-    # More thorough cleanup of existing PM2 processes
-    log_info "Performing comprehensive PM2 cleanup..."
+    # More targeted cleanup of existing PM2 processes
+    log_info "Performing targeted PM2 cleanup..."
     
-    # Stop all processes first
-    pm2 stop all 2>/dev/null || true
-    
-    # Delete by name
+    # Stop and delete only our specific app instances
+    pm2 stop "$PM2_APP_NAME" 2>/dev/null || true
     pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
     
-    # Delete by ecosystem config files (both extensions)
+    # Delete by ecosystem config files (both extensions) 
     pm2 delete ecosystem.config.cjs 2>/dev/null || true
     pm2 delete ecosystem.config.mjs 2>/dev/null || true
     
-    # Check for any remaining processes with similar names
+    # Check for any remaining processes with exact name match only
     local pm2_list=$(pm2 jlist 2>/dev/null || echo "[]")
     if [ "$pm2_list" != "[]" ]; then
-        echo "$pm2_list" | jq -r '.[].name' 2>/dev/null | grep -i "boxing\|frontend" | while read -r process_name; do
-            if [ -n "$process_name" ] && [ "$process_name" != "null" ]; then
-                log_warning "Removing remaining process: $process_name"
-                pm2 delete "$process_name" 2>/dev/null || true
+        echo "$pm2_list" | jq -r '.[] | select(.name == "boxing-ticket-frontend") | .pm_id' 2>/dev/null | while read -r process_id; do
+            if [ -n "$process_id" ] && [ "$process_id" != "null" ]; then
+                log_warning "Removing remaining boxing-ticket-frontend process ID: $process_id"
+                pm2 delete "$process_id" 2>/dev/null || true
             fi
         done
     fi

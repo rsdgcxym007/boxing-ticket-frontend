@@ -90,8 +90,8 @@ parse_payload() {
         branch=$(echo "$payload" | jq -r '.branch')
     fi
     
-    # Only deploy if it's the main branch or no branch specified
-    if [ -n "$branch" ] && [ "$branch" != "main" ] && [ "$branch" != "master" ]; then
+    # Only deploy if it's the target branch or no branch specified
+    if [ -n "$branch" ] && [ "$branch" != "main" ] && [ "$branch" != "master" ] && [ "$branch" != "featues/v1" ]; then
         log_message "INFO" "Ignoring deployment for branch: $branch"
         echo "HTTP/1.1 200 OK"
         echo "Content-Type: application/json"
