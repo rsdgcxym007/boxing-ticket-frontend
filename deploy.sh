@@ -589,23 +589,50 @@ pull_code() {
     log_success "Code updated to commit: $commit_hash"
     log_info "Commit message: $commit_message"
     
+    # Install dependencies immediately after code pull
+    log_info "Installing dependencies after code pull..."
+    npm ci --production=false || {
+        log_warning "npm ci failed after pull, will retry in install_dependencies step"
+    }
+    
     echo "$commit_hash" > .deployment-info
     echo "$(date)" >> .deployment-info
 }
 
 # Install dependencies
 install_dependencies() {
-    log_info "Installing dependencies..."
+    log_info "Installing dependencies (comprehensive check)..."
     
     cd "$APP_DIR"
     
-    # Clear npm cache
+    # Clear npm cache for clean install
+    log_info "Clearing npm cache..."
     npm cache clean --force
     
-    # Install production dependencies
-    npm ci --production=false
+    # Remove node_modules for clean slate
+    if [ -d "node_modules" ]; then
+        log_info "Removing existing node_modules..."
+        rm -rf node_modules
+    fi
     
-    log_success "Dependencies installed"
+    # Remove package-lock.json if it exists to avoid conflicts
+    if [ -f "package-lock.json" ]; then
+        log_info "Removing existing package-lock.json..."
+        rm -f package-lock.json
+    fi
+    
+    # Fresh install with production dependencies
+    log_info "Running fresh npm ci..."
+    npm ci --production=false --verbose
+    
+    # Verify critical packages are installed
+    log_info "Verifying critical packages..."
+    npm list qr-scanner > /dev/null 2>&1 || {
+        log_warning "qr-scanner missing, installing..."
+        npm install qr-scanner@1.4.2
+    }
+    
+    log_success "Dependencies installed and verified"
 }
 
 # Build application
@@ -620,7 +647,14 @@ build_application() {
         log_info "Using production environment configuration"
     fi
     
+    # One more dependency check before build
+    log_info "Final dependency check before build..."
+    npm ci --production=false --quiet || {
+        log_warning "Final npm ci failed, but continuing with build..."
+    }
+    
     # Build the application
+    log_info "Running npm run build..."
     npm run build
     
     log_success "Application built successfully"
