@@ -214,11 +214,11 @@ export default defineNuxtConfig({
           charset: false,
         },
       },
-      devSourcemap: process.env.NODE_ENV === 'development',
+      devSourcemap: process.env.NODE_ENV === "development",
     },
     build: {
       sourcemap: false, // ปิด sourcemap ใน production เพื่อลด warnings
-      minify: process.env.NODE_ENV === 'production' ? 'esbuild' : false,
+      minify: process.env.NODE_ENV === "production" ? "esbuild" : false,
       rollupOptions: {
         output: {
           manualChunks: undefined,
