@@ -29,7 +29,7 @@ WEBHOOK_REPO="$2"
 if [ -n "$WEBHOOK_REF" ]; then
     WEBHOOK_BRANCH=$(echo "$WEBHOOK_REF" | sed 's/refs\/heads\///')
     if [ -n "$WEBHOOK_BRANCH" ]; then
-         echo "  $0 setup-webhook # Setup webhook server on port 4200"  BRANCH="$WEBHOOK_BRANCH"
+        BRANCH="$WEBHOOK_BRANCH"
         log_info "Using branch from webhook: $BRANCH"
     fi
 fi
@@ -815,7 +815,6 @@ install_dependencies() {
     
     log_step_end "Installing dependencies"
 }
-}
 
 # Build application
 build_application() {
@@ -1000,7 +999,6 @@ manage_pm2() {
     pm2 list | grep "$PM2_APP_NAME" || log_warning "Application not found in PM2 list"
     
     log_step_end "Managing PM2 application"
-}
 }
 
 # Cleanup old deployments
