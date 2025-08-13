@@ -1,5 +1,6 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
+import { useApi } from "~/composables/useApi";
 
 export interface User {
   id: string;
@@ -89,5 +90,47 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
-  return { user, setUser, loadUser, logout, isAuthenticated, initialize };
+  const login = async (username: string, password: string, deviceInfo: any) => {
+    console.log("🔑 Auth Store: Attempting login with username:", username);
+
+    try {
+      // Use the existing useApi composable
+      const { post } = useApi();
+
+      // Call the login API - use email instead of username
+      const responseData = await post("/api/v1/auth/login", {
+        email: username, // Backend expects 'email' field
+        password,
+        deviceInfo,
+      });
+
+      // Save user and token
+      const user: User = {
+        id: responseData.id,
+        name: responseData.name,
+        role: responseData.role,
+      };
+
+      setUser(user);
+      if (process.client) {
+        localStorage.setItem("token", responseData.token);
+      }
+
+      console.log("✅ Auth Store: Login successful", user);
+      return user;
+    } catch (error: any) {
+      console.error("❌ Login failed:", error);
+      throw new Error(error.message || "Login failed");
+    }
+  };
+
+  return {
+    user,
+    setUser,
+    loadUser,
+    logout,
+    isAuthenticated,
+    initialize,
+    login,
+  };
 });

@@ -177,7 +177,6 @@ onMounted(() => {
 // SEO
 definePageMeta({
   layout: "mobile",
-  middleware: "auth",
 });
 
 useSeoMeta({

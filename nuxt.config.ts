@@ -43,7 +43,13 @@ export default defineNuxtConfig({
     defaultLocale: "th",
     strategy: "prefix_except_default",
     langDir: "locales/",
-    detectBrowserLanguage: false,
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "i18n_redirected",
+      redirectOn: "root",
+      alwaysRedirect: false,
+      fallbackLocale: "th",
+    },
     lazy: true,
     bundle: {
       optimizeTranslationDirective: false, // แก้ warning
@@ -227,6 +233,8 @@ export default defineNuxtConfig({
     },
     define: {
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+      __VUE_OPTIONS_API__: true,
+      __VUE_PROD_DEVTOOLS__: false,
     },
   },
 

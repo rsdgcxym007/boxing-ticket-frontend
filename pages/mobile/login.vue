@@ -1,183 +1,196 @@
 <template>
-  <div class="login-page">
-    <!-- Background -->
-    <div class="login-background">
-      <div class="bg-gradient"></div>
-      <div class="bg-pattern"></div>
+  <div class="muay-thai-login">
+    <!-- Background with Fighter Silhouettes -->
+    <div class="combat-background">
+      <div class="fighter-overlay"></div>
+      <div class="ring-lights"></div>
     </div>
 
     <!-- Content -->
     <div class="login-content">
-      <!-- Header -->
-      <div class="login-header">
-        <div class="logo-container">
-          <Icon icon="mdi:qrcode-scan" class="logo-icon" />
-          <h1 class="logo-text">Staff Scanner</h1>
+      <!-- Arena Header -->
+      <div class="arena-header">
+        <div class="arena-logo">
+          <div class="boxing-ring-icon">
+            <Icon icon="mdi:boxing-glove" class="glove-icon" />
+          </div>
+          <h1 class="arena-title combat-text">PATONG ARENA</h1>
+          <div class="subtitle-thai">🥊 เวทีมวยไทย</div>
         </div>
-        <p class="subtitle">เข้าสู่ระบบสำหรับเจ้าหน้าที่</p>
+        <p class="fight-subtitle">STAFF ACCESS PORTAL</p>
       </div>
 
       <!-- Login Form -->
-      <div class="login-form-container">
-        <form @submit.prevent="handleLogin" class="login-form">
+      <div class="combat-form-container">
+        <form @submit.prevent="handleLogin" class="combat-form">
           <!-- Username Field -->
-          <div class="form-group">
-            <label for="username" class="form-label">
-              <Icon icon="mdi:account" class="label-icon" />
-              Username
+          <div class="field-group">
+            <label for="username" class="field-label combat-text">
+              <Icon icon="mdi:account-circle" class="label-icon" />
+              FIGHTER ID
             </label>
             <input
               id="username"
               v-model="form.username"
               type="text"
-              class="form-input"
+              class="combat-input"
               :class="{ error: errors.username }"
-              placeholder="กรอก username"
+              placeholder="Enter your fighter ID"
               autocomplete="username"
               :disabled="isLoading"
             />
-            <div v-if="errors.username" class="error-message">
+            <div v-if="errors.username" class="error-text">
               {{ errors.username }}
             </div>
           </div>
 
           <!-- Password Field -->
-          <div class="form-group">
-            <label for="password" class="form-label">
-              <Icon icon="mdi:lock" class="label-icon" />
-              Password
+          <div class="field-group">
+            <label for="password" class="field-label combat-text">
+              <Icon icon="mdi:shield-lock" class="label-icon" />
+              ACCESS CODE
             </label>
-            <div class="password-input-wrapper">
+            <div class="password-wrapper">
               <input
                 id="password"
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
-                class="form-input"
+                class="combat-input password-field"
                 :class="{ error: errors.password }"
-                placeholder="กรอก password"
+                placeholder="Enter access code"
                 autocomplete="current-password"
                 :disabled="isLoading"
               />
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="password-toggle"
+                class="password-reveal"
                 :disabled="isLoading"
               >
                 <Icon
                   :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'"
-                  class="text-lg"
+                  class="reveal-icon"
                 />
               </button>
             </div>
-            <div v-if="errors.password" class="error-message">
+            <div v-if="errors.password" class="error-text">
               {{ errors.password }}
             </div>
           </div>
 
           <!-- Remember Me -->
-          <div class="form-group">
-            <label class="checkbox-label">
+          <div class="field-group">
+            <label class="remember-label">
               <input
                 v-model="form.rememberMe"
                 type="checkbox"
-                class="checkbox-input"
+                class="remember-input"
                 :disabled="isLoading"
               />
-              <div class="checkbox-custom"></div>
-              <span>จำข้อมูลการเข้าสู่ระบบ</span>
+              <div class="remember-custom"></div>
+              <span class="remember-text">Remember this fighter</span>
             </label>
           </div>
 
-          <!-- Login Button -->
+          <!-- Combat Login Button -->
           <button
             type="submit"
-            class="login-button"
+            class="combat-login-btn punch-effect"
             :disabled="isLoading || !isFormValid"
           >
-            <div v-if="isLoading" class="button-loading">
-              <div class="loading-spinner"></div>
-              <span>กำลังเข้าสู่ระบบ...</span>
+            <div v-if="isLoading" class="btn-loading">
+              <div class="combat-spinner"></div>
+              <span class="combat-text">ENTERING ARENA...</span>
             </div>
-            <div v-else class="button-content">
-              <Icon icon="mdi:login" class="text-lg" />
-              <span>เข้าสู่ระบบ</span>
+            <div v-else class="btn-content">
+              <Icon icon="mdi:fire" class="fire-icon" />
+              <span class="combat-text">ENTER ARENA</span>
+              <Icon icon="mdi:fire" class="fire-icon" />
             </div>
           </button>
 
+          <!-- Success Alert -->
+          <div v-if="loginSuccess" class="victory-alert">
+            <Icon icon="mdi:trophy" class="trophy-icon" />
+            <div class="victory-content">
+              <h4 class="combat-text">VICTORY! �</h4>
+              <p>Welcome to the arena, fighter!</p>
+            </div>
+          </div>
+
           <!-- Error Alert -->
-          <div v-if="loginError" class="error-alert">
-            <Icon icon="mdi:alert-circle" class="alert-icon" />
+          <div v-if="loginError" class="defeat-alert">
+            <Icon icon="mdi:alert-octagon" class="alert-icon" />
             <div class="alert-content">
-              <h4>เข้าสู่ระบบไม่สำเร็จ</h4>
+              <h4 class="combat-text">ACCESS DENIED</h4>
               <p>{{ loginError }}</p>
             </div>
           </div>
         </form>
       </div>
 
-      <!-- Demo Credentials -->
-      <div class="demo-credentials">
-        <h3>
-          <Icon icon="mdi:information" class="text-blue-500" />
-          ข้อมูลทดสอบ
+      <!-- Training Credentials -->
+      <div class="training-credentials">
+        <h3 class="combat-text">
+          <Icon icon="mdi:dumbbell" class="training-icon" />
+          TRAINING ACCOUNTS
         </h3>
 
-        <div class="credential-cards">
-          <!-- Staff Account -->
+        <div class="fighter-cards">
+          <!-- Fighter 1 -->
           <div
-            class="credential-card"
+            class="fighter-card"
             @click="fillCredentials('staff1', 'staff123')"
           >
-            <div class="credential-header">
-              <Icon icon="mdi:account" class="credential-icon staff" />
-              <span>Staff Account</span>
+            <div class="fighter-header">
+              <Icon icon="mdi:account-tie" class="fighter-icon red-fighter" />
+              <span class="combat-text">Red Corner</span>
             </div>
-            <div class="credential-info">
-              <p>Username: staff1</p>
-              <p>Password: staff123</p>
+            <div class="fighter-stats">
+              <p>ID: staff1</p>
+              <p>Code: staff123</p>
             </div>
           </div>
 
-          <!-- Staff Account 2 -->
+          <!-- Fighter 2 -->
           <div
-            class="credential-card"
+            class="fighter-card"
             @click="fillCredentials('staff2', 'staff456')"
           >
-            <div class="credential-header">
+            <div class="fighter-header">
               <Icon
                 icon="mdi:account-supervisor"
-                class="credential-icon staff"
+                class="fighter-icon blue-fighter"
               />
-              <span>Staff Account 2</span>
+              <span class="combat-text">Blue Corner</span>
             </div>
-            <div class="credential-info">
-              <p>Username: staff2</p>
-              <p>Password: staff456</p>
+            <div class="fighter-stats">
+              <p>ID: staff2</p>
+              <p>Code: staff456</p>
             </div>
           </div>
 
-          <!-- Admin Account -->
+          <!-- Champion -->
           <div
-            class="credential-card"
+            class="fighter-card champion"
             @click="fillCredentials('admin', 'admin123')"
           >
-            <div class="credential-header">
-              <Icon icon="mdi:shield-account" class="credential-icon admin" />
-              <span>Admin Account</span>
+            <div class="fighter-header">
+              <Icon icon="mdi:crown" class="fighter-icon champion-fighter" />
+              <span class="combat-text">Champion</span>
             </div>
-            <div class="credential-info">
-              <p>Username: admin</p>
-              <p>Password: admin123</p>
+            <div class="fighter-stats">
+              <p>ID: admin</p>
+              <p>Code: admin123</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Footer -->
-      <div class="login-footer">
-        <p>&copy; 2025 Patong Boxing Stadium</p>
-        <p>QR Scanner System v1.0</p>
+      <!-- Arena Footer -->
+      <div class="arena-footer">
+        <p>&copy; 2025 Patong Muay Thai Arena</p>
+        <p class="combat-text">FIGHTER ACCESS SYSTEM v2.0</p>
       </div>
     </div>
   </div>
@@ -203,6 +216,7 @@ const form = ref({
 const showPassword = ref(false);
 const isLoading = ref(false);
 const loginError = ref("");
+const loginSuccess = ref(false);
 
 // Validation errors
 const errors = ref({
@@ -248,8 +262,8 @@ const handleLogin = async () => {
   try {
     isLoading.value = true;
     loginError.value = "";
+    loginSuccess.value = false;
 
-    // Collect device information
     const deviceInfo = {
       deviceName: getDeviceName(),
       userAgent: navigator.userAgent,
@@ -262,52 +276,39 @@ const handleLogin = async () => {
       timestamp: new Date().toISOString(),
     };
 
-    console.log("📱 Attempting staff login:", {
-      username: form.value.username,
-      deviceInfo,
-    });
+    console.log("📱 Attempting login with username:", form.value.username);
 
-    const loginData = {
-      username: form.value.username,
-      password: form.value.password,
-      deviceInfo,
-      rememberMe: form.value.rememberMe,
-      loginType: "mobile_scanner",
-    };
+    // Call authStore.login with username, password, and deviceInfo
+    const user = await authStore.login(
+      form.value.username,
+      form.value.password,
+      deviceInfo
+    );
 
-    await authStore.login(loginData);
+    console.log("✅ Login successful:", user);
 
-    console.log("✅ Login successful, redirecting to scanner...");
+    // Show success message
+    loginSuccess.value = true;
 
-    // Success feedback
-    if (navigator.vibrate) {
-      navigator.vibrate([200, 100, 200]);
+    // Save credentials if remember me is checked
+    if (form.value.rememberMe) {
+      localStorage.setItem(
+        "staff_credentials",
+        JSON.stringify({
+          username: form.value.username,
+          rememberMe: true,
+        })
+      );
     }
 
-    // Navigate to scanner
-    await router.push("/mobile/scanner");
+    // Wait a bit to show success message then redirect
+    setTimeout(async () => {
+      await router.push("/mobile");
+    }, 1500);
   } catch (error) {
     console.error("❌ Login failed:", error);
-
-    // Handle specific error codes
-    const errorMessages = {
-      INVALID_CREDENTIALS: "Username หรือ Password ไม่ถูกต้อง",
-      ACCOUNT_DISABLED: "บัญชีถูกระงับการใช้งาน",
-      ACCOUNT_LOCKED: "บัญชีถูกล็อค กรุณาติดต่อผู้ดูแลระบบ",
-      INSUFFICIENT_PERMISSIONS: "ไม่มีสิทธิ์ใช้งาน QR Scanner",
-      NETWORK_ERROR: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้",
-      SERVER_ERROR: "เกิดข้อผิดพลาดที่เซิร์ฟเวอร์",
-    };
-
-    loginError.value =
-      errorMessages[error.code] ||
-      error.message ||
-      "เกิดข้อผิดพลาดในการเข้าสู่ระบบ";
-
-    // Vibrate on error
-    if (navigator.vibrate) {
-      navigator.vibrate([100, 100, 100]);
-    }
+    loginError.value = error.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ";
+    loginSuccess.value = false;
   } finally {
     isLoading.value = false;
   }
@@ -365,7 +366,7 @@ const loadSavedCredentials = () => {
 onMounted(() => {
   // Check if already authenticated
   if (authStore.isAuthenticated) {
-    router.push("/mobile/scanner");
+    router.push("/mobile");
     return;
   }
 
@@ -408,254 +409,360 @@ useSeoMeta({
 </script>
 
 <style scoped>
-.login-page {
+@import url("/assets/css/muay-thai-theme.css");
+
+/* Combat Background */
+.muay-thai-login {
   min-height: 100vh;
+  background: var(--bg-dark);
   position: relative;
-  display: flex;
-  flex-direction: column;
+  overflow-x: hidden;
 }
 
-/* Background */
-.login-background {
+.combat-background {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-}
-
-.bg-gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.bg-pattern {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(
-      circle at 25% 25%,
-      rgba(255, 255, 255, 0.1) 0%,
-      transparent 50%
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+      ellipse at center top,
+      rgba(225, 6, 0, 0.1) 0%,
+      transparent 70%
     ),
-    radial-gradient(
-      circle at 75% 75%,
-      rgba(255, 255, 255, 0.1) 0%,
-      transparent 50%
+    linear-gradient(
+      135deg,
+      rgba(225, 6, 0, 0.05) 0%,
+      rgba(0, 0, 0, 0.9) 50%,
+      rgba(255, 215, 0, 0.05) 100%
     );
-  background-size: 100px 100px;
+  z-index: 1;
 }
 
-/* Content */
+.fighter-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><linearGradient id="fighter" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:rgba(225,6,0,0.1)"/><stop offset="100%" style="stop-color:transparent"/></linearGradient></defs><path d="M100,900 C300,800 400,600 500,500 C600,400 700,200 900,100" stroke="url(%23fighter)" stroke-width="2" fill="none" opacity="0.3"/></svg>')
+    no-repeat center center;
+  background-size: cover;
+  opacity: 0.3;
+}
+
+.ring-lights {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 215, 0, 0.1) 0%,
+      transparent 40%
+    ),
+    radial-gradient(circle at 80% 70%, rgba(225, 6, 0, 0.1) 0%, transparent 40%);
+  animation: flickerLights 4s ease-in-out infinite alternate;
+}
+
+@keyframes flickerLights {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Content Layout */
 .login-content {
-  flex: 1;
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
-  padding: 2rem 1.5rem;
-  padding-top: calc(2rem + env(safe-area-inset-top));
-  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
-}
-
-/* Header */
-.login-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  max-width: 420px;
+  margin: 0 auto;
 }
 
-.logo-icon {
-  width: 48px;
-  height: 48px;
-  color: white;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+/* Arena Header */
+.arena-header {
+  text-align: center;
+  margin-bottom: 3rem;
 }
 
-.logo-text {
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  margin: 0;
-}
-
-.subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
-  margin: 0;
-}
-
-/* Form Container */
-.login-form-container {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  padding: 2rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+.arena-logo {
   margin-bottom: 1.5rem;
 }
 
-/* Form */
-.login-form {
+.boxing-ring-icon {
+  margin-bottom: 1rem;
+}
+
+.glove-icon {
+  font-size: 4rem;
+  color: var(--primary-red);
+  filter: drop-shadow(0 0 20px rgba(225, 6, 0, 0.5));
+  animation: combatGlow 2s ease-in-out infinite alternate;
+}
+
+.arena-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--primary-red);
+  text-shadow: 0 0 10px rgba(225, 6, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 3px;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle-thai {
+  font-size: 1.2rem;
+  color: var(--primary-gold);
+  font-weight: 600;
+}
+
+.fight-subtitle {
+  font-size: 1rem;
+  color: var(--text-light);
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Combat Form */
+.combat-form-container {
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid var(--primary-red);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px rgba(225, 6, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.combat-form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.form-group {
+/* Field Groups */
+.field-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-label {
+.field-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 600;
-  color: #374151;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary-gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .label-icon {
-  width: 16px;
-  height: 16px;
-  color: #6b7280;
+  font-size: 1.2rem;
+  color: var(--primary-red);
 }
 
-.form-input {
-  padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+/* Combat Inputs */
+.combat-input {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
   font-size: 1rem;
-  transition: all 0.2s;
-  background: white;
+  color: var(--text-light);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.form-input:focus {
+.combat-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary-red);
+  box-shadow: 0 0 20px rgba(225, 6, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
-.form-input.error {
+.combat-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.combat-input.error {
   border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  animation: shake 0.5s ease-in-out;
 }
 
-.form-input:disabled {
-  background: #f9fafb;
-  color: #9ca3af;
-  cursor: not-allowed;
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }
 
-/* Password Input */
-.password-input-wrapper {
+/* Password Field */
+.password-wrapper {
   position: relative;
 }
 
-.password-toggle {
+.password-field {
+  padding-right: 3rem;
+}
+
+.password-reveal {
   position: absolute;
-  right: 0.75rem;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #6b7280;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: color 0.2s;
+  color: var(--primary-gold);
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
-.password-toggle:hover:not(:disabled) {
-  color: #374151;
+.password-reveal:hover {
+  color: var(--primary-red);
 }
 
-.password-toggle:disabled {
-  color: #d1d5db;
-  cursor: not-allowed;
+.reveal-icon {
+  font-size: 1.2rem;
 }
 
-/* Checkbox */
-.checkbox-label {
+/* Remember Me */
+.remember-label {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   cursor: pointer;
-  font-size: 0.875rem;
-  color: #374151;
+  user-select: none;
 }
 
-.checkbox-input {
+.remember-input {
   display: none;
 }
 
-.checkbox-custom {
+.remember-custom {
   width: 20px;
   height: 20px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--primary-gold);
   border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
   position: relative;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
-.checkbox-input:checked + .checkbox-custom {
-  background: #3b82f6;
-  border-color: #3b82f6;
+.remember-input:checked + .remember-custom {
+  background: var(--primary-red);
+  border-color: var(--primary-red);
 }
 
-.checkbox-input:checked + .checkbox-custom::after {
+.remember-input:checked + .remember-custom::after {
   content: "✓";
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
+  font-weight: bold;
   font-size: 12px;
-  font-weight: 600;
 }
 
-/* Login Button */
-.login-button {
-  padding: 1rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
-  border: none;
+.remember-text {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+/* Combat Login Button */
+.combat-login-btn {
+  background: linear-gradient(135deg, var(--primary-red) 0%, #b91c1c 100%);
+  border: 2px solid var(--primary-gold);
   border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  padding: 1.2rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.login-button:not(:disabled):active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+.combat-login-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
 }
 
-.login-button:disabled {
-  background: #9ca3af;
+.combat-login-btn:hover::before {
+  left: 100%;
+}
+
+.combat-login-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(225, 6, 0, 0.4), 0 0 30px rgba(255, 215, 0, 0.3);
+  border-color: var(--primary-red);
+}
+
+.combat-login-btn:active:not(:disabled) {
+  transform: translateY(-1px);
+  animation: punchEffect 0.3s ease;
+}
+
+.combat-login-btn:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
-  box-shadow: none;
   transform: none;
 }
 
-.button-loading,
-.button-content {
+.btn-content {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
 }
 
-.loading-spinner {
+.fire-icon {
+  font-size: 1.2rem;
+  color: var(--primary-gold);
+}
+
+.btn-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.combat-spinner {
   width: 20px;
   height: 20px;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -673,144 +780,212 @@ useSeoMeta({
   }
 }
 
-/* Error Handling */
-.error-message {
-  color: #ef4444;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.error-alert {
-  display: flex;
-  gap: 0.75rem;
+/* Alerts */
+.victory-alert {
+  background: rgba(34, 197, 94, 0.1);
+  border: 2px solid #22c55e;
+  border-radius: 10px;
   padding: 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: victoryPulse 0.5s ease-in-out;
 }
 
-.alert-icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  margin-top: 0.125rem;
+@keyframes victoryPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.victory-content h4 {
+  color: #22c55e;
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+}
+
+.victory-content p {
+  color: var(--text-light);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.trophy-icon {
+  font-size: 1.5rem;
+  color: #fbbf24;
+}
+
+.defeat-alert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid #ef4444;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: shake 0.5s ease-in-out;
 }
 
 .alert-content h4 {
-  font-weight: 600;
+  color: #ef4444;
   margin: 0 0 0.25rem 0;
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .alert-content p {
+  color: var(--text-light);
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
 }
 
-/* Demo Credentials */
-.demo-credentials {
-  background: rgba(255, 255, 255, 0.9);
+.alert-icon {
+  font-size: 1.5rem;
+  color: #ef4444;
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Training Credentials */
+.training-credentials {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.3);
   border-radius: 12px;
   padding: 1.5rem;
-  backdrop-filter: blur(10px);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(5px);
 }
 
-.demo-credentials h3 {
+.training-credentials h3 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #374151;
+  color: var(--primary-gold);
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.credential-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.training-icon {
+  font-size: 1.3rem;
+  color: var(--primary-red);
 }
 
-.credential-card {
-  padding: 0.875rem;
-  background: white;
-  border: 1px solid #e5e7eb;
+.fighter-cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+.fighter-card {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.2);
   border-radius: 8px;
+  padding: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
-.credential-card:active {
-  background: #f9fafb;
-  border-color: #3b82f6;
-  transform: scale(0.98);
+.fighter-card:hover {
+  border-color: var(--primary-red);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(225, 6, 0, 0.2);
 }
 
-.credential-header {
+.fighter-card.champion {
+  border-color: var(--primary-gold);
+  background: rgba(255, 215, 0, 0.05);
+}
+
+.fighter-card.champion:hover {
+  border-color: var(--primary-gold);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+}
+
+.fighter-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  font-size: 0.875rem;
-  color: #374151;
+  color: var(--text-light);
 }
 
-.credential-icon {
-  width: 16px;
-  height: 16px;
+.fighter-icon {
+  font-size: 1.2rem;
 }
 
-.credential-icon.staff {
+.red-fighter {
+  color: var(--primary-red);
+}
+
+.blue-fighter {
   color: #3b82f6;
 }
 
-.credential-icon.admin {
-  color: #f59e0b;
+.champion-fighter {
+  color: var(--primary-gold);
 }
 
-.credential-info {
-  font-size: 0.75rem;
-  color: #6b7280;
-  font-family: monospace;
-}
-
-.credential-info p {
-  margin: 0.125rem 0;
-}
-
-/* Footer */
-.login-footer {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.75rem;
-  margin-top: auto;
-  padding-top: 1rem;
-}
-
-.login-footer p {
+.fighter-stats p {
   margin: 0.25rem 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-/* Responsive */
-@media (max-width: 375px) {
+/* Arena Footer */
+.arena-footer {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.arena-footer p {
+  margin: 0.25rem 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Combat Text Effect */
+.combat-text {
+  text-shadow: 0 0 5px currentColor, 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
   .login-content {
     padding: 1.5rem 1rem;
   }
 
-  .login-form-container {
+  .arena-title {
+    font-size: 2rem;
+  }
+
+  .combat-form-container {
     padding: 1.5rem;
   }
 
-  .logo-text {
-    font-size: 1.75rem;
+  .fighter-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 481px) {
+  .fighter-cards {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .logo-icon {
-    width: 40px;
-    height: 40px;
+  .fighter-card.champion {
+    grid-column: 1 / -1;
   }
 }
 </style>
