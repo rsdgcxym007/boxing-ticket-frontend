@@ -624,16 +624,18 @@ definePageMeta({
 }
 
 .fighter-details h2 {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--text-light);
   margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .fighter-role {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--primary-gold);
   margin: 0;
+  font-weight: 500;
 }
 
 .arena-controls {
@@ -780,7 +782,7 @@ definePageMeta({
 }
 
 .arena-main-title {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 900;
   color: var(--primary-red);
   margin: 0 0 0.5rem 0;
@@ -789,12 +791,13 @@ definePageMeta({
 }
 
 .arena-subtitle {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--primary-gold);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 3px;
   margin: 0 0 1rem 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .title-decorations {
@@ -826,16 +829,17 @@ definePageMeta({
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--primary-gold);
   margin-bottom: 1rem;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .section-icon {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   color: var(--primary-red);
 }
 
@@ -909,17 +913,19 @@ definePageMeta({
 }
 
 .action-title {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--text-light);
   margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .action-description {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
   margin: 0 0 1rem 0;
-  line-height: 1.4;
+  line-height: 1.5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .action-btn {
@@ -928,14 +934,16 @@ definePageMeta({
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
   border: none;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .action-btn.primary {
@@ -1011,23 +1019,27 @@ definePageMeta({
 }
 
 .status-label {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--text-light);
   font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .status-value {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 900;
   color: var(--text-light);
   margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .status-trend {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .status-trend.up {
@@ -1078,22 +1090,26 @@ definePageMeta({
 }
 
 .activity-text {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--text-light);
   margin: 0 0 0.25rem 0;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .activity-time {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
 }
 
 .activity-status {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
-  padding: 0.25rem 0.5rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .activity-status.success {
@@ -1144,17 +1160,20 @@ definePageMeta({
 }
 
 .modal-title {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--text-light);
   margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .modal-content p {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   text-align: center;
   margin: 0 0 2rem 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .modal-actions {
@@ -1164,14 +1183,16 @@ definePageMeta({
 
 .modal-btn {
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
   border: none;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .modal-btn.cancel {

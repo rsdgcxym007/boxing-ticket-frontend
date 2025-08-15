@@ -74,7 +74,7 @@ export default defineNuxtRouteMiddleware((to) => {
       return Date.now() > parseInt(tokenExpiration);
     };
 
-    // สำหรับหน้า mobile/scanner ต้อง check role
+    // สำหรับหน้า mobile/scanner และ mobile/scanner/check-in ต้อง check role
     if (cleanPath.startsWith("/mobile/scanner")) {
       if (!authStore.isAuthenticated || !token || isTokenExpired()) {
         console.log("❌ Authentication required for scanner");
@@ -82,8 +82,11 @@ export default defineNuxtRouteMiddleware((to) => {
         return navigateTo("/mobile/login");
       }
 
-      // ตรวจสอบ role สำหรับ scanner
-      if (!["admin", "staff"].includes(authStore.user?.role)) {
+      // ตรวจสอบ role สำหรับ scanner (เฉพาะ scanner หลัก ไม่ใช่ check-in page)
+      if (
+        cleanPath === "/mobile/scanner" &&
+        !["admin", "staff"].includes(authStore.user?.role)
+      ) {
         console.log("❌ Insufficient permissions for scanner");
         return navigateTo("/login");
       }

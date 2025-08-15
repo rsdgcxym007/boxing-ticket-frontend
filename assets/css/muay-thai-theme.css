@@ -82,3 +82,36 @@
 .punch-effect:active {
   animation: punchEffect 0.2s ease-out;
 }
+
+/* Global Input Styles for Muay Thai Theme */
+.combat-input,
+input.combat-input,
+textarea.combat-input,
+select.combat-input {
+  background: rgba(30, 30, 30, 0.9) !important;
+  border: 2px solid rgba(255, 215, 0, 0.3) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.combat-input:focus,
+input.combat-input:focus,
+textarea.combat-input:focus,
+select.combat-input:focus {
+  outline: none !important;
+  border-color: var(--primary-red) !important;
+  background: rgba(40, 40, 40, 0.95) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 20px rgba(225, 6, 0, 0.4) !important;
+}
+
+.combat-input::placeholder,
+input.combat-input::placeholder,
+textarea.combat-input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-weight: 400 !important;
+}

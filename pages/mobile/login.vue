@@ -577,25 +577,30 @@ useSeoMeta({
 
 /* Combat Inputs */
 .combat-input {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(30, 30, 30, 0.9);
   border: 2px solid rgba(255, 215, 0, 0.3);
   border-radius: 8px;
   padding: 1rem;
-  font-size: 1rem;
-  color: var(--text-light);
+  font-size: 1.1rem;
+  color: #ffffff;
+  font-weight: 500;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .combat-input:focus {
   outline: none;
   border-color: var(--primary-red);
+  background: rgba(40, 40, 40, 0.95);
   box-shadow: 0 0 20px rgba(225, 6, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
+  color: #ffffff;
 }
 
 .combat-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
 }
 
 .combat-input.error {

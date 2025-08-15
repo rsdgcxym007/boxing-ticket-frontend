@@ -102,14 +102,15 @@ const isLoading = ref(true);
 const error = ref("");
 const checkInResult = ref(null);
 
-// Check authentication
-if (!authStore.isAuthenticated) {
-  await navigateTo("/mobile/login");
-}
-
 // Methods
 const performCheckIn = async () => {
   try {
+    // Check authentication first
+    if (!authStore.isAuthenticated) {
+      await navigateTo("/mobile/login");
+      return;
+    }
+
     isLoading.value = true;
     error.value = "";
 
