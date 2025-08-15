@@ -15,8 +15,8 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-LOG_FILE="/var/log/frontend/deployment.log"
-WEBHOOK_LOG="/var/log/frontend/webhook.log"
+LOG_FILE="/var/log/patongboxing/deployment.log"
+WEBHOOK_LOG="/var/log/patongboxing/webhook.log"
 
 show_help() {
     echo "📊 Deployment Log Viewer"

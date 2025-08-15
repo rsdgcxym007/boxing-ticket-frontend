@@ -31,12 +31,17 @@
     "postinstall": "nuxt prepare",
     "deploy": "./deploy.sh",
     "pm2:start": "pm2 start ecosystem.config.cjs",
-    "pm2:stop": "pm2 stop boxing-ticket-frontend",
-    "pm2:restart": "pm2 restart boxing-ticket-frontend",
-    "pm2:logs": "pm2 logs boxing-ticket-frontend",
+    "pm2:stop": "pm2 stop patong-boxing-stadium",
+    "pm2:restart": "pm2 restart patong-boxing-stadium",
+    "pm2:logs": "pm2 logs patong-boxing-stadium",
     "pm2:status": "pm2 status",
     "pm2:cleanup": "./cleanup-pm2.sh",
-    "pm2:fix-duplicates": "./fix-pm2-duplicates.sh"
+    "health-check": "./health-check.sh",
+    "deploy:full": "./scripts/full-deploy.sh",
+    "deploy:frontend": "./scripts/deploy-frontend.sh",
+    "deploy:backend": "./scripts/deploy-backend.sh",
+    "setup:domain": "./scripts/setup-domain.sh",
+    "logs:watch": "./watch-logs.sh"
   },
   "dependencies": {
     "@fontsource/prompt": "^5.2.6",

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 🪝 Boxing Ticket Frontend - Webhook Handler
+# 🪝 Patong Boxing Stadium Ticket - Webhook Handler
 # This script handles webhook requests for auto-deployment
 
-LOG_FILE="/var/log/boxing-ticket-webhook.log"
+LOG_FILE="/var/log/patongboxing-webhook.log"
 # Use the same APP_DIR as deploy.sh
-APP_DIR="/var/www/frontend/boxing-ticket-frontend"
+APP_DIR="/var/www/patongboxing"
 DEPLOY_SCRIPT="$APP_DIR/deploy.sh"
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
 

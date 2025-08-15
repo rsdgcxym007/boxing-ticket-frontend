@@ -13,13 +13,16 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_NAME="Boxing Ticket Frontend"
-APP_DIR="/var/www/frontend/boxing-ticket-frontend"
+PROJECT_NAME="Patong Boxing Stadium Ticket"
+APP_DIR="/var/www/patongboxing"
 PM2_APP_NAME="boxing-ticket-frontend"
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
 BRANCH="featues/v1"
 NODE_VERSION="18"
 USER=$(whoami)
+DOMAIN="patongboxingstadiumticket.com"
+FRONTEND_PORT="3000"
+BACKEND_PORT="4000"
 
 # Parse webhook arguments if provided
 WEBHOOK_REF="$1"

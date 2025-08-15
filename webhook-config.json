@@ -1,9 +1,9 @@
 [
   {
     "id": "deploy-frontend",
-    "execute-command": "/var/www/frontend/boxing-ticket-frontend/deploy.sh", 
-    "command-working-directory": "/var/www/frontend/boxing-ticket-frontend",
-    "response-message": "🚀 Deploying frontend...",
+    "execute-command": "/var/www/patongboxing/deploy.sh", 
+    "command-working-directory": "/var/www/patongboxing",
+    "response-message": "🚀 Deploying Patong Boxing Stadium Ticket frontend...",
     "response-headers": {
       "Content-Type": "application/json"
     },
