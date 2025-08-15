@@ -62,7 +62,8 @@
     "system:services": "./scripts/system.sh services",
     "system:logs": "./scripts/system.sh logs",
     "system:network": "./scripts/system.sh network",
-    "system:firewall": "./scripts/system.sh firewall"
+    "system:firewall": "./scripts/system.sh firewall",
+    "setup:database": "./scripts/setup-database.sh"
   },
   "dependencies": {
     "@fontsource/prompt": "^5.2.6",
