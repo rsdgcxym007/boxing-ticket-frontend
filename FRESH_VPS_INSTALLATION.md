@@ -96,10 +96,14 @@ chmod 755 /var/www/patongboxing
 ```bash
 # Switch to postgres user and create database
 sudo -u postgres psql << 'EOF'
+-- Drop existing database and user if they exist (for clean setup)
+DROP DATABASE IF EXISTS patong_boxing_stadium;
+DROP USER IF EXISTS boxing_user;
+
 -- Create database
 CREATE DATABASE patong_boxing_stadium;
 
--- Create user
+-- Create user with specific password
 CREATE USER boxing_user WITH PASSWORD 'Password123!';
 
 -- Grant privileges
@@ -113,11 +117,20 @@ ALTER USER boxing_user CREATEDB;
 GRANT ALL ON SCHEMA public TO boxing_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO boxing_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO boxing_user;
+
+-- Set default privileges for future objects
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO boxing_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO boxing_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO boxing_user;
+
+-- Display success message
+SELECT 'Database created successfully!' AS status;
 
 \q
 EOF
+
+# Test database connection
+sudo -u postgres psql -h localhost -p 5432 -U boxing_user -d patong_boxing_stadium -c "SELECT 'Connection successful!' as status;"
 ```
 
 ### Step 8: Configure PostgreSQL for Remote Access
@@ -129,15 +142,72 @@ PG_MAJOR=$(echo $PG_VERSION | cut -d. -f1)
 PG_CONFIG="/etc/postgresql/$PG_MAJOR/main/postgresql.conf"
 PG_HBA="/etc/postgresql/$PG_MAJOR/main/pg_hba.conf"
 
-# Configure postgresql.conf
+# Backup original configs
+cp "$PG_CONFIG" "$PG_CONFIG.backup"
+cp "$PG_HBA" "$PG_HBA.backup"
+
+# Configure postgresql.conf for remote connections
 sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "$PG_CONFIG"
 sed -i "s/#port = 5432/port = 5432/" "$PG_CONFIG"
 
-# Configure pg_hba.conf
-echo "host    patong_boxing_stadium    boxing_user    0.0.0.0/0    md5" >> "$PG_HBA"
+# Add performance optimizations
+cat >> "$PG_CONFIG" << 'PGCONF'
+
+# Patong Boxing Stadium - Performance Settings
+shared_buffers = 256MB
+effective_cache_size = 1GB
+maintenance_work_mem = 64MB
+checkpoint_completion_target = 0.9
+wal_buffers = 16MB
+default_statistics_target = 100
+random_page_cost = 1.1
+effective_io_concurrency = 200
+work_mem = 4MB
+min_wal_size = 1GB
+max_wal_size = 4GB
+max_connections = 100
+PGCONF
+
+# Configure pg_hba.conf for authentication
+cat >> "$PG_HBA" << 'PGHBA'
+
+# Patong Boxing Stadium Database Access
+host    patong_boxing_stadium    boxing_user    0.0.0.0/0    md5
+host    all                      boxing_user    0.0.0.0/0    md5
+local   patong_boxing_stadium    boxing_user                  md5
+PGHBA
 
 # Restart PostgreSQL
 systemctl restart postgresql
+
+# Verify PostgreSQL is running
+systemctl status postgresql
+```
+
+### Step 8.1: Create Environment Configuration
+
+```bash
+# Create database environment file
+cat > /var/www/patongboxing/.env.database << 'ENV'
+# PostgreSQL Database Configuration for Patong Boxing Stadium
+DATABASE_HOST=43.229.133.51
+DATABASE_PORT=5432
+DATABASE_USERNAME=boxing_user
+DATABASE_PASSWORD=Password123!
+DATABASE_NAME=patong_boxing_stadium
+DATABASE_SSL=false
+DATABASE_SYNCHRONIZE=false
+DATABASE_LOGGING=false
+
+# Connection URL
+DATABASE_URL=postgresql://boxing_user:Password123!@43.229.133.51:5432/patong_boxing_stadium
+ENV
+
+# Set proper ownership
+chown deploy:deploy /var/www/patongboxing/.env.database
+
+# Test database connection
+psql -h 43.229.133.51 -p 5432 -U boxing_user -d patong_boxing_stadium -c "SELECT 'Remote connection successful!' as status;"
 ```
 
 ### Step 9: Clone and Setup Application
@@ -493,8 +563,18 @@ openssl s_client -connect patongboxingstadiumticket.com:443 -servername patongbo
 ### Check Database Connection
 
 ```bash
-# Test database connection
-psql -h localhost -p 5432 -U boxing_user -d patong_boxing_stadium -c "SELECT 'Database connection successful!' as status;"
+# Test local database connection
+psql -h localhost -p 5432 -U boxing_user -d patong_boxing_stadium -c "SELECT 'Local database connection successful!' as status;"
+
+# Test remote database connection (using VPS IP)
+psql -h 43.229.133.51 -p 5432 -U boxing_user -d patong_boxing_stadium -c "SELECT 'Remote database connection successful!' as status;"
+
+# Alternative connection test using URL
+psql "postgresql://boxing_user:Password123!@43.229.133.51:5432/patong_boxing_stadium" -c "SELECT current_database(), current_user, version();"
+
+# Verify database configuration
+echo "Database environment variables:"
+cat /var/www/patongboxing/.env.database
 ```
 
 ## 🎉 Deployment Complete!
@@ -513,6 +593,19 @@ Port: 5432
 Database: patong_boxing_stadium
 Username: boxing_user
 Password: Password123!
+
+# Environment Variables
+DATABASE_HOST=43.229.133.51
+DATABASE_PORT=5432
+DATABASE_USERNAME=boxing_user
+DATABASE_PASSWORD=Password123!
+DATABASE_NAME=patong_boxing_stadium
+DATABASE_SSL=false
+DATABASE_SYNCHRONIZE=false
+DATABASE_LOGGING=false
+
+# Connection URL
+DATABASE_URL=postgresql://boxing_user:Password123!@43.229.133.51:5432/patong_boxing_stadium
 ```
 
 ### Application Paths
