@@ -3,8 +3,8 @@ module.exports = {
     {
       name: "boxing-ticket-frontend",
       script: ".output/server/index.mjs",
-      instances: "max",
-      exec_mode: "cluster",
+      instances: 1,
+      exec_mode: "fork",
       env: {
         NODE_ENV: "development",
         PORT: 3000,
@@ -19,10 +19,13 @@ module.exports = {
         PORT: 3000,
         NITRO_HOST: "0.0.0.0",
         NITRO_PORT: 3000,
-        NUXT_PUBLIC_API_BASE: "http://43.229.133.51:4000",
-        NUXT_PUBLIC_SOCKET_URL: "http://43.229.133.51:4000",
-        NUXT_PUBLIC_WS_URL: "ws://43.229.133.51:4000/realtime",
-        NUXT_PUBLIC_APP_NAME: "Patong Boxing Ticket System",
+        NUXT_PUBLIC_API_BASE: "https://api-patongboxingstadiumticket.com",
+        NUXT_PUBLIC_SOCKET_URL: "https://api-patongboxingstadiumticket.com",
+        NUXT_PUBLIC_WS_URL: "wss://api-patongboxingstadiumticket.com/realtime",
+        NUXT_PUBLIC_APP_URL: "https://patongboxingstadiumticket.com",
+        NUXT_PUBLIC_API_BASE_URL: "https://patongboxingstadiumticket.com",
+        NUXT_PUBLIC_BACKEND_URL: "https://patongboxingstadiumticket.com",
+        NUXT_PUBLIC_APP_NAME: "Patong Boxing Stadium Ticket",
         NUXT_PUBLIC_APP_VERSION: "1.0.31",
         ENABLE_ANALYTICS: true,
         ENABLE_AI_RECOMMENDATIONS: true,
@@ -70,7 +73,6 @@ module.exports = {
       combine_logs: true,
       force: true,
       time: true,
-
       // Instance variable
       instance_var: "INSTANCE_ID",
 
@@ -88,10 +90,10 @@ module.exports = {
       user: "deploy",
       host: "43.229.133.51",
       ref: "origin/main",
-      repo: "git@github.com:your-username/boxing-ticket-frontend.git",
-      path: "/var/www/boxing-ticket-frontend",
+      repo: "git@github.com:rsdgcxym007/boxing-ticket-frontend.git",
+      path: "/var/www/patongboxing",
       "post-deploy":
-        "npm ci && npm run build && pm2 reload ecosystem.config.js --env production && pm2 save",
+        "npm ci && npm run build && chmod +x ./pre-deploy-cleanup.sh && ./pre-deploy-cleanup.sh && pm2 start ecosystem.config.cjs --env production && pm2 save",
       ssh_options: "StrictHostKeyChecking=no",
     },
   },

@@ -3,7 +3,7 @@
 # VPS Health Check Script
 # Usage: ./health-check.sh [optional-domain-or-ip]
 
-TARGET=${1:-"localhost:3000"}
+TARGET=${1:-"patongboxingstadiumticket.com"}
 echo "🔍 Testing VPS deployment health for: $TARGET"
 
 # Colors
@@ -59,12 +59,17 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 if command -v pm2 &> /dev/null; then
     echo ""
     echo "📊 PM2 Status:"
-    pm2 status boxing-ticket-frontend 2>/dev/null || echo "PM2 not running or app not found"
+    pm2 status patong-boxing-stadium 2>/dev/null || echo "PM2 not running or app not found"
 fi
 
 echo ""
 echo "🔧 Quick fixes if issues found:"
-echo "1. Restart: pm2 restart boxing-ticket-frontend"
-echo "2. Rebuild: npm run build && pm2 restart boxing-ticket-frontend"
-echo "3. Check logs: pm2 logs boxing-ticket-frontend"
-echo "4. Full reset: pm2 delete boxing-ticket-frontend && npm run pm2:start"
+echo "1. Restart: pm2 restart patong-boxing-stadium"
+echo "2. Rebuild: npm run build && pm2 restart patong-boxing-stadium"
+echo "3. Check logs: pm2 logs patong-boxing-stadium"
+echo "4. Full reset: pm2 delete patong-boxing-stadium && npm run pm2:start"
+echo ""
+echo "🌐 API Endpoints to test:"
+echo "- Frontend: https://patongboxingstadiumticket.com"
+echo "- Backend API: https://api-patongboxingstadiumticket.com"
+echo "- Health Check: https://api-patongboxingstadiumticket.com/health"

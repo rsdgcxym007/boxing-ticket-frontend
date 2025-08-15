@@ -7,6 +7,11 @@ import { useAuthStore } from "@/stores/auth";
  * รองรับ token expiration checking
  */
 export default defineNuxtRouteMiddleware((to) => {
+  // Prevent /th/admin routing issue by redirecting early
+  if (to.path === "/th/admin") {
+    return navigateTo("/admin");
+  }
+
   // หน้าที่ไม่ต้อง login (หน้าสาธารณะ)
   const publicPages = [
     "/",
@@ -30,6 +35,14 @@ export default defineNuxtRouteMiddleware((to) => {
   // ถ้าขึ้นต้นด้วย /en (เพราะ th เป็น default ไม่มี prefix)
   if (cleanPath.startsWith("/en/")) {
     cleanPath = cleanPath.replace(/^\/en/, "") || "/";
+  }
+
+  // Remove any remaining double slashes
+  cleanPath = cleanPath.replace(/\/+/g, "/");
+
+  // Ensure starts with /
+  if (!cleanPath.startsWith("/")) {
+    cleanPath = "/" + cleanPath;
   }
 
   const isPublicPage = publicPages.some(
@@ -61,7 +74,7 @@ export default defineNuxtRouteMiddleware((to) => {
       return Date.now() > parseInt(tokenExpiration);
     };
 
-    // สำหรับหน้า mobile/scanner ต้อง check role
+    // สำหรับหน้า mobile/scanner และ mobile/scanner/check-in ต้อง check role
     if (cleanPath.startsWith("/mobile/scanner")) {
       if (!authStore.isAuthenticated || !token || isTokenExpired()) {
         console.log("❌ Authentication required for scanner");
@@ -69,8 +82,11 @@ export default defineNuxtRouteMiddleware((to) => {
         return navigateTo("/mobile/login");
       }
 
-      // ตรวจสอบ role สำหรับ scanner
-      if (!["admin", "staff"].includes(authStore.user?.role)) {
+      // ตรวจสอบ role สำหรับ scanner (เฉพาะ scanner หลัก ไม่ใช่ check-in page)
+      if (
+        cleanPath === "/mobile/scanner" &&
+        !["admin", "staff"].includes(authStore.user?.role)
+      ) {
         console.log("❌ Insufficient permissions for scanner");
         return navigateTo("/login");
       }
@@ -88,9 +104,8 @@ export default defineNuxtRouteMiddleware((to) => {
           authStore.logout();
         }
 
-        const currentLocale = to.path.startsWith("/en/") ? "en" : "th";
-        const loginPath = currentLocale === "en" ? "/en/login" : "/login";
-        return navigateTo(loginPath);
+        // ปรับปรุงการ redirect เพื่อป้องกันการสร้าง /th/admin
+        return navigateTo("/login");
       }
 
       // ตรวจสอบ role สำหรับ admin

@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { useApi } from "~/composables/useApi";
 
 interface ScanRecord {
   id: string;
@@ -208,27 +209,28 @@ export const useQRScannerStore = defineStore("qrScanner", {
      */
     async performOnlineScan(scanData: any): Promise<ScanResult> {
       try {
-        // Mock successful scan for demo - replace with actual API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const { post } = useApi();
 
-        const mockResult: ScanResult = {
+        // Call the actual check-in API
+        const response = await post("/api/v1/mobile/scanner/check-in", {
+          qr: scanData.qrData,
+        });
+
+        return {
           success: true,
           data: {
-            orderId:
-              this.extractOrderIdFromQR(scanData.qrData) || "ORD-" + Date.now(),
+            orderId: response.order_id,
             isValid: true,
             attendanceStatus: "CHECKED_IN",
-            customerName: "ลูกค้าทดสอบ",
-            customerPhone: "081-234-5678",
-            ticketType: "seated",
-            seats: ["A1", "A2"],
-            checkInTime: new Date().toISOString(),
+            customerName: response.customer_name,
+            customerPhone: response.customer_phone,
+            ticketType: response.ticket_type || "seated",
+            seats: response.seats || [],
+            checkInTime: response.check_in_time || new Date().toISOString(),
           },
           message: "✅ เช็คอินสำเร็จ",
           timestamp: new Date().toISOString(),
         };
-
-        return mockResult;
       } catch (error: any) {
         console.error("🌐 Online scan failed:", error);
 
@@ -239,7 +241,20 @@ export const useQRScannerStore = defineStore("qrScanner", {
           return this.handleOfflineScan(scanData);
         }
 
-        throw error;
+        // Handle specific API errors
+        let message = "เกิดข้อผิดพลาดในการเช็คอิน";
+
+        if (error.statusCode === 400) {
+          message = error.data?.message || "QR Code ไม่ถูกต้อง";
+        } else if (error.statusCode === 404) {
+          message = "ไม่พบข้อมูลตั๋ว";
+        } else if (error.statusCode === 409) {
+          message = "ตั๋วนี้ได้เช็คอินแล้ว";
+        } else if (error.statusCode === 410) {
+          message = "ตั๋วหมดอายุแล้ว";
+        }
+
+        throw new Error(message);
       }
     },
 

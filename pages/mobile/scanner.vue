@@ -161,10 +161,17 @@ const errorMessage = ref("");
 const mediaStream = ref(null);
 const qrScanner = ref(null);
 
-// Check authentication
-if (!authStore.isAuthenticated) {
-  navigateTo("/mobile/login");
-}
+// Check authentication when component mounts
+onMounted(async () => {
+  // Check if authenticated first
+  if (!authStore.isAuthenticated) {
+    navigateTo("/mobile/login");
+    return;
+  }
+
+  await nextTick();
+  await initCamera();
+});
 
 // Methods
 const initCamera = async () => {
@@ -404,11 +411,6 @@ const cleanup = () => {
 };
 
 // Lifecycle
-onMounted(async () => {
-  await nextTick();
-  await initCamera();
-});
-
 onUnmounted(() => {
   cleanup();
 });
@@ -416,7 +418,6 @@ onUnmounted(() => {
 // SEO
 definePageMeta({
   layout: "mobile",
-  middleware: "auth",
 });
 
 useSeoMeta({
@@ -638,7 +639,10 @@ useSeoMeta({
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-family: monospace;
-  font-size: 0.875rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1f2937;
+  background: #ffffff;
   resize: vertical;
   min-height: 80px;
 }
@@ -647,6 +651,8 @@ useSeoMeta({
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  color: #1f2937;
+  background: #ffffff;
 }
 
 .manual-input-actions {

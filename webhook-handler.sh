@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# 🪝 Boxing Ticket Frontend - Webhook Handler
+# 🪝 Patong Boxing Stadium Ticket - Webhook Handler
 # This script handles webhook requests for auto-deployment
 
-LOG_FILE="/var/log/boxing-ticket-webhook.log"
-DEPLOY_SCRIPT="/var/www/boxing-ticket-frontend/deploy.sh"
+LOG_FILE="/var/log/patongboxing-webhook.log"
+# Use the same APP_DIR as deploy.sh
+APP_DIR="/var/www/patongboxing"
+DEPLOY_SCRIPT="$APP_DIR/deploy.sh"
 DISCORD_WEBHOOK="https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
 
 # Colors
@@ -78,10 +80,10 @@ validate_request() {
     fi
 }
 
-# Parse webhook payload
+# Parse webhook payload (lenient)
 parse_payload() {
     local payload="$1"
-    
+
     # Try to extract branch information if it's a git webhook
     local branch=""
     if echo "$payload" | jq -e '.ref' > /dev/null 2>&1; then
@@ -89,45 +91,62 @@ parse_payload() {
     elif echo "$payload" | jq -e '.branch' > /dev/null 2>&1; then
         branch=$(echo "$payload" | jq -r '.branch')
     fi
-    
-    # Only deploy if it's the target branch or no branch specified
-    if [ -n "$branch" ] && [ "$branch" != "main" ] && [ "$branch" != "master" ] && [ "$branch" != "featues/v1" ]; then
-        log_message "INFO" "Ignoring deployment for branch: $branch"
-        echo "HTTP/1.1 200 OK"
-        echo "Content-Type: application/json"
-        echo ""
-        echo '{"message": "Branch ignored", "branch": "'$branch'"}'
-        exit 0
+
+    # Log branch but do not block deployment
+    if [ -n "$branch" ]; then
+        log_message "INFO" "Webhook payload branch: $branch (continuing deployment)"
+    else
+        log_message "INFO" "Webhook payload without branch info (continuing deployment)"
     fi
-    
+
     return 0
 }
 
 # Execute deployment
 execute_deployment() {
     log_message "INFO" "Starting webhook-triggered deployment"
-    send_discord_notification "🚀 Webhook Deployment" "Deployment triggered via webhook" "3447003"
+    send_discord_notification "🚀 Webhook Deployment" "Deployment triggered via webhook on port 4300 → deploying to port 4100" "3447003"
     
     # Change to application directory
-    cd /var/www/boxing-ticket-frontend || {
+    cd "$APP_DIR" || {
         log_message "ERROR" "Failed to change to application directory"
         send_discord_notification "❌ Deployment Failed" "Could not access application directory" "16711680"
         exit 1
     }
     
-    # Execute deployment script
-    if [ -x "$DEPLOY_SCRIPT" ]; then
+    # Execute deployment script (always via bash, with generous timeout if available)
+    if [ -f "$DEPLOY_SCRIPT" ]; then
         log_message "INFO" "Executing deployment script: $DEPLOY_SCRIPT"
-        
-        # Run deployment in background and capture output
-        if timeout 600 "$DEPLOY_SCRIPT" deploy >> "$LOG_FILE" 2>&1; then
+
+        # Quick dependency install before full deployment
+        log_message "INFO" "Installing dependencies..."
+        cd "$APP_DIR"
+        if [ -f "package-lock.json" ]; then
+            npm ci --production=false >> "$LOG_FILE" 2>&1 || {
+                log_message "WARNING" "npm ci failed, trying npm install..."
+                npm install --production=false >> "$LOG_FILE" 2>&1
+            }
+        else
+            log_message "INFO" "No package-lock.json found, using npm install..."
+            npm install --production=false >> "$LOG_FILE" 2>&1
+        fi
+
+        if command -v timeout > /dev/null 2>&1; then
+            timeout 1800 /bin/bash "$DEPLOY_SCRIPT" deploy >> "$LOG_FILE" 2>&1
+        else
+            /bin/bash "$DEPLOY_SCRIPT" deploy >> "$LOG_FILE" 2>&1
+        fi
+
+        if [ $? -eq 0 ]; then
             log_message "SUCCESS" "Deployment completed successfully"
+            send_discord_notification "✅ Deployment Success" "Deployment completed successfully! App running on http://43.229.133.51:3000" "65280"
             echo "HTTP/1.1 200 OK"
             echo "Content-Type: application/json"
             echo ""
-            echo '{"status": "success", "message": "Deployment completed successfully"}'
+            echo '{"status": "success", "message": "Deployment completed successfully", "app_url": "http://43.229.133.51:3000"}'
         else
-            log_message "ERROR" "Deployment failed"
+            log_message "ERROR" "Deployment failed (see $LOG_FILE)"
+            send_discord_notification "❌ Deployment Failed" "Deployment failed! Check logs for details." "16711680"
             echo "HTTP/1.1 500 Internal Server Error"
             echo "Content-Type: application/json"
             echo ""
@@ -135,7 +154,7 @@ execute_deployment() {
             exit 1
         fi
     else
-        log_message "ERROR" "Deployment script not found or not executable: $DEPLOY_SCRIPT"
+        log_message "ERROR" "Deployment script not found: $DEPLOY_SCRIPT"
         send_discord_notification "❌ Deployment Failed" "Deployment script not found" "16711680"
         echo "HTTP/1.1 500 Internal Server Error"
         echo "Content-Type: application/json"
@@ -147,10 +166,15 @@ execute_deployment() {
 
 # Main webhook handler
 main() {
-    # Create log file if it doesn't exist
-    sudo mkdir -p "$(dirname "$LOG_FILE")"
-    sudo touch "$LOG_FILE"
-    sudo chmod 666 "$LOG_FILE"
+    # Create log file if possible, fallback to app logs when /var/log is not writable
+    local target_log="$LOG_FILE"
+    if ! mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null; then
+        target_log="$APP_DIR/logs/webhook.log"
+    fi
+    mkdir -p "$(dirname "$target_log")" 2>/dev/null || true
+    touch "$target_log" 2>/dev/null || true
+    chmod 666 "$target_log" 2>/dev/null || true
+    LOG_FILE="$target_log"
     
     # Get request method and content type from environment
     local method="${REQUEST_METHOD:-POST}"
@@ -165,11 +189,17 @@ main() {
     # Validate request
     validate_request "$method" "$content_type"
     
-    # Read payload if present
+    # Read payload if present (best-effort)
     local payload=""
-    if [ "$content_length" -gt 0 ]; then
+    if [ -n "$content_length" ] && [ "$content_length" -gt 0 ] 2>/dev/null; then
         payload=$(head -c "$content_length")
         log_message "DEBUG" "Payload received: ${payload:0:200}..."
+    else
+        # Some runners may not set CONTENT_LENGTH; try to read but don't block
+        if read -t 0; then
+            payload=$(cat)
+            [ -n "$payload" ] && log_message "DEBUG" "Payload (no length): ${payload:0:200}..."
+        fi
     fi
     
     # Parse payload
