@@ -51,7 +51,24 @@ export const useAuthStore = defineStore("auth", () => {
   // เพิ่ม function initialize เพื่อ load ข้อมูลเมื่อเริ่มต้น
   const initialize = () => {
     if (process.client) {
-      loadUser();
+      console.log("🔄 Auth Store: Initializing...");
+      
+      const token = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user");
+      
+      console.log("🔍 Found in localStorage:", {
+        hasToken: !!token,
+        token: token ? "***" + token.slice(-8) : null,
+        hasUser: !!savedUser,
+        savedUser: savedUser ? JSON.parse(savedUser) : null,
+      });
+      
+      const loadedUser = loadUser();
+      
+      console.log("✅ Auth Store initialized:", {
+        user: loadedUser,
+        isAuthenticated: isAuthenticated.value,
+      });
     }
   };
 

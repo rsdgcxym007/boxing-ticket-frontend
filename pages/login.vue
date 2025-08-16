@@ -483,7 +483,14 @@ const cleanupAuthState = () => {
     console.log("🧹 Starting auth state cleanup on login page...");
 
     // Log current state before cleanup
-    authDebug.logAuthState();
+    const currentUser = localStorage.getItem("user");
+    const currentToken = localStorage.getItem("token");
+    
+    console.log("📊 Current auth state:", {
+      user: currentUser ? JSON.parse(currentUser) : null,
+      token: currentToken ? "***" + currentToken.slice(-8) : null,
+      isAuthenticated: !!currentToken && !!currentUser,
+    });
 
     // Clear any existing authentication data
     localStorage.removeItem("token");
@@ -496,9 +503,6 @@ const cleanupAuthState = () => {
     auth.logout();
 
     console.log("✅ Auth state cleanup completed");
-
-    // Log state after cleanup
-    authDebug.logAuthState();
   }
 };
 

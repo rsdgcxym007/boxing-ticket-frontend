@@ -129,64 +129,8 @@
         </form>
       </div>
 
-      <!-- Training Credentials -->
-      <div class="training-credentials">
-        <h3 class="combat-text">
-          <Icon icon="mdi:dumbbell" class="training-icon" />
-          TRAINING ACCOUNTS
-        </h3>
-
-        <div class="fighter-cards">
-          <!-- Fighter 1 -->
-          <div
-            class="fighter-card"
-            @click="fillCredentials('staff1', 'staff123')"
-          >
-            <div class="fighter-header">
-              <Icon icon="mdi:account-tie" class="fighter-icon red-fighter" />
-              <span class="combat-text">Red Corner</span>
-            </div>
-            <div class="fighter-stats">
-              <p>ID: staff1</p>
-              <p>Code: staff123</p>
-            </div>
-          </div>
-
-          <!-- Fighter 2 -->
-          <div
-            class="fighter-card"
-            @click="fillCredentials('staff2', 'staff456')"
-          >
-            <div class="fighter-header">
-              <Icon
-                icon="mdi:account-supervisor"
-                class="fighter-icon blue-fighter"
-              />
-              <span class="combat-text">Blue Corner</span>
-            </div>
-            <div class="fighter-stats">
-              <p>ID: staff2</p>
-              <p>Code: staff456</p>
-            </div>
-          </div>
-
-          <!-- Champion -->
-          <div
-            class="fighter-card champion"
-            @click="fillCredentials('admin', 'admin123')"
-          >
-            <div class="fighter-header">
-              <Icon icon="mdi:crown" class="fighter-icon champion-fighter" />
-              <span class="combat-text">Champion</span>
-            </div>
-            <div class="fighter-stats">
-              <p>ID: admin</p>
-              <p>Code: admin123</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <!-- Training Credentials - REMOVED -->
+      
       <!-- Arena Footer -->
       <div class="arena-footer">
         <p>&copy; 2025 Patong Muay Thai Arena</p>
@@ -197,7 +141,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { Icon } from "@iconify/vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
@@ -303,7 +247,7 @@ const handleLogin = async () => {
 
     // Wait a bit to show success message then redirect
     setTimeout(async () => {
-      await router.push("/mobile");
+      await router.replace("/mobile"); // ใช้ replace เพื่อไม่ให้กลับมาหน้า login ได้
     }, 1500);
   } catch (error) {
     console.error("❌ Login failed:", error);
@@ -364,12 +308,26 @@ const loadSavedCredentials = () => {
 
 // Lifecycle
 onMounted(() => {
+  console.log("📱 Mobile Login: Component mounted");
+  
+  // Initialize auth store to load existing auth state
+  authStore.initialize();
+  
+  console.log("🔍 Current auth state:", {
+    isAuthenticated: authStore.isAuthenticated,
+    user: authStore.user,
+    token: process.client ? localStorage.getItem("token") : null,
+  });
+
   // Check if already authenticated
   if (authStore.isAuthenticated) {
+    console.log("✅ User already authenticated, redirecting to mobile dashboard");
     router.push("/mobile");
     return;
   }
 
+  console.log("🚪 User not authenticated, staying on login page");
+  
   // Load saved credentials
   loadSavedCredentials();
 });
@@ -399,7 +357,7 @@ watch(
 // Page meta
 definePageMeta({
   layout: "mobile",
-  middleware: "guest-only",
+  middleware: "mobile-guest-only",
 });
 
 useSeoMeta({
@@ -414,7 +372,7 @@ useSeoMeta({
 /* Combat Background */
 .muay-thai-login {
   min-height: 100vh;
-  background: var(--bg-dark);
+  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
   position: relative;
   overflow-x: hidden;
 }
@@ -427,14 +385,14 @@ useSeoMeta({
   height: 100%;
   background: radial-gradient(
       ellipse at center top,
-      rgba(225, 6, 0, 0.1) 0%,
+      rgba(225, 6, 0, 0.15) 0%,
       transparent 70%
     ),
     linear-gradient(
       135deg,
-      rgba(225, 6, 0, 0.05) 0%,
-      rgba(0, 0, 0, 0.9) 50%,
-      rgba(255, 215, 0, 0.05) 100%
+      rgba(225, 6, 0, 0.08) 0%,
+      rgba(30, 41, 59, 0.95) 50%,
+      rgba(255, 215, 0, 0.08) 100%
     );
   z-index: 1;
 }
@@ -536,14 +494,14 @@ useSeoMeta({
 
 /* Combat Form */
 .combat-form-container {
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid var(--primary-red);
+  background: rgba(30, 41, 59, 0.85);
+  border: 2px solid rgba(225, 6, 0, 0.6);
   border-radius: 15px;
   padding: 2rem;
   margin-bottom: 2rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 30px rgba(225, 6, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 0 30px rgba(225, 6, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .combat-form {
@@ -565,33 +523,36 @@ useSeoMeta({
   gap: 0.5rem;
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--primary-gold);
+  color: #fbbf24;
   text-transform: uppercase;
   letter-spacing: 1px;
+  margin-bottom: 0.5rem;
 }
 
 .label-icon {
   font-size: 1.2rem;
-  color: var(--primary-red);
+  color: #ef4444;
 }
 
 /* Combat Inputs */
+/* Combat Inputs */
 .combat-input {
-  background: rgba(30, 30, 30, 0.9);
-  border: 2px solid rgba(255, 215, 0, 0.3);
+  background: rgba(51, 65, 85, 0.9);
+  border: 2px solid rgba(255, 215, 0, 0.5);
   border-radius: 8px;
   padding: 1rem;
   font-size: 1.1rem;
   color: #ffffff;
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: none;
+  font-family: inherit;
 }
 
 .combat-input:focus {
   outline: none;
-  border-color: var(--primary-red);
-  background: rgba(40, 40, 40, 0.95);
+  border-color: rgba(225, 6, 0, 0.8);
+  background: rgba(71, 85, 105, 0.95);
   box-shadow: 0 0 20px rgba(225, 6, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
@@ -599,7 +560,7 @@ useSeoMeta({
 }
 
 .combat-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(203, 213, 225, 0.7);
   font-weight: 400;
 }
 
@@ -657,6 +618,7 @@ useSeoMeta({
   gap: 0.75rem;
   cursor: pointer;
   user-select: none;
+  color: #e2e8f0;
 }
 
 .remember-input {
@@ -666,16 +628,16 @@ useSeoMeta({
 .remember-custom {
   width: 20px;
   height: 20px;
-  border: 2px solid var(--primary-gold);
+  border: 2px solid #fbbf24;
   border-radius: 4px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(51, 65, 85, 0.8);
   position: relative;
   transition: all 0.3s ease;
 }
 
 .remember-input:checked + .remember-custom {
-  background: var(--primary-red);
-  border-color: var(--primary-red);
+  background: #ef4444;
+  border-color: #ef4444;
 }
 
 .remember-input:checked + .remember-custom::after {

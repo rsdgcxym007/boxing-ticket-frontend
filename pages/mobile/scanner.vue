@@ -177,15 +177,43 @@ onMounted(async () => {
 const initCamera = async () => {
   try {
     isLoading.value = true;
+    
+    console.log("🎥 Initializing camera...");
+    
+    // Check if getUserMedia is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error("Camera access not supported in this browser");
+    }
+    
+    // Check for HTTPS (required for camera access)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      throw new Error("Camera access requires HTTPS connection");
+    }
 
-    // Request camera permission
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: "environment", // Use back camera
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-      },
-    });
+    // Request camera permission with fallback options
+    let stream;
+    try {
+      // Try with back camera first
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment", // Use back camera
+          width: { ideal: 1280, min: 640 },
+          height: { ideal: 720, min: 480 },
+        },
+      });
+      console.log("✅ Back camera access granted");
+    } catch (backCameraError) {
+      console.warn("⚠️ Back camera failed, trying any available camera:", backCameraError);
+      
+      // Fallback to any available camera
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280, min: 640 },
+          height: { ideal: 720, min: 480 },
+        },
+      });
+      console.log("✅ Front camera access granted");
+    }
 
     if (videoElement.value) {
       videoElement.value.srcObject = stream;
@@ -193,13 +221,30 @@ const initCamera = async () => {
       isCameraActive.value = true;
 
       await nextTick();
+      
+      // Wait for video to be ready
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error("Video load timeout")), 10000);
+        
+        videoElement.value.addEventListener('loadedmetadata', () => {
+          clearTimeout(timeout);
+          resolve();
+        }, { once: true });
+        
+        videoElement.value.addEventListener('error', () => {
+          clearTimeout(timeout);
+          reject(new Error("Video load error"));
+        }, { once: true });
+      });
+      
       await videoElement.value.play();
+      console.log("✅ Video element playing");
 
       // Initialize QR Scanner
       await initQRScanner();
     }
   } catch (error) {
-    console.error("Camera initialization failed:", error);
+    console.error("❌ Camera initialization failed:", error);
     handleCameraError(error);
   } finally {
     isLoading.value = false;
@@ -208,33 +253,59 @@ const initCamera = async () => {
 
 const initQRScanner = async () => {
   try {
+    console.log("🔍 Initializing QR Scanner...");
+    
     // Dynamic import to avoid SSR issues
     const { QrScanner } = await import("qr-scanner");
+    console.log("✅ QR Scanner library loaded");
 
-    if (videoElement.value) {
+    if (videoElement.value && isCameraActive.value) {
+      // Stop any existing scanner
+      if (qrScanner.value) {
+        qrScanner.value.destroy();
+      }
+      
       qrScanner.value = new QrScanner(
         videoElement.value,
-        (result) => handleScanSuccess(result.data),
+        (result) => {
+          console.log("🎯 QR Code detected:", result.data);
+          handleScanSuccess(result.data);
+        },
         {
           highlightScanRegion: true,
           highlightCodeOutline: true,
           preferredCamera: "environment",
-          maxScansPerSecond: 3,
+          maxScansPerSecond: 5, // Increased for better responsiveness
           calculateScanRegion: () => ({
             x: 0.1,
-            y: 0.1,
+            y: 0.2,
             width: 0.8,
-            height: 0.8,
+            height: 0.6,
           }),
+          returnDetailedScanResult: false, // Simplified result
         }
       );
 
+      // Set up error handling
+      qrScanner.value.onerror = (error) => {
+        console.error("QR Scanner error:", error);
+        showErrorMessage("QR Scanner error: " + error.message);
+      };
+
       await qrScanner.value.start();
-      console.log("✅ QR Scanner initialized successfully");
+      console.log("✅ QR Scanner started and ready");
+      
+      // Play scan ready sound if available
+      playSound('scan-ready');
+    } else {
+      throw new Error("Video element not ready or camera not active");
     }
   } catch (error) {
-    console.error("QR Scanner initialization failed:", error);
-    showErrorMessage("ไม่สามารถเปิด QR Scanner ได้");
+    console.error("❌ QR Scanner initialization failed:", error);
+    showErrorMessage("ไม่สามารถเปิด QR Scanner ได้: " + error.message);
+    
+    // Show manual input as fallback
+    showManualInput.value = true;
   }
 };
 
@@ -311,17 +382,34 @@ const handleScanError = (error) => {
 };
 
 const handleCameraError = (error) => {
+  console.error("🎥 Camera error:", error);
+  
   let message = "ไม่สามารถเข้าถึงกล้องได้";
+  let suggestions = "";
 
   if (error.name === "NotAllowedError") {
     message = "กรุณาอนุญาตการใช้งานกล้อง";
+    suggestions = "• กดปุ่ม Allow/อนุญาต เมื่อเบราว์เซอร์ถาม\n• ตรวจสอบการตั้งค่าการเข้าถึงกล้องในเบราว์เซอร์";
   } else if (error.name === "NotFoundError") {
     message = "ไม่พบกล้องในอุปกรณ์";
+    suggestions = "• ตรวจสอบว่าอุปกรณ์มีกล้อง\n• ปิดแอปอื่นที่อาจใช้กล้องอยู่";
   } else if (error.name === "NotSupportedError") {
     message = "เบราว์เซอร์ไม่รองรับการใช้งานกล้อง";
+    suggestions = "• ใช้เบราว์เซอร์ที่รองรับ (Chrome, Safari, Firefox)\n• ตรวจสอบว่าใช้ HTTPS";
+  } else if (error.name === "NotReadableError") {
+    message = "กล้องถูกใช้งานโดยแอปอื่น";
+    suggestions = "• ปิดแอปอื่นที่ใช้กล้อง\n• รีเฟรชหน้าเว็บ";
+  } else if (error.message && error.message.includes("HTTPS")) {
+    message = "ต้องใช้ HTTPS สำหรับการเข้าถึงกล้อง";
+    suggestions = "• ใช้ https:// แทน http://\n• หรือทดสอบใน localhost";
   }
 
-  showErrorMessage(message);
+  console.log("📝 Error suggestions:", suggestions);
+  
+  showErrorMessage(message + (suggestions ? "\n\nคำแนะนำ:\n" + suggestions : ""));
+  
+  // Enable manual input as fallback
+  showManualInput.value = true;
 };
 
 const toggleFlashlight = async () => {
@@ -354,6 +442,33 @@ const playScanSound = () => {
     });
   } catch (error) {
     // Ignore audio errors
+  }
+};
+
+const playSound = (soundName) => {
+  try {
+    let soundFile = "/sounds/scan-beep.mp3"; // default
+    
+    switch (soundName) {
+      case 'scan-ready':
+        soundFile = "/sounds/scan-ready.mp3";
+        break;
+      case 'scan-success':
+        soundFile = "/sounds/scan-success.mp3";
+        break;
+      case 'scan-error':
+        soundFile = "/sounds/scan-error.mp3";
+        break;
+    }
+    
+    console.log(`🔊 Playing sound: ${soundFile}`);
+    const audio = new Audio(soundFile);
+    audio.volume = 0.4;
+    audio.play().catch((error) => {
+      console.warn(`⚠️ Could not play sound ${soundFile}:`, error);
+    });
+  } catch (error) {
+    console.warn("⚠️ Audio playback error:", error);
   }
 };
 
