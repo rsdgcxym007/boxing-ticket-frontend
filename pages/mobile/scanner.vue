@@ -104,6 +104,44 @@
           <span>ประวัติ</span>
         </button>
       </div>
+
+      <!-- Manual Input Modal -->
+      <div v-if="showManualInput" class="modal-overlay" @click="showManualInput = false">
+        <div class="manual-input-modal" @click.stop>
+          <div class="modal-header">
+            <h3>กรอก QR Code ด้วยมือ</h3>
+            <button @click="showManualInput = false" class="close-btn">
+              <Icon icon="mdi:close" class="text-xl" />
+            </button>
+          </div>
+          
+          <div class="modal-body">
+            <textarea
+              v-model="manualQRInput"
+              placeholder="วาง QR Code ข้อมูลที่นี่..."
+              class="qr-input"
+              rows="4"
+            ></textarea>
+            
+            <div class="modal-actions">
+              <button
+                @click="showManualInput = false"
+                class="btn-secondary"
+              >
+                ยกเลิก
+              </button>
+              <button
+                @click="handleManualScan"
+                class="btn-primary"
+                :disabled="!manualQRInput.trim() || isScanning"
+              >
+                <Icon v-if="isScanning" icon="mdi:loading" class="animate-spin mr-2" />
+                สแกน
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Scan Result Modal -->
@@ -269,8 +307,20 @@ const initQRScanner = async () => {
   try {
     console.log("🔍 Initializing QR Scanner...");
 
-    // Dynamic import to avoid SSR issues
-    const { QrScanner } = await import("qr-scanner");
+    // Dynamic import with proper handling
+    let QrScanner;
+    try {
+      const qrModule = await import("qr-scanner");
+      QrScanner = qrModule.default || qrModule.QrScanner;
+    } catch (importError) {
+      console.error("❌ QR Scanner import failed:", importError);
+      throw new Error("ไม่สามารถโหลด QR Scanner ได้");
+    }
+
+    if (!QrScanner) {
+      throw new Error("QR Scanner constructor not found");
+    }
+
     console.log("✅ QR Scanner library loaded");
 
     if (videoElement.value && isCameraActive.value) {
@@ -282,21 +332,22 @@ const initQRScanner = async () => {
       qrScanner.value = new QrScanner(
         videoElement.value,
         (result) => {
-          console.log("🎯 QR Code detected:", result.data);
-          handleScanSuccess(result.data);
+          const qrData = typeof result === 'string' ? result : result.data;
+          console.log("🎯 QR Code detected:", qrData);
+          handleScanSuccess(qrData);
         },
         {
           highlightScanRegion: true,
           highlightCodeOutline: true,
           preferredCamera: "environment",
-          maxScansPerSecond: 5, // Increased for better responsiveness
+          maxScansPerSecond: 3,
           calculateScanRegion: () => ({
             x: 0.1,
             y: 0.2,
             width: 0.8,
             height: 0.6,
           }),
-          returnDetailedScanResult: false, // Simplified result
+          returnDetailedScanResult: false,
         }
       );
 
@@ -453,40 +504,75 @@ const toggleFlashlight = async () => {
 
 const playScanSound = () => {
   try {
-    const audio = new Audio("/sounds/scan-beep.mp3");
-    audio.volume = 0.3;
-    audio.play().catch(() => {
-      // Ignore audio play errors (user interaction required)
-    });
+    // Use Web Audio API to generate beep sound
+    if (typeof window !== 'undefined' && window.AudioContext) {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800; // 800 Hz beep
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
   } catch (error) {
-    // Ignore audio errors
+    console.log("Audio not available:", error);
   }
 };
 
 const playSound = (soundName) => {
   try {
-    let soundFile = "/sounds/scan-beep.mp3"; // default
-
-    switch (soundName) {
-      case "scan-ready":
-        soundFile = "/sounds/scan-ready.mp3";
-        break;
-      case "scan-success":
-        soundFile = "/sounds/scan-success.mp3";
-        break;
-      case "scan-error":
-        soundFile = "/sounds/scan-error.mp3";
-        break;
+    // Use Web Audio API to generate different sounds
+    if (typeof window !== 'undefined' && window.AudioContext) {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Different sounds for different events
+      let frequency = 800;
+      let duration = 0.2;
+      
+      switch (soundName) {
+        case "scan-ready":
+          frequency = 600;
+          duration = 0.1;
+          break;
+        case "scan-success":
+          frequency = 1000;
+          duration = 0.3;
+          break;
+        case "scan-error":
+          frequency = 400;
+          duration = 0.5;
+          break;
+        default:
+          frequency = 800;
+          duration = 0.2;
+      }
+      
+      oscillator.frequency.value = frequency;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + duration);
     }
-
-    console.log(`🔊 Playing sound: ${soundFile}`);
-    const audio = new Audio(soundFile);
-    audio.volume = 0.4;
-    audio.play().catch((error) => {
-      console.warn(`⚠️ Could not play sound ${soundFile}:`, error);
-    });
   } catch (error) {
-    console.warn("⚠️ Audio playback error:", error);
+    console.log("Audio not available:", error);
   }
 };
 
@@ -922,6 +1008,124 @@ useSeoMeta({
 .action-btn span {
   font-size: 0.75rem;
   font-weight: 500;
+}
+
+/* Manual Input Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.manual-input-modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  padding: 0.25rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+  background: #f3f4f6;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.qr-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: monospace;
+  resize: vertical;
+  min-height: 100px;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s;
+}
+
+.qr-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
 }
 
 /* Responsive */
