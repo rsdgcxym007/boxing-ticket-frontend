@@ -28,8 +28,8 @@ export default defineEventHandler(async (event) => {
       console.log(`[Webhook] Payload preview: ${payloadStr.slice(0, 200)}...`);
     }
 
-    const APP_DIR = "/var/www/frontend/boxing-ticket-frontend";
-    const SCRIPT = `${APP_DIR}/webhook-handler.sh`;
+    const APP_DIR = "/var/www/patongboxing-frontend";
+    const SCRIPT = `${APP_DIR}/scripts/webhook-deploy.sh`;
 
     // Check if script exists before spawning
     try {

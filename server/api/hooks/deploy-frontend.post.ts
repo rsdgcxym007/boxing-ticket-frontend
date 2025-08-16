@@ -8,8 +8,8 @@ export default defineEventHandler(async (event) => {
     // Read payload (optional)
     const payload = await readRawBody(event).catch(() => undefined);
 
-    const APP_DIR = "/var/www/frontend/boxing-ticket-frontend";
-    const SCRIPT = `${APP_DIR}/webhook-handler.sh`;
+    const APP_DIR = "/var/www/patongboxing-frontend";
+    const SCRIPT = `${APP_DIR}/scripts/webhook-deploy.sh`;
 
     // Fire-and-forget deployment to keep webhook response fast
     const child = spawn("/bin/bash", [SCRIPT, "deploy"], {
