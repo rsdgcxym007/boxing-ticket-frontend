@@ -652,14 +652,15 @@ useSeoMeta({
 }
 
 .remember-text {
-  color: var(--text-light);
+  color: #e2e8f0;
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
 /* Combat Login Button */
 .combat-login-btn {
-  background: linear-gradient(135deg, var(--primary-red) 0%, #b91c1c 100%);
-  border: 2px solid var(--primary-gold);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: 2px solid #fbbf24;
   border-radius: 12px;
   padding: 1.2rem 2rem;
   font-size: 1.1rem;
@@ -671,6 +672,7 @@ useSeoMeta({
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
 }
 
 .combat-login-btn::before {
@@ -695,8 +697,8 @@ useSeoMeta({
 
 .combat-login-btn:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(225, 6, 0, 0.4), 0 0 30px rgba(255, 215, 0, 0.3);
-  border-color: var(--primary-red);
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5), 0 0 30px rgba(251, 191, 36, 0.3);
+  border-color: #ef4444;
 }
 
 .combat-login-btn:active:not(:disabled) {
@@ -719,7 +721,7 @@ useSeoMeta({
 
 .fire-icon {
   font-size: 1.2rem;
-  color: var(--primary-gold);
+  color: #fbbf24;
 }
 
 .btn-loading {
