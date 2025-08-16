@@ -5,7 +5,7 @@
 set -e
 
 LOG_FILE="/var/log/patongboxing-deploy.log"
-PROJECT_DIR="/var/www/patongboxing-frontend/source"
+PROJECT_DIR="/var/www/patongboxing-frontend"
 BACKUP_DIR="/var/backups/patongboxing-frontend"
 
 # Function to log messages
