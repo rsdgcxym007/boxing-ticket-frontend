@@ -184,14 +184,10 @@ const selectTab = (tab) => {
 };
 
 const playScanSound = () => {
-  try {
-    const audio = new Audio("/sounds/scan-ready.mp3");
-    audio.volume = 0.3;
-    audio.play().catch(() => {
-      // Ignore audio errors
-    });
-  } catch (error) {
-    // Ignore audio errors
+  // Audio disabled - focusing on scanning functionality
+  // Use vibration feedback instead
+  if (navigator.vibrate) {
+    navigator.vibrate([50, 50, 50]);
   }
 };
 

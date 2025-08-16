@@ -80,6 +80,10 @@
         <div v-else-if="isCameraActive" class="status-message success">
           <Icon icon="mdi:camera" class="text-2xl mb-2 text-green-500" />
           <p>จ่อ QR Code ที่กล้อง</p>
+          <div class="scanner-indicator">
+            <div class="scanning-dot" :class="{ 'active': !isScanning }"></div>
+            <span class="status-text">{{ isScanning ? 'กำลังประมวลผล...' : 'พร้อมสแกน' }}</span>
+          </div>
         </div>
       </div>
 
@@ -106,7 +110,11 @@
       </div>
 
       <!-- Manual Input Modal -->
-      <div v-if="showManualInput" class="modal-overlay" @click="showManualInput = false">
+      <div
+        v-if="showManualInput"
+        class="modal-overlay"
+        @click="showManualInput = false"
+      >
         <div class="manual-input-modal" @click.stop>
           <div class="modal-header">
             <h3>กรอก QR Code ด้วยมือ</h3>
@@ -114,7 +122,7 @@
               <Icon icon="mdi:close" class="text-xl" />
             </button>
           </div>
-          
+
           <div class="modal-body">
             <textarea
               v-model="manualQRInput"
@@ -122,12 +130,9 @@
               class="qr-input"
               rows="4"
             ></textarea>
-            
+
             <div class="modal-actions">
-              <button
-                @click="showManualInput = false"
-                class="btn-secondary"
-              >
+              <button @click="showManualInput = false" class="btn-secondary">
                 ยกเลิก
               </button>
               <button
@@ -135,7 +140,11 @@
                 class="btn-primary"
                 :disabled="!manualQRInput.trim() || isScanning"
               >
-                <Icon v-if="isScanning" icon="mdi:loading" class="animate-spin mr-2" />
+                <Icon
+                  v-if="isScanning"
+                  icon="mdi:loading"
+                  class="animate-spin mr-2"
+                />
                 สแกน
               </button>
             </div>
@@ -332,15 +341,15 @@ const initQRScanner = async () => {
       qrScanner.value = new QrScanner(
         videoElement.value,
         (result) => {
-          const qrData = typeof result === 'string' ? result : result.data;
-          console.log("🎯 QR Code detected:", qrData);
+          const qrData = typeof result === "string" ? result : result.data;
+          console.log("🎯 QR Code detected:", qrData.substring(0, 30) + "...");
           handleScanSuccess(qrData);
         },
         {
           highlightScanRegion: true,
           highlightCodeOutline: true,
           preferredCamera: "environment",
-          maxScansPerSecond: 3,
+          maxScansPerSecond: 5, // Increased from 3 to 5
           calculateScanRegion: () => ({
             x: 0.1,
             y: 0.2,
@@ -360,8 +369,38 @@ const initQRScanner = async () => {
       await qrScanner.value.start();
       console.log("✅ QR Scanner started and ready");
 
-      // Play scan ready sound if available
-      playSound("scan-ready");
+      // Test if scanner is actually working
+      console.log("🔍 Scanner state:", {
+        isActive: qrScanner.value._active,
+        hasCamera: !!qrScanner.value._video,
+        videoReady: videoElement.value?.readyState,
+        videoWidth: videoElement.value?.videoWidth,
+        videoHeight: videoElement.value?.videoHeight,
+      });
+
+      // Enable continuous scanning
+      isScanning.value = false; // Make sure scanning is not blocked
+      
+      // Add periodic scanner health check
+      setInterval(() => {
+        if (qrScanner.value && !showScanResult.value && !showManualInput.value) {
+          const scannerActive = qrScanner.value._active;
+          const videoPlaying = videoElement.value?.readyState === 4;
+          
+          console.log("🔍 Scanner Health Check:", {
+            scannerActive,
+            videoPlaying,
+            isScanning: isScanning.value,
+            timestamp: new Date().toLocaleTimeString(),
+          });
+          
+          // Restart scanner if it seems stuck
+          if (!scannerActive && videoPlaying && !isScanning.value) {
+            console.log("🚑 Restarting stuck scanner...");
+            qrScanner.value.start();
+          }
+        }
+      }, 10000); // Check every 10 seconds
     } else {
       throw new Error("Video element not ready or camera not active");
     }
@@ -375,10 +414,14 @@ const initQRScanner = async () => {
 };
 
 const handleScanSuccess = async (qrData) => {
-  if (isScanning.value) return; // Prevent multiple scans
+  if (isScanning.value) {
+    console.log("🚫 Already processing scan, ignoring...");
+    return; // Prevent multiple scans
+  }
 
   try {
     isScanning.value = true;
+    console.log("🎯 Processing QR Code:", qrData.substring(0, 50) + "...");
 
     // Vibrate if supported
     if (navigator.vibrate) {
@@ -387,8 +430,6 @@ const handleScanSuccess = async (qrData) => {
 
     // Play scan sound (optional)
     playScanSound();
-
-    console.log("📱 QR Code scanned:", qrData.substring(0, 50) + "...");
 
     // Process QR Code through store
     const result = await qrStore.scanQRCode(qrData);
@@ -399,14 +440,20 @@ const handleScanSuccess = async (qrData) => {
     // Pause scanner while showing result
     if (qrScanner.value) {
       qrScanner.value.pause();
+      console.log("📱 Scanner paused for result display");
     }
   } catch (error) {
-    console.error("Scan processing failed:", error);
+    console.error("❌ Scan processing failed:", error);
     handleScanError(error);
   } finally {
+    // Resume scanning after shorter delay
     setTimeout(() => {
       isScanning.value = false;
-    }, 1000);
+      if (qrScanner.value && !showScanResult.value) {
+        qrScanner.value.start();
+        console.log("🔄 Scanner resumed");
+      }
+    }, 500); // Reduced from 1000ms to 500ms
   }
 };
 
@@ -505,21 +552,28 @@ const toggleFlashlight = async () => {
 const playScanSound = () => {
   try {
     // Use Web Audio API to generate beep sound
-    if (typeof window !== 'undefined' && window.AudioContext) {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (typeof window !== "undefined" && window.AudioContext) {
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      
+
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      
+
       oscillator.frequency.value = 800; // 800 Hz beep
-      oscillator.type = 'sine';
-      
+      oscillator.type = "sine";
+
       gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
-      
+      gainNode.gain.linearRampToValueAtTime(
+        0.1,
+        audioContext.currentTime + 0.01
+      );
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioContext.currentTime + 0.2
+      );
+
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.2);
     }
@@ -531,18 +585,19 @@ const playScanSound = () => {
 const playSound = (soundName) => {
   try {
     // Use Web Audio API to generate different sounds
-    if (typeof window !== 'undefined' && window.AudioContext) {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (typeof window !== "undefined" && window.AudioContext) {
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      
+
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      
+
       // Different sounds for different events
       let frequency = 800;
       let duration = 0.2;
-      
+
       switch (soundName) {
         case "scan-ready":
           frequency = 600;
@@ -560,14 +615,20 @@ const playSound = (soundName) => {
           frequency = 800;
           duration = 0.2;
       }
-      
+
       oscillator.frequency.value = frequency;
-      oscillator.type = 'sine';
-      
+      oscillator.type = "sine";
+
       gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-      
+      gainNode.gain.linearRampToValueAtTime(
+        0.1,
+        audioContext.currentTime + 0.01
+      );
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioContext.currentTime + duration
+      );
+
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + duration);
     }
@@ -584,10 +645,28 @@ const showErrorMessage = (message) => {
 const closeScanResult = () => {
   showScanResult.value = false;
   scanResult.value = null;
+  isScanning.value = false; // Reset scanning state
 
-  // Resume scanner
+  // Resume scanner with debugging
   if (qrScanner.value && isCameraActive.value) {
+    console.log("🔄 Resuming QR Scanner...");
     qrScanner.value.start();
+    
+    // Verify scanner is working
+    setTimeout(() => {
+      console.log("🔍 Scanner status check:", {
+        isActive: qrScanner.value?._active || 'unknown',
+        cameraActive: isCameraActive.value,
+        isScanning: isScanning.value,
+        showResult: showScanResult.value,
+      });
+    }, 1000);
+  } else {
+    console.warn("⚠️ Cannot resume scanner - not ready");
+    console.log("Debug:", {
+      hasScanner: !!qrScanner.value,
+      cameraActive: isCameraActive.value,
+    });
   }
 };
 
@@ -1092,7 +1171,8 @@ useSeoMeta({
   justify-content: flex-end;
 }
 
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: 500;
@@ -1151,5 +1231,44 @@ useSeoMeta({
   .action-btn span {
     font-size: 0.6875rem;
   }
+}
+
+/* Scanner Status Indicator */
+.scanner-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.scanning-dot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.scanning-dot.active {
+  background: #10b981;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.status-text {
+  color: #6b7280;
+  font-weight: 500;
 }
 </style>
