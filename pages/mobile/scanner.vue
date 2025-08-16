@@ -131,7 +131,6 @@ import ErrorModal from "@/components/Mobile/ErrorModal.vue";
 // Define page meta
 definePageMeta({
   layout: "mobile",
-  middleware: ["auth", "mobile-guest-only"],
 });
 
 // Composables

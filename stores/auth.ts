@@ -131,6 +131,13 @@ export const useAuthStore = defineStore("auth", () => {
       setUser(user);
       if (process.client) {
         localStorage.setItem("token", responseData.token);
+        
+        // Set token expiration (7 days from now if not provided by backend)
+        const expirationTime = responseData.expiresAt 
+          ? new Date(responseData.expiresAt).getTime()
+          : Date.now() + (7 * 24 * 60 * 60 * 1000); // 7 days
+        
+        localStorage.setItem("tokenExpiration", expirationTime.toString());
       }
 
       console.log("✅ Auth Store: Login successful", user);

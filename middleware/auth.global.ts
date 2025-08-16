@@ -16,6 +16,7 @@ export default defineNuxtRouteMiddleware((to) => {
   const publicPages = [
     "/",
     "/login",
+    "/mobile/login",
     "/StandingTicketForm",
     "/ringside",
     "/contacts",
@@ -82,15 +83,13 @@ export default defineNuxtRouteMiddleware((to) => {
         return navigateTo("/mobile/login");
       }
 
-      // ตรวจสอบ role สำหรับ scanner (เฉพาะ scanner หลัก ไม่ใช่ check-in page)
-      if (
-        cleanPath === "/mobile/scanner" &&
-        !["admin", "staff"].includes(authStore.user?.role)
-      ) {
-        console.log("❌ Insufficient permissions for scanner");
-        return navigateTo("/login");
+      // สำหรับหน้า scanner ต้องมี role admin หรือ staff เท่านั้น
+      if (!["admin", "staff"].includes(authStore.user?.role)) {
+        console.log("❌ Insufficient permissions for scanner, user role:", authStore.user?.role);
+        return navigateTo("/mobile/login");
       }
 
+      console.log("✅ Scanner access granted for user:", authStore.user?.role);
       return; // อนุญาตให้เข้าได้
     }
 
