@@ -57,7 +57,14 @@ module.exports = {
       // Advanced options
       node_args: "--max-old-space-size=1024",
       watch: false,
-      ignore_watch: ["node_modules", "logs", ".git", ".nuxt", ".output", "dist"],
+      ignore_watch: [
+        "node_modules",
+        "logs",
+        ".git",
+        ".nuxt",
+        ".output",
+        "dist",
+      ],
       merge_logs: true,
       time: true,
       source_map_support: true,
@@ -80,10 +87,11 @@ module.exports = {
       cwd: "/var/www/patongboxing-frontend",
       env: {
         NODE_ENV: "production",
-        WEBHOOK_PORT: 9000,
+        WEBHOOK_PORT: 4200,
         WEBHOOK_SECRET: "patong-boxing-webhook-secret-2025",
         DEPLOY_SCRIPT: "/var/www/patongboxing-frontend/scripts/auto-deploy.sh",
-        DISCORD_WEBHOOK: "https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
+        DISCORD_WEBHOOK:
+          "https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l",
       },
       // Performance settings
       max_memory_restart: "256M",
@@ -104,7 +112,7 @@ module.exports = {
       health_check_grace_period: 2000,
       health_check_interval: 10000,
       kill_timeout: 1600,
-    }
+    },
   ],
 
   // Deployment configuration
@@ -119,16 +127,16 @@ module.exports = {
       "pre-setup": "apt update && apt install -y git nodejs npm",
       "post-deploy": [
         "npm ci --production=false",
-        "npm run build", 
+        "npm run build",
         "chmod +x ./scripts/*.sh",
         "mkdir -p logs",
         "pm2 startOrRestart ecosystem.config.cjs --env production",
         "pm2 save",
-        "pm2 startup"
-      ].join(' && '),
+        "pm2 startup",
+      ].join(" && "),
       env: {
-        NODE_ENV: "production"
-      }
-    }
-  }
+        NODE_ENV: "production",
+      },
+    },
+  },
 };

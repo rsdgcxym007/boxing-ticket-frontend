@@ -100,15 +100,16 @@ module.exports = {
     production: {
       user: "root",
       host: "43.229.133.51",
-      ref: "origin/featues/v1",  // ใช้ branch ปัจจุบัน
+      ref: "origin/featues/v1", // ใช้ branch ปัจจุบัน
       repo: "https://github.com/rsdgcxym007/boxing-ticket-frontend.git",
       path: "/var/www/patongboxing-frontend",
       "pre-setup": "apt update && apt install -y git nodejs npm",
-      "post-deploy": "npm ci && npm run build && chmod +x ./scripts/*.sh && pm2 startOrRestart ecosystem.config.cjs --env production && pm2 save && pm2 startup",
+      "post-deploy":
+        "npm ci && npm run build && chmod +x ./scripts/*.sh && pm2 startOrRestart ecosystem.config.cjs --env production && pm2 save && pm2 startup",
       ssh_options: "StrictHostKeyChecking=no",
       env: {
-        NODE_ENV: "production"
-      }
+        NODE_ENV: "production",
+      },
     },
   },
 };

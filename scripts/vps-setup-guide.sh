@@ -32,7 +32,7 @@ VPS_USER="root"
 PROJECT_PATH="/var/www/patongboxing-frontend"
 REPO_URL="https://github.com/rsdgcxym007/boxing-ticket-frontend.git"
 BRANCH="featues/v1"
-WEBHOOK_PORT="9000"
+WEBHOOK_PORT="4200"
 
 echo -e "${BLUE}📋 STEP-BY-STEP VPS SETUP INSTRUCTIONS${NC}"
 echo "======================================"
@@ -63,7 +63,7 @@ ufw allow 22
 ufw allow 80
 ufw allow 443
 ufw allow 3000
-ufw allow 9000
+ufw allow 4200
 ufw --force enable
 EOF
 
@@ -126,7 +126,7 @@ echo -e "${YELLOW}STEP 6: Configure GitHub Repository${NC}"
 echo "In your GitHub repository settings:"
 echo ""
 echo "1. Go to Settings > Webhooks > Add webhook"
-echo "2. Payload URL: http://43.229.133.51:9000/webhook"
+echo "2. Payload URL: http://43.229.133.51:4200/hooks/deploy-frontend"
 echo "3. Content type: application/json"
 echo "4. Secret: patong-boxing-webhook-secret-2025"
 echo "5. Events: Just the push event"
@@ -186,7 +186,7 @@ echo -e "${BLUE}📊 FINAL CHECKLIST:${NC}"
 echo "□ VPS connected and updated"
 echo "□ Project cloned and built"  
 echo "□ PM2 processes running"
-echo "□ Webhook server listening on port 9000"
+echo "□ Webhook server listening on port 4200"
 echo "□ GitHub webhook configured"
 echo "□ Discord notifications working"
 echo "□ Firewall configured"
@@ -199,7 +199,7 @@ echo "pm2 restart all         # Restart all processes"
 echo "pm2 stop all           # Stop all processes"
 echo "pm2 monit              # Real-time monitoring"
 echo "curl http://localhost:3000  # Test frontend"
-echo "curl http://localhost:9000  # Test webhook server"
+echo "curl http://localhost:4200  # Test webhook server"
 echo ""
 echo -e "${GREEN}Ready to connect to your VPS? Run:${NC}"
 echo -e "${BLUE}ssh root@43.229.133.51${NC}"
