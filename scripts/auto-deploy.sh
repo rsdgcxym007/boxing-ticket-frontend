@@ -145,6 +145,11 @@ npm run build
 log "SUCCESS" "Application built successfully"
 send_discord_notification "✅ **Build Complete**\n\nApplication built for production" "65280" "BUILD SUCCESS"
 
+# Copy production environment
+log "INFO" "Copying production environment..."
+cp .env.production .env
+log "SUCCESS" "Environment configuration updated"
+
 # Create logs directory
 mkdir -p logs
 
