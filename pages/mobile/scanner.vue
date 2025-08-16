@@ -15,7 +15,10 @@
 
     <!-- Scanner Status -->
     <div class="scanner-status">
-      <div class="status-indicator" :class="{ 'active': isScanning, 'ready': scannerReady }">
+      <div
+        class="status-indicator"
+        :class="{ active: isScanning, ready: scannerReady }"
+      >
         <div class="status-dot"></div>
         <span>{{ scannerStatusText }}</span>
       </div>
@@ -33,8 +36,11 @@
         class="action-btn primary"
         :disabled="isLoading"
       >
-        <Icon :icon="isScanning ? 'mdi:stop' : 'mdi:qrcode-scan'" class="text-xl" />
-        <span>{{ isScanning ? 'หยุดสแกน' : 'เริ่มสแกน' }}</span>
+        <Icon
+          :icon="isScanning ? 'mdi:stop' : 'mdi:qrcode-scan'"
+          class="text-xl"
+        />
+        <span>{{ isScanning ? "หยุดสแกน" : "เริ่มสแกน" }}</span>
       </button>
 
       <button @click="showManualInput = true" class="action-btn">
@@ -196,15 +202,11 @@ const initScanner = async () => {
       false // verbose logging
     );
 
-    html5QrcodeScanner.value.render(
-      onScanSuccess,
-      onScanFailure
-    );
+    html5QrcodeScanner.value.render(onScanSuccess, onScanFailure);
 
     scannerReady.value = true;
     isLoading.value = false;
     console.log("✅ HTML5 QR Scanner initialized successfully");
-
   } catch (error) {
     console.error("❌ Scanner initialization failed:", error);
     isLoading.value = false;
@@ -223,7 +225,7 @@ const onScanSuccess = async (decodedText, decodedResult) => {
   // Set cooldown
   scanCooldown.value = true;
   lastScannedCode.value = decodedText;
-  
+
   // Pause scanner temporarily
   if (html5QrcodeScanner.value) {
     html5QrcodeScanner.value.pause(true);
@@ -236,13 +238,12 @@ const onScanSuccess = async (decodedText, decodedResult) => {
     playWebAudioSound();
 
     await handleQRScan(decodedText);
-
   } catch (error) {
     console.error("QR processing error:", error);
     showErrorMessage("เกิดข้อผิดพลาดในการประมวลผล QR Code");
   } finally {
     isScanning.value = false;
-    
+
     // Resume scanner after delay
     setTimeout(() => {
       if (html5QrcodeScanner.value) {
@@ -283,20 +284,20 @@ const stopScanner = () => {
 const handleQRScan = async (qrData) => {
   try {
     let processedQRData = qrData;
-    
+
     // Check if QR code is a URL containing our endpoint
-    if (qrData.includes('/api/v1/mobile/scanner/check-in/')) {
+    if (qrData.includes("/api/v1/mobile/scanner/check-in/")) {
       const url = new URL(qrData);
-      processedQRData = url.searchParams.get('qr') || qrData;
+      processedQRData = url.searchParams.get("qr") || qrData;
     }
 
     // Use the QR scanner store to process the scan
     const result = await qrStore.scanQRCode(processedQRData);
-    
+
     if (result.success) {
       scanResult.value = result.data;
       showScanResult.value = true;
-      
+
       // Vibrate on success (if supported)
       if (navigator.vibrate) {
         navigator.vibrate([100, 50, 100]);
@@ -304,7 +305,6 @@ const handleQRScan = async (qrData) => {
     } else {
       showErrorMessage(result.message || "QR Code ไม่ถูกต้อง");
     }
-
   } catch (error) {
     console.error("API Error:", error);
     showErrorMessage("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
@@ -315,7 +315,7 @@ const handleManualScan = async () => {
   if (!manualQRInput.value.trim()) return;
 
   isScanning.value = true;
-  
+
   try {
     await handleQRScan(manualQRInput.value.trim());
     showManualInput.value = false;
@@ -330,7 +330,8 @@ const handleManualScan = async () => {
 const playWebAudioSound = () => {
   try {
     // Create Web Audio API sound
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -339,9 +340,12 @@ const playWebAudioSound = () => {
 
     oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
     oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
-    
+
     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.2
+    );
 
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.2);
@@ -394,7 +398,7 @@ onUnmounted(() => {
 // Periodic health check
 onMounted(() => {
   const healthCheckInterval = setInterval(performHealthCheck, 10000);
-  
+
   onUnmounted(() => {
     clearInterval(healthCheckInterval);
   });
@@ -488,13 +492,24 @@ onMounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0.3; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0.3;
+  }
 }
 
 /* Scanner Container */
@@ -628,7 +643,7 @@ onMounted(() => {
   padding: 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.875rem;
   resize: vertical;
   min-height: 80px;
