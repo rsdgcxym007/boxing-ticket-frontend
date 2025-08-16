@@ -2,7 +2,7 @@
   <div class="debug-routing-page">
     <div class="debug-container">
       <h1>🔧 Routing Debug Center</h1>
-      
+
       <!-- Current State -->
       <div class="debug-section">
         <h2>📊 Current State</h2>
@@ -10,20 +10,24 @@
           <div class="state-item">
             <strong>Current URL:</strong> {{ currentUrl }}
           </div>
-          <div class="state-item">
-            <strong>Path:</strong> {{ currentPath }}
-          </div>
+          <div class="state-item"><strong>Path:</strong> {{ currentPath }}</div>
           <div class="state-item">
             <strong>Protocol:</strong> {{ currentProtocol }}
           </div>
           <div class="state-item">
-            <strong>Auth Status:</strong> 
-            <span :class="authStatus.authenticated ? 'status-success' : 'status-error'">
-              {{ authStatus.authenticated ? 'Authenticated' : 'Not Authenticated' }}
+            <strong>Auth Status:</strong>
+            <span
+              :class="
+                authStatus.authenticated ? 'status-success' : 'status-error'
+              "
+            >
+              {{
+                authStatus.authenticated ? "Authenticated" : "Not Authenticated"
+              }}
             </span>
           </div>
           <div class="state-item">
-            <strong>User Role:</strong> {{ authStatus.role || 'None' }}
+            <strong>User Role:</strong> {{ authStatus.role || "None" }}
           </div>
         </div>
       </div>
@@ -32,31 +36,39 @@
       <div class="debug-section">
         <h2>💾 Storage Contents</h2>
         <div class="storage-tabs">
-          <button 
-            @click="activeStorageTab = 'local'" 
+          <button
+            @click="activeStorageTab = 'local'"
             :class="['tab-btn', { active: activeStorageTab === 'local' }]"
           >
             Local Storage
           </button>
-          <button 
-            @click="activeStorageTab = 'session'" 
+          <button
+            @click="activeStorageTab = 'session'"
             :class="['tab-btn', { active: activeStorageTab === 'session' }]"
           >
             Session Storage
           </button>
         </div>
-        
+
         <div class="storage-content">
           <div v-if="activeStorageTab === 'local'" class="storage-items">
-            <div v-for="item in localStorageItems" :key="item.key" class="storage-item">
-              <strong>{{ item.key }}:</strong> 
+            <div
+              v-for="item in localStorageItems"
+              :key="item.key"
+              class="storage-item"
+            >
+              <strong>{{ item.key }}:</strong>
               <span class="storage-value">{{ item.value }}</span>
             </div>
           </div>
-          
+
           <div v-if="activeStorageTab === 'session'" class="storage-items">
-            <div v-for="item in sessionStorageItems" :key="item.key" class="storage-item">
-              <strong>{{ item.key }}:</strong> 
+            <div
+              v-for="item in sessionStorageItems"
+              :key="item.key"
+              class="storage-item"
+            >
+              <strong>{{ item.key }}:</strong>
               <span class="storage-value">{{ item.value }}</span>
             </div>
           </div>
@@ -92,9 +104,7 @@
       <div class="debug-section">
         <h2>🧭 Navigation Test</h2>
         <div class="nav-grid">
-          <button @click="navigateTo('/')" class="btn nav-btn">
-            🏠 Home
-          </button>
+          <button @click="navigateTo('/')" class="btn nav-btn">🏠 Home</button>
           <button @click="navigateTo('/login')" class="btn nav-btn">
             🔐 Desktop Login
           </button>
@@ -117,8 +127,11 @@
       <div class="debug-section">
         <h2>🧪 Test Results</h2>
         <div class="test-results">
-          <div v-for="(result, index) in testResults" :key="index" 
-               :class="['test-result', `result-${result.type}`]">
+          <div
+            v-for="(result, index) in testResults"
+            :key="index"
+            :class="['test-result', `result-${result.type}`]"
+          >
             <span class="test-time">{{ result.time }}</span>
             <span class="test-message">{{ result.message }}</span>
           </div>
@@ -129,194 +142,193 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 
 // Composables
-const router = useRouter()
-const authStore = useAuthStore()
+const router = useRouter();
+const authStore = useAuthStore();
 
 // Reactive state
-const activeStorageTab = ref('local')
-const localStorageItems = ref([])
-const sessionStorageItems = ref([])
-const testResults = ref([])
+const activeStorageTab = ref("local");
+const localStorageItems = ref([]);
+const sessionStorageItems = ref([]);
+const testResults = ref([]);
 
 // Computed properties
 const currentUrl = computed(() => {
-  return process.client ? window.location.href : 'Server-side'
-})
+  return process.client ? window.location.href : "Server-side";
+});
 
 const currentPath = computed(() => {
-  return process.client ? window.location.pathname : 'Server-side'
-})
+  return process.client ? window.location.pathname : "Server-side";
+});
 
 const currentProtocol = computed(() => {
-  return process.client ? window.location.protocol : 'Server-side'
-})
+  return process.client ? window.location.protocol : "Server-side";
+});
 
 const authStatus = computed(() => {
   return {
     authenticated: authStore.isAuthenticated,
-    role: authStore.user?.role || null
-  }
-})
+    role: authStore.user?.role || null,
+  };
+});
 
 // Methods
 const addTestResult = (type, message) => {
   testResults.value.unshift({
     type,
     message,
-    time: new Date().toLocaleTimeString()
-  })
-  
+    time: new Date().toLocaleTimeString(),
+  });
+
   // Keep only last 10 results
   if (testResults.value.length > 10) {
-    testResults.value = testResults.value.slice(0, 10)
+    testResults.value = testResults.value.slice(0, 10);
   }
-}
+};
 
 const updateStorageItems = () => {
-  if (!process.client) return
-  
+  if (!process.client) return;
+
   // Local Storage
-  localStorageItems.value = []
+  localStorageItems.value = [];
   for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i)
+    const key = localStorage.key(i);
     localStorageItems.value.push({
       key,
-      value: localStorage.getItem(key)
-    })
+      value: localStorage.getItem(key),
+    });
   }
-  
+
   // Session Storage
-  sessionStorageItems.value = []
+  sessionStorageItems.value = [];
   for (let i = 0; i < sessionStorage.length; i++) {
-    const key = sessionStorage.key(i)
+    const key = sessionStorage.key(i);
     sessionStorageItems.value.push({
       key,
-      value: sessionStorage.getItem(key)
-    })
+      value: sessionStorage.getItem(key),
+    });
   }
-}
+};
 
 const clearAllStorage = () => {
-  if (!process.client) return
-  
-  localStorage.clear()
-  sessionStorage.clear()
-  authStore.logout()
-  
-  updateStorageItems()
-  addTestResult('success', 'All storage cleared')
-}
+  if (!process.client) return;
+
+  localStorage.clear();
+  sessionStorage.clear();
+  authStore.logout();
+
+  updateStorageItems();
+  addTestResult("success", "All storage cleared");
+};
 
 const clearRoutingCache = () => {
-  if (!process.client) return
-  
+  if (!process.client) return;
+
   // Clear session storage
-  sessionStorage.clear()
-  
+  sessionStorage.clear();
+
   // Clear any cached redirects
-  if (typeof window.history !== 'undefined') {
-    window.history.replaceState(null, '', window.location.pathname)
+  if (typeof window.history !== "undefined") {
+    window.history.replaceState(null, "", window.location.pathname);
   }
-  
-  addTestResult('info', 'Routing cache cleared')
-  updateStorageItems()
-}
+
+  addTestResult("info", "Routing cache cleared");
+  updateStorageItems();
+};
 
 const fixAdminRedirect = () => {
-  if (!process.client) return
-  
-  addTestResult('info', 'Checking admin redirect issue...')
-  
-  if (window.location.pathname.includes('/admin')) {
+  if (!process.client) return;
+
+  addTestResult("info", "Checking admin redirect issue...");
+
+  if (window.location.pathname.includes("/admin")) {
     if (!authStore.isAuthenticated) {
-      addTestResult('warning', 'Not authenticated, redirecting to login')
-      window.location.href = '/login'
-      return
+      addTestResult("warning", "Not authenticated, redirecting to login");
+      window.location.href = "/login";
+      return;
     }
-    
-    if (!['admin', 'staff'].includes(authStore.user?.role)) {
-      addTestResult('warning', 'Insufficient role, redirecting to home')
-      window.location.href = '/'
-      return
+
+    if (!["admin", "staff"].includes(authStore.user?.role)) {
+      addTestResult("warning", "Insufficient role, redirecting to home");
+      window.location.href = "/";
+      return;
     }
-    
-    addTestResult('success', 'Admin access validated')
+
+    addTestResult("success", "Admin access validated");
   }
-}
+};
 
 const refreshPage = () => {
   if (process.client) {
-    window.location.reload()
+    window.location.reload();
   }
-}
+};
 
 const testCameraAccess = async () => {
-  if (!process.client) return
-  
-  addTestResult('info', 'Testing camera access...')
-  
+  if (!process.client) return;
+
+  addTestResult("info", "Testing camera access...");
+
   try {
     // Check if getUserMedia is supported
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error('Camera access not supported')
+      throw new Error("Camera access not supported");
     }
-    
+
     // Check HTTPS
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-      throw new Error('HTTPS required for camera access')
+    if (location.protocol !== "https:" && location.hostname !== "localhost") {
+      throw new Error("HTTPS required for camera access");
     }
-    
+
     // Test camera permission
-    const stream = await navigator.mediaDevices.getUserMedia({ 
-      video: { facingMode: 'environment' }
-    })
-    
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
+
     // Stop the stream immediately
-    stream.getTracks().forEach(track => track.stop())
-    
-    addTestResult('success', 'Camera access granted ✅')
-    
+    stream.getTracks().forEach((track) => track.stop());
+
+    addTestResult("success", "Camera access granted ✅");
   } catch (error) {
-    addTestResult('error', `Camera access failed: ${error.message}`)
+    addTestResult("error", `Camera access failed: ${error.message}`);
   }
-}
+};
 
 const testHttpsStatus = () => {
-  if (!process.client) return
-  
-  const protocol = window.location.protocol
-  const hostname = window.location.hostname
-  
-  if (protocol === 'https:') {
-    addTestResult('success', 'HTTPS connection ✅')
-  } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    addTestResult('info', 'HTTP on localhost (OK for development)')
+  if (!process.client) return;
+
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+
+  if (protocol === "https:") {
+    addTestResult("success", "HTTPS connection ✅");
+  } else if (hostname === "localhost" || hostname === "127.0.0.1") {
+    addTestResult("info", "HTTP on localhost (OK for development)");
   } else {
-    addTestResult('error', 'HTTPS required for production')
+    addTestResult("error", "HTTPS required for production");
   }
-}
+};
 
 const navigateTo = (path) => {
-  addTestResult('info', `Navigating to: ${path}`)
-  router.push(path)
-}
+  addTestResult("info", `Navigating to: ${path}`);
+  router.push(path);
+};
 
 // Lifecycle
 onMounted(() => {
-  authStore.initialize()
-  updateStorageItems()
-  addTestResult('info', 'Debug page loaded')
-})
+  authStore.initialize();
+  updateStorageItems();
+  addTestResult("info", "Debug page loaded");
+});
 
 // Page meta
 definePageMeta({
-  layout: 'default'
-})
+  layout: "default",
+});
 </script>
 
 <style scoped>
@@ -325,7 +337,7 @@ definePageMeta({
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   padding: 1rem;
   color: white;
-  font-family: 'Monaco', 'Menlo', monospace;
+  font-family: "Monaco", "Menlo", monospace;
 }
 
 .debug-container {
@@ -419,7 +431,8 @@ definePageMeta({
   font-family: monospace;
 }
 
-.action-grid, .nav-grid {
+.action-grid,
+.nav-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
@@ -436,12 +449,30 @@ definePageMeta({
   letter-spacing: 0.5px;
 }
 
-.btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
-.btn-secondary { background: linear-gradient(135deg, #6b7280, #4b5563); color: white; }
-.btn-success { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-.btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
-.btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
-.btn-info { background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; }
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+.btn-secondary {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: white;
+}
+.btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+.btn-info {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  color: white;
+}
 
 .nav-btn {
   background: linear-gradient(135deg, #8b5cf6, #7c3aed);
@@ -470,10 +501,18 @@ definePageMeta({
   font-size: 0.9rem;
 }
 
-.result-info { border-left: 3px solid #60a5fa; }
-.result-success { border-left: 3px solid #10b981; }
-.result-warning { border-left: 3px solid #f59e0b; }
-.result-error { border-left: 3px solid #ef4444; }
+.result-info {
+  border-left: 3px solid #60a5fa;
+}
+.result-success {
+  border-left: 3px solid #10b981;
+}
+.result-warning {
+  border-left: 3px solid #f59e0b;
+}
+.result-error {
+  border-left: 3px solid #ef4444;
+}
 
 .test-time {
   color: #9ca3af;
@@ -486,8 +525,18 @@ definePageMeta({
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 3px; }
-::-webkit-scrollbar-thumb { background: rgba(96, 165, 250, 0.5); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(96, 165, 250, 0.7); }
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(96, 165, 250, 0.5);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(96, 165, 250, 0.7);
+}
 </style>

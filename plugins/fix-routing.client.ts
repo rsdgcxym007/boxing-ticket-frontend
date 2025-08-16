@@ -1,5 +1,5 @@
 // Client-side routing fix
-import { defineNuxtPlugin } from 'nuxt/app'
+import { defineNuxtPlugin } from "nuxt/app";
 
 export default defineNuxtPlugin(() => {
   if (process.client) {

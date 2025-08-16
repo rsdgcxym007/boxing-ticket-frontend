@@ -23,7 +23,9 @@ export default defineNuxtRouteMiddleware((to) => {
 
   // ถ้า login แล้วให้ redirect ไปหน้า mobile dashboard
   if (authStore.isAuthenticated) {
-    console.log("✅ User already authenticated, redirecting to mobile dashboard");
+    console.log(
+      "✅ User already authenticated, redirecting to mobile dashboard"
+    );
     return navigateTo("/mobile");
   }
 

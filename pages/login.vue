@@ -485,7 +485,7 @@ const cleanupAuthState = () => {
     // Log current state before cleanup
     const currentUser = localStorage.getItem("user");
     const currentToken = localStorage.getItem("token");
-    
+
     console.log("📊 Current auth state:", {
       user: currentUser ? JSON.parse(currentUser) : null,
       token: currentToken ? "***" + currentToken.slice(-8) : null,

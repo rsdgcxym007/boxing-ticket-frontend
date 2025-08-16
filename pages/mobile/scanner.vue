@@ -177,16 +177,16 @@ onMounted(async () => {
 const initCamera = async () => {
   try {
     isLoading.value = true;
-    
+
     console.log("🎥 Initializing camera...");
-    
+
     // Check if getUserMedia is supported
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       throw new Error("Camera access not supported in this browser");
     }
-    
+
     // Check for HTTPS (required for camera access)
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    if (location.protocol !== "https:" && location.hostname !== "localhost") {
       throw new Error("Camera access requires HTTPS connection");
     }
 
@@ -203,8 +203,11 @@ const initCamera = async () => {
       });
       console.log("✅ Back camera access granted");
     } catch (backCameraError) {
-      console.warn("⚠️ Back camera failed, trying any available camera:", backCameraError);
-      
+      console.warn(
+        "⚠️ Back camera failed, trying any available camera:",
+        backCameraError
+      );
+
       // Fallback to any available camera
       stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -221,22 +224,33 @@ const initCamera = async () => {
       isCameraActive.value = true;
 
       await nextTick();
-      
+
       // Wait for video to be ready
       await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error("Video load timeout")), 10000);
-        
-        videoElement.value.addEventListener('loadedmetadata', () => {
-          clearTimeout(timeout);
-          resolve();
-        }, { once: true });
-        
-        videoElement.value.addEventListener('error', () => {
-          clearTimeout(timeout);
-          reject(new Error("Video load error"));
-        }, { once: true });
+        const timeout = setTimeout(
+          () => reject(new Error("Video load timeout")),
+          10000
+        );
+
+        videoElement.value.addEventListener(
+          "loadedmetadata",
+          () => {
+            clearTimeout(timeout);
+            resolve();
+          },
+          { once: true }
+        );
+
+        videoElement.value.addEventListener(
+          "error",
+          () => {
+            clearTimeout(timeout);
+            reject(new Error("Video load error"));
+          },
+          { once: true }
+        );
       });
-      
+
       await videoElement.value.play();
       console.log("✅ Video element playing");
 
@@ -254,7 +268,7 @@ const initCamera = async () => {
 const initQRScanner = async () => {
   try {
     console.log("🔍 Initializing QR Scanner...");
-    
+
     // Dynamic import to avoid SSR issues
     const { QrScanner } = await import("qr-scanner");
     console.log("✅ QR Scanner library loaded");
@@ -264,7 +278,7 @@ const initQRScanner = async () => {
       if (qrScanner.value) {
         qrScanner.value.destroy();
       }
-      
+
       qrScanner.value = new QrScanner(
         videoElement.value,
         (result) => {
@@ -294,16 +308,16 @@ const initQRScanner = async () => {
 
       await qrScanner.value.start();
       console.log("✅ QR Scanner started and ready");
-      
+
       // Play scan ready sound if available
-      playSound('scan-ready');
+      playSound("scan-ready");
     } else {
       throw new Error("Video element not ready or camera not active");
     }
   } catch (error) {
     console.error("❌ QR Scanner initialization failed:", error);
     showErrorMessage("ไม่สามารถเปิด QR Scanner ได้: " + error.message);
-    
+
     // Show manual input as fallback
     showManualInput.value = true;
   }
@@ -383,19 +397,21 @@ const handleScanError = (error) => {
 
 const handleCameraError = (error) => {
   console.error("🎥 Camera error:", error);
-  
+
   let message = "ไม่สามารถเข้าถึงกล้องได้";
   let suggestions = "";
 
   if (error.name === "NotAllowedError") {
     message = "กรุณาอนุญาตการใช้งานกล้อง";
-    suggestions = "• กดปุ่ม Allow/อนุญาต เมื่อเบราว์เซอร์ถาม\n• ตรวจสอบการตั้งค่าการเข้าถึงกล้องในเบราว์เซอร์";
+    suggestions =
+      "• กดปุ่ม Allow/อนุญาต เมื่อเบราว์เซอร์ถาม\n• ตรวจสอบการตั้งค่าการเข้าถึงกล้องในเบราว์เซอร์";
   } else if (error.name === "NotFoundError") {
     message = "ไม่พบกล้องในอุปกรณ์";
     suggestions = "• ตรวจสอบว่าอุปกรณ์มีกล้อง\n• ปิดแอปอื่นที่อาจใช้กล้องอยู่";
   } else if (error.name === "NotSupportedError") {
     message = "เบราว์เซอร์ไม่รองรับการใช้งานกล้อง";
-    suggestions = "• ใช้เบราว์เซอร์ที่รองรับ (Chrome, Safari, Firefox)\n• ตรวจสอบว่าใช้ HTTPS";
+    suggestions =
+      "• ใช้เบราว์เซอร์ที่รองรับ (Chrome, Safari, Firefox)\n• ตรวจสอบว่าใช้ HTTPS";
   } else if (error.name === "NotReadableError") {
     message = "กล้องถูกใช้งานโดยแอปอื่น";
     suggestions = "• ปิดแอปอื่นที่ใช้กล้อง\n• รีเฟรชหน้าเว็บ";
@@ -405,9 +421,11 @@ const handleCameraError = (error) => {
   }
 
   console.log("📝 Error suggestions:", suggestions);
-  
-  showErrorMessage(message + (suggestions ? "\n\nคำแนะนำ:\n" + suggestions : ""));
-  
+
+  showErrorMessage(
+    message + (suggestions ? "\n\nคำแนะนำ:\n" + suggestions : "")
+  );
+
   // Enable manual input as fallback
   showManualInput.value = true;
 };
@@ -448,19 +466,19 @@ const playScanSound = () => {
 const playSound = (soundName) => {
   try {
     let soundFile = "/sounds/scan-beep.mp3"; // default
-    
+
     switch (soundName) {
-      case 'scan-ready':
+      case "scan-ready":
         soundFile = "/sounds/scan-ready.mp3";
         break;
-      case 'scan-success':
+      case "scan-success":
         soundFile = "/sounds/scan-success.mp3";
         break;
-      case 'scan-error':
+      case "scan-error":
         soundFile = "/sounds/scan-error.mp3";
         break;
     }
-    
+
     console.log(`🔊 Playing sound: ${soundFile}`);
     const audio = new Audio(soundFile);
     audio.volume = 0.4;

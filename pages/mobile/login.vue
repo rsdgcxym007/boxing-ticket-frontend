@@ -130,7 +130,7 @@
       </div>
 
       <!-- Training Credentials - REMOVED -->
-      
+
       <!-- Arena Footer -->
       <div class="arena-footer">
         <p>&copy; 2025 Patong Muay Thai Arena</p>
@@ -152,8 +152,8 @@ const router = useRouter();
 
 // Form state
 const form = ref({
-  username: "",
-  password: "",
+  username: "staff1",
+  password: "staff123",
   rememberMe: false,
 });
 
@@ -258,20 +258,6 @@ const handleLogin = async () => {
   }
 };
 
-const fillCredentials = (username, password) => {
-  form.value.username = username;
-  form.value.password = password;
-
-  // Clear errors
-  errors.value = {
-    username: "",
-    password: "",
-  };
-
-  // Clear login error
-  loginError.value = "";
-};
-
 const getDeviceName = () => {
   const userAgent = navigator.userAgent;
 
@@ -309,10 +295,10 @@ const loadSavedCredentials = () => {
 // Lifecycle
 onMounted(() => {
   console.log("📱 Mobile Login: Component mounted");
-  
+
   // Initialize auth store to load existing auth state
   authStore.initialize();
-  
+
   console.log("🔍 Current auth state:", {
     isAuthenticated: authStore.isAuthenticated,
     user: authStore.user,
@@ -321,13 +307,15 @@ onMounted(() => {
 
   // Check if already authenticated
   if (authStore.isAuthenticated) {
-    console.log("✅ User already authenticated, redirecting to mobile dashboard");
+    console.log(
+      "✅ User already authenticated, redirecting to mobile dashboard"
+    );
     router.push("/mobile");
     return;
   }
 
   console.log("🚪 User not authenticated, staying on login page");
-  
+
   // Load saved credentials
   loadSavedCredentials();
 });
@@ -463,33 +451,34 @@ useSeoMeta({
 
 .glove-icon {
   font-size: 4rem;
-  color: var(--primary-red);
-  filter: drop-shadow(0 0 20px rgba(225, 6, 0, 0.5));
+  color: #ef4444;
+  filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.6));
   animation: combatGlow 2s ease-in-out infinite alternate;
 }
 
 .arena-title {
   font-size: 2.5rem;
   font-weight: 900;
-  color: var(--primary-red);
-  text-shadow: 0 0 10px rgba(225, 6, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8);
+  color: #ef4444;
+  text-shadow: 0 0 15px rgba(239, 68, 68, 0.6), 0 2px 4px rgba(0, 0, 0, 0.5);
   letter-spacing: 3px;
   margin-bottom: 0.5rem;
 }
 
 .subtitle-thai {
   font-size: 1.2rem;
-  color: var(--primary-gold);
+  color: #fbbf24;
   font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .fight-subtitle {
   font-size: 1rem;
-  color: var(--text-light);
+  color: #cbd5e1;
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Combat Form */
@@ -697,7 +686,8 @@ useSeoMeta({
 
 .combat-login-btn:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5), 0 0 30px rgba(251, 191, 36, 0.3);
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5),
+    0 0 30px rgba(251, 191, 36, 0.3);
   border-color: #ef4444;
 }
 
@@ -751,14 +741,15 @@ useSeoMeta({
 
 /* Alerts */
 .victory-alert {
-  background: rgba(34, 197, 94, 0.1);
-  border: 2px solid #22c55e;
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px solid #10b981;
   border-radius: 10px;
   padding: 1rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   animation: victoryPulse 0.5s ease-in-out;
+  backdrop-filter: blur(10px);
 }
 
 @keyframes victoryPulse {
@@ -773,13 +764,13 @@ useSeoMeta({
 }
 
 .victory-content h4 {
-  color: #22c55e;
+  color: #10b981;
   margin: 0 0 0.25rem 0;
   font-size: 1rem;
 }
 
 .victory-content p {
-  color: var(--text-light);
+  color: #e2e8f0;
   margin: 0;
   font-size: 0.9rem;
 }
@@ -790,7 +781,7 @@ useSeoMeta({
 }
 
 .defeat-alert {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.2);
   border: 2px solid #ef4444;
   border-radius: 10px;
   padding: 1rem;
@@ -798,6 +789,7 @@ useSeoMeta({
   align-items: center;
   gap: 1rem;
   animation: shake 0.5s ease-in-out;
+  backdrop-filter: blur(10px);
 }
 
 .alert-content h4 {
@@ -807,7 +799,7 @@ useSeoMeta({
 }
 
 .alert-content p {
-  color: var(--text-light);
+  color: #e2e8f0;
   margin: 0;
   font-size: 0.9rem;
 }
@@ -821,112 +813,49 @@ useSeoMeta({
   color: #ef4444;
   font-size: 0.8rem;
   margin-top: 0.25rem;
-}
-
-/* Training Credentials */
-.training-credentials {
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  backdrop-filter: blur(5px);
-}
-
-.training-credentials h3 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--primary-gold);
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.training-icon {
-  font-size: 1.3rem;
-  color: var(--primary-red);
-}
-
-.fighter-cards {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 1fr;
-}
-
-.fighter-card {
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 215, 0, 0.2);
-  border-radius: 8px;
-  padding: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.fighter-card:hover {
-  border-color: var(--primary-red);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(225, 6, 0, 0.2);
-}
-
-.fighter-card.champion {
-  border-color: var(--primary-gold);
-  background: rgba(255, 215, 0, 0.05);
-}
-
-.fighter-card.champion:hover {
-  border-color: var(--primary-gold);
-  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-}
-
-.fighter-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: var(--text-light);
-}
-
-.fighter-icon {
-  font-size: 1.2rem;
-}
-
-.red-fighter {
-  color: var(--primary-red);
-}
-
-.blue-fighter {
-  color: #3b82f6;
-}
-
-.champion-fighter {
-  color: var(--primary-gold);
-}
-
-.fighter-stats p {
-  margin: 0.25rem 0;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
 }
 
 /* Arena Footer */
 .arena-footer {
   text-align: center;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 215, 0, 0.2);
+  border-top: 1px solid rgba(251, 191, 36, 0.3);
+  margin-top: 2rem;
 }
 
 .arena-footer p {
   margin: 0.25rem 0;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(226, 232, 240, 0.8);
 }
 
 /* Combat Text Effect */
 .combat-text {
-  text-shadow: 0 0 5px currentColor, 0 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 8px currentColor, 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes combatGlow {
+  0% {
+    filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.6));
+    transform: scale(1);
+  }
+  100% {
+    filter: drop-shadow(0 0 30px rgba(239, 68, 68, 0.9));
+    transform: scale(1.05);
+  }
+}
+
+@keyframes punchEffect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Responsive Design */
@@ -941,20 +870,6 @@ useSeoMeta({
 
   .combat-form-container {
     padding: 1.5rem;
-  }
-
-  .fighter-cards {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (min-width: 481px) {
-  .fighter-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .fighter-card.champion {
-    grid-column: 1 / -1;
   }
 }
 </style>
