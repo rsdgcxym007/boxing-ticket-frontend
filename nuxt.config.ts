@@ -183,11 +183,37 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:4000",
-      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || "http://localhost:4000",
-      wsUrl: process.env.NUXT_PUBLIC_WS_URL || "ws://localhost:4000/realtime",
+      // Legacy config for backward compatibility
+      apiBase:
+        process.env.NUXT_PUBLIC_API_BASE ||
+        "https://api.patongboxingstadiumticket.com",
+      socketUrl:
+        process.env.NUXT_PUBLIC_SOCKET_URL ||
+        "https://api.patongboxingstadiumticket.com",
+      wsUrl:
+        process.env.NUXT_PUBLIC_WS_URL ||
+        "wss://api.patongboxingstadiumticket.com/realtime",
+
+      // Quick Start Guide Configuration
+      apiBaseUrl:
+        process.env.NUXT_PUBLIC_API_BASE_URL ||
+        "https://api.patongboxingstadiumticket.com",
+      appUrl:
+        process.env.NUXT_PUBLIC_APP_URL ||
+        "https://patongboxingstadiumticket.com",
+      apiUrl:
+        process.env.API_URL || "https://api.patongboxingstadiumticket.com/api",
+
+      // QR Scanner Configuration
+      qrTimeout: process.env.NUXT_PUBLIC_QR_TIMEOUT || "15000",
+      cameraFacingMode:
+        process.env.NUXT_PUBLIC_CAMERA_FACING_MODE || "environment",
+      debugMode: process.env.NUXT_PUBLIC_DEBUG_MODE === "true",
+
+      // App Configuration
       appName:
-        process.env.NUXT_PUBLIC_APP_NAME || "Patong Boxing Ticket System",
+        process.env.NUXT_PUBLIC_APP_NAME ||
+        "Patong Boxing Stadium Ticket System",
       appVersion: process.env.NUXT_PUBLIC_APP_VERSION || "1.0.31",
       environment: process.env.NODE_ENV || "development",
     },

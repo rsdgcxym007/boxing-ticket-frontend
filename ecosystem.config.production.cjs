@@ -1,25 +1,24 @@
 module.exports = {
   apps: [
+    // Main frontend application
     {
-      name: "boxing-ticket-frontend",
+      name: "patong-boxing-frontend",
       script: ".output/server/index.mjs",
       instances: 1,
       exec_mode: "fork",
+      cwd: "/var/www/patongboxing-frontend",
       env: {
         NODE_ENV: "development",
         PORT: 3000,
         NITRO_HOST: "0.0.0.0",
         NITRO_PORT: 3000,
-        NUXT_PUBLIC_API_BASE: "http://localhost:4000",
-        NUXT_PUBLIC_SOCKET_URL: "http://localhost:4000",
-        NUXT_PUBLIC_WS_URL: "ws://localhost:4000/realtime",
       },
       env_production: {
         NODE_ENV: "production",
         PORT: 3000,
         NITRO_HOST: "0.0.0.0",
         NITRO_PORT: 3000,
-        // Updated API endpoints according to Quick Start Guide
+        // API Configuration from Quick Start Guide
         NUXT_PUBLIC_API_BASE_URL: "https://api.patongboxingstadiumticket.com",
         NUXT_PUBLIC_APP_URL: "https://patongboxingstadiumticket.com",
         API_URL: "https://api.patongboxingstadiumticket.com/api",
@@ -44,71 +43,92 @@ module.exports = {
         NUXT_JWT_SECRET: "patong-boxing-jwt-secret-production-2025",
         NUXT_API_SECRET: "patong-boxing-api-secret-production-2025",
       },
-
-      // Restart configuration
+      // Performance & Monitoring
       max_memory_restart: "1G",
       restart_delay: 1000,
       max_restarts: 10,
       min_uptime: "10s",
       autorestart: true,
-
       // Logging
-      log_file: "./logs/combined.log",
-      out_file: "./logs/out.log",
-      error_file: "./logs/error.log",
+      log_file: "./logs/frontend-combined.log",
+      out_file: "./logs/frontend-out.log",
+      error_file: "./logs/frontend-error.log",
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
-
-      // Performance
+      // Advanced options
       node_args: "--max-old-space-size=1024",
-
+      watch: false,
+      ignore_watch: ["node_modules", "logs", ".git", ".nuxt", ".output", "dist"],
+      merge_logs: true,
+      time: true,
+      source_map_support: true,
       // Health monitoring
       health_check_grace_period: 3000,
       health_check_interval: 5000,
-
-      // Graceful shutdown
       kill_timeout: 1600,
       wait_ready: true,
       listen_timeout: 3000,
-
-      // Other options
-      watch: false,
-      ignore_watch: [
-        "node_modules",
-        "logs",
-        ".git",
-        ".nuxt",
-        ".output",
-        "dist",
-      ],
-      merge_logs: true,
-      combine_logs: true,
-      force: true,
-      time: true,
-      // Instance variable
-      instance_var: "INSTANCE_ID",
-
-      // Source map support
-      source_map_support: true,
-
       // Cron restart (restart every day at 3 AM)
       cron_restart: "0 3 * * *",
     },
+
+    // GitHub Webhook Server
+    {
+      name: "patong-boxing-webhook",
+      script: "./scripts/webhook-server-clean.js",
+      instances: 1,
+      exec_mode: "fork",
+      cwd: "/var/www/patongboxing-frontend",
+      env: {
+        NODE_ENV: "production",
+        WEBHOOK_PORT: 9000,
+        WEBHOOK_SECRET: "patong-boxing-webhook-secret-2025",
+        DEPLOY_SCRIPT: "/var/www/patongboxing-frontend/scripts/auto-deploy.sh",
+        DISCORD_WEBHOOK: "https://discord.com/api/webhooks/1404715794205511752/H4H1Q-aJ2B1LwSpKxHYP7rt4tCWA0p10339NN5Gy71fhwXvFjcfSQKXNl9Xdj60ks__l"
+      },
+      // Performance settings
+      max_memory_restart: "256M",
+      restart_delay: 2000,
+      max_restarts: 5,
+      min_uptime: "10s",
+      autorestart: true,
+      // Logging
+      log_file: "./logs/webhook-combined.log",
+      out_file: "./logs/webhook-out.log",
+      error_file: "./logs/webhook-error.log",
+      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
+      // Advanced options
+      watch: false,
+      merge_logs: true,
+      time: true,
+      // Health monitoring
+      health_check_grace_period: 2000,
+      health_check_interval: 10000,
+      kill_timeout: 1600,
+    }
   ],
 
-  // Deployment configuration for PM2 deploy
+  // Deployment configuration
   deploy: {
     production: {
       user: "root",
       host: "43.229.133.51",
-      ref: "origin/featues/v1",  // ใช้ branch ปัจจุบัน
+      ref: "origin/featues/v1",
       repo: "https://github.com/rsdgcxym007/boxing-ticket-frontend.git",
       path: "/var/www/patongboxing-frontend",
-      "pre-setup": "apt update && apt install -y git nodejs npm",
-      "post-deploy": "npm ci && npm run build && chmod +x ./scripts/*.sh && pm2 startOrRestart ecosystem.config.cjs --env production && pm2 save && pm2 startup",
       ssh_options: "StrictHostKeyChecking=no",
+      "pre-setup": "apt update && apt install -y git nodejs npm",
+      "post-deploy": [
+        "npm ci --production=false",
+        "npm run build", 
+        "chmod +x ./scripts/*.sh",
+        "mkdir -p logs",
+        "pm2 startOrRestart ecosystem.config.cjs --env production",
+        "pm2 save",
+        "pm2 startup"
+      ].join(' && '),
       env: {
         NODE_ENV: "production"
       }
-    },
-  },
+    }
+  }
 };
