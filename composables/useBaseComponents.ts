@@ -3,6 +3,8 @@
 export const useBaseComponents = () => {
   return {
     // Button utilities
+    // Button utilities
+
     getButtonVariant: (type: string) => {
       switch (type) {
         case "submit":
