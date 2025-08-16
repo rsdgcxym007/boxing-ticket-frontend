@@ -81,8 +81,10 @@
           <Icon icon="mdi:camera" class="text-2xl mb-2 text-green-500" />
           <p>จ่อ QR Code ที่กล้อง</p>
           <div class="scanner-indicator">
-            <div class="scanning-dot" :class="{ 'active': !isScanning }"></div>
-            <span class="status-text">{{ isScanning ? 'กำลังประมวลผล...' : 'พร้อมสแกน' }}</span>
+            <div class="scanning-dot" :class="{ active: !isScanning }"></div>
+            <span class="status-text">{{
+              isScanning ? "กำลังประมวลผล..." : "พร้อมสแกน"
+            }}</span>
           </div>
         </div>
       </div>
@@ -380,20 +382,24 @@ const initQRScanner = async () => {
 
       // Enable continuous scanning
       isScanning.value = false; // Make sure scanning is not blocked
-      
+
       // Add periodic scanner health check
       setInterval(() => {
-        if (qrScanner.value && !showScanResult.value && !showManualInput.value) {
+        if (
+          qrScanner.value &&
+          !showScanResult.value &&
+          !showManualInput.value
+        ) {
           const scannerActive = qrScanner.value._active;
           const videoPlaying = videoElement.value?.readyState === 4;
-          
+
           console.log("🔍 Scanner Health Check:", {
             scannerActive,
             videoPlaying,
             isScanning: isScanning.value,
             timestamp: new Date().toLocaleTimeString(),
           });
-          
+
           // Restart scanner if it seems stuck
           if (!scannerActive && videoPlaying && !isScanning.value) {
             console.log("🚑 Restarting stuck scanner...");
@@ -651,11 +657,11 @@ const closeScanResult = () => {
   if (qrScanner.value && isCameraActive.value) {
     console.log("🔄 Resuming QR Scanner...");
     qrScanner.value.start();
-    
+
     // Verify scanner is working
     setTimeout(() => {
       console.log("🔍 Scanner status check:", {
-        isActive: qrScanner.value?._active || 'unknown',
+        isActive: qrScanner.value?._active || "unknown",
         cameraActive: isCameraActive.value,
         isScanning: isScanning.value,
         showResult: showScanResult.value,
