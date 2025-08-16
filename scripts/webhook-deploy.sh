@@ -1,12 +1,17 @@
 #!/bin/bash
-# GitHub Webhook Handler for Auto Deploy
-# Path: /var/www/patongboxing-frontend/webhook-deploy.sh
+# 🥊 Patong Boxing Stadium - Production Deployment Script
+# Auto Deploy with GitHub Webhook Integration
+# Path: /var/www/patongboxing-frontend/scripts/webhook-deploy.sh
 
 set -e
 
+# Configuration
 LOG_FILE="/var/log/patongboxing-deploy.log"
 PROJECT_DIR="/var/www/patongboxing-frontend"
 BACKUP_DIR="/var/backups/patongboxing-frontend"
+PM2_APP_NAME="boxing-ticket-frontend"
+BRANCH="featues/v1"
+NODE_MODULES_BACKUP="node_modules_backup_$(date +%Y%m%d_%H%M%S)"
 
 # Function to log messages
 log_message() {
@@ -45,12 +50,29 @@ deploy() {
     
     cd "$PROJECT_DIR" || exit 1
     
+    # Clean up old builds and modules
+    log_message "Cleaning up old builds..."
+    rm -rf .output .nuxt dist 2>/dev/null || true
+    
+    # Backup node_modules if exists
+    if [ -d "node_modules" ]; then
+        log_message "Backing up node_modules..."
+        mv node_modules "$NODE_MODULES_BACKUP" 2>/dev/null || true
+    fi
+    
     # Pull latest changes
     log_message "Pulling latest changes from GitHub..."
     git fetch origin
-    git reset --hard origin/featues/v1
+    git reset --hard origin/$BRANCH
+    git clean -fd
     
-    # Install dependencies
+    # Restore node_modules if backup exists
+    if [ -d "$NODE_MODULES_BACKUP" ]; then
+        log_message "Restoring node_modules..."
+        mv "$NODE_MODULES_BACKUP" node_modules 2>/dev/null || true
+    fi
+    
+    # Fresh install dependencies
     log_message "Installing dependencies..."
     npm ci --production=false
     
@@ -60,12 +82,16 @@ deploy() {
     
     # Restart PM2 process
     log_message "Restarting PM2 processes..."
+    pm2 delete "$PM2_APP_NAME" 2>/dev/null || true
     pm2 startOrRestart ecosystem.config.cjs --env production
     pm2 save
     
+    # Cleanup old backups in node_modules
+    find . -maxdepth 1 -name "node_modules_backup_*" -type d -mtime +7 -exec rm -rf {} + 2>/dev/null || true
+    
     # Health check
     sleep 5
-    if pm2 list | grep -q "online.*boxing-ticket-frontend"; then
+    if pm2 list | grep -q "online.*$PM2_APP_NAME"; then
         log_message "✅ Deployment successful!"
         send_discord_notification "✅ Deployment successful! Frontend is online."
     else

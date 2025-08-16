@@ -13,143 +13,79 @@
       </div>
     </div>
 
-    <!-- Camera Scanner -->
+    <!-- Scanner Status -->
+    <div class="scanner-status">
+      <div class="status-indicator" :class="{ 'active': isScanning, 'ready': scannerReady }">
+        <div class="status-dot"></div>
+        <span>{{ scannerStatusText }}</span>
+      </div>
+    </div>
+
+    <!-- HTML5 QR Scanner -->
     <div class="scanner-container">
-      <div class="camera-wrapper" ref="cameraWrapper">
-        <video
-          ref="videoElement"
-          class="camera-video"
-          :class="{ 'camera-active': isCameraActive }"
-          autoplay
-          muted
-          playsinline
-        ></video>
+      <div id="qr-reader" ref="qrReader" class="qr-scanner-wrapper"></div>
+    </div>
 
-        <!-- Scanning Overlay -->
-        <div class="scan-overlay">
-          <div class="scan-frame">
-            <div class="corner-tl"></div>
-            <div class="corner-tr"></div>
-            <div class="corner-bl"></div>
-            <div class="corner-br"></div>
-          </div>
-
-          <!-- Scanning Animation -->
-          <div v-if="isScanning" class="scan-line"></div>
-        </div>
-
-        <!-- Manual Input Overlay -->
-        <div v-if="showManualInput" class="manual-input-overlay">
-          <div class="manual-input-card">
-            <h3>กรอก QR Code Manual</h3>
-            <textarea
-              v-model="manualQRInput"
-              placeholder="วาง QR Code data ที่นี่..."
-              class="manual-input"
-              rows="4"
-            ></textarea>
-            <div class="manual-input-actions">
-              <button @click="showManualInput = false" class="btn-cancel">
-                ยกเลิก
-              </button>
-              <button
-                @click="handleManualScan"
-                class="btn-scan"
-                :disabled="!manualQRInput.trim()"
-              >
-                สแกน
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Scanner Status -->
-      <div class="scanner-status">
-        <div v-if="!isCameraActive && !isLoading" class="status-message error">
-          <Icon icon="mdi:camera-off" class="text-2xl mb-2" />
-          <p>ไม่สามารถเข้าถึงกล้องได้</p>
-          <button @click="initCamera" class="btn-retry">ลองอีกครั้ง</button>
-        </div>
-
-        <div v-else-if="isLoading" class="status-message loading">
-          <div class="loading-spinner"></div>
-          <p>กำลังเปิดกล้อง...</p>
-        </div>
-
-        <div v-else-if="isCameraActive" class="status-message success">
-          <Icon icon="mdi:camera" class="text-2xl mb-2 text-green-500" />
-          <p>จ่อ QR Code ที่กล้อง</p>
-          <div class="scanner-indicator">
-            <div class="scanning-dot" :class="{ active: !isScanning }"></div>
-            <span class="status-text">{{
-              isScanning ? "กำลังประมวลผล..." : "พร้อมสแกน"
-            }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button
-          @click="toggleFlashlight"
-          class="action-btn"
-          :class="{ active: isFlashlightOn }"
-        >
-          <Icon icon="mdi:flashlight" class="text-xl" />
-          <span>แฟลช</span>
-        </button>
-
-        <button @click="showManualInput = true" class="action-btn">
-          <Icon icon="mdi:keyboard" class="text-xl" />
-          <span>Manual</span>
-        </button>
-
-        <button @click="showHistory = true" class="action-btn">
-          <Icon icon="mdi:history" class="text-xl" />
-          <span>ประวัติ</span>
-        </button>
-      </div>
-
-      <!-- Manual Input Modal -->
-      <div
-        v-if="showManualInput"
-        class="modal-overlay"
-        @click="showManualInput = false"
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button
+        @click="toggleScanner"
+        class="action-btn primary"
+        :disabled="isLoading"
       >
-        <div class="manual-input-modal" @click.stop>
-          <div class="modal-header">
-            <h3>กรอก QR Code ด้วยมือ</h3>
-            <button @click="showManualInput = false" class="close-btn">
-              <Icon icon="mdi:close" class="text-xl" />
+        <Icon :icon="isScanning ? 'mdi:stop' : 'mdi:qrcode-scan'" class="text-xl" />
+        <span>{{ isScanning ? 'หยุดสแกน' : 'เริ่มสแกน' }}</span>
+      </button>
+
+      <button @click="showManualInput = true" class="action-btn">
+        <Icon icon="mdi:keyboard" class="text-xl" />
+        <span>Manual</span>
+      </button>
+
+      <button @click="showHistory = true" class="action-btn">
+        <Icon icon="mdi:history" class="text-xl" />
+        <span>ประวัติ</span>
+      </button>
+    </div>
+
+    <!-- Manual Input Modal -->
+    <div
+      v-if="showManualInput"
+      class="modal-overlay"
+      @click="showManualInput = false"
+    >
+      <div class="manual-input-modal" @click.stop>
+        <div class="modal-header">
+          <h3>กรอก QR Code ด้วยมือ</h3>
+          <button @click="showManualInput = false" class="close-btn">
+            <Icon icon="mdi:close" class="text-xl" />
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <textarea
+            v-model="manualQRInput"
+            placeholder="วาง QR Code ข้อมูลที่นี่..."
+            class="qr-input"
+            rows="4"
+          ></textarea>
+
+          <div class="modal-actions">
+            <button @click="showManualInput = false" class="btn-secondary">
+              ยกเลิก
             </button>
-          </div>
-
-          <div class="modal-body">
-            <textarea
-              v-model="manualQRInput"
-              placeholder="วาง QR Code ข้อมูลที่นี่..."
-              class="qr-input"
-              rows="4"
-            ></textarea>
-
-            <div class="modal-actions">
-              <button @click="showManualInput = false" class="btn-secondary">
-                ยกเลิก
-              </button>
-              <button
-                @click="handleManualScan"
-                class="btn-primary"
-                :disabled="!manualQRInput.trim() || isScanning"
-              >
-                <Icon
-                  v-if="isScanning"
-                  icon="mdi:loading"
-                  class="animate-spin mr-2"
-                />
-                สแกน
-              </button>
-            </div>
+            <button
+              @click="handleManualScan"
+              class="btn-primary"
+              :disabled="!manualQRInput.trim() || isScanning"
+            >
+              <Icon
+                v-if="isScanning"
+                icon="mdi:loading"
+                class="animate-spin mr-2"
+              />
+              สแกน
+            </button>
           </div>
         </div>
       </div>
@@ -177,27 +113,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, computed } from "vue";
 import { Icon } from "@iconify/vue";
+import { Html5QrcodeScanner } from "html5-qrcode";
 import { useQRScannerStore } from "@/stores/qrScanner";
 import { useAuthStore } from "@/stores/auth";
 import ScanResultModal from "@/components/Mobile/ScanResultModal.vue";
 import ScanHistoryModal from "@/components/Mobile/ScanHistoryModal.vue";
 import ErrorModal from "@/components/Mobile/ErrorModal.vue";
 
+// Define page meta
+definePageMeta({
+  layout: "mobile",
+  middleware: ["auth", "mobile-guest-only"],
+});
+
 // Composables
 const qrStore = useQRScannerStore();
 const authStore = useAuthStore();
 
 // Refs
-const videoElement = ref(null);
-const cameraWrapper = ref(null);
+const qrReader = ref(null);
 
 // State
-const isCameraActive = ref(false);
 const isScanning = ref(false);
 const isLoading = ref(false);
-const isFlashlightOn = ref(false);
+const scannerReady = ref(false);
 const showManualInput = ref(false);
 const showScanResult = ref(false);
 const showHistory = ref(false);
@@ -207,439 +148,205 @@ const showError = ref(false);
 const manualQRInput = ref("");
 const scanResult = ref(null);
 const errorMessage = ref("");
-const mediaStream = ref(null);
-const qrScanner = ref(null);
+const html5QrcodeScanner = ref(null);
+const lastScannedCode = ref("");
+const scanCooldown = ref(false);
+
+// Computed
+const scannerStatusText = computed(() => {
+  if (isLoading.value) return "กำลังเตรียมกล้อง...";
+  if (!scannerReady.value) return "กำลังโหลด Scanner...";
+  if (isScanning.value) return "กำลังสแกน...";
+  return "พร้อมสแกน QR Code";
+});
 
 // Check authentication when component mounts
 onMounted(async () => {
-  // Check if authenticated first
   if (!authStore.isAuthenticated) {
     navigateTo("/mobile/login");
     return;
   }
 
   await nextTick();
-  await initCamera();
+  await initScanner();
 });
 
 // Methods
-const initCamera = async () => {
+const initScanner = async () => {
   try {
     isLoading.value = true;
+    console.log("🎥 Initializing HTML5 QR Scanner...");
 
-    console.log("🎥 Initializing camera...");
+    const config = {
+      fps: 10, // Frames per second for scanning
+      qrbox: {
+        width: 250,
+        height: 250,
+      },
+      aspectRatio: 1.0,
+      disableFlip: false,
+      videoConstraints: {
+        facingMode: "environment", // Use back camera
+      },
+    };
 
-    // Check if getUserMedia is supported
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error("Camera access not supported in this browser");
-    }
+    html5QrcodeScanner.value = new Html5QrcodeScanner(
+      "qr-reader",
+      config,
+      false // verbose logging
+    );
 
-    // Check for HTTPS (required for camera access)
-    if (location.protocol !== "https:" && location.hostname !== "localhost") {
-      throw new Error("Camera access requires HTTPS connection");
-    }
+    html5QrcodeScanner.value.render(
+      onScanSuccess,
+      onScanFailure
+    );
 
-    // Request camera permission with fallback options
-    let stream;
-    try {
-      // Try with back camera first
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment", // Use back camera
-          width: { ideal: 1280, min: 640 },
-          height: { ideal: 720, min: 480 },
-        },
-      });
-      console.log("✅ Back camera access granted");
-    } catch (backCameraError) {
-      console.warn(
-        "⚠️ Back camera failed, trying any available camera:",
-        backCameraError
-      );
-
-      // Fallback to any available camera
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280, min: 640 },
-          height: { ideal: 720, min: 480 },
-        },
-      });
-      console.log("✅ Front camera access granted");
-    }
-
-    if (videoElement.value) {
-      videoElement.value.srcObject = stream;
-      mediaStream.value = stream;
-      isCameraActive.value = true;
-
-      await nextTick();
-
-      // Wait for video to be ready
-      await new Promise((resolve, reject) => {
-        const timeout = setTimeout(
-          () => reject(new Error("Video load timeout")),
-          10000
-        );
-
-        videoElement.value.addEventListener(
-          "loadedmetadata",
-          () => {
-            clearTimeout(timeout);
-            resolve();
-          },
-          { once: true }
-        );
-
-        videoElement.value.addEventListener(
-          "error",
-          () => {
-            clearTimeout(timeout);
-            reject(new Error("Video load error"));
-          },
-          { once: true }
-        );
-      });
-
-      await videoElement.value.play();
-      console.log("✅ Video element playing");
-
-      // Initialize QR Scanner
-      await initQRScanner();
-    }
-  } catch (error) {
-    console.error("❌ Camera initialization failed:", error);
-    handleCameraError(error);
-  } finally {
+    scannerReady.value = true;
     isLoading.value = false;
+    console.log("✅ HTML5 QR Scanner initialized successfully");
+
+  } catch (error) {
+    console.error("❌ Scanner initialization failed:", error);
+    isLoading.value = false;
+    showErrorMessage("ไม่สามารถเปิดกล้องได้: " + error.message);
   }
 };
 
-const initQRScanner = async () => {
-  try {
-    console.log("🔍 Initializing QR Scanner...");
+const onScanSuccess = async (decodedText, decodedResult) => {
+  console.log("🔍 QR Code scanned:", decodedText);
 
-    // Dynamic import with proper handling
-    let QrScanner;
-    try {
-      const qrModule = await import("qr-scanner");
-      QrScanner = qrModule.default || qrModule.QrScanner;
-    } catch (importError) {
-      console.error("❌ QR Scanner import failed:", importError);
-      throw new Error("ไม่สามารถโหลด QR Scanner ได้");
-    }
-
-    if (!QrScanner) {
-      throw new Error("QR Scanner constructor not found");
-    }
-
-    console.log("✅ QR Scanner library loaded");
-
-    if (videoElement.value && isCameraActive.value) {
-      // Stop any existing scanner
-      if (qrScanner.value) {
-        qrScanner.value.destroy();
-      }
-
-      qrScanner.value = new QrScanner(
-        videoElement.value,
-        (result) => {
-          const qrData = typeof result === "string" ? result : result.data;
-          console.log("🎯 QR Code detected:", qrData.substring(0, 30) + "...");
-          handleScanSuccess(qrData);
-        },
-        {
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
-          preferredCamera: "environment",
-          maxScansPerSecond: 5, // Increased from 3 to 5
-          calculateScanRegion: () => ({
-            x: 0.1,
-            y: 0.2,
-            width: 0.8,
-            height: 0.6,
-          }),
-          returnDetailedScanResult: false,
-        }
-      );
-
-      // Set up error handling
-      qrScanner.value.onerror = (error) => {
-        console.error("QR Scanner error:", error);
-        showErrorMessage("QR Scanner error: " + error.message);
-      };
-
-      await qrScanner.value.start();
-      console.log("✅ QR Scanner started and ready");
-
-      // Test if scanner is actually working
-      console.log("🔍 Scanner state:", {
-        isActive: qrScanner.value._active,
-        hasCamera: !!qrScanner.value._video,
-        videoReady: videoElement.value?.readyState,
-        videoWidth: videoElement.value?.videoWidth,
-        videoHeight: videoElement.value?.videoHeight,
-      });
-
-      // Enable continuous scanning
-      isScanning.value = false; // Make sure scanning is not blocked
-
-      // Add periodic scanner health check
-      setInterval(() => {
-        if (
-          qrScanner.value &&
-          !showScanResult.value &&
-          !showManualInput.value
-        ) {
-          const scannerActive = qrScanner.value._active;
-          const videoPlaying = videoElement.value?.readyState === 4;
-
-          console.log("🔍 Scanner Health Check:", {
-            scannerActive,
-            videoPlaying,
-            isScanning: isScanning.value,
-            timestamp: new Date().toLocaleTimeString(),
-          });
-
-          // Restart scanner if it seems stuck
-          if (!scannerActive && videoPlaying && !isScanning.value) {
-            console.log("🚑 Restarting stuck scanner...");
-            qrScanner.value.start();
-          }
-        }
-      }, 10000); // Check every 10 seconds
-    } else {
-      throw new Error("Video element not ready or camera not active");
-    }
-  } catch (error) {
-    console.error("❌ QR Scanner initialization failed:", error);
-    showErrorMessage("ไม่สามารถเปิด QR Scanner ได้: " + error.message);
-
-    // Show manual input as fallback
-    showManualInput.value = true;
-  }
-};
-
-const handleScanSuccess = async (qrData) => {
-  if (isScanning.value) {
-    console.log("🚫 Already processing scan, ignoring...");
-    return; // Prevent multiple scans
+  // Prevent duplicate scans
+  if (scanCooldown.value || lastScannedCode.value === decodedText) {
+    return;
   }
 
+  // Set cooldown
+  scanCooldown.value = true;
+  lastScannedCode.value = decodedText;
+  
+  // Pause scanner temporarily
+  if (html5QrcodeScanner.value) {
+    html5QrcodeScanner.value.pause(true);
+  }
+
+  isScanning.value = true;
+
   try {
-    isScanning.value = true;
-    console.log("🎯 Processing QR Code:", qrData.substring(0, 50) + "...");
+    // Play scan sound
+    playWebAudioSound();
 
-    // Vibrate if supported
-    if (navigator.vibrate) {
-      navigator.vibrate([100, 50, 100]);
-    }
+    await handleQRScan(decodedText);
 
-    // Play scan sound (optional)
-    playScanSound();
-
-    // Process QR Code through store
-    const result = await qrStore.scanQRCode(qrData);
-
-    scanResult.value = result;
-    showScanResult.value = true;
-
-    // Pause scanner while showing result
-    if (qrScanner.value) {
-      qrScanner.value.pause();
-      console.log("📱 Scanner paused for result display");
-    }
   } catch (error) {
-    console.error("❌ Scan processing failed:", error);
-    handleScanError(error);
+    console.error("QR processing error:", error);
+    showErrorMessage("เกิดข้อผิดพลาดในการประมวลผล QR Code");
   } finally {
-    // Resume scanning after shorter delay
+    isScanning.value = false;
+    
+    // Resume scanner after delay
     setTimeout(() => {
-      isScanning.value = false;
-      if (qrScanner.value && !showScanResult.value) {
-        qrScanner.value.start();
-        console.log("🔄 Scanner resumed");
+      if (html5QrcodeScanner.value) {
+        html5QrcodeScanner.value.resume();
       }
-    }, 500); // Reduced from 1000ms to 500ms
+      scanCooldown.value = false;
+    }, 2000);
+  }
+};
+
+const onScanFailure = (error) => {
+  // This is called frequently during scanning, so we don't log it
+  // console.log("Scan error:", error);
+};
+
+const toggleScanner = () => {
+  if (isScanning.value) {
+    stopScanner();
+  } else {
+    startScanner();
+  }
+};
+
+const startScanner = () => {
+  if (html5QrcodeScanner.value) {
+    html5QrcodeScanner.value.resume();
+    isScanning.value = true;
+  }
+};
+
+const stopScanner = () => {
+  if (html5QrcodeScanner.value) {
+    html5QrcodeScanner.value.pause(true);
+    isScanning.value = false;
+  }
+};
+
+const handleQRScan = async (qrData) => {
+  try {
+    let processedQRData = qrData;
+    
+    // Check if QR code is a URL containing our endpoint
+    if (qrData.includes('/api/v1/mobile/scanner/check-in/')) {
+      const url = new URL(qrData);
+      processedQRData = url.searchParams.get('qr') || qrData;
+    }
+
+    // Use the QR scanner store to process the scan
+    const result = await qrStore.scanQRCode(processedQRData);
+    
+    if (result.success) {
+      scanResult.value = result.data;
+      showScanResult.value = true;
+      
+      // Vibrate on success (if supported)
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+      }
+    } else {
+      showErrorMessage(result.message || "QR Code ไม่ถูกต้อง");
+    }
+
+  } catch (error) {
+    console.error("API Error:", error);
+    showErrorMessage("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
   }
 };
 
 const handleManualScan = async () => {
   if (!manualQRInput.value.trim()) return;
 
+  isScanning.value = true;
+  
   try {
+    await handleQRScan(manualQRInput.value.trim());
     showManualInput.value = false;
-    isScanning.value = true;
-
-    const result = await qrStore.scanQRCode(manualQRInput.value.trim());
-
-    scanResult.value = result;
-    showScanResult.value = true;
     manualQRInput.value = "";
   } catch (error) {
-    console.error("Manual scan failed:", error);
-    handleScanError(error);
+    console.error("Manual scan error:", error);
   } finally {
     isScanning.value = false;
   }
 };
 
-const handleScanError = (error) => {
-  const errorMessages = {
-    QR_INVALID: "QR Code ไม่ถูกต้องหรือเสียหาย",
-    QR_EXPIRED: "QR Code หมดอายุแล้ว",
-    ALREADY_CHECKED_IN: "ลูกค้าได้เช็คอินแล้ว",
-    INVALID_CREDENTIALS: "ไม่มีสิทธิ์เข้าถึง",
-    NETWORK_ERROR: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้",
-  };
-
-  errorMessage.value =
-    errorMessages[error.code] ||
-    error.message ||
-    "เกิดข้อผิดพลาดในการสแกน QR Code";
-  showError.value = true;
-};
-
-const handleCameraError = (error) => {
-  console.error("🎥 Camera error:", error);
-
-  let message = "ไม่สามารถเข้าถึงกล้องได้";
-  let suggestions = "";
-
-  if (error.name === "NotAllowedError") {
-    message = "กรุณาอนุญาตการใช้งานกล้อง";
-    suggestions =
-      "• กดปุ่ม Allow/อนุญาต เมื่อเบราว์เซอร์ถาม\n• ตรวจสอบการตั้งค่าการเข้าถึงกล้องในเบราว์เซอร์";
-  } else if (error.name === "NotFoundError") {
-    message = "ไม่พบกล้องในอุปกรณ์";
-    suggestions = "• ตรวจสอบว่าอุปกรณ์มีกล้อง\n• ปิดแอปอื่นที่อาจใช้กล้องอยู่";
-  } else if (error.name === "NotSupportedError") {
-    message = "เบราว์เซอร์ไม่รองรับการใช้งานกล้อง";
-    suggestions =
-      "• ใช้เบราว์เซอร์ที่รองรับ (Chrome, Safari, Firefox)\n• ตรวจสอบว่าใช้ HTTPS";
-  } else if (error.name === "NotReadableError") {
-    message = "กล้องถูกใช้งานโดยแอปอื่น";
-    suggestions = "• ปิดแอปอื่นที่ใช้กล้อง\n• รีเฟรชหน้าเว็บ";
-  } else if (error.message && error.message.includes("HTTPS")) {
-    message = "ต้องใช้ HTTPS สำหรับการเข้าถึงกล้อง";
-    suggestions = "• ใช้ https:// แทน http://\n• หรือทดสอบใน localhost";
-  }
-
-  console.log("📝 Error suggestions:", suggestions);
-
-  showErrorMessage(
-    message + (suggestions ? "\n\nคำแนะนำ:\n" + suggestions : "")
-  );
-
-  // Enable manual input as fallback
-  showManualInput.value = true;
-};
-
-const toggleFlashlight = async () => {
+const playWebAudioSound = () => {
   try {
-    if (mediaStream.value) {
-      const track = mediaStream.value.getVideoTracks()[0];
-      const capabilities = track.getCapabilities();
+    // Create Web Audio API sound
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
 
-      if (capabilities.torch) {
-        await track.applyConstraints({
-          advanced: [{ torch: !isFlashlightOn.value }],
-        });
-        isFlashlightOn.value = !isFlashlightOn.value;
-      } else {
-        showErrorMessage("อุปกรณ์ไม่รองรับแฟลช");
-      }
-    }
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
   } catch (error) {
-    console.error("Flashlight toggle failed:", error);
-    showErrorMessage("ไม่สามารถควบคุมแฟลชได้");
-  }
-};
-
-const playScanSound = () => {
-  try {
-    // Use Web Audio API to generate beep sound
-    if (typeof window !== "undefined" && window.AudioContext) {
-      const audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      oscillator.frequency.value = 800; // 800 Hz beep
-      oscillator.type = "sine";
-
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(
-        0.1,
-        audioContext.currentTime + 0.01
-      );
-      gainNode.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioContext.currentTime + 0.2
-      );
-
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.2);
-    }
-  } catch (error) {
-    console.log("Audio not available:", error);
-  }
-};
-
-const playSound = (soundName) => {
-  try {
-    // Use Web Audio API to generate different sounds
-    if (typeof window !== "undefined" && window.AudioContext) {
-      const audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      // Different sounds for different events
-      let frequency = 800;
-      let duration = 0.2;
-
-      switch (soundName) {
-        case "scan-ready":
-          frequency = 600;
-          duration = 0.1;
-          break;
-        case "scan-success":
-          frequency = 1000;
-          duration = 0.3;
-          break;
-        case "scan-error":
-          frequency = 400;
-          duration = 0.5;
-          break;
-        default:
-          frequency = 800;
-          duration = 0.2;
-      }
-
-      oscillator.frequency.value = frequency;
-      oscillator.type = "sine";
-
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(
-        0.1,
-        audioContext.currentTime + 0.01
-      );
-      gainNode.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioContext.currentTime + duration
-      );
-
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + duration);
-    }
-  } catch (error) {
-    console.log("Audio not available:", error);
+    console.log("Audio not supported:", error);
   }
 };
 
@@ -651,33 +358,6 @@ const showErrorMessage = (message) => {
 const closeScanResult = () => {
   showScanResult.value = false;
   scanResult.value = null;
-  isScanning.value = false; // Reset scanning state
-
-  // Resume scanner with debugging
-  if (qrScanner.value && isCameraActive.value) {
-    console.log("🔄 Resuming QR Scanner...");
-    qrScanner.value.start();
-
-    // Verify scanner is working
-    setTimeout(() => {
-      console.log("🔍 Scanner status check:", {
-        isActive: qrScanner.value?._active || "unknown",
-        cameraActive: isCameraActive.value,
-        isScanning: isScanning.value,
-        showResult: showScanResult.value,
-      });
-    }, 1000);
-  } else {
-    console.warn("⚠️ Cannot resume scanner - not ready");
-    console.log("Debug:", {
-      hasScanner: !!qrScanner.value,
-      cameraActive: isCameraActive.value,
-    });
-  }
-};
-
-const scanNext = () => {
-  closeScanResult();
 };
 
 const closeError = () => {
@@ -685,385 +365,163 @@ const closeError = () => {
   errorMessage.value = "";
 };
 
+const scanNext = () => {
+  closeScanResult();
+  startScanner();
+};
+
 const retryScan = () => {
   closeError();
-  if (!isCameraActive.value) {
-    initCamera();
-  }
+  startScanner();
 };
 
-const cleanup = () => {
-  // Stop QR Scanner
-  if (qrScanner.value) {
-    qrScanner.value.stop();
-    qrScanner.value.destroy();
-    qrScanner.value = null;
+// Health check for scanner
+const performHealthCheck = () => {
+  if (!html5QrcodeScanner.value) {
+    console.warn("⚠️ Scanner health check: Scanner not initialized");
+    return;
   }
-
-  // Stop camera stream
-  if (mediaStream.value) {
-    mediaStream.value.getTracks().forEach((track) => track.stop());
-    mediaStream.value = null;
-  }
-
-  // Turn off flashlight
-  if (isFlashlightOn.value) {
-    isFlashlightOn.value = false;
-  }
-
-  isCameraActive.value = false;
+  console.log("✅ Scanner health check: OK");
 };
 
-// Lifecycle
+// Cleanup
 onUnmounted(() => {
-  cleanup();
+  if (html5QrcodeScanner.value) {
+    html5QrcodeScanner.value.clear();
+  }
 });
 
-// SEO
-definePageMeta({
-  layout: "mobile",
-});
-
-useSeoMeta({
-  title: "QR Scanner - Patong Boxing",
-  description: "Scan QR codes for ticket check-in",
+// Periodic health check
+onMounted(() => {
+  const healthCheckInterval = setInterval(performHealthCheck, 10000);
+  
+  onUnmounted(() => {
+    clearInterval(healthCheckInterval);
+  });
 });
 </script>
 
 <style scoped>
+/* Scanner Page */
 .scanner-page {
   min-height: 100vh;
-  background: #000;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   flex-direction: column;
 }
 
 /* Header */
 .scanner-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  padding-top: env(safe-area-inset-top);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
 }
 
 .back-button,
 .history-button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
-  color: white;
   border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.back-button:active,
-.history-button:active {
+.back-button:hover,
+.history-button:hover {
   background: rgba(255, 255, 255, 0.3);
-  transform: scale(0.95);
+  transform: scale(1.1);
 }
 
 .header-title {
   color: white;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
-}
-
-/* Scanner Container */
-.scanner-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  margin-top: calc(80px + env(safe-area-inset-top));
-}
-
-.camera-wrapper {
-  position: relative;
-  flex: 1;
-  min-height: 400px;
-  background: #000;
-  overflow: hidden;
-}
-
-.camera-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.camera-video.camera-active {
-  opacity: 1;
-}
-
-/* Scan Overlay */
-.scan-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.scan-frame {
-  position: relative;
-  width: 250px;
-  height: 250px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  border-radius: 12px;
-}
-
-.scan-frame::before {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: transparent;
-  border-radius: 12px;
-  backdrop-filter: blur(0);
-}
-
-/* Corner indicators */
-.corner-tl,
-.corner-tr,
-.corner-bl,
-.corner-br {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  border: 3px solid #00ff88;
-}
-
-.corner-tl {
-  top: -3px;
-  left: -3px;
-  border-right: none;
-  border-bottom: none;
-  border-radius: 12px 0 0 0;
-}
-
-.corner-tr {
-  top: -3px;
-  right: -3px;
-  border-left: none;
-  border-bottom: none;
-  border-radius: 0 12px 0 0;
-}
-
-.corner-bl {
-  bottom: -3px;
-  left: -3px;
-  border-right: none;
-  border-top: none;
-  border-radius: 0 0 0 12px;
-}
-
-.corner-br {
-  bottom: -3px;
-  right: -3px;
-  border-left: none;
-  border-top: none;
-  border-radius: 0 0 12px 0;
-}
-
-/* Scanning Animation */
-.scan-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #00ff88, transparent);
-  animation: scan-animation 2s linear infinite;
-}
-
-@keyframes scan-animation {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(250px);
-  }
-}
-
-/* Manual Input Overlay */
-.manual-input-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.manual-input-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  width: 100%;
-  max-width: 400px;
-}
-
-.manual-input-card h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.manual-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-family: monospace;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #1f2937;
-  background: #ffffff;
-  resize: vertical;
-  min-height: 80px;
-}
-
-.manual-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  color: #1f2937;
-  background: #ffffff;
-}
-
-.manual-input-actions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.btn-cancel,
-.btn-scan {
-  flex: 1;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-cancel {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.btn-cancel:active {
-  background: #e5e7eb;
-}
-
-.btn-scan {
-  background: #3b82f6;
-  color: white;
-}
-
-.btn-scan:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-
-.btn-scan:not(:disabled):active {
-  background: #2563eb;
 }
 
 /* Scanner Status */
 .scanner-status {
   padding: 1rem;
-  min-height: 120px;
+  text-align: center;
+}
+
+.status-indicator {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.status-message {
-  text-align: center;
+  gap: 0.5rem;
   color: white;
+  font-weight: 500;
 }
 
-.status-message.error {
-  color: #ef4444;
-}
-
-.status-message.loading {
-  color: #3b82f6;
-}
-
-.status-message.success {
-  color: #10b981;
-}
-
-.loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid rgba(59, 130, 246, 0.3);
-  border-top: 3px solid #3b82f6;
+.status-dot {
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 0.5rem;
+  background: #fbbf24;
+  animation: pulse 2s infinite;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.status-indicator.ready .status-dot {
+  background: #10b981;
 }
 
-.btn-retry {
-  margin-top: 0.5rem;
-  padding: 0.5rem 1rem;
+.status-indicator.active .status-dot {
   background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  animation: blink 1s infinite;
 }
 
-.btn-retry:active {
-  background: #2563eb;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+/* Scanner Container */
+.scanner-container {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-scanner-wrapper {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 /* Action Buttons */
 .action-buttons {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 1rem;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.8);
-  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  flex-wrap: wrap;
 }
 
 .action-btn {
@@ -1071,31 +529,42 @@ useSeoMeta({
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 12px;
-  min-width: 70px;
-  transition: all 0.2s;
-}
-
-.action-btn:active {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(0.95);
-}
-
-.action-btn.active {
-  background: #3b82f6;
+  padding: 1rem;
   color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 80px;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.action-btn.primary {
+  background: rgba(59, 130, 246, 0.8);
+  min-width: 120px;
+}
+
+.action-btn.primary:hover {
+  background: rgba(59, 130, 246, 0.9);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .action-btn span {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
-/* Manual Input Modal */
+/* Modal Styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1112,57 +581,58 @@ useSeoMeta({
 
 .manual-input-modal {
   background: white;
-  border-radius: 16px;
+  border-radius: 15px;
   width: 100%;
   max-width: 400px;
-  max-height: 90vh;
   overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .modal-header h3 {
+  margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
   color: #1f2937;
-  margin: 0;
 }
 
 .close-btn {
   background: none;
   border: none;
+  cursor: pointer;
   color: #6b7280;
   padding: 0.25rem;
-  cursor: pointer;
   border-radius: 6px;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .close-btn:hover {
-  background: #f3f4f6;
+  background: #e5e7eb;
+  color: #374151;
 }
 
 .modal-body {
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 .qr-input {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
+  font-family: 'Courier New', monospace;
   font-size: 0.875rem;
-  font-family: monospace;
   resize: vertical;
-  min-height: 100px;
+  min-height: 80px;
   margin-bottom: 1rem;
-  transition: border-color 0.2s;
 }
 
 .qr-input:focus {
@@ -1173,30 +643,24 @@ useSeoMeta({
 
 .modal-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   justify-content: flex-end;
-}
-
-.btn-primary,
-.btn-secondary {
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 80px;
 }
 
 .btn-primary {
   background: #3b82f6;
   color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
-.btn-primary:hover:not(:disabled) {
+.btn-primary:hover {
   background: #2563eb;
 }
 
@@ -1206,75 +670,17 @@ useSeoMeta({
 }
 
 .btn-secondary {
-  background: #f3f4f6;
+  background: #e5e7eb;
   color: #374151;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background: #e5e7eb;
-}
-
-/* Responsive */
-@media (max-width: 375px) {
-  .scan-frame {
-    width: 200px;
-    height: 200px;
-  }
-
-  .corner-tl,
-  .corner-tr,
-  .corner-bl,
-  .corner-br {
-    width: 25px;
-    height: 25px;
-  }
-
-  .action-btn {
-    min-width: 60px;
-    padding: 0.5rem;
-  }
-
-  .action-btn span {
-    font-size: 0.6875rem;
-  }
-}
-
-/* Scanner Status Indicator */
-.scanner-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.scanning-dot {
-  width: 8px;
-  height: 8px;
-  background: #ef4444;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
-
-.scanning-dot.active {
-  background: #10b981;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
-}
-
-.status-text {
-  color: #6b7280;
-  font-weight: 500;
+  background: #d1d5db;
 }
 </style>
