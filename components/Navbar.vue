@@ -690,7 +690,7 @@ import { useAdminMenu } from "@/composables/useAdminMenu";
 import { useImagePath } from "@/composables/useImagePath";
 import { useRouter } from "vue-router";
 import { useSwitchLocalePath, useLocalePath } from "#imports";
-import { authDebug } from "@/utils/authDebug";
+import { authDebug } from "@/utils/authDebug.ts";
 
 const { getImagePath } = useImagePath();
 const { locale, t } = useI18n();
